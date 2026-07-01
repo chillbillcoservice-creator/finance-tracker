@@ -118,6 +118,30 @@
         </div>
       </header>
 
+      <!-- Month Selector Bar (shown in Monthly mode) -->
+      <div class="month-selector-bar" id="month-selector-bar" style="display: none;">
+        <div class="month-nav">
+          <button class="month-nav-btn" onclick="navigateMonth(-1)">&lt;</button>
+          <span id="month-selector-label">July 2026</span>
+          <button class="month-nav-btn" onclick="navigateMonth(1)">&gt;</button>
+        </div>
+        <div class="month-grid" id="month-grid">
+          <!-- Months injected via JS -->
+        </div>
+      </div>
+
+      <!-- Year Selector Bar (shown in Yearly mode) -->
+      <div class="year-selector-bar" id="year-selector-bar" style="display: none;">
+        <div class="month-nav">
+          <button class="month-nav-btn" onclick="navigateYear(-1)">&lt;</button>
+          <span id="year-selector-label">2026</span>
+          <button class="month-nav-btn" onclick="navigateYear(1)">&gt;</button>
+        </div>
+        <div class="month-grid" id="year-grid">
+          <!-- Years injected via JS -->
+        </div>
+      </div>
+
       <!-- VIEW: DASHBOARD -->
       <section id="view-dashboard" class="tab-content active">
         <!-- Search bar -->

@@ -25,11 +25,20 @@ let viewMode = 'month';
 // Selected date string in YYYY-MM-DD format
 let selectedDateStr = new Date().toISOString().slice(0, 10);
 
+// Month names for selector
+const MONTH_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+const MONTH_FULL_NAMES = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+
 function toggleMonthlyMode() {
   viewMode = 'month';
   document.getElementById('btn-mode-monthly').classList.add('active');
   document.getElementById('btn-mode-yearly').classList.remove('active');
   
+  // Show month selector, hide year selector
+  document.getElementById('month-selector-bar').style.display = 'block';
+  document.getElementById('year-selector-bar').style.display = 'none';
+  
+  renderMonthSelector();
   updateHeaderDateDisplay();
   refreshActiveTab();
 }
@@ -39,6 +48,110 @@ function setYearlyMode() {
   document.getElementById('btn-mode-yearly').classList.add('active');
   document.getElementById('btn-mode-monthly').classList.remove('active');
   
+  // Show year selector, hide month selector
+  document.getElementById('month-selector-bar').style.display = 'none';
+  document.getElementById('year-selector-bar').style.display = 'block';
+  
+  renderYearSelector();
+  updateHeaderDateDisplay();
+  refreshActiveTab();
+}
+
+function renderMonthSelector() {
+  const year = parseInt(selectedMonthStr.slice(0, 4));
+  const month = parseInt(selectedMonthStr.slice(5, 7)) - 1;
+  const currentMonth = new Date().getMonth();
+  const currentYear = new Date().getFullYear();
+  
+  document.getElementById('month-selector-label').textContent = `${MONTH_FULL_NAMES[month]} ${year}`;
+  
+  const grid = document.getElementById('month-grid');
+  grid.innerHTML = '';
+  
+  MONTH_NAMES.forEach((name, idx) => {
+    const btn = document.createElement('button');
+    btn.className = 'month-grid-btn';
+    btn.textContent = name;
+    
+    if (idx === month && year === parseInt(selectedMonthStr.slice(0, 4))) {
+      btn.classList.add('active');
+    }
+    if (idx === currentMonth && year === currentYear) {
+      btn.classList.add('current');
+    }
+    
+    btn.onclick = () => selectMonth(idx);
+    grid.appendChild(btn);
+  });
+}
+
+function renderYearSelector() {
+  const year = parseInt(selectedMonthStr.slice(0, 4));
+  const currentYear = new Date().getFullYear();
+  
+  document.getElementById('year-selector-label').textContent = year;
+  
+  const grid = document.getElementById('year-grid');
+  grid.innerHTML = '';
+  
+  // Show 5 years: current year - 2 to current year + 2
+  for (let y = currentYear - 2; y <= currentYear + 2; y++) {
+    const btn = document.createElement('button');
+    btn.className = 'month-grid-btn';
+    btn.textContent = y;
+    
+    if (y === year) {
+      btn.classList.add('active');
+    }
+    if (y === currentYear) {
+      btn.classList.add('current');
+    }
+    
+    btn.onclick = () => selectYear(y);
+    grid.appendChild(btn);
+  }
+}
+
+function selectMonth(monthIdx) {
+  const year = parseInt(selectedMonthStr.slice(0, 4));
+  selectedMonthStr = `${year}-${String(monthIdx + 1).padStart(2, '0')}`;
+  selectedDateStr = `${selectedMonthStr}-15`;
+  
+  renderMonthSelector();
+  updateHeaderDateDisplay();
+  refreshActiveTab();
+}
+
+function selectYear(year) {
+  const month = parseInt(selectedMonthStr.slice(5, 7));
+  selectedMonthStr = `${year}-${String(month).padStart(2, '0')}`;
+  selectedDateStr = `${selectedMonthStr}-15`;
+  
+  renderYearSelector();
+  updateHeaderDateDisplay();
+  refreshActiveTab();
+}
+
+function navigateMonth(direction) {
+  let [year, month] = selectedMonthStr.split('-').map(Number);
+  month += direction;
+  if (month < 1) { month = 12; year--; }
+  if (month > 12) { month = 1; year++; }
+  selectedMonthStr = `${year}-${String(month).padStart(2, '0')}`;
+  selectedDateStr = `${selectedMonthStr}-15`;
+  
+  renderMonthSelector();
+  updateHeaderDateDisplay();
+  refreshActiveTab();
+}
+
+function navigateYear(direction) {
+  let year = parseInt(selectedMonthStr.slice(0, 4));
+  year += direction;
+  selectedMonthStr = `${year}-${selectedMonthStr.slice(5, 7)}`;
+  selectedDateStr = `${selectedMonthStr}-15`;
+  
+  renderYearSelector();
   updateHeaderDateDisplay();
   refreshActiveTab();
 }
@@ -831,6 +944,10 @@ window.adjustSelectedMonth = adjustSelectedMonth;
 window.refreshActiveTab = refreshActiveTab;
 window.toggleMonthlyMode = toggleMonthlyMode;
 window.setYearlyMode = setYearlyMode;
+window.navigateMonth = navigateMonth;
+window.navigateYear = navigateYear;
+window.selectMonth = selectMonth;
+window.selectYear = selectYear;
 
 // 5. Navigation & Routing Handler
 const VIEWS = {
@@ -2890,6 +3007,9 @@ function initApp() {
   loadState();
   initNavigation();
   startClock();
+  
+  // Initialize month selector (default view is monthly)
+  renderMonthSelector();
   
   // Set default lending rates for new entries (4%)
   document.getElementById('btn-add-loan-lent').addEventListener('click', () => {
