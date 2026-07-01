@@ -3719,9 +3719,11 @@ window.reportsSetViewMode = reportsSetViewMode;
 
 function reportsNavigate(dir) {
   if (reportsViewMode === 'month') {
-    const [y, m] = reportsSelectedMonth.split('-').map(Number);
-    const d = new Date(y, m - 1 + dir, 1);
-    reportsSelectedMonth = d.toISOString().slice(0, 7);
+    let [y, m] = reportsSelectedMonth.split('-').map(Number);
+    m += dir;
+    if (m < 1) { m = 12; y--; }
+    if (m > 12) { m = 1; y++; }
+    reportsSelectedMonth = `${y}-${String(m).padStart(2, '0')}`;
     document.getElementById('reports-selector-label').textContent = formatMonth(reportsSelectedMonth);
   } else {
     const y = Number(reportsSelectedMonth.slice(0, 4)) + dir;
