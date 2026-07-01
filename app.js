@@ -4112,4 +4112,55 @@ window.addEventListener('DOMContentLoaded', () => {
   
   // Render docs initially
   renderDocs();
+
+  // ==========================================
+  // SWIPE GESTURES FOR MOBILE NAVIGATION
+  // ==========================================
+  const tabsOrder = ['dashboard', 'rental', 'interest', 'docs', 'settings'];
+  let touchStartX = 0;
+  let touchEndX = 0;
+  let touchStartY = 0;
+  let touchEndY = 0;
+
+  const mainContent = document.querySelector('.main-content');
+  if (mainContent) {
+    mainContent.addEventListener('touchstart', e => {
+      touchStartX = e.changedTouches[0].screenX;
+      touchStartY = e.changedTouches[0].screenY;
+    }, {passive: true});
+
+    mainContent.addEventListener('touchend', e => {
+      touchEndX = e.changedTouches[0].screenX;
+      touchEndY = e.changedTouches[0].screenY;
+      
+      // Ignore swipe if we are interacting with a horizontally scrollable container or modal
+      if (e.target.closest('.table-responsive, canvas, input[type="range"], .modal-container, select')) return;
+
+      const xDiff = touchStartX - touchEndX;
+      const yDiff = Math.abs(touchStartY - touchEndY);
+      
+      // Check if swipe is mostly horizontal and long enough (threshold 60px)
+      if (Math.abs(xDiff) > 60 && yDiff < 40) {
+        const activeTabEl = document.querySelector('.tab-content.active');
+        if (!activeTabEl) return;
+        
+        const currentTab = activeTabEl.id.replace('view-', '');
+        const currentIndex = tabsOrder.indexOf(currentTab);
+        
+        if (currentIndex === -1) return; // Ignore if in expenses or unknown tab
+        
+        if (xDiff > 0) {
+          // Swiped left (finger moved left) -> go to next tab (right)
+          if (currentIndex < tabsOrder.length - 1) {
+            switchTab(tabsOrder[currentIndex + 1]);
+          }
+        } else {
+          // Swiped right (finger moved right) -> go to previous tab (left)
+          if (currentIndex > 0) {
+            switchTab(tabsOrder[currentIndex - 1]);
+          }
+        }
+      }
+    }, {passive: true});
+  }
 });
