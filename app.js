@@ -202,7 +202,10 @@ function openRenewalModal(renewalId = null) {
     }
   } else {
     document.getElementById('renewal-modal-title').textContent = 'Add Renewal';
-    document.getElementById('renewal-date').value = new Date().toISOString().split('T')[0];
+    // Default due date: 1 year from today
+    const nextYear = new Date();
+    nextYear.setFullYear(nextYear.getFullYear() + 1);
+    document.getElementById('renewal-date').value = nextYear.toISOString().split('T')[0];
   }
   
   openModal('modal-renewal');
@@ -245,6 +248,8 @@ function saveRenewal(e) {
   saveState();
   closeModal('modal-renewal');
   showToast('Renewal saved successfully!', 'success');
+  // Always refresh dashboard to show renewal in reminders
+  renderDashboard();
   refreshActiveTab();
 }
 
