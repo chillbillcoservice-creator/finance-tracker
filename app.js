@@ -7,7 +7,8 @@ let state = {
   rentals: [],
   interestPayments: [],
   rentPayments: [],
-  expenses: []
+  expenses: [],
+  renewals: []
 };
 
 // 2. Local Storage Keys
@@ -180,6 +181,130 @@ function navigateYear(direction) {
   refreshActiveTab();
 }
 
+// ============ RENEWALS FUNCTIONS ============
+
+function openRenewalModal(renewalId = null) {
+  document.getElementById('form-renewal').reset();
+  document.getElementById('renewal-id').value = '';
+  
+  if (renewalId) {
+    // Edit mode
+    const renewal = state.renewals.find(r => r.id === renewalId);
+    if (renewal) {
+      document.getElementById('renewal-modal-title').textContent = 'Edit Renewal';
+      document.getElementById('renewal-id').value = renewal.id;
+      document.getElementById('renewal-title').value = renewal.title;
+      document.getElementById('renewal-category').value = renewal.category;
+      document.getElementById('renewal-amount').value = renewal.amount || '';
+      document.getElementById('renewal-date').value = renewal.dueDate;
+      document.getElementById('renewal-frequency').value = renewal.frequency;
+      document.getElementById('renewal-note').value = renewal.note || '';
+    }
+  } else {
+    document.getElementById('renewal-modal-title').textContent = 'Add Renewal';
+    document.getElementById('renewal-date').value = new Date().toISOString().split('T')[0];
+  }
+  
+  openModal('modal-renewal');
+}
+
+function setRenewalPreset(title, category) {
+  document.getElementById('renewal-title').value = title;
+  document.getElementById('renewal-category').value = category;
+}
+
+function saveRenewal(e) {
+  e.preventDefault();
+  
+  const id = document.getElementById('renewal-id').value;
+  const renewal = {
+    id: id || 'renewal_' + Date.now(),
+    title: document.getElementById('renewal-title').value.trim(),
+    category: document.getElementById('renewal-category').value,
+    amount: parseFloat(document.getElementById('renewal-amount').value) || 0,
+    dueDate: document.getElementById('renewal-date').value,
+    frequency: document.getElementById('renewal-frequency').value,
+    note: document.getElementById('renewal-note').value.trim(),
+    lastRenewed: null,
+    createdAt: new Date().toISOString()
+  };
+  
+  if (id) {
+    // Update existing
+    const idx = state.renewals.findIndex(r => r.id === id);
+    if (idx !== -1) {
+      renewal.lastRenewed = state.renewals[idx].lastRenewed;
+      renewal.createdAt = state.renewals[idx].createdAt;
+      state.renewals[idx] = renewal;
+    }
+  } else {
+    // Add new
+    state.renewals.push(renewal);
+  }
+  
+  saveState();
+  closeModal('modal-renewal');
+  showToast('Renewal saved successfully!', 'success');
+  refreshActiveTab();
+}
+
+function markRenewalDone(renewalId) {
+  const renewal = state.renewals.find(r => r.id === renewalId);
+  if (!renewal) return;
+  
+  renewal.lastRenewed = new Date().toISOString();
+  
+  // Calculate next due date based on frequency
+  const dueDate = new Date(renewal.dueDate);
+  if (renewal.frequency === 'yearly') {
+    dueDate.setFullYear(dueDate.getFullYear() + 1);
+  } else if (renewal.frequency === 'monthly') {
+    dueDate.setMonth(dueDate.getMonth() + 1);
+  }
+  renewal.dueDate = dueDate.toISOString().split('T')[0];
+  
+  saveState();
+  showToast('Renewal marked as done!', 'success');
+  refreshActiveTab();
+}
+
+function deleteRenewal(renewalId) {
+  if (!confirm('Are you sure you want to delete this renewal?')) return;
+  
+  state.renewals = state.renewals.filter(r => r.id !== renewalId);
+  saveState();
+  showToast('Renewal deleted.', 'info');
+  refreshActiveTab();
+}
+
+function getUpcomingRenewals() {
+  const today = new Date();
+  const thirtyDaysLater = new Date(today);
+  thirtyDaysLater.setDate(thirtyDaysLater.getDate() + 30);
+  
+  return state.renewals.filter(renewal => {
+    const dueDate = new Date(renewal.dueDate);
+    return dueDate >= today && dueDate <= thirtyDaysLater;
+  }).sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate));
+}
+
+function getOverdueRenewals() {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  
+  return state.renewals.filter(renewal => {
+    const dueDate = new Date(renewal.dueDate);
+    dueDate.setHours(0, 0, 0, 0);
+    return dueDate < today;
+  });
+}
+
+window.openRenewalModal = openRenewalModal;
+window.setRenewalPreset = setRenewalPreset;
+window.saveRenewal = saveRenewal;
+window.markRenewalDone = markRenewalDone;
+window.deleteRenewal = deleteRenewal;
+
 function updateHeaderDateDisplay() {
   const headerDate = document.getElementById('header-date');
   if (!headerDate) return;
@@ -224,6 +349,7 @@ function loadState() {
       state.interestPayments = state.interestPayments || [];
       state.rentPayments = state.rentPayments || [];
       state.expenses = state.expenses || [];
+      state.renewals = state.renewals || [];
     } catch (e) {
       console.error('Failed to parse local storage data, resetting to default.', e);
       saveState();
@@ -1365,6 +1491,41 @@ function renderDashboard() {
     });
   });
 
+  // 4. Renewals Reminders
+  const todayForRenewals = new Date();
+  todayForRenewals.setHours(0, 0, 0, 0);
+  
+  state.renewals.forEach(renewal => {
+    const dueDate = new Date(renewal.dueDate);
+    dueDate.setHours(0, 0, 0, 0);
+    
+    const diffTime = dueDate.getTime() - todayForRenewals.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    
+    let status = 'upcoming';
+    if (diffDays < 0) {
+      status = 'overdue';
+    } else if (diffDays <= 30) {
+      status = 'due-soon';
+    }
+    
+    // Only show if due within 30 days or overdue
+    if (diffDays <= 30) {
+      dashboardRemindersList.push({
+        id: renewal.id,
+        partyName: renewal.title,
+        propertyName: renewal.category,
+        amount: renewal.amount,
+        type: 'renewal',
+        status,
+        diffDays,
+        dueStr: dueDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+        frequency: renewal.frequency,
+        note: renewal.note
+      });
+    }
+  });
+
   // Sort reminders: overdue first, then due soon, then upcoming, then paid
   const statusOrder = { overdue: 0, 'due-soon': 1, upcoming: 2, paid: 3 };
   dashboardRemindersList.sort((a, b) => statusOrder[a.status] - statusOrder[b.status]);
@@ -1372,22 +1533,36 @@ function renderDashboard() {
   // Update Quick Filter Buttons Visual States
   const btnRent = document.getElementById('btn-quick-rent');
   const btnInterest = document.getElementById('btn-quick-interest');
-  if (btnRent && btnInterest) {
+  const btnRenewals = document.getElementById('btn-quick-renewals');
+  if (btnRent && btnInterest && btnRenewals) {
     if (currentReminderFilter === 'rent') {
       btnRent.style.opacity = '1';
       btnRent.style.boxShadow = '0 0 10px var(--color-primary)';
       btnInterest.style.opacity = '0.35';
       btnInterest.style.boxShadow = 'none';
+      btnRenewals.style.opacity = '0.35';
+      btnRenewals.style.boxShadow = 'none';
     } else if (currentReminderFilter === 'interest') {
       btnRent.style.opacity = '0.35';
       btnRent.style.boxShadow = 'none';
       btnInterest.style.opacity = '1';
       btnInterest.style.boxShadow = '0 0 10px var(--color-success)';
+      btnRenewals.style.opacity = '0.35';
+      btnRenewals.style.boxShadow = 'none';
+    } else if (currentReminderFilter === 'renewals') {
+      btnRent.style.opacity = '0.35';
+      btnRent.style.boxShadow = 'none';
+      btnInterest.style.opacity = '0.35';
+      btnInterest.style.boxShadow = 'none';
+      btnRenewals.style.opacity = '1';
+      btnRenewals.style.boxShadow = '0 0 10px #f59e0b';
     } else {
       btnRent.style.opacity = '1';
       btnRent.style.boxShadow = '';
       btnInterest.style.opacity = '1';
       btnInterest.style.boxShadow = '';
+      btnRenewals.style.opacity = '1';
+      btnRenewals.style.boxShadow = '';
     }
   }
 
@@ -1472,6 +1647,28 @@ function renderDashboard() {
           </div>
         </div>
       `;
+    } else if (currentReminderFilter === 'renewals') {
+      const totalRenewals = state.renewals.length;
+      const overdueRenewals = getOverdueRenewals().length;
+      const upcomingRenewals = getUpcomingRenewals().length;
+
+      summaryBlock.style.display = 'flex';
+      summaryBlock.innerHTML = `
+        <div style="display: flex; gap: 1.5rem; flex-wrap: wrap; width: 100%; justify-content: flex-start; padding: 0.25rem 0;">
+          <div style="display: flex; flex-direction: column; gap: 0.15rem;">
+            <span style="font-size: 0.7rem; text-transform: uppercase; color: var(--text-muted); font-weight: 800; letter-spacing: 0.5px;">Total Renewals</span>
+            <span style="color: var(--text-primary); font-size: 1.05rem; font-weight: 800;">${totalRenewals}</span>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 0.15rem;">
+            <span style="font-size: 0.7rem; text-transform: uppercase; color: var(--text-muted); font-weight: 800; letter-spacing: 0.5px;">Overdue</span>
+            <span style="color: ${overdueRenewals > 0 ? 'var(--color-danger)' : 'var(--color-success)'}; font-size: 1.05rem; font-weight: 800;">${overdueRenewals}</span>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 0.15rem;">
+            <span style="font-size: 0.7rem; text-transform: uppercase; color: var(--text-muted); font-weight: 800; letter-spacing: 0.5px;">Due in 30 days</span>
+            <span style="color: ${upcomingRenewals > 0 ? '#f59e0b' : 'var(--color-success)'}; font-size: 1.05rem; font-weight: 800;">${upcomingRenewals}</span>
+          </div>
+        </div>
+      `;
     }
   }
 
@@ -1481,6 +1678,8 @@ function renderDashboard() {
     filteredReminders = dashboardRemindersList.filter(r => r.type === 'rent-payment' || r.type === 'agreement-renewal');
   } else if (currentReminderFilter === 'interest') {
     filteredReminders = dashboardRemindersList.filter(r => r.type === 'interest-collection' || r.type === 'interest-payment');
+  } else if (currentReminderFilter === 'renewals') {
+    filteredReminders = dashboardRemindersList.filter(r => r.type === 'renewal');
   }
 
   if (filteredReminders.length === 0) {
@@ -1499,21 +1698,36 @@ function renderDashboard() {
         itemClass = 'paid';
       } else if (item.status === 'overdue') {
         const daysOverdue = Math.abs(item.diffDays);
-        const label = item.type === 'agreement-renewal' 
-          ? `Renewal: ${daysOverdue}d ago` 
-          : `${daysOverdue}d Overdue`;
+        let label;
+        if (item.type === 'agreement-renewal') {
+          label = `Renewal: ${daysOverdue}d ago`;
+        } else if (item.type === 'renewal') {
+          label = `Overdue: ${daysOverdue}d`;
+        } else {
+          label = `${daysOverdue}d Overdue`;
+        }
         badgeHTML = `<span class="reminder-badge badge-danger">${label}</span>`;
         itemClass = 'overdue';
       } else if (item.status === 'due-soon') {
-        const label = item.type === 'agreement-renewal'
-          ? `Renewal: ${item.diffDays}d left`
-          : `Due in ${item.diffDays}d`;
+        let label;
+        if (item.type === 'agreement-renewal') {
+          label = `Renewal: ${item.diffDays}d left`;
+        } else if (item.type === 'renewal') {
+          label = `Due in ${item.diffDays}d`;
+        } else {
+          label = `Due in ${item.diffDays}d`;
+        }
         badgeHTML = `<span class="reminder-badge badge-warning">${label}</span>`;
         itemClass = 'due-soon';
       } else {
-        const label = item.type === 'agreement-renewal'
-          ? `Renewal: ${item.dueStr}`
-          : `Due: ${item.dueStr} (${item.diffDays}d left)`;
+        let label;
+        if (item.type === 'agreement-renewal') {
+          label = `Renewal: ${item.dueStr}`;
+        } else if (item.type === 'renewal') {
+          label = `Due: ${item.dueStr}`;
+        } else {
+          label = `Due: ${item.dueStr} (${item.diffDays}d left)`;
+        }
         badgeHTML = `<span class="reminder-badge badge-info">${label}</span>`;
         itemClass = 'info';
       }
@@ -1563,6 +1777,31 @@ function renderDashboard() {
           </div>
           <div style="display: flex; align-items: center;">${badgeHTML}</div>
         `;
+      } else if (item.type === 'renewal') {
+        const renewalActions = item.status !== 'paid' ? `
+          <button class="btn btn-success btn-sm" onclick="event.stopPropagation(); markRenewalDone('${item.id}')" style="padding: 0.25rem 0.5rem; font-size: 0.72rem; min-height: auto; margin-right: 0.5rem; display: inline-flex; align-items: center; gap: 2px;">
+            <svg viewBox="0 0 24 24" width="10" height="10" stroke="currentColor" stroke-width="3.5" fill="none"><polyline points="20 6 9 17 4 12"/></svg>
+            Done
+          </button>
+          <button class="btn btn-secondary btn-sm" onclick="event.stopPropagation(); openRenewalModal('${item.id}')" style="padding: 0.25rem 0.5rem; font-size: 0.72rem; min-height: auto; margin-right: 0.5rem; display: inline-flex; align-items: center; gap: 2px;">
+            Edit
+          </button>
+        ` : '';
+        
+        div.innerHTML = `
+          <div class="reminder-icon-wrapper" style="background: rgba(245,158,11,0.15); color: #f59e0b;">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 11-6.219-8.56"/><polyline points="22 2 22 8 16 8"/></svg>
+          </div>
+          <div class="reminder-details">
+            <div class="reminder-title">${item.partyName}</div>
+            <div class="reminder-subtitle">${item.category}${item.amount ? ' | ' + formatCurrency(item.amount) : ''}${item.frequency !== 'once' ? ' | ' + item.frequency : ''}</div>
+          </div>
+          <div style="display: flex; align-items: center; gap: 0.25rem;">
+            ${renewalActions}
+            ${badgeHTML}
+          </div>
+        `;
+        div.style.cursor = 'default';
       } else if (item.type === 'rent-payment') {
         div.innerHTML = `
           <div class="reminder-icon-wrapper" style="background: rgba(16, 185, 129, 0.15); color: var(--color-success);">
@@ -3144,6 +3383,9 @@ function initApp() {
     // Switch to expenses tab if we logged it from dashboard to see it immediately
     switchTab('expenses');
   });
+
+  // Renewal Form Submit
+  document.getElementById('form-renewal').addEventListener('submit', saveRenewal);
 
   // Initialize search logic
   initSearch();
