@@ -11,7 +11,8 @@
   <link rel="manifest" href="manifest.json">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%230ea5e9'/><text x='50' y='65' font-size='40' font-weight='bold' text-anchor='middle' fill='white' font-family='Arial'>CF</text></svg>">
   <title>Capital Flow | Personal Finance Tracker</title>
-  <script type="module" crossorigin src="/finance-tracker/assets/index-CtNJu7bt.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+  <script type="module" crossorigin src="/finance-tracker/assets/index-MnFM1Yrh.js"></script>
   <link rel="stylesheet" crossorigin href="/finance-tracker/assets/index-D6GCIAph.css">
 </head>
 <body>
@@ -54,7 +55,7 @@
           <li class="nav-item">
             <a class="nav-link" data-tab="settings">
               <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-              <span>Config</span>
+              <span>Reports</span>
             </a>
           </li>
         </ul>
@@ -86,7 +87,7 @@
       </a>
       <a class="mobile-nav-link" data-tab="settings">
         <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-        <span>Config</span>
+        <span>Reports</span>
       </a>
     </nav>
 
@@ -100,8 +101,6 @@
           <p id="current-view-subtitle" style="display: none;"></p>
         </div>
         <div class="header-actions">
-          <button class="mode-btn active" id="btn-mode-monthly" onclick="toggleMonthlyMode()">Monthly</button>
-          <button class="mode-btn" id="btn-mode-yearly" onclick="toggleYearlyMode()">Yearly</button>
           <div class="date-badge" id="current-date-badge">
             <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
             <span id="header-date">--</span>
@@ -410,29 +409,63 @@
         </div>
       </section>
 
-      <!-- VIEW: SETTINGS -->
+      <!-- VIEW: REPORTS -->
       <section id="view-settings" class="tab-content">
-        <div class="settings-section">
-          <div class="card settings-box">
-            <div class="settings-box-title">Reports & Summaries</div>
-            <div class="settings-box-desc">View and export month-wise and yearly summaries of your earnings and expenses.</div>
-            <div>
-              <button class="btn btn-primary" onclick="openReportsModal()">
-                <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
-                View Reports
-              </button>
-            </div>
+        <div class="section-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem;">
+          <h2 style="margin-bottom: 0;">Reports</h2>
+        </div>
+
+        <!-- View Mode Toggle -->
+        <div class="card" style="margin-bottom: 1.25rem; padding: 1rem; display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
+          <span style="font-size: 0.8rem; color: var(--text-secondary); font-weight: 600;">VIEW MODE:</span>
+          <div style="display: flex; gap: 0.35rem; background: var(--bg-primary); border-radius: 8px; padding: 3px;">
+            <button class="mode-btn" id="reports-btn-mode-monthly" onclick="reportsSetViewMode('month')">Monthly</button>
+            <button class="mode-btn" id="reports-btn-mode-yearly" onclick="reportsSetViewMode('year')">Yearly</button>
           </div>
-          
-          <div class="card settings-box" style="border-color: rgba(239, 68, 68, 0.3);">
-            <div class="settings-box-title" style="color: var(--color-danger);">Reset System</div>
-            <div class="settings-box-desc">Permanently remove all logged loans, tenants, and payment details from your browser's local cache. This action cannot be undone.</div>
-            <div>
-              <button class="btn btn-danger" id="btn-reset-data">
-                <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
-                Reset Database
-              </button>
-            </div>
+        </div>
+
+        <!-- Month/Year Selector -->
+        <div id="reports-selector-bar" class="card" style="margin-bottom: 1.25rem; padding: 0.75rem 1rem; display: none;">
+          <div style="display: flex; align-items: center; justify-content: space-between; gap: 0.5rem;">
+            <button class="month-nav-btn" onclick="reportsNavigate(-1)">&lt;</button>
+            <span id="reports-selector-label" style="font-weight: 700; font-size: 0.9rem;">July 2026</span>
+            <button class="month-nav-btn" onclick="reportsNavigate(1)">&gt;</button>
+          </div>
+        </div>
+
+        <!-- Chart -->
+        <div class="card" style="margin-bottom: 1.25rem; padding: 1.25rem;">
+          <h3 style="margin: 0 0 1rem 0; font-size: 1rem; color: var(--text-primary);">Income vs Expenses</h3>
+          <div style="position: relative; width: 100%; height: 280px;">
+            <canvas id="reports-chart"></canvas>
+          </div>
+        </div>
+
+        <!-- Summary Cards -->
+        <div style="display: flex; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 1.25rem;">
+          <div class="card" style="flex: 1; min-width: 100px; padding: 0.75rem 1rem; border-left: 3px solid var(--color-success);">
+            <span style="font-size: 0.7rem; color: var(--text-secondary); font-weight: 600; text-transform: uppercase;">Total Income</span>
+            <div id="reports-total-income" style="font-size: 1.15rem; font-weight: 800; color: var(--color-success); margin-top: 0.25rem;">Rs. 0</div>
+          </div>
+          <div class="card" style="flex: 1; min-width: 100px; padding: 0.75rem 1rem; border-left: 3px solid var(--color-danger);">
+            <span style="font-size: 0.7rem; color: var(--text-secondary); font-weight: 600; text-transform: uppercase;">Total Expenses</span>
+            <div id="reports-total-expenses" style="font-size: 1.15rem; font-weight: 800; color: var(--color-danger); margin-top: 0.25rem;">Rs. 0</div>
+          </div>
+          <div class="card" style="flex: 1; min-width: 100px; padding: 0.75rem 1rem; border-left: 3px solid var(--color-accent);">
+            <span style="font-size: 0.7rem; color: var(--text-secondary); font-weight: 600; text-transform: uppercase;">Net Balance</span>
+            <div id="reports-net-balance" style="font-size: 1.15rem; font-weight: 800; color: var(--text-primary); margin-top: 0.25rem;">Rs. 0</div>
+          </div>
+        </div>
+
+        <!-- Reset System -->
+        <div class="card settings-box" style="border-color: rgba(239, 68, 68, 0.3);">
+          <div class="settings-box-title" style="color: var(--color-danger);">Reset System</div>
+          <div class="settings-box-desc">Permanently remove all logged loans, tenants, and payment details from your browser's local cache. This action cannot be undone.</div>
+          <div>
+            <button class="btn btn-danger" id="btn-reset-data">
+              <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+              Reset Database
+            </button>
           </div>
         </div>
       </section>
