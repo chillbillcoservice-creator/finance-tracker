@@ -89,15 +89,15 @@ New principal: ${f(Number(c.principal)+i)}`);return}}const u="l"+Math.random().t
         <p>No active reminders for this period.</p>
       </div>
     `:C.forEach(n=>{let g="",$="info";if(n.status==="paid")g='<span class="reminder-badge badge-success">Paid</span>',$="paid";else if(n.status==="overdue"){const N=Math.abs(n.diffDays);let q;n.type==="agreement-renewal"?q=`Renewal: ${N}d ago`:n.type==="renewal"?q=`Overdue: ${N}d`:q=`${N}d Overdue`,g=`<span class="reminder-badge badge-danger">${q}</span>`,$="overdue"}else if(n.status==="due-soon"){let N;n.type==="agreement-renewal"?N=`Renewal: ${n.diffDays}d left`:n.type==="renewal"?N=`Due in ${n.diffDays}d`:N=`Due in ${n.diffDays}d`,g=`<span class="reminder-badge badge-warning">${N}</span>`,$="due-soon"}else{let N;n.type==="agreement-renewal"?N=`Renewal: ${n.dueStr}`:n.type==="renewal"?N=`Due: ${n.dueStr}`:N=`Due: ${n.dueStr} (${n.diffDays}d left)`,g=`<span class="reminder-badge badge-info">${N}</span>`,$="info"}const T=document.createElement("div");T.className=`reminder-item ${$}`,T.style.cursor="pointer";let F="rental";n.type==="interest-collection"?F="lending":n.type==="interest-payment"&&(F="borrowing"),T.addEventListener("click",()=>{Le(F,n.id)});let z="";if(n.status!=="paid"){if(n.type==="rent-payment")z=`
-            <button class="btn btn-success btn-sm" onclick="event.stopPropagation(); quickMarkRentalPaid('${n.id}', ${n.amount}, '${x}')" style="padding: 0.25rem 0.5rem; font-size: 0.72rem; min-height: auto; margin-right: 0.5rem; display: inline-flex; align-items: center; gap: 2px;">
-              <svg viewBox="0 0 24 24" width="10" height="10" stroke="currentColor" stroke-width="3.5" fill="none"><polyline points="20 6 9 17 4 12"/></svg>
+            <label style="display: inline-flex; align-items: center; gap: 5px; font-size: 0.72rem; font-weight: 700; color: var(--color-success); margin-right: 0.5rem; cursor: pointer; user-select: none;" onclick="event.stopPropagation();">
+              <input type="checkbox" style="width: 14px; height: 14px; accent-color: var(--color-success); cursor: pointer; margin: 0;" onchange="if(this.checked) quickMarkRentalPaid('${n.id}', ${n.amount}, '${x}')">
               Mark Paid
-            </button>
+            </label>
           `;else if(n.type==="interest-collection"||n.type==="interest-payment"){const N=n.type==="interest-collection"?"received":"paid";z=`
-            <button class="btn btn-success btn-sm" onclick="event.stopPropagation(); quickMarkInterestPaid('${n.id}', '${N}', ${n.amount}, '${x}')" style="padding: 0.25rem 0.5rem; font-size: 0.72rem; min-height: auto; margin-right: 0.5rem; display: inline-flex; align-items: center; gap: 2px;">
-              <svg viewBox="0 0 24 24" width="10" height="10" stroke="currentColor" stroke-width="3.5" fill="none"><polyline points="20 6 9 17 4 12"/></svg>
+            <label style="display: inline-flex; align-items: center; gap: 5px; font-size: 0.72rem; font-weight: 700; color: var(--color-success); margin-right: 0.5rem; cursor: pointer; user-select: none;" onclick="event.stopPropagation();">
+              <input type="checkbox" style="width: 14px; height: 14px; accent-color: var(--color-success); cursor: pointer; margin: 0;" onchange="if(this.checked) quickMarkInterestPaid('${n.id}', '${N}', ${n.amount}, '${x}')">
               Mark Paid
-            </button>
+            </label>
           `}}if(n.type==="agreement-renewal")T.innerHTML=`
           <div class="reminder-icon-wrapper" style="background: rgba(245,158,11,0.15); color: #f59e0b;">
             <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
@@ -108,10 +108,10 @@ New principal: ${f(Number(c.principal)+i)}`);return}}const u="l"+Math.random().t
           </div>
           <div style="display: flex; align-items: center;">${g}</div>
         `;else if(n.type==="renewal"){const N=n.status!=="paid"?`
-          <button class="btn btn-success btn-sm" onclick="event.stopPropagation(); markRenewalDone('${n.id}')" style="padding: 0.25rem 0.5rem; font-size: 0.72rem; min-height: auto; margin-right: 0.5rem; display: inline-flex; align-items: center; gap: 2px;">
-            <svg viewBox="0 0 24 24" width="10" height="10" stroke="currentColor" stroke-width="3.5" fill="none"><polyline points="20 6 9 17 4 12"/></svg>
-            Done
-          </button>
+          <label style="display: inline-flex; align-items: center; gap: 5px; font-size: 0.72rem; font-weight: 700; color: var(--color-success); margin-right: 0.5rem; cursor: pointer; user-select: none;" onclick="event.stopPropagation();">
+            <input type="checkbox" style="width: 14px; height: 14px; accent-color: var(--color-success); cursor: pointer; margin: 0;" onchange="if(this.checked) markRenewalDone('${n.id}')">
+            Mark Done
+          </label>
           <button class="btn btn-secondary btn-sm" onclick="event.stopPropagation(); openRenewalModal('${n.id}')" style="padding: 0.25rem 0.5rem; font-size: 0.72rem; min-height: auto; margin-right: 0.5rem; display: inline-flex; align-items: center; gap: 2px;">
             Edit
           </button>
