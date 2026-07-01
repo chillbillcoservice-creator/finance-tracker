@@ -4177,13 +4177,18 @@ window.addEventListener('DOMContentLoaded', () => {
       touchEndX = e.changedTouches[0].screenX;
       touchEndY = e.changedTouches[0].screenY;
       
-      // Ignore swipe if we are interacting with a horizontally scrollable container or modal
-      if (e.target.closest('.table-responsive, canvas, input[type="range"], .modal-container, select')) return;
+      const ignoreEl = e.target.closest('.table-responsive, input[type="range"], .modal-container, select');
+      if (ignoreEl) {
+        if (ignoreEl.classList.contains('table-responsive')) {
+          if (ignoreEl.scrollWidth > ignoreEl.clientWidth) return;
+        } else {
+          return;
+        }
+      }
 
       const xDiff = touchStartX - touchEndX;
       const yDiff = Math.abs(touchStartY - touchEndY);
       
-      // Check if swipe is mostly horizontal and long enough (threshold 60px)
       if (Math.abs(xDiff) > 60 && yDiff < 40) {
         const activeTabEl = document.querySelector('.tab-content.active');
         if (!activeTabEl) return;
@@ -4191,17 +4196,19 @@ window.addEventListener('DOMContentLoaded', () => {
         const currentTab = activeTabEl.id.replace('view-', '');
         const currentIndex = tabsOrder.indexOf(currentTab);
         
-        if (currentIndex === -1) return; // Ignore if in expenses or unknown tab
+        if (currentIndex === -1) return;
         
         if (xDiff > 0) {
-          // Swiped left (finger moved left) -> go to next tab (right)
           if (currentIndex < tabsOrder.length - 1) {
             switchTab(tabsOrder[currentIndex + 1]);
+          } else {
+            switchTab(tabsOrder[0]); // Loop to start
           }
         } else {
-          // Swiped right (finger moved right) -> go to previous tab (left)
           if (currentIndex > 0) {
             switchTab(tabsOrder[currentIndex - 1]);
+          } else {
+            switchTab(tabsOrder[tabsOrder.length - 1]); // Loop to end
           }
         }
       }
