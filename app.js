@@ -1768,18 +1768,18 @@ function renderDashboard() {
       if (item.status !== 'paid') {
         if (item.type === 'rent-payment') {
           markPaidBtn = `
-            <button class="btn btn-success btn-sm" onclick="event.stopPropagation(); quickMarkRentalPaid('${item.id}', ${item.amount}, '${selectedMonthStr}')" style="padding: 0.25rem 0.5rem; font-size: 0.72rem; min-height: auto; margin-right: 0.5rem; display: inline-flex; align-items: center; gap: 2px;">
-              <svg viewBox="0 0 24 24" width="10" height="10" stroke="currentColor" stroke-width="3.5" fill="none"><polyline points="20 6 9 17 4 12"/></svg>
+            <label style="display: inline-flex; align-items: center; gap: 5px; font-size: 0.72rem; font-weight: 700; color: var(--color-success); margin-right: 0.5rem; cursor: pointer; user-select: none;" onclick="event.stopPropagation();">
+              <input type="checkbox" style="width: 14px; height: 14px; accent-color: var(--color-success); cursor: pointer; margin: 0;" onchange="if(this.checked) quickMarkRentalPaid('${item.id}', ${item.amount}, '${selectedMonthStr}')">
               Mark Paid
-            </button>
+            </label>
           `;
         } else if (item.type === 'interest-collection' || item.type === 'interest-payment') {
           const typeStr = item.type === 'interest-collection' ? 'received' : 'paid';
           markPaidBtn = `
-            <button class="btn btn-success btn-sm" onclick="event.stopPropagation(); quickMarkInterestPaid('${item.id}', '${typeStr}', ${item.amount}, '${selectedMonthStr}')" style="padding: 0.25rem 0.5rem; font-size: 0.72rem; min-height: auto; margin-right: 0.5rem; display: inline-flex; align-items: center; gap: 2px;">
-              <svg viewBox="0 0 24 24" width="10" height="10" stroke="currentColor" stroke-width="3.5" fill="none"><polyline points="20 6 9 17 4 12"/></svg>
+            <label style="display: inline-flex; align-items: center; gap: 5px; font-size: 0.72rem; font-weight: 700; color: var(--color-success); margin-right: 0.5rem; cursor: pointer; user-select: none;" onclick="event.stopPropagation();">
+              <input type="checkbox" style="width: 14px; height: 14px; accent-color: var(--color-success); cursor: pointer; margin: 0;" onchange="if(this.checked) quickMarkInterestPaid('${item.id}', '${typeStr}', ${item.amount}, '${selectedMonthStr}')">
               Mark Paid
-            </button>
+            </label>
           `;
         }
       }
@@ -1797,10 +1797,10 @@ function renderDashboard() {
         `;
       } else if (item.type === 'renewal') {
         const renewalActions = item.status !== 'paid' ? `
-          <button class="btn btn-success btn-sm" onclick="event.stopPropagation(); markRenewalDone('${item.id}')" style="padding: 0.25rem 0.5rem; font-size: 0.72rem; min-height: auto; margin-right: 0.5rem; display: inline-flex; align-items: center; gap: 2px;">
-            <svg viewBox="0 0 24 24" width="10" height="10" stroke="currentColor" stroke-width="3.5" fill="none"><polyline points="20 6 9 17 4 12"/></svg>
-            Done
-          </button>
+          <label style="display: inline-flex; align-items: center; gap: 5px; font-size: 0.72rem; font-weight: 700; color: var(--color-success); margin-right: 0.5rem; cursor: pointer; user-select: none;" onclick="event.stopPropagation();">
+            <input type="checkbox" style="width: 14px; height: 14px; accent-color: var(--color-success); cursor: pointer; margin: 0;" onchange="if(this.checked) markRenewalDone('${item.id}')">
+            Mark Done
+          </label>
           <button class="btn btn-secondary btn-sm" onclick="event.stopPropagation(); openRenewalModal('${item.id}')" style="padding: 0.25rem 0.5rem; font-size: 0.72rem; min-height: auto; margin-right: 0.5rem; display: inline-flex; align-items: center; gap: 2px;">
             Edit
           </button>
