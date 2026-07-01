@@ -317,30 +317,36 @@
         </div>
 
         <!-- Summary Stats Bar -->
-        <div class="stats-summary-bar" style="display: flex; gap: 1rem; margin-top: 1.25rem; flex-wrap: wrap;">
-          <div class="card" style="flex: 1; min-width: 120px; padding: 0.75rem 1rem; display: flex; flex-direction: column; gap: 0.25rem; border-left: 3px solid var(--color-accent);">
-            <span style="font-size: 0.7rem; color: var(--text-secondary); font-weight: 600; text-transform: uppercase;">Lent Loans</span>
-            <span id="lending-total-loans" style="font-size: 1.15rem; font-weight: 800; color: var(--text-primary);">0</span>
+        <div style="display: flex; gap: 0.75rem; margin-top: 1.25rem; flex-wrap: wrap;">
+          <!-- Lent Column -->
+          <div style="flex: 1; min-width: 140px; display: flex; flex-direction: column; gap: 0.5rem;">
+            <div class="card" style="padding: 0.75rem 1rem; display: flex; flex-direction: column; gap: 0.25rem; border-left: 3px solid var(--color-accent);">
+              <span style="font-size: 0.7rem; color: var(--text-secondary); font-weight: 600; text-transform: uppercase;">Lent Loans</span>
+              <span id="lending-total-loans" style="font-size: 1.15rem; font-weight: 800; color: var(--text-primary);">0</span>
+            </div>
+            <div class="card" style="padding: 0.75rem 1rem; display: flex; flex-direction: column; gap: 0.25rem; border-left: 3px solid var(--color-success);">
+              <span style="font-size: 0.7rem; color: var(--text-secondary); font-weight: 600; text-transform: uppercase;">Lent Principal</span>
+              <span id="lending-total-principal" style="font-size: 1.15rem; font-weight: 800; color: var(--color-success);">Rs. 0</span>
+            </div>
+            <div class="card" style="padding: 0.75rem 1rem; display: flex; flex-direction: column; gap: 0.25rem; border-left: 3px solid var(--color-purple);">
+              <span style="font-size: 0.7rem; color: var(--text-secondary); font-weight: 600; text-transform: uppercase;">Lent Outstanding</span>
+              <span id="lending-total-outstanding" style="font-size: 1.15rem; font-weight: 800; color: var(--color-purple);">Rs. 0</span>
+            </div>
           </div>
-          <div class="card" style="flex: 1; min-width: 120px; padding: 0.75rem 1rem; display: flex; flex-direction: column; gap: 0.25rem; border-left: 3px solid var(--color-success);">
-            <span style="font-size: 0.7rem; color: var(--text-secondary); font-weight: 600; text-transform: uppercase;">Lent Principal</span>
-            <span id="lending-total-principal" style="font-size: 1.15rem; font-weight: 800; color: var(--color-success);">Rs. 0</span>
-          </div>
-          <div class="card" style="flex: 1; min-width: 120px; padding: 0.75rem 1rem; display: flex; flex-direction: column; gap: 0.25rem; border-left: 3px solid var(--color-purple);">
-            <span style="font-size: 0.7rem; color: var(--text-secondary); font-weight: 600; text-transform: uppercase;">Lent Outstanding</span>
-            <span id="lending-total-outstanding" style="font-size: 1.15rem; font-weight: 800; color: var(--color-purple);">Rs. 0</span>
-          </div>
-          <div class="card" style="flex: 1; min-width: 120px; padding: 0.75rem 1rem; display: flex; flex-direction: column; gap: 0.25rem; border-left: 3px solid var(--color-danger);">
-            <span style="font-size: 0.7rem; color: var(--text-secondary); font-weight: 600; text-transform: uppercase;">Borrowed</span>
-            <span id="borrowing-total-loans" style="font-size: 1.15rem; font-weight: 800; color: var(--text-primary);">0</span>
-          </div>
-          <div class="card" style="flex: 1; min-width: 120px; padding: 0.75rem 1rem; display: flex; flex-direction: column; gap: 0.25rem; border-left: 3px solid var(--color-warning);">
-            <span style="font-size: 0.7rem; color: var(--text-secondary); font-weight: 600; text-transform: uppercase;">Borrowed Principal</span>
-            <span id="borrowing-total-principal" style="font-size: 1.15rem; font-weight: 800; color: var(--color-danger);">Rs. 0</span>
-          </div>
-          <div class="card" style="flex: 1; min-width: 120px; padding: 0.75rem 1rem; display: flex; flex-direction: column; gap: 0.25rem; border-left: 3px solid var(--color-purple);">
-            <span style="font-size: 0.7rem; color: var(--text-secondary); font-weight: 600; text-transform: uppercase;">Borrowed Outstanding</span>
-            <span id="borrowing-total-outstanding" style="font-size: 1.15rem; font-weight: 800; color: var(--color-warning);">Rs. 0</span>
+          <!-- Borrowed Column -->
+          <div style="flex: 1; min-width: 140px; display: flex; flex-direction: column; gap: 0.5rem;">
+            <div class="card" style="padding: 0.75rem 1rem; display: flex; flex-direction: column; gap: 0.25rem; border-left: 3px solid var(--color-danger);">
+              <span style="font-size: 0.7rem; color: var(--text-secondary); font-weight: 600; text-transform: uppercase;">Borrowed</span>
+              <span id="borrowing-total-loans" style="font-size: 1.15rem; font-weight: 800; color: var(--text-primary);">0</span>
+            </div>
+            <div class="card" style="padding: 0.75rem 1rem; display: flex; flex-direction: column; gap: 0.25rem; border-left: 3px solid var(--color-warning);">
+              <span style="font-size: 0.7rem; color: var(--text-secondary); font-weight: 600; text-transform: uppercase;">Borrowed Principal</span>
+              <span id="borrowing-total-principal" style="font-size: 1.15rem; font-weight: 800; color: var(--color-danger);">Rs. 0</span>
+            </div>
+            <div class="card" style="padding: 0.75rem 1rem; display: flex; flex-direction: column; gap: 0.25rem; border-left: 3px solid var(--color-purple);">
+              <span style="font-size: 0.7rem; color: var(--text-secondary); font-weight: 600; text-transform: uppercase;">Borrowed Outstanding</span>
+              <span id="borrowing-total-outstanding" style="font-size: 1.15rem; font-weight: 800; color: var(--color-warning);">Rs. 0</span>
+            </div>
           </div>
         </div>
       </section>
