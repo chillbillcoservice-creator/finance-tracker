@@ -30,6 +30,18 @@ const MONTH_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Se
 const MONTH_FULL_NAMES = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
 function toggleMonthlyMode() {
+  // If already in monthly mode, toggle off and reset to today
+  if (viewMode === 'month') {
+    viewMode = 'day';
+    selectedDateStr = new Date().toISOString().slice(0, 10);
+    selectedMonthStr = selectedDateStr.slice(0, 7);
+    document.getElementById('btn-mode-monthly').classList.remove('active');
+    document.getElementById('month-selector-bar').style.display = 'none';
+    updateHeaderDateDisplay();
+    refreshActiveTab();
+    return;
+  }
+  
   viewMode = 'month';
   document.getElementById('btn-mode-monthly').classList.add('active');
   document.getElementById('btn-mode-yearly').classList.remove('active');
@@ -43,7 +55,19 @@ function toggleMonthlyMode() {
   refreshActiveTab();
 }
 
-function setYearlyMode() {
+function toggleYearlyMode() {
+  // If already in yearly mode, toggle off and reset to today
+  if (viewMode === 'year') {
+    viewMode = 'day';
+    selectedDateStr = new Date().toISOString().slice(0, 10);
+    selectedMonthStr = selectedDateStr.slice(0, 7);
+    document.getElementById('btn-mode-yearly').classList.remove('active');
+    document.getElementById('year-selector-bar').style.display = 'none';
+    updateHeaderDateDisplay();
+    refreshActiveTab();
+    return;
+  }
+  
   viewMode = 'year';
   document.getElementById('btn-mode-yearly').classList.add('active');
   document.getElementById('btn-mode-monthly').classList.remove('active');
@@ -943,7 +967,7 @@ window.populateReportingMonthSelect = populateReportingMonthSelect;
 window.adjustSelectedMonth = adjustSelectedMonth;
 window.refreshActiveTab = refreshActiveTab;
 window.toggleMonthlyMode = toggleMonthlyMode;
-window.setYearlyMode = setYearlyMode;
+window.toggleYearlyMode = toggleYearlyMode;
 window.navigateMonth = navigateMonth;
 window.navigateYear = navigateYear;
 window.selectMonth = selectMonth;
