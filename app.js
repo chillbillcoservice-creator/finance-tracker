@@ -430,6 +430,8 @@ const formatCurrency = (val) => {
   });
 };
 
+
+
 function numberToIndianWords(num) {
   num = Math.floor(Number(num));
   if (isNaN(num) || num === 0) return 'Zero Rupees Only';
@@ -2399,7 +2401,8 @@ function renderRentals() {
         </div>
         <div class="amount-display" style="text-align: right; display: flex; flex-direction: column; align-items: flex-end;">
           <div class="amount-value" style="color: var(--color-purple);">${formatCurrency(rental.monthlyRent)}</div>
-          <div class="amount-label" style="margin-bottom: 0.2rem;">Monthly Rent</div>
+          <div class="amount-in-words" style="font-size: 0.68rem; color: var(--text-secondary); max-width: 180px; line-height: 1.25; margin-top: 0.15rem; font-style: italic; text-align: right; word-wrap: break-word;">(${numberToIndianWords(rental.monthlyRent)})</div>
+          <div class="amount-label" style="margin-top: 0.2rem; margin-bottom: 0.2rem;">Monthly Rent</div>
           <div style="display: flex; align-items: center; gap: 0.3rem; margin-top: 0.2rem;">
             <input type="checkbox" id="chk-rent-paid-${rental.id}" ${isRentPaidThisMonth ? 'checked disabled' : ''} onchange="if(this.checked) { quickMarkRentalPaid('${rental.id}', ${rental.monthlyRent}, '${selectedMonthStr}'); }" style="width: 14px; height: 14px; cursor: pointer; accent-color: var(--color-success); margin: 0;">
             <label for="chk-rent-paid-${rental.id}" style="font-size: 0.72rem; font-weight: 700; color: ${isRentPaidThisMonth ? 'var(--color-success)' : 'var(--text-secondary)'}; cursor: pointer; margin: 0; line-height: 1;">Received</label>
