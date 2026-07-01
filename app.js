@@ -3347,7 +3347,7 @@ function initApp() {
       saveState();
     }
     
-    closeModal('modal-expense');
+    openExpenseModal();
     
     // Switch to expenses tab if we logged it from dashboard to see it immediately
     switchTab('expenses');
@@ -3409,7 +3409,13 @@ function openExpenseModal(expenseId = null) {
     document.getElementById('expense-modal-title').textContent = 'Record Expense';
   }
 
-  openModal('modal-expense');
+  const inlineForm = document.getElementById('inline-expense-form');
+  if (inlineForm) {
+    inlineForm.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    setTimeout(() => {
+      document.getElementById('expense-amount').focus();
+    }, 300);
+  }
 }
 
 function deleteExpense(expenseId) {
