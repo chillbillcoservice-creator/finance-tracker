@@ -11,7 +11,7 @@
   <link rel="manifest" href="manifest.json">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%230ea5e9'/><text x='50' y='65' font-size='40' font-weight='bold' text-anchor='middle' fill='white' font-family='Arial'>CF</text></svg>">
   <title>Capital Flow | Personal Finance Tracker</title>
-  <script type="module" crossorigin src="/finance-tracker/assets/index-CcfZHOS7.js"></script>
+  <script type="module" crossorigin src="/finance-tracker/assets/index-AT0mn5Bh.js"></script>
   <link rel="stylesheet" crossorigin href="/finance-tracker/assets/index-DOVgvw2P.css">
 </head>
 <body>
@@ -34,15 +34,9 @@
             </a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" data-tab="lending">
-              <svg viewBox="0 0 24 24"><path d="M7 17L17 7M17 7H7M17 7V17"/></svg>
-              <span>Lending (Lent)</span>
-            </a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" data-tab="borrowing">
-              <svg viewBox="0 0 24 24"><path d="M17 17L7 7M7 7H17M7 7V17"/></svg>
-              <span>Borrowing (Owed)</span>
+            <a class="nav-link" data-tab="interest">
+              <svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+              <span>Interest</span>
             </a>
           </li>
           <li class="nav-item">
@@ -60,7 +54,7 @@
           <li class="nav-item">
             <a class="nav-link" data-tab="settings">
               <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-              <span>Backup & Config</span>
+              <span>Config</span>
             </a>
           </li>
         </ul>
@@ -78,13 +72,9 @@
         <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>
         <span>Summary</span>
       </a>
-      <a class="mobile-nav-link" data-tab="lending">
-        <svg viewBox="0 0 24 24"><path d="M7 17L17 7M17 7H7M17 7V17"/></svg>
-        <span>Lent</span>
-      </a>
-      <a class="mobile-nav-link" data-tab="borrowing">
-        <svg viewBox="0 0 24 24"><path d="M17 17L7 7M7 7H17M7 7V17"/></svg>
-        <span>Borrowed</span>
+      <a class="mobile-nav-link" data-tab="interest">
+        <svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        <span>Interest</span>
       </a>
       <a class="mobile-nav-link" data-tab="rental">
         <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
@@ -222,7 +212,7 @@
             <div class="summary-value" id="dash-monthly-rent">Rs. 0.00</div>
             <div class="summary-sub-value" id="dash-rental-balance" style="font-size: 0.78rem; margin-top: 0.35rem; font-weight: 700; color: var(--text-secondary); display: flex; align-items: center; gap: 0.25rem;">Balance to collect: Rs. 0.00</div>
           </div>
-          <div class="card summary-card success" data-tab="lending" style="border-left: 4px solid var(--color-success); cursor: pointer;">
+          <div class="card summary-card success" data-tab="interest" style="border-left: 4px solid var(--color-success); cursor: pointer;">
             <div class="summary-card-header">
               <span style="color: var(--color-success);">Interest Received</span>
               <div class="summary-card-icon" style="background: rgba(16, 185, 129, 0.1); color: var(--color-success);">
@@ -263,7 +253,7 @@
           </div>
           <div class="summary-grid" id="dash-interest-stats" style="margin-bottom: 0; gap: 1rem;">
             <!-- Lent Card -->
-            <div class="reminder-item" data-tab="lending" style="cursor: pointer; align-items: flex-start;">
+            <div class="reminder-item" data-tab="interest" style="cursor: pointer; align-items: flex-start;">
               <div class="reminder-icon-wrapper" style="background: rgba(16, 185, 129, 0.15); color: var(--color-success); margin-top: 0.25rem;">
                 <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
               </div>
@@ -280,7 +270,7 @@
             </div>
             
             <!-- Borrowed Card -->
-            <div class="reminder-item" data-tab="borrowing" style="cursor: pointer; align-items: flex-start;">
+            <div class="reminder-item" data-tab="interest" style="cursor: pointer; align-items: flex-start;">
               <div class="reminder-icon-wrapper" style="background: rgba(239, 68, 68, 0.15); color: var(--color-danger); margin-top: 0.25rem;">
                 <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
               </div>
@@ -301,48 +291,25 @@
       </section>
 
       <!-- VIEW: LENDING (LENT) -->
-      <section id="view-lending" class="tab-content">
+      <section id="view-interest" class="tab-content">
         <div class="section-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem;">
           <div style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
-            <h2 style="margin-bottom: 0;">Active Lent Ledger</h2>
+            <h2 style="margin-bottom: 0;">Interest Ledger</h2>
           </div>
-          <button class="btn btn-primary" id="btn-add-loan-lent">
-            <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-            Lend Money
-          </button>
+          <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+            <button class="btn btn-primary" id="btn-add-loan-lent">
+              <svg viewBox="0 0 24 24" width="16" height="16"><path d="M7 17L17 7M17 7H7M17 7V17"/></svg>
+              Lend Money
+            </button>
+            <button class="btn btn-primary" id="btn-add-loan-borrowed" style="background: linear-gradient(135deg, var(--color-danger), #b91c1c); box-shadow: 0 4px 14px rgba(239,68,68,0.3);">
+              <svg viewBox="0 0 24 24" width="16" height="16"><path d="M17 17L7 7M7 7H17M7 7V17"/></svg>
+              Record Borrowing
+            </button>
+          </div>
         </div>
 
-        <div class="list-container" id="lent-loans-list">
+        <div class="list-container" id="lent-loans-list" style="margin-bottom: 1.25rem;">
           <!-- Injected via JS -->
-        </div>
-
-        <!-- Summary Stats Bar -->
-        <div class="stats-summary-bar" style="display: flex; gap: 1rem; margin-top: 1.25rem; flex-wrap: wrap;">
-          <div class="card" style="flex: 1; min-width: 150px; padding: 0.75rem 1rem; display: flex; flex-direction: column; gap: 0.25rem; border-left: 3px solid var(--color-accent);">
-            <span style="font-size: 0.75rem; color: var(--text-secondary); font-weight: 600; text-transform: uppercase;">Total Loans</span>
-            <span id="lending-total-loans" style="font-size: 1.25rem; font-weight: 800; color: var(--text-primary);">0</span>
-          </div>
-          <div class="card" style="flex: 1; min-width: 150px; padding: 0.75rem 1rem; display: flex; flex-direction: column; gap: 0.25rem; border-left: 3px solid var(--color-success);">
-            <span style="font-size: 0.75rem; color: var(--text-secondary); font-weight: 600; text-transform: uppercase;">Original Principal</span>
-            <span id="lending-total-principal" style="font-size: 1.25rem; font-weight: 800; color: var(--color-success);">Rs. 0.00</span>
-          </div>
-          <div class="card" style="flex: 1; min-width: 150px; padding: 0.75rem 1rem; display: flex; flex-direction: column; gap: 0.25rem; border-left: 3px solid var(--color-purple);">
-            <span style="font-size: 0.75rem; color: var(--text-secondary); font-weight: 600; text-transform: uppercase;">Outstanding Balance</span>
-            <span id="lending-total-outstanding" style="font-size: 1.25rem; font-weight: 800; color: var(--color-purple);">Rs. 0.00</span>
-          </div>
-        </div>
-      </section>
-
-      <!-- VIEW: BORROWING (BORROWED) -->
-      <section id="view-borrowing" class="tab-content">
-        <div class="section-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem;">
-          <div style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
-            <h2 style="margin-bottom: 0;">Financier Borrowing Ledger</h2>
-          </div>
-          <button class="btn btn-primary" id="btn-add-loan-borrowed">
-            <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-            Record Borrowing
-          </button>
         </div>
 
         <div class="list-container" id="borrowed-loans-list">
@@ -351,17 +318,29 @@
 
         <!-- Summary Stats Bar -->
         <div class="stats-summary-bar" style="display: flex; gap: 1rem; margin-top: 1.25rem; flex-wrap: wrap;">
-          <div class="card" style="flex: 1; min-width: 150px; padding: 0.75rem 1rem; display: flex; flex-direction: column; gap: 0.25rem; border-left: 3px solid var(--color-purple);">
-            <span style="font-size: 0.75rem; color: var(--text-secondary); font-weight: 600; text-transform: uppercase;">Active Borrowings</span>
-            <span id="borrowing-total-loans" style="font-size: 1.25rem; font-weight: 800; color: var(--text-primary);">0</span>
+          <div class="card" style="flex: 1; min-width: 120px; padding: 0.75rem 1rem; display: flex; flex-direction: column; gap: 0.25rem; border-left: 3px solid var(--color-accent);">
+            <span style="font-size: 0.7rem; color: var(--text-secondary); font-weight: 600; text-transform: uppercase;">Lent Loans</span>
+            <span id="lending-total-loans" style="font-size: 1.15rem; font-weight: 800; color: var(--text-primary);">0</span>
           </div>
-          <div class="card" style="flex: 1; min-width: 150px; padding: 0.75rem 1rem; display: flex; flex-direction: column; gap: 0.25rem; border-left: 3px solid var(--color-danger);">
-            <span style="font-size: 0.75rem; color: var(--text-secondary); font-weight: 600; text-transform: uppercase;">Original Owed</span>
-            <span id="borrowing-total-principal" style="font-size: 1.25rem; font-weight: 800; color: var(--color-danger);">Rs. 0.00</span>
+          <div class="card" style="flex: 1; min-width: 120px; padding: 0.75rem 1rem; display: flex; flex-direction: column; gap: 0.25rem; border-left: 3px solid var(--color-success);">
+            <span style="font-size: 0.7rem; color: var(--text-secondary); font-weight: 600; text-transform: uppercase;">Lent Principal</span>
+            <span id="lending-total-principal" style="font-size: 1.15rem; font-weight: 800; color: var(--color-success);">Rs. 0</span>
           </div>
-          <div class="card" style="flex: 1; min-width: 150px; padding: 0.75rem 1rem; display: flex; flex-direction: column; gap: 0.25rem; border-left: 3px solid var(--color-warning);">
-            <span style="font-size: 0.75rem; color: var(--text-secondary); font-weight: 600; text-transform: uppercase;">Outstanding Owed</span>
-            <span id="borrowing-total-outstanding" style="font-size: 1.25rem; font-weight: 800; color: var(--color-warning);">Rs. 0.00</span>
+          <div class="card" style="flex: 1; min-width: 120px; padding: 0.75rem 1rem; display: flex; flex-direction: column; gap: 0.25rem; border-left: 3px solid var(--color-purple);">
+            <span style="font-size: 0.7rem; color: var(--text-secondary); font-weight: 600; text-transform: uppercase;">Lent Outstanding</span>
+            <span id="lending-total-outstanding" style="font-size: 1.15rem; font-weight: 800; color: var(--color-purple);">Rs. 0</span>
+          </div>
+          <div class="card" style="flex: 1; min-width: 120px; padding: 0.75rem 1rem; display: flex; flex-direction: column; gap: 0.25rem; border-left: 3px solid var(--color-danger);">
+            <span style="font-size: 0.7rem; color: var(--text-secondary); font-weight: 600; text-transform: uppercase;">Borrowed</span>
+            <span id="borrowing-total-loans" style="font-size: 1.15rem; font-weight: 800; color: var(--text-primary);">0</span>
+          </div>
+          <div class="card" style="flex: 1; min-width: 120px; padding: 0.75rem 1rem; display: flex; flex-direction: column; gap: 0.25rem; border-left: 3px solid var(--color-warning);">
+            <span style="font-size: 0.7rem; color: var(--text-secondary); font-weight: 600; text-transform: uppercase;">Borrowed Principal</span>
+            <span id="borrowing-total-principal" style="font-size: 1.15rem; font-weight: 800; color: var(--color-danger);">Rs. 0</span>
+          </div>
+          <div class="card" style="flex: 1; min-width: 120px; padding: 0.75rem 1rem; display: flex; flex-direction: column; gap: 0.25rem; border-left: 3px solid var(--color-purple);">
+            <span style="font-size: 0.7rem; color: var(--text-secondary); font-weight: 600; text-transform: uppercase;">Borrowed Outstanding</span>
+            <span id="borrowing-total-outstanding" style="font-size: 1.15rem; font-weight: 800; color: var(--color-warning);">Rs. 0</span>
           </div>
         </div>
       </section>
