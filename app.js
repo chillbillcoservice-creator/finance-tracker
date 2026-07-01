@@ -3411,6 +3411,7 @@ function openExpenseModal(expenseId = null) {
 
   const inlineForm = document.getElementById('inline-expense-form');
   if (inlineForm) {
+    switchTab('expenses');
     inlineForm.scrollIntoView({ behavior: 'smooth', block: 'start' });
     setTimeout(() => {
       document.getElementById('expense-amount').focus();
