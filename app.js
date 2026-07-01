@@ -314,17 +314,13 @@ function updateHeaderDateDisplay() {
   const headerDate = document.getElementById('header-date');
   if (!headerDate) return;
   
-  // Show current date and time with live clock
+  // Show current date only
   const now = new Date();
   const options = { 
     weekday: 'long', 
     year: 'numeric', 
     month: 'long', 
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit',
-    hour12: true
+    day: 'numeric'
   };
   headerDate.textContent = now.toLocaleDateString('en-US', options);
 }
@@ -332,7 +328,6 @@ function updateHeaderDateDisplay() {
 // Live clock update
 function startClock() {
   updateHeaderDateDisplay();
-  setInterval(updateHeaderDateDisplay, 1000);
 }
 
 function toggleReminderFilter(filterType) {
