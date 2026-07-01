@@ -12,7 +12,7 @@
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%230ea5e9'/><text x='50' y='65' font-size='40' font-weight='bold' text-anchor='middle' fill='white' font-family='Arial'>CF</text></svg>">
   <title>Capital Flow | Personal Finance Tracker</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
-  <script type="module" crossorigin src="/finance-tracker/assets/index-uG2N78uz.js"></script>
+  <script type="module" crossorigin src="/finance-tracker/assets/index-CFHGVZ9A.js"></script>
   <link rel="stylesheet" crossorigin href="/finance-tracker/assets/index-BZ-y3Nh_.css">
 </head>
 <body>
@@ -369,6 +369,11 @@
               <label class="form-label" for="expense-amount">Amount (Rs.)</label>
               <input type="number" id="expense-amount" class="form-input" min="0.01" step="any" placeholder="0.00" required>
               <div id="expense-amount-presets" style="display: flex; gap: 0.35rem; margin-top: 0.4rem; flex-wrap: wrap;"></div>
+              <div id="expense-property-shortcuts" style="display: none; gap: 0.35rem; margin-top: 0.8rem; flex-wrap: wrap;">
+                <button type="button" class="btn btn-secondary btn-sm preset-btn" onclick="autoSelectProperty('23/48 Ground Floor')">23/48 Ground Floor</button>
+                <button type="button" class="btn btn-secondary btn-sm preset-btn" onclick="autoSelectProperty('23/48 3rd Floor')">23/48 3rd Floor</button>
+                <button type="button" class="btn btn-secondary btn-sm preset-btn" onclick="autoSelectProperty('1/104')">1/104</button>
+              </div>
             </div>
             
             <div class="form-group-row">
@@ -378,11 +383,16 @@
               </div>
               <div class="form-group">
                 <label class="form-label" for="expense-category">Category</label>
-                <select id="expense-category" class="form-input" required style="background-color: var(--bg-primary); color: var(--text-primary); border: 1px solid var(--border-color);">
+                <select id="expense-category" class="form-input" required style="background-color: var(--bg-primary); color: var(--text-primary); border: 1px solid var(--border-color);" onchange="handleCategoryChange()">
                   <option value="Maintenance" selected>Maintenance</option>
                   <option value="Taxes">Taxes / Fees</option>
+                  <option value="House Tax">House Tax</option>
+                  <option value="ITR">ITR</option>
                   <option value="Utilities">Utilities (Bills)</option>
                   <option value="Insurance">Insurance</option>
+                  <option value="Car Insurance">Car Insurance</option>
+                  <option value="Health">Health</option>
+                  <option value="Pollution">Pollution</option>
                   <option value="Certificate">Certificate</option>
                   <option value="Travel">Travel / Fuel</option>
                   <option value="Others">Others</option>
@@ -396,7 +406,7 @@
               <p style="font-size: 0.72rem; color: var(--text-muted); margin-top: 0.3rem;">Auto-created as a Renewal reminder for next year</p>
             </div>
 
-            <div class="form-group">
+            <div class="form-group" id="expense-property-group">
               <label class="form-label" for="expense-property">Associate with Property (Optional)</label>
               <select id="expense-property" class="form-input" style="background-color: var(--bg-primary); color: var(--text-primary); border: 1px solid var(--border-color);">
                 <option value="">General / None</option>
