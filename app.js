@@ -3372,10 +3372,46 @@ function initApp() {
 
 // 12. EXPENSES TAB CONTROLLERS & ACTIONS
 
+window.handleCategoryChange = function() {
+  const cat = document.getElementById('expense-category').value;
+  const propGroup = document.getElementById('expense-property-group');
+  const propShortcuts = document.getElementById('expense-property-shortcuts');
+  
+  if (['Car Insurance', 'Health', 'Pollution'].includes(cat)) {
+    if(propGroup) propGroup.style.display = 'none';
+  } else {
+    if(propGroup) propGroup.style.display = 'block';
+  }
+  
+  if (['House Tax', 'ITR'].includes(cat)) {
+    if(propShortcuts) propShortcuts.style.display = 'flex';
+  } else {
+    if(propShortcuts) propShortcuts.style.display = 'none';
+  }
+};
+
+window.autoSelectProperty = function(searchString) {
+  const propertySelect = document.getElementById('expense-property');
+  if(!propertySelect) return;
+  const lowerSearch = searchString.toLowerCase();
+  
+  for (let i = 0; i < propertySelect.options.length; i++) {
+    if (propertySelect.options[i].text.toLowerCase().includes(lowerSearch)) {
+      propertySelect.selectedIndex = i;
+      propertySelect.style.borderColor = 'var(--color-success)';
+      setTimeout(() => propertySelect.style.borderColor = 'var(--border-color)', 1000);
+      break;
+    }
+  }
+};
+
 function openExpenseModal(expenseId = null) {
   loadState();
   const form = document.getElementById('form-expense');
   form.reset();
+  
+  if(window.handleCategoryChange) window.handleCategoryChange();
+
   
   const presetsContainer = document.getElementById('expense-amount-presets');
   if (presetsContainer) presetsContainer.innerHTML = '';
