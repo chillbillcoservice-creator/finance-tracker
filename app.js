@@ -43,45 +43,29 @@ function setYearlyMode() {
   refreshActiveTab();
 }
 
-function onDateChange(dateStr) {
-  if (!dateStr) return;
-  // Prevent future dates
-  const today = new Date().toISOString().slice(0, 10);
-  if (dateStr > today) {
-    dateStr = today;
-    document.getElementById('header-date-input').value = today;
-  }
-  selectedDateStr = dateStr;
-  selectedMonthStr = dateStr.slice(0, 7);
-  // Auto-switch to day mode when a date is picked
-  viewMode = 'day';
-  document.getElementById('btn-mode-monthly').classList.remove('active');
-  document.getElementById('btn-mode-yearly').classList.remove('active');
-  updateHeaderDateDisplay();
-  refreshActiveTab();
-}
-
 function updateHeaderDateDisplay() {
   const headerDate = document.getElementById('header-date');
-  const dateInput = document.getElementById('header-date-input');
-  if (!headerDate || !dateInput) return;
+  if (!headerDate) return;
   
-  // Set max date to today to prevent future selection
-  dateInput.max = new Date().toISOString().slice(0, 10);
-  dateInput.value = selectedDateStr;
-  
-  const today = new Date().toISOString().slice(0, 10);
-  
-  if (viewMode === 'day') {
-    const d = new Date(selectedDateStr + 'T12:00:00');
-    headerDate.textContent = d.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-  } else if (viewMode === 'year') {
-    const year = selectedDateStr.slice(0, 4);
-    headerDate.textContent = year;
-  } else {
-    const d = new Date(selectedMonthStr + '-15T12:00:00');
-    headerDate.textContent = d.toLocaleDateString('en-US', { year: 'numeric', month: 'long' });
-  }
+  // Show current date and time with live clock
+  const now = new Date();
+  const options = { 
+    weekday: 'long', 
+    year: 'numeric', 
+    month: 'long', 
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: true
+  };
+  headerDate.textContent = now.toLocaleDateString('en-US', options);
+}
+
+// Live clock update
+function startClock() {
+  updateHeaderDateDisplay();
+  setInterval(updateHeaderDateDisplay, 1000);
 }
 
 function toggleReminderFilter(filterType) {
@@ -847,7 +831,6 @@ window.adjustSelectedMonth = adjustSelectedMonth;
 window.refreshActiveTab = refreshActiveTab;
 window.toggleMonthlyMode = toggleMonthlyMode;
 window.setYearlyMode = setYearlyMode;
-window.onDateChange = onDateChange;
 
 // 5. Navigation & Routing Handler
 const VIEWS = {
@@ -2906,6 +2889,7 @@ function initSearch() {
 function initApp() {
   loadState();
   initNavigation();
+  startClock();
   
   // Set default lending rates for new entries (4%)
   document.getElementById('btn-add-loan-lent').addEventListener('click', () => {
