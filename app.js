@@ -4085,11 +4085,55 @@ async function viewDoc(id) {
       return;
     }
 
+    const btnShare = document.getElementById('btn-share-doc');
+    const btnDownload = document.getElementById('btn-download-doc');
+    
+    if (navigator.share) {
+      btnShare.style.display = 'inline-flex';
+      btnShare.onclick = () => shareDoc(id);
+    } else {
+      btnShare.style.display = 'none';
+    }
+    btnDownload.onclick = () => downloadDoc(id);
+
     openModal('modal-view-doc');
   } catch (err) {
     console.error('Error viewing doc', err);
   }
 }
+
+window.downloadDoc = async function(id) {
+  try {
+    const doc = await docStorage.get(id);
+    if (!doc) return;
+    const a = document.createElement('a');
+    a.href = doc.dataUrl;
+    a.download = doc.name;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  } catch (err) {
+    console.error('Failed to download doc:', err);
+  }
+};
+
+window.shareDoc = async function(id) {
+  try {
+    const doc = await docStorage.get(id);
+    if (!doc) return;
+    if (navigator.share) {
+      const res = await fetch(doc.dataUrl);
+      const blob = await res.blob();
+      const file = new File([blob], doc.name, { type: doc.type });
+      await navigator.share({
+        title: doc.name,
+        files: [file]
+      });
+    }
+  } catch (err) {
+    console.error('Failed to share doc:', err);
+  }
+};
 
 async function deleteDoc(id) {
   if (!confirm('Delete this document?')) return;
