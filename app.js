@@ -3891,4 +3891,186 @@ window.setExpensePreset = setExpensePreset;
 window.openReportsModal = openReportsModal;
 window.exportReportsCSV = exportReportsCSV;
 
-window.addEventListener('DOMContentLoaded', initApp);
+// ==========================================
+// DOCS STORAGE (IndexedDB)
+// ==========================================
+class DocStorage {
+  constructor() {
+    this.dbName = 'FinanceTrackerDocs';
+    this.storeName = 'documents';
+    this.db = null;
+  }
+
+  async init() {
+    return new Promise((resolve, reject) => {
+      const request = indexedDB.open(this.dbName, 1);
+      request.onerror = (e) => reject(e);
+      request.onsuccess = (e) => {
+        this.db = e.target.result;
+        resolve();
+      };
+      request.onupgradeneeded = (e) => {
+        const db = e.target.result;
+        if (!db.objectStoreNames.contains(this.storeName)) {
+          db.createObjectStore(this.storeName, { keyPath: 'id' });
+        }
+      };
+    });
+  }
+
+  async save(id, dataUrl, type, name) {
+    if (!this.db) await this.init();
+    return new Promise((resolve, reject) => {
+      const tx = this.db.transaction([this.storeName], 'readwrite');
+      const store = tx.objectStore(this.storeName);
+      const request = store.put({ id, dataUrl, type, name, timestamp: Date.now() });
+      request.onsuccess = () => resolve();
+      request.onerror = (e) => reject(e);
+    });
+  }
+
+  async get(id) {
+    if (!this.db) await this.init();
+    return new Promise((resolve, reject) => {
+      const tx = this.db.transaction([this.storeName], 'readonly');
+      const store = tx.objectStore(this.storeName);
+      const request = store.get(id);
+      request.onsuccess = (e) => resolve(e.target.result);
+      request.onerror = (e) => reject(e);
+    });
+  }
+
+  async getAllMeta() {
+    if (!this.db) await this.init();
+    return new Promise((resolve, reject) => {
+      const tx = this.db.transaction([this.storeName], 'readonly');
+      const store = tx.objectStore(this.storeName);
+      const request = store.getAll();
+      request.onsuccess = (e) => {
+        const items = e.target.result || [];
+        resolve(items.map(item => ({ id: item.id, name: item.name, type: item.type, timestamp: item.timestamp })).sort((a,b) => b.timestamp - a.timestamp));
+      };
+      request.onerror = (e) => reject(e);
+    });
+  }
+
+  async delete(id) {
+    if (!this.db) await this.init();
+    return new Promise((resolve, reject) => {
+      const tx = this.db.transaction([this.storeName], 'readwrite');
+      const store = tx.objectStore(this.storeName);
+      const request = store.delete(id);
+      request.onsuccess = () => resolve();
+      request.onerror = (e) => reject(e);
+    });
+  }
+}
+
+const docStorage = new DocStorage();
+
+async function handleDocUpload(event) {
+  const files = event.target.files;
+  if (!files || files.length === 0) return;
+
+  for (let i = 0; i < files.length; i++) {
+    const file = files[i];
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+      const id = 'doc_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5);
+      await docStorage.save(id, e.target.result, file.type, file.name || 'Captured Photo');
+      renderDocs();
+    };
+    reader.readAsDataURL(file);
+  }
+  event.target.value = ''; // reset
+}
+
+async function renderDocs() {
+  const grid = document.getElementById('docs-grid');
+  if (!grid) return;
+
+  try {
+    const docs = await docStorage.getAllMeta();
+    
+    if (docs.length === 0) {
+      grid.innerHTML = `<div class="empty-state" style="grid-column: 1 / -1;"><p>No documents uploaded yet.</p></div>`;
+      return;
+    }
+
+    grid.innerHTML = docs.map(doc => {
+      const isImg = doc.type.startsWith('image/');
+      const icon = isImg 
+        ? `<svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" fill="none"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>`
+        : `<svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" fill="none"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>`;
+      
+      const dateStr = new Date(doc.timestamp).toLocaleDateString();
+
+      return `
+        <div class="card" style="padding: 1rem; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 0.5rem; position: relative;">
+          <div style="color: var(--color-accent);">${icon}</div>
+          <div style="font-size: 0.75rem; font-weight: 600; word-break: break-all; color: var(--text-primary); width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${doc.name}">${doc.name}</div>
+          <div style="font-size: 0.65rem; color: var(--text-muted);">${dateStr}</div>
+          
+          <div style="display: flex; gap: 0.4rem; margin-top: 0.5rem; width: 100%;">
+            <button class="btn btn-primary btn-sm" style="flex: 1; padding: 0.3rem;" onclick="viewDoc('${doc.id}')">View</button>
+            <button class="btn btn-secondary btn-sm" style="flex: 1; padding: 0.3rem; border-color: rgba(239, 68, 68, 0.3); color: var(--color-danger);" onclick="deleteDoc('${doc.id}')">Del</button>
+          </div>
+        </div>
+      `;
+    }).join('');
+  } catch (err) {
+    console.error('Failed to render docs:', err);
+    grid.innerHTML = `<p style="color: red;">Error loading documents.</p>`;
+  }
+}
+
+async function viewDoc(id) {
+  try {
+    const doc = await docStorage.get(id);
+    if (!doc) return;
+
+    const imgEl = document.getElementById('view-doc-img');
+    const pdfEl = document.getElementById('view-doc-pdf');
+    
+    imgEl.style.display = 'none';
+    pdfEl.style.display = 'none';
+
+    if (doc.type.startsWith('image/')) {
+      imgEl.src = doc.dataUrl;
+      imgEl.style.display = 'block';
+    } else if (doc.type === 'application/pdf') {
+      pdfEl.src = doc.dataUrl;
+      pdfEl.style.display = 'block';
+    } else {
+      alert('Unsupported file type for viewing.');
+      return;
+    }
+
+    openModal('modal-view-doc');
+  } catch (err) {
+    console.error('Error viewing doc', err);
+  }
+}
+
+async function deleteDoc(id) {
+  if (!confirm('Delete this document?')) return;
+  await docStorage.delete(id);
+  renderDocs();
+}
+
+window.viewDoc = viewDoc;
+window.deleteDoc = deleteDoc;
+
+window.addEventListener('DOMContentLoaded', () => {
+  initApp();
+  
+  // Attach doc upload listeners
+  const docUploadInput = document.getElementById('doc-upload-input');
+  if (docUploadInput) docUploadInput.addEventListener('change', handleDocUpload);
+  
+  const docCameraInput = document.getElementById('doc-camera-input');
+  if (docCameraInput) docCameraInput.addEventListener('change', handleDocUpload);
+  
+  // Render docs initially
+  renderDocs();
+});
