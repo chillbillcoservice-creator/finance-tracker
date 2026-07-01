@@ -12,7 +12,7 @@
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%230ea5e9'/><text x='50' y='65' font-size='40' font-weight='bold' text-anchor='middle' fill='white' font-family='Arial'>CF</text></svg>">
   <title>Capital Flow | Personal Finance Tracker</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
-  <script type="module" crossorigin src="/finance-tracker/assets/index-Diz4t5C4.js"></script>
+  <script type="module" crossorigin src="/finance-tracker/assets/index-D8KWhtyR.js"></script>
   <link rel="stylesheet" crossorigin href="/finance-tracker/assets/index-BZ-y3Nh_.css">
 </head>
 <body>
@@ -47,9 +47,9 @@
             </a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" data-tab="expenses">
-              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
-              <span>Expenses</span>
+            <a class="nav-link" data-tab="docs">
+              <div class="nav-icon"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
+              <span>Docs</span>
             </a>
           </li>
           <li class="nav-item">
@@ -81,9 +81,8 @@
         <svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
         <span>Interest</span>
       </a>
-      <a class="mobile-nav-link" data-tab="expenses">
-        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
-        <span>Expenses</span>
+      <a class="mobile-nav-link" data-tab="docs">
+        <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
       </a>
       <a class="mobile-nav-link" data-tab="settings">
         <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
@@ -426,6 +425,28 @@
         </div>
 
         <div class="list-container" id="expenses-list">
+          <!-- Injected via JS -->
+        </div>
+      </section>
+
+      <!-- VIEW: DOCS -->
+      <section id="view-docs" class="tab-content">
+        <div class="section-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem;">
+          <h2 style="margin-bottom: 0;">Documents</h2>
+          <div style="display: flex; gap: 0.5rem;">
+            <label class="btn btn-primary" style="cursor: pointer;">
+              <input type="file" id="doc-upload-input" accept="image/*,application/pdf" style="display: none;" multiple>
+              <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              Upload
+            </label>
+            <label class="btn btn-secondary" style="cursor: pointer;">
+              <input type="file" id="doc-camera-input" accept="image/*" capture="environment" style="display: none;">
+              <svg viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+              Camera
+            </label>
+          </div>
+        </div>
+        <div id="docs-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 1rem; margin-top: 1rem;">
           <!-- Injected via JS -->
         </div>
       </section>
@@ -1055,6 +1076,16 @@
     </div>
   </div>
 
+  <!-- MODAL: VIEW DOCUMENT -->
+  <div class="modal-overlay" id="modal-view-doc">
+    <div class="modal-container" style="max-width: 90vw; background: transparent; box-shadow: none; border: none;">
+      <div style="display: flex; justify-content: flex-end; margin-bottom: 0.5rem;">
+        <button class="btn btn-secondary" onclick="closeModal('modal-view-doc')" style="background: rgba(0,0,0,0.5); border-color: transparent;">Close</button>
+      </div>
+      <img id="view-doc-img" src="" style="max-width: 100%; max-height: 80vh; border-radius: 8px; display: none; object-fit: contain;">
+      <iframe id="view-doc-pdf" style="width: 100%; height: 80vh; border: none; border-radius: 8px; display: none; background: white;"></iframe>
+    </div>
+  </div>
 
   <!-- JavaScript Modules -->
 </body>
