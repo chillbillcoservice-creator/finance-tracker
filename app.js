@@ -21,24 +21,12 @@ let selectedMonthStr = new Date().toISOString().slice(0, 7);
 let currentReminderFilter = 'all'; // 'all', 'rent', 'interest'
 
 // View mode: 'month' shows full month data, 'day' shows single day data, 'year' shows full year data
-let viewMode = 'day';
+let viewMode = 'month';
 // Selected date string in YYYY-MM-DD format
 let selectedDateStr = new Date().toISOString().slice(0, 10);
 
-function goToToday() {
-  viewMode = 'day';
-  selectedDateStr = new Date().toISOString().slice(0, 10);
-  selectedMonthStr = selectedDateStr.slice(0, 7);
-  document.getElementById('btn-mode-today').classList.add('active');
-  document.getElementById('btn-mode-monthly').classList.remove('active');
-  document.getElementById('btn-mode-yearly').classList.remove('active');
-  updateHeaderDateDisplay();
-  refreshActiveTab();
-}
-
 function toggleMonthlyMode() {
   viewMode = 'month';
-  document.getElementById('btn-mode-today').classList.remove('active');
   document.getElementById('btn-mode-monthly').classList.add('active');
   document.getElementById('btn-mode-yearly').classList.remove('active');
   
@@ -48,7 +36,6 @@ function toggleMonthlyMode() {
 
 function setYearlyMode() {
   viewMode = 'year';
-  document.getElementById('btn-mode-today').classList.remove('active');
   document.getElementById('btn-mode-yearly').classList.add('active');
   document.getElementById('btn-mode-monthly').classList.remove('active');
   
@@ -68,8 +55,6 @@ function onDateChange(dateStr) {
   selectedMonthStr = dateStr.slice(0, 7);
   // Auto-switch to day mode when a date is picked
   viewMode = 'day';
-  const todayStr = new Date().toISOString().slice(0, 10);
-  document.getElementById('btn-mode-today').classList.toggle('active', dateStr === todayStr);
   document.getElementById('btn-mode-monthly').classList.remove('active');
   document.getElementById('btn-mode-yearly').classList.remove('active');
   updateHeaderDateDisplay();
@@ -862,7 +847,6 @@ window.adjustSelectedMonth = adjustSelectedMonth;
 window.refreshActiveTab = refreshActiveTab;
 window.toggleMonthlyMode = toggleMonthlyMode;
 window.setYearlyMode = setYearlyMode;
-window.goToToday = goToToday;
 window.onDateChange = onDateChange;
 
 // 5. Navigation & Routing Handler
