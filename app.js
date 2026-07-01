@@ -314,15 +314,26 @@ function updateHeaderDateDisplay() {
   const headerDate = document.getElementById('header-date');
   if (!headerDate) return;
   
-  // Show current date only
+  // Show day, date, year only (no month)
   const now = new Date();
-  const options = { 
-    weekday: 'long', 
-    year: 'numeric', 
-    month: 'long', 
-    day: 'numeric'
-  };
-  headerDate.textContent = now.toLocaleDateString('en-US', options);
+  const dayName = now.toLocaleDateString('en-US', { weekday: 'long' });
+  const dayNum = now.getDate();
+  const year = now.getFullYear();
+  headerDate.textContent = `${dayName}, ${dayNum} ${year}`;
+  
+  // Update month display in the middle
+  const monthDisplay = document.getElementById('header-month-display');
+  if (monthDisplay) {
+    const monthName = now.toLocaleDateString('en-US', { month: 'long' });
+    monthDisplay.textContent = monthName.toUpperCase();
+  }
+  
+  // Update title
+  const titleNode = document.getElementById('current-view-title');
+  if (titleNode) {
+    const baseTitle = VIEWS[currentTab]?.title || 'Summary';
+    titleNode.textContent = baseTitle;
+  }
 }
 
 // Live clock update
@@ -957,8 +968,7 @@ function navigateAndHighlightCard(tabId, itemId) {
   _expandedCards.add(itemId);
   
   if (tabId === 'rental') renderRentals();
-  else if (tabId === 'lending') renderLending();
-  else if (tabId === 'borrowing') renderBorrowing();
+  else if (tabId === 'interest') renderInterest();
   
   setTimeout(() => {
     const card = document.querySelector(`[data-id="${itemId}"]`);
@@ -1102,14 +1112,16 @@ window.selectYear = selectYear;
 // 5. Navigation & Routing Handler
 const VIEWS = {
   dashboard: { title: 'Summary', subtitle: 'Your aggregated financial overview at a glance.', render: renderDashboard },
-  lending: { title: 'Lending Tracker', subtitle: 'Track loans granted to borrowers and monitor accrued interest.', render: renderLending },
-  borrowing: { title: 'Borrowing Tracker', subtitle: 'Manage funding/loans from financiers and schedule interest payouts.', render: renderBorrowing },
-  rental: { title: 'Rental Property Management', subtitle: 'Oversee properties, tenant agreements, deposits, and rent collections.', render: renderRentals },
+  interest: { title: 'Interest Ledger', subtitle: 'Track loans you\'ve lent and amounts you\'ve borrowed, with accrued interest.', render: renderInterest },
+  rental: { title: 'Rent Tracker', subtitle: 'Oversee properties, tenant agreements, deposits, and rent collections.', render: renderRentals },
   expenses: { title: 'Expenses Tracker', subtitle: 'Manage maintenance, utilities, tax payments, and general spending.', render: renderExpenses },
-  settings: { title: 'Backup & Configurations', subtitle: 'Export, import, or reset the local application database.', render: () => {} } // settings is static HTML
+  settings: { title: 'Reports', subtitle: 'View charts, summaries, and reset your financial data.', render: renderReports }
 };
 
+let currentTab = 'dashboard';
+
 function switchTab(tabId) {
+  currentTab = tabId;
   // Update Navigation Active States
   document.querySelectorAll('.nav-link, .mobile-nav-link').forEach(link => {
     if (link.getAttribute('data-tab') === tabId) {
@@ -1130,11 +1142,11 @@ function switchTab(tabId) {
   }
 
   // Update Header text
-  const titleNode = document.getElementById('current-view-title');
   const subtitleNode = document.getElementById('current-view-subtitle');
-  if (VIEWS[tabId] && titleNode && subtitleNode) {
-    titleNode.textContent = VIEWS[tabId].title;
-    subtitleNode.textContent = VIEWS[tabId].subtitle;
+  if (VIEWS[tabId]) {
+    if (subtitleNode) {
+      subtitleNode.textContent = VIEWS[tabId].subtitle;
+    }
     updateHeaderDateDisplay();
     VIEWS[tabId].render();
   }
@@ -1153,7 +1165,13 @@ function initNavigation() {
   updateHeaderDateDisplay();
 }
 
-// 6. DASHBOARD TAB LOGIC
+// 6. INTEREST TAB LOGIC (combined lending + borrowing)
+function renderInterest() {
+  renderLending();
+  renderBorrowing();
+}
+
+// 7. DASHBOARD TAB LOGIC
 function renderDashboard() {
   loadState();
 
@@ -1851,7 +1869,7 @@ function renderDashboard() {
       if (diff < 0) {
         alertsList.push({
           id: loan.id,
-          tab: 'lending',
+          tab: 'interest',
           title: `Overdue Loan Receivable`,
           desc: `${loan.borrowerName} was due to pay back ${formatCurrency(loan.principal)} on ${formatDate(loan.dueDate)}.`,
           type: 'overdue'
@@ -1859,7 +1877,7 @@ function renderDashboard() {
       } else if (diff <= 14) {
         alertsList.push({
           id: loan.id,
-          tab: 'lending',
+          tab: 'interest',
           title: `Lent Loan Coming Due`,
           desc: `${loan.borrowerName}'s loan of ${formatCurrency(loan.principal)} is due in ${diff} days.`,
           type: 'due-soon'
@@ -1873,7 +1891,7 @@ function renderDashboard() {
       if (diff < 0) {
         alertsList.push({
           id: loan.id,
-          tab: 'borrowing',
+          tab: 'interest',
           title: `Overdue Payment Payable`,
           desc: `You were scheduled to repay ${formatCurrency(loan.principal)} to ${loan.financierName} by ${formatDate(loan.dueDate)}.`,
           type: 'overdue'
@@ -1881,7 +1899,7 @@ function renderDashboard() {
       } else if (diff <= 14) {
         alertsList.push({
           id: loan.id,
-          tab: 'borrowing',
+          tab: 'interest',
           title: `Borrowed Repayment Due`,
           desc: `Repayment of ${formatCurrency(loan.principal)} to ${loan.financierName} is due in ${diff} days.`,
           type: 'due-soon'
@@ -2443,6 +2461,7 @@ function renderRentals() {
 
 // 10. TRANSACTION MODALS CONTROLLERS & ACTIONS
 
+try {
 // Create/Edit Loan Submit Handler
 document.getElementById('form-loan').addEventListener('submit', (e) => {
   e.preventDefault();
@@ -3038,79 +3057,7 @@ window.promptRentPayment = promptRentPayment;
 window.showRentalLedger = showRentalLedger;
 window.deleteRentPayment = deleteRentPayment;
 
-// 12. BACKUP & SYSTEM SETTINGS HANDLERS
-
-// Export JSON Database
-document.getElementById('btn-export-data').addEventListener('click', () => {
-  loadState();
-  const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(state, null, 2));
-  const dlAnchorElem = document.createElement('a');
-  
-  const formattedDate = new Date().toISOString().split('T')[0];
-  dlAnchorElem.setAttribute("href", dataStr);
-  dlAnchorElem.setAttribute("download", `capitalflow_backup_${formattedDate}.json`);
-  dlAnchorElem.click();
-});
-
-// File Import change handler (UI file selection)
-document.getElementById('import-file-input').addEventListener('change', (e) => {
-  const file = e.target.files[0];
-  const label = document.getElementById('import-filename');
-  const importBtn = document.getElementById('btn-import-data');
-  
-  if (file) {
-    label.textContent = file.name;
-    importBtn.removeAttribute('disabled');
-  } else {
-    label.textContent = 'No file chosen';
-    importBtn.setAttribute('disabled', 'true');
-  }
-});
-
-// Import JSON database restore
-document.getElementById('btn-import-data').addEventListener('click', () => {
-  const fileInput = document.getElementById('import-file-input');
-  const file = fileInput.files[0];
-  if (!file) return;
-
-  const reader = new FileReader();
-  reader.onload = function(event) {
-    try {
-      const importedData = JSON.parse(event.target.result);
-      
-      // Structure Validation checks
-      if (
-        importedData &&
-        Array.isArray(importedData.lent) &&
-        Array.isArray(importedData.borrowed) &&
-        Array.isArray(importedData.rentals) &&
-        Array.isArray(importedData.interestPayments) &&
-        Array.isArray(importedData.rentPayments)
-      ) {
-        if (confirm('Restoring this backup will completely replace your current database in this browser. Do you want to proceed?')) {
-          state = {
-            ...importedData,
-            expenses: importedData.expenses || []
-          };
-          saveState();
-          alert('Database restored successfully!');
-          switchTab('dashboard');
-          
-          // Clear inputs
-          fileInput.value = '';
-          document.getElementById('import-filename').textContent = 'No file chosen';
-          document.getElementById('btn-import-data').setAttribute('disabled', 'true');
-        }
-      } else {
-        alert('Invalid Backup File format. Make sure it is a valid CapitalFlow JSON export.');
-      }
-    } catch (err) {
-      alert('Error parsing the JSON file. Ensure the file is not corrupted.');
-      console.error(err);
-    }
-  };
-  reader.readAsText(file);
-});
+// 12. SYSTEM SETTINGS HANDLERS
 
 // Hard system reset
 document.getElementById('btn-reset-data').addEventListener('click', () => {
@@ -3130,6 +3077,7 @@ document.getElementById('btn-reset-data').addEventListener('click', () => {
     }
   }
 });
+} catch(e) { console.error('Top-level handler error:', e); }
 
 // Search feature in Dashboard
 function initSearch() {
@@ -3202,7 +3150,7 @@ function initSearch() {
         </div>
       `;
       item.addEventListener('click', () => {
-        switchTab('lending');
+        switchTab('interest');
       });
       resultsList.appendChild(item);
     });
@@ -3228,7 +3176,7 @@ function initSearch() {
         </div>
       `;
       item.addEventListener('click', () => {
-        switchTab('borrowing');
+        switchTab('interest');
       });
       resultsList.appendChild(item);
     });
@@ -3296,7 +3244,7 @@ function initApp() {
     document.getElementById('form-loan').reset();
     document.getElementById('loan-id').value = '';
     document.getElementById('loan-direction').value = 'borrowed';
-    document.getElementById('loan-rate').value = '4.00'; // Default interest rate placeholder
+    document.getElementById('loan-rate').value = '3.00'; // Default interest rate
     document.getElementById('loan-start-date').value = new Date().toISOString().split('T')[0];
     
     // Label updates
@@ -3378,10 +3326,32 @@ function initApp() {
     }
 
     saveState();
+    
+    // Auto-create renewal if renewal date is set
+    const renewalDateInput = document.getElementById('expense-renewal-date');
+    const renewalDateGroup = document.getElementById('expense-renewal-date-group');
+    if (renewalDateInput && renewalDateInput.value && renewalDateGroup && renewalDateGroup.style.display !== 'none') {
+      const renewalTitle = document.getElementById('expense-note').value || note;
+      const renewalCategory = document.getElementById('expense-category').value;
+      state.renewals.push({
+        id: 'renewal_' + Date.now(),
+        title: renewalTitle,
+        category: renewalCategory,
+        amount: amount,
+        dueDate: renewalDateInput.value,
+        frequency: 'yearly',
+        note: 'Auto-created from expense',
+        lastRenewed: null,
+        createdAt: new Date().toISOString()
+      });
+      saveState();
+    }
+    
     closeModal('modal-expense');
     
     // Switch to expenses tab if we logged it from dashboard to see it immediately
     switchTab('expenses');
+    renderDashboard();
   });
 
   // Renewal Form Submit
@@ -3523,6 +3493,8 @@ function renderExpenses() {
     `;
     listContainer.appendChild(card);
   });
+
+  openExpenseModal();
 }
 
 function setExpensePreset(noteText, categoryValue) {
@@ -3530,10 +3502,26 @@ function setExpensePreset(noteText, categoryValue) {
   const catSelect = document.getElementById('expense-category');
   const amtInput = document.getElementById('expense-amount');
   const presetsContainer = document.getElementById('expense-amount-presets');
+  const renewalDateGroup = document.getElementById('expense-renewal-date-group');
+  const renewalDateInput = document.getElementById('expense-renewal-date');
   
   if (noteInput) noteInput.value = noteText;
   if (catSelect) catSelect.value = categoryValue;
   if (presetsContainer) presetsContainer.innerHTML = '';
+  
+  // Show renewal date for insurance/tax/certificate presets
+  const renewalPresets = ['Car Insurance', 'Health Insurance', 'Pollution Certificate', 'House Tax', 'I.T.R Filing'];
+  if (renewalPresets.includes(noteText)) {
+    if (renewalDateGroup) renewalDateGroup.style.display = 'block';
+    if (renewalDateInput) {
+      const nextYear = new Date();
+      nextYear.setFullYear(nextYear.getFullYear() + 1);
+      renewalDateInput.value = nextYear.toISOString().split('T')[0];
+    }
+  } else {
+    if (renewalDateGroup) renewalDateGroup.style.display = 'none';
+    if (renewalDateInput) renewalDateInput.value = '';
+  }
   
   if (noteText === 'Fuel') {
     if (amtInput) {
@@ -3701,6 +3689,189 @@ function exportReportsCSV() {
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
+}
+
+// 14. REPORTS TAB LOGIC
+let reportsViewMode = 'month';
+let reportsSelectedMonth = new Date().toISOString().slice(0, 7);
+let reportsChart = null;
+
+function reportsSetViewMode(mode) {
+  reportsViewMode = mode;
+  const monthlyBtn = document.getElementById('reports-btn-mode-monthly');
+  const yearlyBtn = document.getElementById('reports-btn-mode-yearly');
+  const selectorBar = document.getElementById('reports-selector-bar');
+  
+  if (mode === 'month') {
+    if (monthlyBtn) monthlyBtn.classList.add('active');
+    if (yearlyBtn) yearlyBtn.classList.remove('active');
+    if (selectorBar) selectorBar.style.display = 'block';
+    document.getElementById('reports-selector-label').textContent = formatMonth(reportsSelectedMonth);
+  } else {
+    if (yearlyBtn) yearlyBtn.classList.add('active');
+    if (monthlyBtn) monthlyBtn.classList.remove('active');
+    if (selectorBar) selectorBar.style.display = 'block';
+    document.getElementById('reports-selector-label').textContent = reportsSelectedMonth.slice(0, 4);
+  }
+  renderReportsChart();
+}
+window.reportsSetViewMode = reportsSetViewMode;
+
+function reportsNavigate(dir) {
+  if (reportsViewMode === 'month') {
+    const [y, m] = reportsSelectedMonth.split('-').map(Number);
+    const d = new Date(y, m - 1 + dir, 1);
+    reportsSelectedMonth = d.toISOString().slice(0, 7);
+    document.getElementById('reports-selector-label').textContent = formatMonth(reportsSelectedMonth);
+  } else {
+    const y = Number(reportsSelectedMonth.slice(0, 4)) + dir;
+    reportsSelectedMonth = `${y}-01`;
+    document.getElementById('reports-selector-label').textContent = String(y);
+  }
+  renderReportsChart();
+}
+window.reportsNavigate = reportsNavigate;
+
+function formatMonth(monthStr) {
+  const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  const [y, m] = monthStr.split('-').map(Number);
+  return `${months[m - 1]} ${y}`;
+}
+
+function renderReports() {
+  loadState();
+  
+  // Set default month selector
+  const selectorBar = document.getElementById('reports-selector-bar');
+  if (selectorBar) selectorBar.style.display = 'block';
+  
+  const monthlyBtn = document.getElementById('reports-btn-mode-monthly');
+  if (monthlyBtn) monthlyBtn.classList.add('active');
+  
+  const label = document.getElementById('reports-selector-label');
+  if (label) label.textContent = formatMonth(reportsSelectedMonth);
+  
+  renderReportsChart();
+  renderYearlySummaryTable();
+}
+
+function renderYearlySummaryTable() {
+  loadState();
+  const tbody = document.querySelector('#yearly-reports-table tbody');
+  if (!tbody) return;
+  tbody.innerHTML = '';
+  
+  // Collect all years from data
+  const years = new Set();
+  state.rentPayments.forEach(p => { if (p.date) years.add(p.date.slice(0, 4)); });
+  state.interestPayments.forEach(p => { if (p.date) years.add(p.date.slice(0, 4)); });
+  state.expenses.forEach(e => { if (e.date) years.add(e.date.slice(0, 4)); });
+  
+  if (years.size === 0) {
+    const currentYear = String(new Date().getFullYear());
+    years.add(currentYear);
+  }
+  
+  const sortedYears = [...years].sort().reverse();
+  
+  sortedYears.forEach(year => {
+    const yearRent = state.rentPayments.filter(p => p.date && p.date.startsWith(year)).reduce((s, p) => s + Number(p.amount), 0);
+    const yearInterestIn = state.interestPayments.filter(p => p.date && p.date.startsWith(year) && p.type === 'received').reduce((s, p) => s + Number(p.amount), 0);
+    const yearInterestOut = state.interestPayments.filter(p => p.date && p.date.startsWith(year) && p.type === 'paid').reduce((s, p) => s + Number(p.amount), 0);
+    const yearExpense = state.expenses.filter(e => e.date && e.date.startsWith(year)).reduce((s, e) => s + Number(e.amount), 0);
+    const netEarnings = yearRent + yearInterestIn - yearInterestOut - yearExpense;
+    
+    const row = document.createElement('tr');
+    row.innerHTML = `
+      <td style="font-weight: 700;">${year}</td>
+      <td style="color: var(--color-success);">${formatCurrency(yearRent)}</td>
+      <td style="color: var(--color-success);">${formatCurrency(yearInterestIn)}</td>
+      <td style="color: var(--color-danger);">${formatCurrency(yearInterestOut)}</td>
+      <td style="color: var(--color-danger);">${formatCurrency(yearExpense)}</td>
+      <td style="font-weight: 700; color: ${netEarnings >= 0 ? 'var(--color-success)' : 'var(--color-danger)'};">${formatCurrency(netEarnings)}</td>
+    `;
+    tbody.appendChild(row);
+  });
+}
+
+function renderReportsChart() {
+  loadState();
+  const [selYear, selMonth] = reportsSelectedMonth.split('-').map(Number);
+  const endDate = `${reportsSelectedMonth}-${String(new Date(selYear, selMonth, 0).getDate()).padStart(2, '0')}`;
+  
+  let labels = [];
+  let rentData = [];
+  let interestData = [];
+  let expenseData = [];
+  
+  if (reportsViewMode === 'month') {
+    // Daily breakdown for the selected month
+    const daysInMonth = new Date(selYear, selMonth, 0).getDate();
+    for (let d = 1; d <= daysInMonth; d++) {
+      const dayStr = `${reportsSelectedMonth}-${String(d).padStart(2, '0')}`;
+      labels.push(d);
+      
+      const dayRent = state.rentPayments.filter(p => p.date === dayStr).reduce((s, p) => s + Number(p.amount), 0);
+      const dayInterest = state.interestPayments.filter(p => p.date === dayStr).reduce((s, p) => s + Number(p.amount), 0);
+      const dayExpense = state.expenses.filter(e => e.date === dayStr).reduce((s, e) => s + Number(e.amount), 0);
+      
+      rentData.push(dayRent);
+      interestData.push(dayInterest);
+      expenseData.push(dayExpense);
+    }
+  } else {
+    // Monthly breakdown for the selected year
+    const monthNames = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    for (let m = 1; m <= 12; m++) {
+      const mStr = `${selYear}-${String(m).padStart(2, '0')}`;
+      const mEnd = `${mStr}-${String(new Date(selYear, m, 0).getDate()).padStart(2, '0')}`;
+      labels.push(monthNames[m - 1]);
+      
+      const mRent = state.rentPayments.filter(p => p.date && p.date.startsWith(mStr)).reduce((s, p) => s + Number(p.amount), 0);
+      const mInterest = state.interestPayments.filter(p => p.date && p.date.startsWith(mStr)).reduce((s, p) => s + Number(p.amount), 0);
+      const mExpense = state.expenses.filter(e => e.date && e.date.startsWith(mStr)).reduce((s, e) => s + Number(e.amount), 0);
+      
+      rentData.push(mRent);
+      interestData.push(mInterest);
+      expenseData.push(mExpense);
+    }
+  }
+  
+  const totalIncome = rentData.reduce((a, b) => a + b, 0) + interestData.reduce((a, b) => a + b, 0);
+  const totalExpenses = expenseData.reduce((a, b) => a + b, 0);
+  
+  document.getElementById('reports-total-income').textContent = formatCurrency(totalIncome);
+  document.getElementById('reports-total-expenses').textContent = formatCurrency(totalExpenses);
+  document.getElementById('reports-net-balance').textContent = formatCurrency(totalIncome - totalExpenses);
+  
+  const canvas = document.getElementById('reports-chart');
+  if (!canvas) return;
+  
+  if (reportsChart) reportsChart.destroy();
+  
+  const ctx = canvas.getContext('2d');
+  reportsChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [
+        { label: 'Rent', data: rentData, backgroundColor: 'rgba(234, 179, 8, 0.8)', borderRadius: 4 },
+        { label: 'Interest', data: interestData, backgroundColor: 'rgba(16, 185, 129, 0.8)', borderRadius: 4 },
+        { label: 'Expenses', data: expenseData, backgroundColor: 'rgba(239, 68, 68, 0.8)', borderRadius: 4 }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { position: 'bottom', labels: { color: '#94a3b8', font: { size: 11 }, padding: 16, usePointStyle: true } }
+      },
+      scales: {
+        x: { stacked: true, grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: '#94a3b8', font: { size: 10 }, maxRotation: 0 } },
+        y: { stacked: true, grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: '#94a3b8', callback: v => '₹' + (v >= 1000 ? (v/1000).toFixed(0) + 'k' : v) } }
+      }
+    }
+  });
 }
 
 // Bind to window for global templates
