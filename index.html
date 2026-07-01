@@ -443,33 +443,6 @@
             </div>
           </div>
           
-          <div class="card settings-box">
-            <div class="settings-box-title">Backup Database</div>
-            <div class="settings-box-desc">Export all your transactions, rentals, and historical payments to a single JSON file. You can save this file locally to preserve backups.</div>
-            <div>
-              <button class="btn btn-primary" id="btn-export-data">
-                <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-                Export JSON Backup
-              </button>
-            </div>
-          </div>
-          
-          <div class="card settings-box">
-            <div class="settings-box-title">Restore Database</div>
-            <div class="settings-box-desc">Restore database entries from a previous CapitalFlow JSON backup. Warning: This will overwrite current entries stored in your browser.</div>
-            <div style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
-              <div class="file-input-wrapper">
-                <button class="btn btn-secondary">Choose Backup File</button>
-                <input type="file" id="import-file-input" accept=".json" />
-              </div>
-              <span id="import-filename" style="font-size: 0.85rem; color: var(--text-secondary);">No file chosen</span>
-              <button class="btn btn-primary" id="btn-import-data" disabled>
-                <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                Restore Backup
-              </button>
-            </div>
-          </div>
-          
           <div class="card settings-box" style="border-color: rgba(239, 68, 68, 0.3);">
             <div class="settings-box-title" style="color: var(--color-danger);">Reset System</div>
             <div class="settings-box-desc">Permanently remove all logged loans, tenants, and payment details from your browser's local cache. This action cannot be undone.</div>
@@ -653,6 +626,11 @@
               <button type="button" class="btn btn-secondary btn-sm" onclick="setExpensePreset('Rent', 'Others')" style="padding: 0.3rem 0.5rem; min-height: auto; font-size: 0.72rem; border-color: rgba(255,255,255,0.06); background: var(--bg-secondary);">🏠 Rent</button>
               <button type="button" class="btn btn-secondary btn-sm" onclick="setExpensePreset('Wifi bill', 'Utilities')" style="padding: 0.3rem 0.5rem; min-height: auto; font-size: 0.72rem; border-color: rgba(255,255,255,0.06); background: var(--bg-secondary);">🌐 Wifi Bill</button>
               <button type="button" class="btn btn-secondary btn-sm" onclick="setExpensePreset('Phone bill', 'Utilities')" style="padding: 0.3rem 0.5rem; min-height: auto; font-size: 0.72rem; border-color: rgba(255,255,255,0.06); background: var(--bg-secondary);">📱 Phone Bill</button>
+              <button type="button" class="btn btn-secondary btn-sm" onclick="setExpensePreset('Car Insurance', 'Insurance')" style="padding: 0.3rem 0.5rem; min-height: auto; font-size: 0.72rem; border-color: rgba(255,255,255,0.06); background: var(--bg-secondary);">🚗 Car Insurance</button>
+              <button type="button" class="btn btn-secondary btn-sm" onclick="setExpensePreset('Health Insurance', 'Insurance')" style="padding: 0.3rem 0.5rem; min-height: auto; font-size: 0.72rem; border-color: rgba(255,255,255,0.06); background: var(--bg-secondary);">🏥 Health Insurance</button>
+              <button type="button" class="btn btn-secondary btn-sm" onclick="setExpensePreset('Pollution Certificate', 'Certificate')" style="padding: 0.3rem 0.5rem; min-height: auto; font-size: 0.72rem; border-color: rgba(255,255,255,0.06); background: var(--bg-secondary);">🌿 Pollution</button>
+              <button type="button" class="btn btn-secondary btn-sm" onclick="setExpensePreset('House Tax', 'Taxes')" style="padding: 0.3rem 0.5rem; min-height: auto; font-size: 0.72rem; border-color: rgba(255,255,255,0.06); background: var(--bg-secondary);">🏠 House Tax</button>
+              <button type="button" class="btn btn-secondary btn-sm" onclick="setExpensePreset('I.T.R Filing', 'Taxes')" style="padding: 0.3rem 0.5rem; min-height: auto; font-size: 0.72rem; border-color: rgba(255,255,255,0.06); background: var(--bg-secondary);">📋 I.T.R</button>
             </div>
           </div>
           <div class="form-group">
@@ -673,6 +651,7 @@
                 <option value="Taxes">Taxes / Fees</option>
                 <option value="Utilities">Utilities (Bills)</option>
                 <option value="Insurance">Insurance</option>
+                <option value="Certificate">Certificate</option>
                 <option value="Travel">Travel / Fuel</option>
                 <option value="Others">Others</option>
               </select>
@@ -799,16 +778,6 @@
       <form id="form-renewal">
         <input type="hidden" id="renewal-id">
         <div class="modal-body">
-          <div class="form-group" style="margin-bottom: 1rem;">
-            <label class="form-label" style="margin-bottom: 0.4rem;">Quick Presets</label>
-            <div style="display: flex; gap: 0.4rem; flex-wrap: wrap;">
-              <button type="button" class="btn btn-secondary btn-sm" onclick="setRenewalPreset('Car Insurance', 'Insurance')" style="padding: 0.3rem 0.5rem; min-height: auto; font-size: 0.72rem; border-color: rgba(255,255,255,0.06); background: var(--bg-secondary);">🚗 Car Insurance</button>
-              <button type="button" class="btn btn-secondary btn-sm" onclick="setRenewalPreset('Health Insurance', 'Insurance')" style="padding: 0.3rem 0.5rem; min-height: auto; font-size: 0.72rem; border-color: rgba(255,255,255,0.06); background: var(--bg-secondary);">🏥 Health Insurance</button>
-              <button type="button" class="btn btn-secondary btn-sm" onclick="setRenewalPreset('Pollution Certificate', 'Certificate')" style="padding: 0.3rem 0.5rem; min-height: auto; font-size: 0.72rem; border-color: rgba(255,255,255,0.06); background: var(--bg-secondary);">🌿 Pollution</button>
-              <button type="button" class="btn btn-secondary btn-sm" onclick="setRenewalPreset('House Tax', 'Tax')" style="padding: 0.3rem 0.5rem; min-height: auto; font-size: 0.72rem; border-color: rgba(255,255,255,0.06); background: var(--bg-secondary);">🏠 House Tax</button>
-              <button type="button" class="btn btn-secondary btn-sm" onclick="setRenewalPreset('I.T.R Filing', 'Tax')" style="padding: 0.3rem 0.5rem; min-height: auto; font-size: 0.72rem; border-color: rgba(255,255,255,0.06); background: var(--bg-secondary);">📋 I.T.R</button>
-            </div>
-          </div>
           <div class="form-group">
             <label class="form-label" for="renewal-title">Renewal Title</label>
             <input type="text" id="renewal-title" class="form-input" placeholder="e.g. Car Insurance" required>
