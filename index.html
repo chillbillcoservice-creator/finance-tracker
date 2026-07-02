@@ -12,7 +12,7 @@
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%230ea5e9'/><text x='50' y='65' font-size='40' font-weight='bold' text-anchor='middle' fill='white' font-family='Arial'>CF</text></svg>">
   <title>Capital Flow | Personal Finance Tracker</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
-  <script type="module" crossorigin src="/finance-tracker/assets/index-Dx_vA4-E.js"></script>
+  <script type="module" crossorigin src="/finance-tracker/assets/index-ByXnqIYl.js"></script>
   <link rel="stylesheet" crossorigin href="/finance-tracker/assets/index-B7yIaiPy.css">
 </head>
 <body>
@@ -514,7 +514,7 @@
         </div>
         
         <div class="summary-grid" style="margin-bottom: 1.25rem;">
-          <div class="card summary-card warning" onclick="alert('Bills - Coming soon')" style="border-left: 4px solid var(--color-warning); cursor: pointer;">
+          <div class="card summary-card warning" id="card-records-bills" onclick="selectRecordsTab('bills')" style="border-left: 4px solid var(--color-warning); cursor: pointer; opacity: 0.6; transition: all 0.2s;">
             <div class="summary-card-header">
               <span style="text-transform: uppercase; color: var(--color-warning);">BILLS</span>
               <div class="summary-card-icon" style="background: rgba(245,158,11,0.15); color: #f59e0b;">
@@ -525,7 +525,7 @@
             <div class="summary-sub-value" style="font-size: 0.78rem; margin-top: 0.35rem; font-weight: 700; color: var(--text-secondary); display: flex; flex-direction: column; align-items: flex-start; gap: 0.15rem;">Pending: 0</div>
           </div>
           
-          <div class="card summary-card success" onclick="alert('Documents - Coming soon')" style="border-left: 4px solid var(--color-success); cursor: pointer;">
+          <div class="card summary-card success" id="card-records-documents" onclick="selectRecordsTab('documents')" style="border-left: 4px solid var(--color-success); cursor: pointer; opacity: 0.6; transition: all 0.2s;">
             <div class="summary-card-header">
               <span style="text-transform: uppercase; color: var(--color-success);">DOCUMENTS</span>
               <div class="summary-card-icon" style="background: rgba(16, 185, 129, 0.1); color: var(--color-success);">
@@ -536,7 +536,7 @@
             <div class="summary-sub-value" style="font-size: 0.78rem; margin-top: 0.35rem; font-weight: 700; color: var(--text-secondary); display: flex; flex-direction: column; align-items: flex-start; gap: 0.15rem;">Uploaded: 0</div>
           </div>
           
-          <div class="card summary-card accent" onclick="alert('Construction - Coming soon')" style="border-left: 4px solid var(--color-accent); cursor: pointer;">
+          <div class="card summary-card accent active" id="card-records-construction" onclick="selectRecordsTab('construction')" style="border-left: 4px solid var(--color-accent); cursor: pointer; opacity: 1; transform: scale(1.02); transition: all 0.2s;">
             <div class="summary-card-header">
               <span style="text-transform: uppercase; color: var(--color-accent);">CONSTRUCTION</span>
               <div class="summary-card-icon" style="background: rgba(var(--color-accent-rgb), 0.1); color: var(--color-accent);">
@@ -544,27 +544,67 @@
               </div>
             </div>
             <div class="summary-value" style="color: var(--color-accent);">0</div>
-            <div class="summary-sub-value" style="font-size: 0.78rem; margin-top: 0.35rem; font-weight: 700; color: var(--text-secondary); display: flex; flex-direction: column; align-items: flex-start; gap: 0.15rem;">Projects: 0</div>
+            <div class="summary-sub-value" style="font-size: 0.78rem; margin-top: 0.35rem; font-weight: 700; color: var(--text-secondary); display: flex; flex-direction: column; align-items: flex-start; gap: 0.15rem;">Projects: 3</div>
           </div>
           
         </div>
         
-        <!-- Main Content Card Wrapper for Records -->
-        <div class="card" style="margin-bottom: 1.25rem;">
-          <div class="section-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
-            <h2 style="margin-bottom: 0;">
-              <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-              <span>Recent Activity</span>
-            </h2>
-          </div>
-          <div class="list-container">
-            <div class="empty-state">
-              <div class="empty-state-icon">
-                <svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        <div id="section-records-bills" style="display: none;">
+          <div class="card" style="margin-bottom: 1.25rem;">
+            <div class="section-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
+              <h2 style="margin-bottom: 0; display: flex; align-items: center; gap: 0.5rem;">
+                <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                <span>Bills</span>
+              </h2>
+            </div>
+            <div class="list-container">
+              <div class="empty-state">
+                <div class="empty-state-icon">
+                  <svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                </div>
+                <p>No bills to show yet.</p>
               </div>
-              <p>No recent activity to show.</p>
             </div>
           </div>
+        </div>
+
+        <div id="section-records-documents" style="display: none;">
+          <div class="card" style="margin-bottom: 1.25rem;">
+            <div class="section-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
+              <h2 style="margin-bottom: 0; display: flex; align-items: center; gap: 0.5rem;">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                <span>Documents</span>
+              </h2>
+            </div>
+            <div class="list-container">
+              <div class="empty-state">
+                <div class="empty-state-icon">
+                  <svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                </div>
+                <p>No documents uploaded yet.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div id="section-records-construction">
+        
+        <!-- Construction Tracking -->
+        <div class="card" style="margin-bottom: 1.25rem;">
+          <div class="section-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
+            <h2 style="margin-bottom: 0; display: flex; align-items: center; gap: 0.5rem;">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M12 12h.01"/><path d="M17 12h.01"/><path d="M7 12h.01"/></svg>
+              <span>Construction Projects</span>
+            </h2>
+            <button class="btn btn-primary btn-sm" onclick="openConstructionModal()">
+              <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Record Labor Payment
+            </button>
+          </div>
+          <div class="list-container" id="construction-list-container">
+            <!-- Rendered by JS -->
+          </div>
+        </div>
         </div>
       </section>
 
@@ -673,6 +713,71 @@
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" onclick="closeModal('modal-loan')">Cancel</button>
           <button type="submit" class="btn btn-primary">Save Entry</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: ADD/EDIT CONSTRUCTION PAYMENT -->
+  <div class="modal-overlay" id="modal-construction">
+    <div class="modal-container">
+      <div class="modal-header">
+        <h3 class="modal-title" id="construction-modal-title">Record Labor Payment</h3>
+        <button type="button" class="modal-close" onclick="closeModal('modal-construction')">
+          <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <form id="form-construction">
+        <input type="hidden" id="construction-id">
+        <div class="modal-body">
+          <div class="form-group-row">
+            <div class="form-group" style="flex: 1;">
+              <label class="form-label" for="const-project">Project</label>
+              <select id="const-project" class="form-input" required>
+                <option value="23/48 Ground Floor">23/48 Ground Floor</option>
+                <option value="23/48 3rd Floor">23/48 3rd Floor</option>
+                <option value="1/104">1/104</option>
+              </select>
+            </div>
+            <div class="form-group" style="flex: 1;">
+              <label class="form-label" for="const-labor">Labor Type</label>
+              <select id="const-labor" class="form-input" required>
+                <option value="Electrician">Electrician</option>
+                <option value="Plumber">Plumber</option>
+                <option value="Welder">Welder</option>
+                <option value="Mason">Mason</option>
+                <option value="Carpenter">Carpenter</option>
+                <option value="Painter">Painter</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+          </div>
+          
+          <div class="form-group-row">
+            <div class="form-group">
+              <label class="form-label" for="const-worker">Worker Name</label>
+              <input type="text" id="const-worker" class="form-input" placeholder="e.g. John Doe" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="const-amount">Amount Paid (Rs.)</label>
+              <input type="number" id="const-amount" class="form-input" min="1" step="any" placeholder="0.00" required>
+            </div>
+          </div>
+          
+          <div class="form-group-row">
+            <div class="form-group">
+              <label class="form-label" for="const-date">Date Paid</label>
+              <input type="date" id="const-date" class="form-input" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="const-notes">Notes / Purpose</label>
+              <input type="text" id="const-notes" class="form-input" placeholder="What was this payment for?">
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('modal-construction')">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save Payment</button>
         </div>
       </form>
     </div>
