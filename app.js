@@ -8,7 +8,8 @@ let state = {
   interestPayments: [],
   rentPayments: [],
   expenses: [],
-  renewals: []
+  renewals: [],
+  files: []
 };
 
 // 2. Local Storage Keys
@@ -389,6 +390,7 @@ function loadState() {
       state.rentPayments = state.rentPayments || [];
       state.expenses = state.expenses || [];
       state.renewals = state.renewals || [];
+      state.files = state.files || [];
     } catch (e) {
       console.error('Failed to parse local storage data, resetting to default.', e);
       saveState();
@@ -1199,6 +1201,7 @@ window.setTheme = setTheme;
 function renderRecords() {
   // Records dashboard
   renderConstruction();
+  if (typeof renderFiles === 'function') renderFiles();
 }
 
 const VIEWS = {
@@ -3171,6 +3174,7 @@ document.getElementById('btn-reset-data').addEventListener('click', () => {
         rentPayments: [],
         expenses: [],
         renewals: [],
+        files: [],
         theme: 'dark-blue'
       };
       seedInitialData();
@@ -3482,6 +3486,84 @@ function renderConstruction() {
   }
 }
 
+// FILE UPLOAD LOGIC
+window.openUploadModal = function(type, method) {
+  const form = document.getElementById('form-upload');
+  if(form) form.reset();
+  
+  document.getElementById('upload-type').value = type;
+  const img = document.getElementById('upload-preview-img');
+  const txt = document.getElementById('upload-preview-text');
+  if(img) { img.style.display = 'none'; img.src = ''; }
+  if(txt) txt.style.display = 'block';
+  if(txt) txt.textContent = 'No file selected';
+  
+  const fileInput = document.getElementById('upload-file-input');
+  if (fileInput) {
+    if (method === 'camera') {
+      fileInput.setAttribute('capture', 'environment');
+    } else {
+      fileInput.removeAttribute('capture');
+    }
+  }
+  
+  document.getElementById('upload-modal-title').textContent = 'Upload ' + type.charAt(0).toUpperCase() + type.slice(1);
+  openModal('modal-upload');
+};
+
+window.deleteFile = function(id) {
+  if(!confirm('Are you sure you want to delete this file?')) return;
+  loadState();
+  state.files = state.files.filter(f => f.id !== id);
+  saveState();
+  renderFiles();
+};
+
+window.viewFile = function(id) {
+  const file = state.files.find(f => f.id === id);
+  if(file && file.data) {
+    const w = window.open('');
+    w.document.write(`<img src="${file.data}" style="max-width:100%; height:auto;">`);
+  }
+};
+
+function renderFiles() {
+  const container = document.getElementById('policies-list-container');
+  if (!container) return;
+  const policies = state.files.filter(f => f.type === 'policies').sort((a,b) => new Date(b.date) - new Date(a.date));
+  
+  if (policies.length === 0) {
+    container.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-state-icon">
+          <svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        </div>
+        <p>No documents uploaded yet.</p>
+      </div>`;
+    return;
+  }
+  
+  let html = '';
+  policies.forEach(p => {
+    html += `
+      <div class="card" style="margin-bottom: 0.75rem; display: flex; align-items: center; gap: 1rem; padding: 0.75rem;">
+        <div style="width: 48px; height: 48px; background: var(--input-bg); border-radius: 8px; overflow: hidden; flex-shrink: 0; display:flex; align-items:center; justify-content:center;">
+          ${p.data ? `<img src="${p.data}" style="width:100%; height:100%; object-fit:cover;">` : '<svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>'}
+        </div>
+        <div style="flex: 1;">
+          <div style="font-weight: 600; color: var(--text-primary); font-size: 0.95rem;">${p.title}</div>
+          <div style="font-size: 0.75rem; color: var(--text-muted);">Uploaded: ${p.date}</div>
+        </div>
+        <div style="display: flex; gap: 0.5rem;">
+          <button class="btn btn-secondary btn-sm" onclick="viewFile('${p.id}')">View</button>
+          <button class="btn btn-danger btn-sm" onclick="deleteFile('${p.id}')">Delete</button>
+        </div>
+      </div>
+    `;
+  });
+  container.innerHTML = html;
+}
+
 // 13. BOOTSTRAP INITIALIZATION
 function initApp() {
   loadState();
@@ -3489,6 +3571,47 @@ function initApp() {
   
   // Initialize month selector (default view is monthly)
   renderMonthSelector();
+
+  // File Upload Handlers
+  const formUpload = document.getElementById('form-upload');
+  const fileInput = document.getElementById('upload-file-input');
+  if (fileInput) {
+    fileInput.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          document.getElementById('upload-preview-img').src = ev.target.result;
+          document.getElementById('upload-preview-img').style.display = 'block';
+          document.getElementById('upload-preview-text').style.display = 'none';
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+  }
+  if (formUpload) {
+    formUpload.addEventListener('submit', (e) => {
+      e.preventDefault();
+      loadState();
+      const type = document.getElementById('upload-type').value;
+      const title = document.getElementById('upload-title').value;
+      const data = document.getElementById('upload-preview-img').src;
+      if (!data || data === window.location.href || data === '') {
+        alert('Please select a file or take a photo.');
+        return;
+      }
+      state.files.push({
+        id: 'file_' + Date.now(),
+        type: type,
+        title: title,
+        data: data,
+        date: new Date().toISOString().slice(0, 10)
+      });
+      saveState();
+      closeModal('modal-upload');
+      renderFiles();
+    });
+  }
   
   // Set default lending rates for new entries (4%)
   document.getElementById('btn-add-loan-lent').addEventListener('click', () => {
