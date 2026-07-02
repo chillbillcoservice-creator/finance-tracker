@@ -375,6 +375,7 @@ function loadState() {
     try {
       state = JSON.parse(data);
       // Ensure all arrays are initialized
+      state.theme = state.theme || 'dark-blue';
       state.lent = state.lent || [];
       state.borrowed = state.borrowed || [];
       state.rentals = state.rentals || [];
@@ -1161,6 +1162,33 @@ window.navigateYear = navigateYear;
 window.selectMonth = selectMonth;
 window.selectYear = selectYear;
 
+function setTheme(themeId) {
+  document.documentElement.setAttribute('data-theme', themeId);
+  
+  if (state) {
+    state.theme = themeId;
+    saveState();
+  }
+
+  // Update button UI
+  document.querySelectorAll('.theme-btn').forEach(btn => {
+    btn.style.borderColor = 'var(--border-color)';
+    btn.style.boxShadow = 'none';
+  });
+  
+  const activeBtn = document.getElementById(`theme-btn-${themeId}`);
+  if (activeBtn) {
+    activeBtn.style.borderColor = 'var(--color-accent)';
+    activeBtn.style.boxShadow = '0 0 0 2px var(--color-accent)';
+  }
+  
+  // Rerender charts with new theme colors if on dashboard
+  if (currentTab === 'dashboard') {
+    renderDashboard();
+  }
+}
+window.setTheme = setTheme;
+
 // 5. Navigation & Routing Handler
 function renderRecords() {
   // Records dashboard
@@ -1176,6 +1204,8 @@ let activeRecordsTab = 'bills';
 
 function selectRecordsTab(tab) {
   activeRecordsTab = tab;
+  
+  renderConstruction();
   
   // Update UI highlights
   const cards = { bills: 'card-records-bills', documents: 'card-records-documents', construction: 'card-records-construction' };
@@ -2062,7 +2092,6 @@ function renderLending() {
     card.className = `card loan-card ${_expandedCards.has(loan.id) ? 'expanded' : ''}`;
     card.setAttribute('data-id', loan.id);
 
-    MONTH_UPPER_NAMES
     const [y, m] = selectedMonthStr.split('-').map(Number);
     const currentMonthName = MONTH_UPPER_NAMES[m - 1];
     
@@ -2243,7 +2272,6 @@ function renderBorrowing() {
     card.className = `card loan-card ${_expandedCards.has(loan.id) ? 'expanded' : ''}`;
     card.setAttribute('data-id', loan.id);
 
-    MONTH_UPPER_NAMES
     const [y, m] = selectedMonthStr.split('-').map(Number);
     const currentMonthName = MONTH_UPPER_NAMES[m - 1];
     
@@ -2353,7 +2381,6 @@ function renderRentals() {
   loadState();
 
   const [selYear, selMonth] = selectedMonthStr.split('-').map(Number);
-  MONTH_UPPER_NAMES
   const currentMonthName = MONTH_UPPER_NAMES[selMonth - 1];
   const activeMonthStr = `${currentMonthName} ${selYear}`;
   
@@ -2410,7 +2437,6 @@ function renderRentals() {
     const rentPayments = state.rentPayments.filter(rp => rp.rentalId === rental.id && rp.monthYear <= selectedMonthStr);
     const totalCollected = rentPayments.reduce((sum, rp) => sum + Number(rp.amount), 0);
 
-    MONTH_UPPER_NAMES
     const currentMonthName = MONTH_UPPER_NAMES[selMonth - 1];
     
     // Check if there is a rent payment logged where monthYear matches the selected month
@@ -3083,7 +3109,6 @@ function showRentalLedger(rentalId) {
     sortedHistory.forEach(item => {
       // Format Year string (e.g. 2026-06 -> June 2026)
       const parts = item.monthYear.split('-');
-      MONTH_FULL_NAMES
       const dateName = MONTH_UPPER_NAMES[parseInt(parts[1]) - 1] + ' ' + parts[0];
 
       const div = document.createElement('div');
@@ -3139,7 +3164,8 @@ document.getElementById('btn-reset-data').addEventListener('click', () => {
         interestPayments: [],
         rentPayments: [],
         expenses: [],
-        renewals: []
+        renewals: [],
+        theme: 'dark-blue'
       };
       seedInitialData();
       localStorage.setItem(STORAGE_KEY + '_v', SEED_VERSION);
