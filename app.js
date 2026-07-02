@@ -29,6 +29,7 @@ let selectedDateStr = new Date().toISOString().slice(0, 10);
 // Month names for selector
 const MONTH_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 const MONTH_FULL_NAMES = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+const MONTH_UPPER_NAMES = ['JANUARY', 'FEBRUARY', 'MARCH', 'APRIL', 'MAY', 'JUNE', 'JULY', 'AUGUST', 'SEPTEMBER', 'OCTOBER', 'NOVEMBER', 'DECEMBER'];
 
 function toggleMonthlyMode() {
   // If already in monthly mode, toggle off and reset to today
@@ -335,21 +336,27 @@ function updateHeaderDateDisplay() {
   }
 }
 
-// Live clock update
-function startClock() {
-  updateHeaderDateDisplay();
-}
-
 function toggleReminderFilter(filterType) {
   currentReminderFilter = (currentReminderFilter === filterType) ? 'all' : filterType;
   renderDashboard();
 }
+
+function updateCardHighlights() {
+  const cards = { rent: 'card-rent', interest: 'card-interest', expenses: 'card-expenses', reports: 'card-reports' };
+  Object.entries(cards).forEach(([key, id]) => {
+    const el = document.getElementById(id);
+    if (el) el.classList.toggle('active', currentReminderFilter === key);
+  });
+}
 window.toggleReminderFilter = toggleReminderFilter;
 
 // Load Data from LocalStorage
+const SEED_VERSION = 2;
 function loadState() {
   const data = localStorage.getItem(STORAGE_KEY);
-  if (data) {
+  const storedVersion = parseInt(localStorage.getItem(STORAGE_KEY + '_v') || '0');
+  
+  if (data && storedVersion >= SEED_VERSION) {
     try {
       state = JSON.parse(data);
       // Ensure all arrays are initialized
@@ -365,8 +372,10 @@ function loadState() {
       saveState();
     }
   } else {
-    // Seed with dummy sample data if empty for a beautiful first impression
+    // Seed with dummy sample data if empty or outdated
+    localStorage.removeItem(STORAGE_KEY);
     seedInitialData();
+    localStorage.setItem(STORAGE_KEY + '_v', SEED_VERSION);
   }
 }
 
@@ -392,30 +401,53 @@ function seedInitialData() {
   })();
 
   state.lent = [
-    { id: 'l1', borrowerName: 'Alice Johnson', principal: 5000, interestRate: 4, startDate: dateStr(-90), dueDate: dateStr(270), status: 'active', notes: 'Personal loan for computer equipment' },
-    { id: 'l2', borrowerName: 'Bob Miller', principal: 12000, interestRate: 5.5, startDate: dateStr(-30), dueDate: null, status: 'active', notes: 'Business startup expansion' }
+    { id: 'l1', borrowerName: 'Rajesh Kumar', phone: '9876543210', principal: 250000, interestRate: 2, startDate: dateStr(-120), dueDate: dateStr(240), status: 'active', notes: 'Medical emergency loan' },
+    { id: 'l2', borrowerName: 'Suresh Patil', phone: '9988776655', principal: 500000, interestRate: 1.5, startDate: dateStr(-90), dueDate: null, status: 'active', notes: 'Shop renovation funds' },
+    { id: 'l3', borrowerName: 'Anita Sharma', phone: '9123456789', principal: 100000, interestRate: 2, startDate: dateStr(-45), dueDate: dateStr(320), status: 'active', notes: 'Daughter wedding advance' }
   ];
 
   state.borrowed = [
-    { id: 'b1', financierName: 'Apex Capital Inc', principal: 15000, interestRate: 4, startDate: dateStr(-60), dueDate: dateStr(120), status: 'active', notes: 'Machinery acquisition loan' }
+    { id: 'b1', financierName: 'HDFC Bank', principal: 1500000, interestRate: 0.85, startDate: dateStr(-180), dueDate: dateStr(1980), status: 'active', notes: 'Home loan EMI' },
+    { id: 'b2', financierName: 'Vikram Mehta', phone: '9871234567', principal: 200000, interestRate: 1.5, startDate: dateStr(-60), dueDate: dateStr(120), status: 'active', notes: 'Car down payment borrowed' }
   ];
 
   state.rentals = [
-    { id: 'r1', tenantName: 'David & Sarah Jenkins', propertyName: 'Apartment 4B, Pine Towers', contactInfo: '+1 555-0199', startDate: dateStr(-365), securityDeposit: 1500, monthlyRent: 1250, rentDueDay: 5, status: 'active' },
-    { id: 'r2', tenantName: 'Emily Davis', propertyName: 'Studio Suite 102', contactInfo: 'emily.d@mail.com', startDate: dateStr(-180), securityDeposit: 800, monthlyRent: 850, rentDueDay: 5, status: 'active' }
+    { id: 'r1', tenantName: 'Priya & Arjun Mehta', propertyName: '23/48 Ground Floor', contactInfo: '9812345678', startDate: dateStr(-395), securityDeposit: 50000, monthlyRent: 23000, rentDueDay: 5, status: 'active' },
+    { id: 'r2', tenantName: 'Kavita Joshi', propertyName: '23/48 3rd Floor', contactInfo: '9900112233', startDate: dateStr(-210), securityDeposit: 32000, monthlyRent: 15000, rentDueDay: 1, status: 'active' },
+    { id: 'r3', tenantName: 'Deepak Nair', propertyName: '1/104', contactInfo: '9011223344', startDate: dateStr(-30), securityDeposit: 60000, monthlyRent: 35000, rentDueDay: 10, status: 'active' }
   ];
 
   // Seed payments
   state.interestPayments = [
-    { id: 'ip1', loanId: 'l1', type: 'received', amount: 50, date: dateStr(-60), note: 'First interest payment' },
-    { id: 'ip2', loanId: 'l1', type: 'received', amount: 50, date: dateStr(-30), note: 'Second interest payment' },
-    { id: 'ip3', loanId: 'b1', type: 'paid', amount: 50.00, date: dateStr(-30), note: 'Monthly interest installment' }
+    { id: 'ip1', loanId: 'l1', type: 'received', category: 'interest', amount: 5000, date: dateStr(-90), note: 'Sept interest' },
+    { id: 'ip2', loanId: 'l1', type: 'received', category: 'interest', amount: 5000, date: dateStr(-60), note: 'Oct interest' },
+    { id: 'ip3', loanId: 'l1', type: 'received', category: 'interest', amount: 5000, date: dateStr(-30), note: 'Nov interest' },
+    { id: 'ip4', loanId: 'l2', type: 'received', category: 'interest', amount: 7500, date: dateStr(-60), note: 'Sept interest' },
+    { id: 'ip5', loanId: 'l2', type: 'received', category: 'interest', amount: 7500, date: dateStr(-30), note: 'Oct interest' },
+    { id: 'ip6', loanId: 'l3', type: 'received', category: 'interest', amount: 2000, date: dateStr(-15), note: 'First month interest' },
+    { id: 'ip7', loanId: 'b1', type: 'paid', category: 'interest', amount: 12750, date: dateStr(-30), note: 'HDFC EMI Oct' },
+    { id: 'ip8', loanId: 'b2', type: 'paid', category: 'interest', amount: 3000, date: dateStr(-30), note: 'Nov interest to Vikram' }
   ];
 
   state.rentPayments = [
-    { id: 'rp1', rentalId: 'r1', amount: 1250, monthYear: prevMonthStr, datePaid: dateStr(-25), note: 'Rent paid via bank transfer' },
-    { id: 'rp2', rentalId: 'r2', amount: 850, monthYear: prevMonthStr, datePaid: dateStr(-25), note: 'Venmo transfer receipt' },
-    { id: 'rp3', rentalId: 'r2', amount: 850, monthYear: currentMonthStr, datePaid: dateStr(-1), note: 'Current month paid' }
+    { id: 'rp1', rentalId: 'r1', amount: 23000, monthYear: prevMonthStr, datePaid: dateStr(-25), note: 'UPI - arjun.mehta@okicici' },
+    { id: 'rp2', rentalId: 'r1', amount: 23000, monthYear: currentMonthStr, datePaid: dateStr(-2), note: 'Cash received' },
+    { id: 'rp3', rentalId: 'r2', amount: 15000, monthYear: prevMonthStr, datePaid: dateStr(-20), note: 'NEFT transfer' },
+    { id: 'rp4', rentalId: 'r2', amount: 15000, monthYear: currentMonthStr, datePaid: dateStr(-1), note: 'Google Pay' },
+    { id: 'rp5', rentalId: 'r3', amount: 35000, monthYear: currentMonthStr, datePaid: dateStr(0), note: 'Cheque #4521' }
+  ];
+
+  state.expenses = [
+    { id: 'exp1', amount: 23000, date: dateStr(-45), category: 'House Tax', propertyId: 'r1', note: 'House tax 2026-27' },
+    { id: 'exp2', amount: 8500, date: dateStr(-30), category: 'Car Insurance', note: 'Maruti Swift comprehensive' },
+    { id: 'exp3', amount: 1200, date: dateStr(-15), category: 'Travel', note: 'Fuel - Pune trip' },
+    { id: 'exp4', amount: 707, date: dateStr(-10), category: 'Utilities', note: 'Airtel broadband' },
+    { id: 'exp5', amount: 4500, date: dateStr(-5), category: 'Maintenance', propertyId: 'r2', note: 'Plumber for kitchen sink' }
+  ];
+
+  state.renewals = [
+    { id: 'renewal1', title: 'Car Insurance Renewal', category: 'Insurance', amount: 8500, dueDate: dateStr(335), frequency: 'yearly', note: 'Maruti Swift - ICICI Lombard', lastRenewed: null, createdAt: new Date().toISOString() },
+    { id: 'renewal2', title: 'Health Insurance Premium', category: 'Insurance', amount: 18000, dueDate: dateStr(180), frequency: 'yearly', note: 'Star Health Family Floater', lastRenewed: null, createdAt: new Date().toISOString() }
   ];
 
   saveState();
@@ -428,8 +460,6 @@ const formatCurrency = (val) => {
     minimumFractionDigits: 2
   });
 };
-
-
 
 function numberToIndianWords(num) {
   num = Math.floor(Number(num));
@@ -1074,10 +1104,9 @@ window.lendMore = lendMore;
 window.quickMarkRentalPaid = quickMarkRentalPaid;
 window.navigateAndHighlightCard = navigateAndHighlightCard;
 
-function populateReportingMonthSelect() {
-  // Month selectors removed from individual tabs - date is controlled via header
-  // This function is kept for backward compatibility but no longer populates select elements
-}
+window.populateReportingMonthSelect = function() {};
+window.adjustSelectedMonth = function() {};
+window.refreshActiveTab = refreshActiveTab;
 
 function refreshActiveTab() {
   // Ensure header date is updated
@@ -1096,12 +1125,8 @@ function refreshActiveTab() {
   }
 }
 
-function adjustSelectedMonth(direction) {
-  // Month navigation arrows removed - date is now controlled via header date picker
-}
-
-window.populateReportingMonthSelect = populateReportingMonthSelect;
-window.adjustSelectedMonth = adjustSelectedMonth;
+window.populateReportingMonthSelect = function() {};
+window.adjustSelectedMonth = function() {};
 window.refreshActiveTab = refreshActiveTab;
 window.toggleMonthlyMode = toggleMonthlyMode;
 window.toggleYearlyMode = toggleYearlyMode;
@@ -1176,6 +1201,7 @@ function renderInterest() {
 // 7. DASHBOARD TAB LOGIC
 function renderDashboard() {
   loadState();
+  updateCardHighlights();
 
   // A. Determine reporting date boundaries
   const today = new Date();
@@ -1637,7 +1663,6 @@ function renderDashboard() {
     }
   }
 
-
   // Filter reminders list
   let filteredReminders = dashboardRemindersList;
   if (currentReminderFilter === 'rent') {
@@ -1668,7 +1693,7 @@ function renderDashboard() {
         const daysOverdue = Math.abs(item.diffDays);
         let label;
         if (item.type === 'agreement-renewal') {
-          label = `Renewal: ${daysOverdue}d ago`;
+          label = `${daysOverdue} DAYS AGO`;
         } else if (item.type === 'renewal') {
           label = `Overdue: ${daysOverdue}d`;
         } else {
@@ -1679,7 +1704,7 @@ function renderDashboard() {
       } else if (item.status === 'due-soon') {
         let label;
         if (item.type === 'agreement-renewal') {
-          label = `Renewal: ${item.diffDays}d left`;
+          label = `${item.diffDays} DAYS LEFT`;
         } else if (item.type === 'renewal') {
           label = `Due in ${item.diffDays}d`;
         } else {
@@ -1690,11 +1715,11 @@ function renderDashboard() {
       } else {
         let label;
         if (item.type === 'agreement-renewal') {
-          label = `Renewal: ${item.dueStr}`;
+          label = `${item.diffDays} DAYS LEFT`;
         } else if (item.type === 'renewal') {
-          label = `Due: ${item.dueStr}`;
+          label = `Due in ${item.diffDays}d`;
         } else {
-          label = `Due: ${item.dueStr} (${item.diffDays}d left)`;
+          label = `Due in ${item.diffDays}d`;
         }
         badgeHTML = `<span class="reminder-badge badge-info">${label}</span>`;
         itemClass = 'info';
@@ -1765,8 +1790,8 @@ function renderDashboard() {
             <div class="reminder-subtitle">${item.category}${item.amount ? ' | ' + formatCurrency(item.amount) : ''}${item.frequency !== 'once' ? ' | ' + item.frequency : ''}</div>
           </div>
           <div style="display: flex; align-items: center; gap: 0.25rem;">
-            ${renewalActions}
             ${badgeHTML}
+            ${markPaidBtn}
           </div>
         `;
         div.style.cursor = 'default';
@@ -1794,12 +1819,11 @@ function renderDashboard() {
             <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
           </div>
           <div class="reminder-details">
-            <div class="reminder-title">${item.partyName} (${isCollect ? 'Collect Interest' : 'Pay Interest'})</div>
+            <div class="reminder-title">${item.partyName} (${isCollect ? 'Collect Interest' : 'Pay Interest'}) <span style="margin-left: 0.5rem;">${badgeHTML}</span></div>
             <div class="reminder-subtitle">${isCollect ? 'Lending Yield' : 'Funding Cost'} | Interest: ${formatCurrency(item.amount)}</div>
           </div>
           <div style="display: flex; align-items: center; gap: 0.25rem;">
             ${markPaidBtn}
-            ${badgeHTML}
           </div>
         `;
       }
@@ -1972,9 +1996,9 @@ function renderLending() {
     card.className = `card loan-card ${_expandedCards.has(loan.id) ? 'expanded' : ''}`;
     card.setAttribute('data-id', loan.id);
 
-    const monthNames = ["JANUARY", "FEBRUARY", "MARCH", "APRIL", "MAY", "JUNE", "JULY", "AUGUST", "SEPTEMBER", "OCTOBER", "NOVEMBER", "DECEMBER"];
+    MONTH_UPPER_NAMES
     const [y, m] = selectedMonthStr.split('-').map(Number);
-    const currentMonthName = monthNames[m - 1];
+    const currentMonthName = MONTH_UPPER_NAMES[m - 1];
     
     const actualInterestPayments = loanPayments.filter(p => p.category === 'interest');
     
@@ -2152,9 +2176,9 @@ function renderBorrowing() {
     card.className = `card loan-card ${_expandedCards.has(loan.id) ? 'expanded' : ''}`;
     card.setAttribute('data-id', loan.id);
 
-    const monthNames = ["JANUARY", "FEBRUARY", "MARCH", "APRIL", "MAY", "JUNE", "JULY", "AUGUST", "SEPTEMBER", "OCTOBER", "NOVEMBER", "DECEMBER"];
+    MONTH_UPPER_NAMES
     const [y, m] = selectedMonthStr.split('-').map(Number);
-    const currentMonthName = monthNames[m - 1];
+    const currentMonthName = MONTH_UPPER_NAMES[m - 1];
     
     const actualInterestPayments = loanPayments.filter(p => p.category === 'interest');
     
@@ -2262,8 +2286,8 @@ function renderRentals() {
   loadState();
 
   const [selYear, selMonth] = selectedMonthStr.split('-').map(Number);
-  const monthNames = ["JANUARY", "FEBRUARY", "MARCH", "APRIL", "MAY", "JUNE", "JULY", "AUGUST", "SEPTEMBER", "OCTOBER", "NOVEMBER", "DECEMBER"];
-  const currentMonthName = monthNames[selMonth - 1];
+  MONTH_UPPER_NAMES
+  const currentMonthName = MONTH_UPPER_NAMES[selMonth - 1];
   const activeMonthStr = `${currentMonthName} ${selYear}`;
   
   const activeMonthBadge = document.getElementById('rentals-active-month-badge');
@@ -2318,8 +2342,8 @@ function renderRentals() {
     const rentPayments = state.rentPayments.filter(rp => rp.rentalId === rental.id && rp.monthYear <= selectedMonthStr);
     const totalCollected = rentPayments.reduce((sum, rp) => sum + Number(rp.amount), 0);
 
-    const monthNames = ["JANUARY", "FEBRUARY", "MARCH", "APRIL", "MAY", "JUNE", "JULY", "AUGUST", "SEPTEMBER", "OCTOBER", "NOVEMBER", "DECEMBER"];
-    const currentMonthName = monthNames[selMonth - 1];
+    MONTH_UPPER_NAMES
+    const currentMonthName = MONTH_UPPER_NAMES[selMonth - 1];
     
     // Check if there is a rent payment logged where monthYear matches the selected month
     const isRentPaidThisMonth = rentPayments.some(p => p.monthYear === selectedMonthStr);
@@ -2827,8 +2851,6 @@ document.getElementById('form-rental').addEventListener('submit', (e) => {
     });
   }
 
-
-
   saveState();
   closeModal('modal-rental');
   renderRentals();
@@ -2993,8 +3015,8 @@ function showRentalLedger(rentalId) {
     sortedHistory.forEach(item => {
       // Format Year string (e.g. 2026-06 -> June 2026)
       const parts = item.monthYear.split('-');
-      const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-      const dateName = monthNames[parseInt(parts[1]) - 1] + ' ' + parts[0];
+      MONTH_FULL_NAMES
+      const dateName = MONTH_UPPER_NAMES[parseInt(parts[1]) - 1] + ' ' + parts[0];
 
       const div = document.createElement('div');
       div.className = 'ledger-item';
@@ -3040,16 +3062,20 @@ window.deleteRentPayment = deleteRentPayment;
 document.getElementById('btn-reset-data').addEventListener('click', () => {
   if (confirm('CRITICAL WARNING: This will completely delete all your loans, properties, tenants, and logged history. Are you absolutely sure?')) {
     if (confirm('Confirm one last time. This cannot be undone.')) {
+      localStorage.removeItem(STORAGE_KEY);
+      localStorage.removeItem(STORAGE_KEY + '_v');
       state = {
         lent: [],
         borrowed: [],
         rentals: [],
         interestPayments: [],
         rentPayments: [],
-        expenses: []
+        expenses: [],
+        renewals: []
       };
-      saveState();
-      alert('Local database wiped successfully.');
+      seedInitialData();
+      localStorage.setItem(STORAGE_KEY + '_v', SEED_VERSION);
+      alert('Local database wiped and reseeded successfully.');
       switchTab('dashboard');
     }
   }
@@ -3194,7 +3220,6 @@ function initSearch() {
 function initApp() {
   loadState();
   initNavigation();
-  startClock();
   
   // Initialize month selector (default view is monthly)
   renderMonthSelector();
@@ -3446,6 +3471,24 @@ function deleteExpense(expenseId) {
 
 function renderExpenses() {
   loadState();
+
+  const dateInput = document.getElementById('expense-date');
+  if (dateInput && !dateInput.value) {
+    const d = new Date();
+    dateInput.value = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+  }
+
+  const propertySelect = document.getElementById('expense-property');
+  if (propertySelect && propertySelect.options.length <= 1) {
+    propertySelect.innerHTML = '<option value="">General / None</option>';
+    state.rentals.filter(r => r.status === 'active').forEach(rental => {
+      const opt = document.createElement('option');
+      opt.value = rental.id;
+      opt.textContent = `${rental.propertyName} (${rental.tenantName})`;
+      propertySelect.appendChild(opt);
+    });
+  }
+
   const listContainer = document.getElementById('expenses-list');
   if (!listContainer) return;
   listContainer.innerHTML = '';
@@ -3460,7 +3503,6 @@ function renderExpenses() {
     ? state.expenses.filter(e => e.date && e.date.startsWith(selectedYear))
     : state.expenses.filter(e => e.date.startsWith(selectedMonthStr));
   const totalExpenses = visibleExpenses.reduce((sum, e) => sum + Number(e.amount), 0);
-
 
   if (visibleExpenses.length === 0) {
     listContainer.innerHTML = `
@@ -3513,8 +3555,6 @@ function renderExpenses() {
     `;
     listContainer.appendChild(card);
   });
-
-  openExpenseModal();
 }
 
 function setExpensePreset(noteText, categoryValue) {
@@ -3598,89 +3638,7 @@ function setExpensePreset(noteText, categoryValue) {
 }
 
 // --- Reports & Summaries ---
-function generateReports() {
-  const monthData = {};
-  
-  // Rent
-  state.rentPayments.forEach(p => {
-    const m = p.date.substring(0, 7); // YYYY-MM
-    if (!monthData[m]) monthData[m] = { rent: 0, interestReceived: 0, interestPaid: 0, expenses: 0 };
-    monthData[m].rent += Number(p.amount);
-  });
-  
-  // Interest
-  state.interestPayments.forEach(p => {
-    const m = p.date.substring(0, 7);
-    if (!monthData[m]) monthData[m] = { rent: 0, interestReceived: 0, interestPaid: 0, expenses: 0 };
-    if (p.type === 'received') monthData[m].interestReceived += Number(p.amount);
-    if (p.type === 'paid') monthData[m].interestPaid += Number(p.amount);
-  });
-  
-  // Expenses
-  state.expenses.forEach(p => {
-    const m = p.date.substring(0, 7);
-    if (!monthData[m]) monthData[m] = { rent: 0, interestReceived: 0, interestPaid: 0, expenses: 0 };
-    monthData[m].expenses += Number(p.amount);
-  });
-  
-  const sortedMonths = Object.keys(monthData).sort((a,b) => b.localeCompare(a)); // Descending
-  
-  const tbodyMonth = document.querySelector('#monthly-reports-table tbody');
-  const tbodyYear = document.querySelector('#yearly-reports-table tbody');
-  if (!tbodyMonth || !tbodyYear) return;
-  
-  tbodyMonth.innerHTML = '';
-  tbodyYear.innerHTML = '';
-  
-  const yearData = {};
-  window.reportsCsvData = [];
-  
-  sortedMonths.forEach(m => {
-    const d = monthData[m];
-    const net = d.rent + d.interestReceived - d.interestPaid - d.expenses;
-    
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td>${m}</td>
-      <td>${formatCurrency(d.rent)}</td>
-      <td>${formatCurrency(d.interestReceived)}</td>
-      <td>${formatCurrency(d.interestPaid)}</td>
-      <td>${formatCurrency(d.expenses)}</td>
-      <td style="color: ${net >= 0 ? 'var(--color-success)' : 'var(--color-danger)'}">${formatCurrency(net)}</td>
-    `;
-    tbodyMonth.appendChild(tr);
-    
-    const y = m.substring(0, 4);
-    if (!yearData[y]) yearData[y] = { rent: 0, interestReceived: 0, interestPaid: 0, expenses: 0, net: 0 };
-    yearData[y].rent += d.rent;
-    yearData[y].interestReceived += d.interestReceived;
-    yearData[y].interestPaid += d.interestPaid;
-    yearData[y].expenses += d.expenses;
-    yearData[y].net += net;
-    
-    window.reportsCsvData.push({ period: m, type: 'Monthly', ...d, net });
-  });
-  
-  const sortedYears = Object.keys(yearData).sort((a,b) => b.localeCompare(a));
-  sortedYears.forEach(y => {
-    const d = yearData[y];
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td>${y}</td>
-      <td>${formatCurrency(d.rent)}</td>
-      <td>${formatCurrency(d.interestReceived)}</td>
-      <td>${formatCurrency(d.interestPaid)}</td>
-      <td>${formatCurrency(d.expenses)}</td>
-      <td style="color: ${d.net >= 0 ? 'var(--color-success)' : 'var(--color-danger)'}; font-weight: 800;">${formatCurrency(d.net)}</td>
-    `;
-    tbodyYear.appendChild(tr);
-    
-    window.reportsCsvData.push({ period: y, type: 'Yearly', rent: d.rent, interestReceived: d.interestReceived, interestPaid: d.interestPaid, expenses: d.expenses, net: d.net });
-  });
-}
-
 function openReportsModal() {
-  generateReports();
   openModal('modal-reports');
 }
 
@@ -3843,11 +3801,11 @@ function renderReportsChart() {
     }
   } else {
     // Monthly breakdown for the selected year
-    const monthNames = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    MONTH_NAMES
     for (let m = 1; m <= 12; m++) {
       const mStr = `${selYear}-${String(m).padStart(2, '0')}`;
       const mEnd = `${mStr}-${String(new Date(selYear, m, 0).getDate()).padStart(2, '0')}`;
-      labels.push(monthNames[m - 1]);
+      labels.push(MONTH_UPPER_NAMES[m - 1]);
       
       const mRent = state.rentPayments.filter(p => p.date && p.date.startsWith(mStr)).reduce((s, p) => s + Number(p.amount), 0);
       const mInterest = state.interestPayments.filter(p => p.date && p.date.startsWith(mStr)).reduce((s, p) => s + Number(p.amount), 0);

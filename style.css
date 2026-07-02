@@ -665,6 +665,12 @@ body::before {
   box-shadow: 0 8px 24px -6px rgba(0, 0, 0, 0.5);
 }
 
+.summary-card.active {
+  transform: translateY(-2px);
+  border-color: var(--color-accent);
+  box-shadow: 0 0 20px rgba(var(--color-accent-rgb), 0.25), 0 8px 24px -6px rgba(0, 0, 0, 0.5);
+}
+
 .summary-card::before {
   content: '';
   position: absolute;
