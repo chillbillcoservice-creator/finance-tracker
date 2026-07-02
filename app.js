@@ -3341,6 +3341,9 @@ function initApp() {
   // Initialize header date display
   updateHeaderDateDisplay();
 
+  // Initialize expense form with today's date
+  openExpenseModal();
+
   // Render initial dashboard view
   renderDashboard();
 }
@@ -3471,6 +3474,7 @@ function renderExpenses() {
         <p>No expense logs found for this period. Tap "Record Expense" to log one.</p>
       </div>
     `;
+    openExpenseModal();
     return;
   }
 
