@@ -314,18 +314,17 @@ function updateHeaderDateDisplay() {
   const headerDate = document.getElementById('header-date');
   if (!headerDate) return;
   
-  // Show day, date, year only (no month)
-  const now = new Date();
-  const dayName = now.toLocaleDateString('en-US', { weekday: 'long' });
-  const dayNum = now.getDate();
-  const year = now.getFullYear();
-  headerDate.textContent = `${dayName}, ${dayNum} ${year}`;
+  const [yearStr, monthStr, dayStr] = selectedDateStr.split('-');
+  const selected = new Date(yearStr, monthStr - 1, dayStr);
+  const dayName = selected.toLocaleDateString('en-US', { weekday: 'long' });
+  const monthName = selected.toLocaleDateString('en-US', { month: 'short' });
+  const dayNum = selected.getDate();
+  const year = selected.getFullYear();
+  headerDate.textContent = `${dayName}, ${monthName} ${dayNum} ${year}`;
   
-  // Update month display in the middle
   const monthDisplay = document.getElementById('header-month-display');
   if (monthDisplay) {
-    const monthName = now.toLocaleDateString('en-US', { month: 'long' });
-    monthDisplay.textContent = monthName.toUpperCase();
+    monthDisplay.style.display = 'none';
   }
   
   // Update title
@@ -1117,6 +1116,7 @@ const VIEWS = {
   interest: { title: 'Interest Ledger', subtitle: 'Track loans you\'ve lent and amounts you\'ve borrowed, with accrued interest.', render: renderInterest },
   rental: { title: 'Rent Tracker', subtitle: 'Oversee properties, tenant agreements, deposits, and rent collections.', render: renderRentals },
   expenses: { title: 'Expenses Tracker', subtitle: 'Manage maintenance, utilities, tax payments, and general spending.', render: renderExpenses },
+  docs: { title: 'Bills', subtitle: 'Manage your bills, files, and receipts.', render: renderDocs },
   settings: { title: 'Reports', subtitle: 'View charts, summaries, and reset your financial data.', render: renderReports }
 };
 
@@ -1292,7 +1292,7 @@ function renderDashboard() {
   if (rentLabelNode) {
     rentLabelNode.textContent = isDayMode ? 'Rent Collected (Day)' : isYearMode ? 'Rent Collected (Year)' : 'Rental Income (Collected)';
   }
-  document.getElementById('dash-monthly-rent').textContent = formatCurrency(totalRentCollected);
+  document.getElementById('dash-monthly-rent').textContent = formatCurrency(monthlyRent);
   
   const rentalBalanceNode = document.getElementById('dash-rental-balance');
   if (rentalBalanceNode) {
@@ -1300,11 +1300,7 @@ function renderDashboard() {
       rentalBalanceNode.innerHTML = `<span style="color: var(--text-secondary); font-weight: 700;">${isYearMode ? 'Year' : 'Day'} view active</span>`;
     } else {
       const rentPending = Math.max(0, monthlyRent - totalRentCollected);
-      if (rentPending > 0) {
-        rentalBalanceNode.innerHTML = `Balance: <span style="color: var(--color-danger); font-weight: 800; margin-left: 2px;">${formatCurrency(rentPending)}</span>`;
-      } else {
-        rentalBalanceNode.innerHTML = `<span style="color: var(--color-success); font-weight: 800;">All Collected</span>`;
-      }
+      rentalBalanceNode.innerHTML = `<span>Collected: <span style="color: var(--color-success); font-weight: 800; margin-left: 2px;">${formatCurrency(totalRentCollected)}</span></span><span>Pending: <span style="color: ${rentPending > 0 ? 'var(--color-danger)' : 'var(--color-success)'}; font-weight: 800; margin-left: 2px;">${formatCurrency(rentPending)}</span></span>`;
     }
   }
   
@@ -1315,9 +1311,17 @@ function renderDashboard() {
   document.getElementById('dash-interest-received').textContent = formatCurrency(totalInterestReceived);
   document.getElementById('dash-interest-paid').textContent = formatCurrency(totalInterestPaid);
 
+  const expectedInterestReceived = activeLendingLoans.reduce((sum, loan) => {
+    const outstanding = getOutstandingPrincipalAtMonth(loan.id, loan.principal, selectedMonthStr);
+    if (outstanding > 0) {
+      return sum + (outstanding * (Number(loan.interestRate) / 100));
+    }
+    return sum;
+  }, 0);
+
   const totalInterestReceivedNode = document.getElementById('dash-total-interest-received');
   if (totalInterestReceivedNode) {
-    totalInterestReceivedNode.textContent = formatCurrency(totalInterestReceived);
+    totalInterestReceivedNode.textContent = formatCurrency(expectedInterestReceived);
   }
 
   const interestReceivedBalanceNode = document.getElementById('dash-interest-received-balance');
@@ -1325,25 +1329,72 @@ function renderDashboard() {
     if (isDayMode || isYearMode) {
       interestReceivedBalanceNode.innerHTML = `<span style="color: var(--text-secondary); font-weight: 700;">${isYearMode ? 'Year' : 'Day'} view active</span>`;
     } else {
-      const expectedInterestReceived = activeLendingLoans.reduce((sum, loan) => {
-        const outstanding = getOutstandingPrincipalAtMonth(loan.id, loan.principal, selectedMonthStr);
-        if (outstanding > 0) {
-          return sum + (outstanding * (Number(loan.interestRate) / 100));
-        }
-        return sum;
-      }, 0);
       const interestPending = Math.max(0, expectedInterestReceived - totalInterestReceived);
-      if (interestPending > 0) {
-        interestReceivedBalanceNode.innerHTML = `Balance: <span style="color: var(--color-danger); font-weight: 800; margin-left: 2px;">${formatCurrency(interestPending)}</span>`;
-      } else {
-        interestReceivedBalanceNode.innerHTML = `<span style="color: var(--color-success); font-weight: 800;">All Collected</span>`;
-      }
+      interestReceivedBalanceNode.innerHTML = `<span>Collected: <span style="color: var(--color-success); font-weight: 800; margin-left: 2px;">${formatCurrency(totalInterestReceived)}</span></span><span>Pending: <span style="color: ${interestPending > 0 ? 'var(--color-danger)' : 'var(--color-success)'}; font-weight: 800; margin-left: 2px;">${formatCurrency(interestPending)}</span></span>`;
     }
   }
 
   // F. Reminders Logic (for the selected month)
   const rentRemindersNode = document.getElementById('dashboard-rent-reminders');
-  rentRemindersNode.innerHTML = '';
+  if (rentRemindersNode) rentRemindersNode.innerHTML = '';
+  
+  const notifReminders = document.getElementById('notifications-reminders-view');
+  const notifRent = document.getElementById('notifications-rent-view');
+  const notifInterest = document.getElementById('notifications-interest-view');
+  const notifExpenses = document.getElementById('notifications-expenses-view');
+  const notifReports = document.getElementById('notifications-reports-view');
+  const notifTitle = document.getElementById('notifications-title');
+  const notifMainHeader = document.getElementById('notifications-main-header');
+  const notifWrapper = document.getElementById('notifications-wrapper-card');
+
+  if (notifReminders && notifRent && notifInterest && notifExpenses && notifReports) {
+    if (currentReminderFilter === 'rent') {
+      if (notifWrapper) notifWrapper.style.display = 'block';
+      notifReminders.style.display = 'none';
+      notifRent.style.display = 'block';
+      notifInterest.style.display = 'none';
+      notifExpenses.style.display = 'none';
+      notifReports.style.display = 'none';
+      if (notifMainHeader) notifMainHeader.style.display = 'none';
+      renderRentals();
+    } else if (currentReminderFilter === 'interest') {
+      if (notifWrapper) notifWrapper.style.display = 'block';
+      notifReminders.style.display = 'none';
+      notifRent.style.display = 'none';
+      notifInterest.style.display = 'block';
+      notifExpenses.style.display = 'none';
+      notifReports.style.display = 'none';
+      if (notifMainHeader) notifMainHeader.style.display = 'none';
+      renderInterest();
+    } else if (currentReminderFilter === 'expenses') {
+      if (notifWrapper) notifWrapper.style.display = 'none';
+      notifReminders.style.display = 'none';
+      notifRent.style.display = 'none';
+      notifInterest.style.display = 'none';
+      notifExpenses.style.display = 'block';
+      notifReports.style.display = 'none';
+      if (notifMainHeader) notifMainHeader.style.display = 'none';
+      renderExpenses();
+    } else if (currentReminderFilter === 'reports') {
+      if (notifWrapper) notifWrapper.style.display = 'none';
+      notifReminders.style.display = 'none';
+      notifRent.style.display = 'none';
+      notifInterest.style.display = 'none';
+      notifExpenses.style.display = 'none';
+      notifReports.style.display = 'block';
+      if (notifMainHeader) notifMainHeader.style.display = 'none';
+      renderReports();
+    } else {
+      if (notifWrapper) notifWrapper.style.display = 'block';
+      notifReminders.style.display = 'block';
+      notifRent.style.display = 'none';
+      notifInterest.style.display = 'none';
+      notifExpenses.style.display = 'none';
+      notifReports.style.display = 'none';
+      if (notifMainHeader) notifMainHeader.style.display = 'flex';
+      if (notifTitle) notifTitle.textContent = 'Notifications';
+    }
+  }
   
   const dashboardRemindersList = [];
 
@@ -1586,111 +1637,6 @@ function renderDashboard() {
     }
   }
 
-  // Update reminder filter summary block
-  const summaryBlock = document.getElementById('reminder-filter-summary');
-  if (summaryBlock) {
-    if (currentReminderFilter === 'all' || isDayMode || isYearMode) {
-      summaryBlock.style.display = 'none';
-    } else if (currentReminderFilter === 'rent') {
-      const rentExpected = monthlyRent;
-      const rentCollected = totalRentCollected;
-      const rentPending = Math.max(0, rentExpected - rentCollected);
-
-      summaryBlock.style.display = 'flex';
-      summaryBlock.innerHTML = `
-        <div style="display: flex; gap: 1.5rem; flex-wrap: wrap; width: 100%; justify-content: flex-start; padding: 0.25rem 0;">
-          <div style="display: flex; flex-direction: column; gap: 0.15rem;">
-            <span style="font-size: 0.7rem; text-transform: uppercase; color: var(--text-muted); font-weight: 800; letter-spacing: 0.5px;">Rent Expected</span>
-            <span style="color: var(--color-purple); font-size: 1.05rem; font-weight: 800;">${formatCurrency(rentExpected)}</span>
-          </div>
-          <div style="display: flex; flex-direction: column; gap: 0.15rem;">
-            <span style="font-size: 0.7rem; text-transform: uppercase; color: var(--text-muted); font-weight: 800; letter-spacing: 0.5px;">Rent Collected</span>
-            <span style="color: var(--color-success); font-size: 1.05rem; font-weight: 800;">${formatCurrency(rentCollected)}</span>
-          </div>
-          <div style="display: flex; flex-direction: column; gap: 0.15rem;">
-            <span style="font-size: 0.7rem; text-transform: uppercase; color: var(--text-muted); font-weight: 800; letter-spacing: 0.5px;">Rent Pending</span>
-            <span style="color: ${rentPending > 0 ? 'var(--color-danger)' : 'var(--color-success)'}; font-size: 1.05rem; font-weight: 800;">${formatCurrency(rentPending)}</span>
-          </div>
-        </div>
-      `;
-    } else if (currentReminderFilter === 'interest') {
-      const expectedInterestReceived = activeLendingLoans.reduce((sum, loan) => {
-        const outstanding = getOutstandingPrincipalAtMonth(loan.id, loan.principal, selectedMonthStr);
-        if (outstanding > 0) {
-          return sum + (outstanding * (Number(loan.interestRate) / 100));
-        }
-        return sum;
-      }, 0);
-      const interestCollectedReceived = totalInterestReceived;
-      const interestPendingReceived = Math.max(0, expectedInterestReceived - interestCollectedReceived);
-
-      const expectedInterestPaid = activeBorrowingLoans.reduce((sum, loan) => {
-        const outstanding = getOutstandingPrincipalAtMonth(loan.id, loan.principal, selectedMonthStr);
-        if (outstanding > 0) {
-          return sum + (outstanding * (Number(loan.interestRate) / 100));
-        }
-        return sum;
-      }, 0);
-      const interestCollectedPaid = totalInterestPaid;
-      const interestPendingPaid = Math.max(0, expectedInterestPaid - interestCollectedPaid);
-
-      summaryBlock.style.display = 'flex';
-      summaryBlock.innerHTML = `
-        <div style="display: flex; flex-direction: column; gap: 0.75rem; width: 100%;">
-          <div style="display: flex; gap: 1.5rem; flex-wrap: wrap; width: 100%; justify-content: flex-start; border-bottom: 1px solid rgba(255,255,255,0.03); padding-bottom: 0.5rem;">
-            <div style="display: flex; flex-direction: column; gap: 0.15rem;">
-              <span style="font-size: 0.7rem; text-transform: uppercase; color: var(--text-muted); font-weight: 800; letter-spacing: 0.5px;">Interest to Receive</span>
-              <span style="color: var(--color-accent); font-size: 1.05rem; font-weight: 800;">${formatCurrency(expectedInterestReceived)}</span>
-            </div>
-            <div style="display: flex; flex-direction: column; gap: 0.15rem;">
-              <span style="font-size: 0.7rem; text-transform: uppercase; color: var(--text-muted); font-weight: 800; letter-spacing: 0.5px;">Interest Collected</span>
-              <span style="color: var(--color-success); font-size: 1.05rem; font-weight: 800;">${formatCurrency(interestCollectedReceived)}</span>
-            </div>
-            <div style="display: flex; flex-direction: column; gap: 0.15rem;">
-              <span style="font-size: 0.7rem; text-transform: uppercase; color: var(--text-muted); font-weight: 800; letter-spacing: 0.5px;">Interest Pending</span>
-              <span style="color: ${interestPendingReceived > 0 ? 'var(--color-danger)' : 'var(--color-success)'}; font-size: 1.05rem; font-weight: 800;">${formatCurrency(interestPendingReceived)}</span>
-            </div>
-          </div>
-          <div style="display: flex; gap: 1.5rem; flex-wrap: wrap; width: 100%; justify-content: flex-start; padding-top: 0.25rem;">
-            <div style="display: flex; flex-direction: column; gap: 0.15rem;">
-              <span style="font-size: 0.7rem; text-transform: uppercase; color: var(--text-muted); font-weight: 800; letter-spacing: 0.5px;">Interest to Pay</span>
-              <span style="color: var(--color-warning); font-size: 1.05rem; font-weight: 800;">${formatCurrency(expectedInterestPaid)}</span>
-            </div>
-            <div style="display: flex; flex-direction: column; gap: 0.15rem;">
-              <span style="font-size: 0.7rem; text-transform: uppercase; color: var(--text-muted); font-weight: 800; letter-spacing: 0.5px;">Interest Paid</span>
-              <span style="color: var(--color-danger); font-size: 1.05rem; font-weight: 800;">${formatCurrency(interestCollectedPaid)}</span>
-            </div>
-            <div style="display: flex; flex-direction: column; gap: 0.15rem;">
-              <span style="font-size: 0.7rem; text-transform: uppercase; color: var(--text-muted); font-weight: 800; letter-spacing: 0.5px;">Payment Pending</span>
-              <span style="color: ${interestPendingPaid > 0 ? 'var(--color-danger)' : 'var(--color-success)'}; font-size: 1.05rem; font-weight: 800;">${formatCurrency(interestPendingPaid)}</span>
-            </div>
-          </div>
-        </div>
-      `;
-    } else if (currentReminderFilter === 'renewals') {
-      const totalRenewals = state.renewals.length;
-      const overdueRenewals = getOverdueRenewals().length;
-      const upcomingRenewals = getUpcomingRenewals().length;
-
-      summaryBlock.style.display = 'flex';
-      summaryBlock.innerHTML = `
-        <div style="display: flex; gap: 1.5rem; flex-wrap: wrap; width: 100%; justify-content: flex-start; padding: 0.25rem 0;">
-          <div style="display: flex; flex-direction: column; gap: 0.15rem;">
-            <span style="font-size: 0.7rem; text-transform: uppercase; color: var(--text-muted); font-weight: 800; letter-spacing: 0.5px;">Total Renewals</span>
-            <span style="color: var(--text-primary); font-size: 1.05rem; font-weight: 800;">${totalRenewals}</span>
-          </div>
-          <div style="display: flex; flex-direction: column; gap: 0.15rem;">
-            <span style="font-size: 0.7rem; text-transform: uppercase; color: var(--text-muted); font-weight: 800; letter-spacing: 0.5px;">Overdue</span>
-            <span style="color: ${overdueRenewals > 0 ? 'var(--color-danger)' : 'var(--color-success)'}; font-size: 1.05rem; font-weight: 800;">${overdueRenewals}</span>
-          </div>
-          <div style="display: flex; flex-direction: column; gap: 0.15rem;">
-            <span style="font-size: 0.7rem; text-transform: uppercase; color: var(--text-muted); font-weight: 800; letter-spacing: 0.5px;">Due in 30 days</span>
-            <span style="color: ${upcomingRenewals > 0 ? '#f59e0b' : 'var(--color-success)'}; font-size: 1.05rem; font-weight: 800;">${upcomingRenewals}</span>
-          </div>
-        </div>
-      `;
-    }
-  }
 
   // Filter reminders list
   let filteredReminders = dashboardRemindersList;
@@ -1700,6 +1646,8 @@ function renderDashboard() {
     filteredReminders = dashboardRemindersList.filter(r => r.type === 'interest-collection' || r.type === 'interest-payment');
   } else if (currentReminderFilter === 'renewals') {
     filteredReminders = dashboardRemindersList.filter(r => r.type === 'renewal');
+  } else if (currentReminderFilter === 'expenses') {
+    filteredReminders = dashboardRemindersList.filter(r => r.type === 'expense');
   }
 
   if (filteredReminders.length === 0) {
@@ -1960,7 +1908,9 @@ function renderLending() {
   const activeLentList = state.lent.filter(l => l.startDate <= endDateOfSelectedMonth && getOutstandingPrincipalAtMonth(l.id, l.principal, selectedMonthStr) > 0);
   const totalLoans = activeLentList.length;
   const totalOriginalPrincipal = activeLentList.reduce((sum, l) => sum + Number(l.principal), 0);
-  const totalOutstandingBalance = activeLentList.reduce((sum, l) => sum + getOutstandingPrincipalAtMonth(l.id, l.principal, selectedMonthStr), 0);
+  const totalInterestEarned = state.interestPayments
+    .filter(p => p.type === 'received' && p.category === 'interest' && p.date <= endDateOfSelectedMonth)
+    .reduce((sum, p) => sum + Number(p.amount), 0);
 
   const totalLoansNode = document.getElementById('lending-total-loans');
   const totalPrincipalNode = document.getElementById('lending-total-principal');
@@ -1968,7 +1918,7 @@ function renderLending() {
   
   if (totalLoansNode) totalLoansNode.textContent = totalLoans;
   if (totalPrincipalNode) totalPrincipalNode.textContent = formatCurrency(totalOriginalPrincipal);
-  if (totalOutstandingNode) totalOutstandingNode.textContent = formatCurrency(totalOutstandingBalance);
+  if (totalOutstandingNode) totalOutstandingNode.textContent = formatCurrency(totalInterestEarned);
 
   const listContainer = document.getElementById('lent-loans-list');
   listContainer.innerHTML = '';
@@ -2138,7 +2088,9 @@ function renderBorrowing() {
   const activeBorrowedList = state.borrowed.filter(b => b.startDate <= endDateOfSelectedMonth && getOutstandingPrincipalAtMonth(b.id, b.principal, selectedMonthStr) > 0);
   const totalLoans = activeBorrowedList.length;
   const totalOriginalPrincipal = activeBorrowedList.reduce((sum, b) => sum + Number(b.principal), 0);
-  const totalOutstandingBalance = activeBorrowedList.reduce((sum, b) => sum + getOutstandingPrincipalAtMonth(b.id, b.principal, selectedMonthStr), 0);
+  const totalInterestPaid = state.interestPayments
+    .filter(p => p.type === 'paid' && p.category === 'interest' && p.date <= endDateOfSelectedMonth)
+    .reduce((sum, p) => sum + Number(p.amount), 0);
 
   const totalLoansNode = document.getElementById('borrowing-total-loans');
   const totalPrincipalNode = document.getElementById('borrowing-total-principal');
@@ -2146,7 +2098,7 @@ function renderBorrowing() {
   
   if (totalLoansNode) totalLoansNode.textContent = totalLoans;
   if (totalPrincipalNode) totalPrincipalNode.textContent = formatCurrency(totalOriginalPrincipal);
-  if (totalOutstandingNode) totalOutstandingNode.textContent = formatCurrency(totalOutstandingBalance);
+  if (totalOutstandingNode) totalOutstandingNode.textContent = formatCurrency(totalInterestPaid);
 
   const listContainer = document.getElementById('borrowed-loans-list');
   listContainer.innerHTML = '';
@@ -2875,10 +2827,30 @@ document.getElementById('form-rental').addEventListener('submit', (e) => {
     });
   }
 
+
+
   saveState();
   closeModal('modal-rental');
   renderRentals();
 });
+
+function updateRentalRenewalDate() {
+  const startDateStr = document.getElementById('rental-start-date').value;
+  const displayEl = document.getElementById('rental-renewal-date-display');
+  if (!displayEl) return;
+  if (!startDateStr) {
+    displayEl.textContent = '';
+    return;
+  }
+  const startDate = new Date(startDateStr);
+  if (isNaN(startDate.getTime())) return;
+  
+  const renewalDate = new Date(startDate);
+  renewalDate.setMonth(renewalDate.getMonth() + 11);
+  const options = { year: 'numeric', month: 'short', day: 'numeric' };
+  displayEl.textContent = `RENEWS ON: ${renewalDate.toLocaleDateString(undefined, options)}`;
+}
+window.updateRentalRenewalDate = updateRentalRenewalDate;
 
 // Edit Rental Trigger
 function editRental(id) {
@@ -2895,6 +2867,8 @@ function editRental(id) {
   document.getElementById('rental-start-date').value = rental.startDate;
   document.getElementById('rental-due-day').value = rental.rentDueDay;
   
+  updateRentalRenewalDate();
+
   // Set existing image values
   document.getElementById('rental-aadhaar-base64').value = rental.aadhaarImg || '';
   document.getElementById('rental-agreement-base64').value = rental.agreementImg || '';
@@ -3275,6 +3249,7 @@ function initApp() {
     document.getElementById('rental-agreement-status').style.display = 'none';
 
     document.getElementById('rental-modal-title').textContent = 'Add Tenant Agreement';
+    updateRentalRenewalDate();
     openModal('modal-rental');
   });
 
@@ -3416,8 +3391,10 @@ function openExpenseModal(expenseId = null) {
   const presetsContainer = document.getElementById('expense-amount-presets');
   if (presetsContainer) presetsContainer.innerHTML = '';
   
-  // Set default date
-  document.getElementById('expense-date').value = new Date().toISOString().split('T')[0];
+  // Set default date in local timezone
+  const d = new Date();
+  const localDateStr = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+  document.getElementById('expense-date').value = localDateStr;
   
   // Populate property dropdown with active properties
   const propertySelect = document.getElementById('expense-property');
@@ -3483,10 +3460,7 @@ function renderExpenses() {
     ? state.expenses.filter(e => e.date && e.date.startsWith(selectedYear))
     : state.expenses.filter(e => e.date.startsWith(selectedMonthStr));
   const totalExpenses = visibleExpenses.reduce((sum, e) => sum + Number(e.amount), 0);
-  const totalValueNode = document.getElementById('expenses-total-value');
-  if (totalValueNode) {
-    totalValueNode.textContent = formatCurrency(totalExpenses);
-  }
+
 
   if (visibleExpenses.length === 0) {
     listContainer.innerHTML = `
@@ -3751,12 +3725,12 @@ function reportsSetViewMode(mode) {
   if (mode === 'month') {
     if (monthlyBtn) monthlyBtn.classList.add('active');
     if (yearlyBtn) yearlyBtn.classList.remove('active');
-    if (selectorBar) selectorBar.style.display = 'block';
+    if (selectorBar) selectorBar.style.display = 'flex';
     document.getElementById('reports-selector-label').textContent = formatMonth(reportsSelectedMonth);
   } else {
     if (yearlyBtn) yearlyBtn.classList.add('active');
     if (monthlyBtn) monthlyBtn.classList.remove('active');
-    if (selectorBar) selectorBar.style.display = 'block';
+    if (selectorBar) selectorBar.style.display = 'flex';
     document.getElementById('reports-selector-label').textContent = reportsSelectedMonth.slice(0, 4);
   }
   renderReportsChart();
@@ -3791,7 +3765,7 @@ function renderReports() {
   
   // Set default month selector
   const selectorBar = document.getElementById('reports-selector-bar');
-  if (selectorBar) selectorBar.style.display = 'block';
+  if (selectorBar) selectorBar.style.display = 'flex';
   
   const monthlyBtn = document.getElementById('reports-btn-mode-monthly');
   if (monthlyBtn) monthlyBtn.classList.add('active');
@@ -3987,7 +3961,7 @@ class DocStorage {
       const request = store.getAll();
       request.onsuccess = (e) => {
         const items = e.target.result || [];
-        resolve(items.map(item => ({ id: item.id, name: item.name, type: item.type, timestamp: item.timestamp })).sort((a,b) => b.timestamp - a.timestamp));
+        resolve(items.map(item => ({ id: item.id, name: item.name, type: item.type, timestamp: item.timestamp, dataUrl: item.dataUrl })).sort((a,b) => b.timestamp - a.timestamp));
       };
       request.onerror = (e) => reject(e);
     });
@@ -4038,19 +4012,25 @@ async function renderDocs() {
 
     grid.innerHTML = docs.map(doc => {
       const isImg = doc.type.startsWith('image/');
-      const icon = isImg 
-        ? `<svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" fill="none"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>`
-        : `<svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" fill="none"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>`;
+      let mediaPreview = '';
+      if (isImg && doc.dataUrl) {
+          mediaPreview = `<div style="width: 100%; height: 90px; overflow: hidden; border-radius: 6px; margin-bottom: 0.5rem;"><img src="${doc.dataUrl}" style="width: 100%; height: 100%; object-fit: cover; opacity: 0.9; transition: opacity 0.2s;" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.9"></div>`;
+      } else {
+          const icon = isImg 
+            ? `<svg viewBox="0 0 24 24" width="32" height="32" stroke="currentColor" fill="none"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>`
+            : `<svg viewBox="0 0 24 24" width="32" height="32" stroke="currentColor" fill="none"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>`;
+          mediaPreview = `<div style="color: var(--color-accent); height: 90px; display: flex; align-items: center; justify-content: center;">${icon}</div>`;
+      }
       
       const dateStr = new Date(doc.timestamp).toLocaleDateString();
 
       return `
-        <div class="card" style="padding: 1rem; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 0.5rem; position: relative;">
-          <div style="color: var(--color-accent);">${icon}</div>
+        <div class="card" style="padding: 1rem; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 0.25rem; position: relative;">
+          ${mediaPreview}
           <div style="font-size: 0.75rem; font-weight: 600; word-break: break-all; color: var(--text-primary); width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${doc.name}">${doc.name}</div>
           <div style="font-size: 0.65rem; color: var(--text-muted);">${dateStr}</div>
           
-          <div style="display: flex; gap: 0.4rem; margin-top: 0.5rem; width: 100%;">
+          <div style="display: flex; gap: 0.4rem; margin-top: 0.75rem; width: 100%;">
             <button class="btn btn-primary btn-sm" style="flex: 1; padding: 0.3rem;" onclick="viewDoc('${doc.id}')">View</button>
             <button class="btn btn-secondary btn-sm" style="flex: 1; padding: 0.3rem; border-color: rgba(239, 68, 68, 0.3); color: var(--color-danger);" onclick="deleteDoc('${doc.id}')">Del</button>
           </div>
@@ -4088,11 +4068,15 @@ async function viewDoc(id) {
     const btnShare = document.getElementById('btn-share-doc');
     const btnDownload = document.getElementById('btn-download-doc');
     
+    // Always display share button so users know it exists
+    btnShare.style.display = 'inline-flex';
+    
     if (navigator.share) {
-      btnShare.style.display = 'inline-flex';
       btnShare.onclick = () => shareDoc(id);
     } else {
-      btnShare.style.display = 'none';
+      btnShare.onclick = () => {
+        alert('Your browser does not support direct sharing to WhatsApp. Please download the image and send it manually.');
+      };
     }
     btnDownload.onclick = () => downloadDoc(id);
 
@@ -4146,6 +4130,19 @@ window.deleteDoc = deleteDoc;
 
 window.addEventListener('DOMContentLoaded', () => {
   initApp();
+  
+  const datePickerInput = document.getElementById('date-picker-input');
+  if (datePickerInput) {
+    datePickerInput.addEventListener('change', (e) => {
+      if (e.target.value) {
+        selectedDateStr = e.target.value;
+        selectedMonthStr = selectedDateStr.slice(0, 7);
+        viewMode = 'day';
+        updateHeaderDateDisplay();
+        refreshActiveTab();
+      }
+    });
+  }
   
   // Attach doc upload listeners
   const docUploadInput = document.getElementById('doc-upload-input');
