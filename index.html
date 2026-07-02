@@ -513,7 +513,7 @@
         </div>
         
         <div class="summary-grid" style="margin-bottom: 1.25rem;">
-          <div class="card summary-card warning" id="card-records-bills" onclick="selectRecordsTab('bills')" style="border-left: 4px solid var(--color-warning); cursor: pointer; opacity: 0.6; transition: all 0.2s;">
+          <div class="card summary-card warning active" id="card-records-bills" onclick="selectRecordsTab('bills')" style="border-left: 4px solid var(--color-warning); cursor: pointer; opacity: 1; transform: scale(1.02); transition: all 0.2s;">
             <div class="summary-card-header">
               <span style="text-transform: uppercase; color: var(--color-warning);">BILLS</span>
               <div class="summary-card-icon" style="background: rgba(245,158,11,0.15); color: #f59e0b;">
@@ -524,7 +524,7 @@
             <div class="summary-sub-value" style="font-size: 0.78rem; margin-top: 0.35rem; font-weight: 700; color: var(--text-secondary); display: flex; flex-direction: column; align-items: flex-start; gap: 0.15rem;">Pending: 0</div>
           </div>
           
-          <div class="card summary-card success" id="card-records-documents" onclick="selectRecordsTab('documents')" style="border-left: 4px solid var(--color-success); cursor: pointer; opacity: 0.6; transition: all 0.2s;">
+          <div class="card summary-card success" id="card-records-documents" onclick="selectRecordsTab('documents')" style="border-left: 4px solid var(--color-success); cursor: pointer; opacity: 0.9; transition: all 0.2s;">
             <div class="summary-card-header">
               <span style="text-transform: uppercase; color: var(--color-success);">DOCUMENTS</span>
               <div class="summary-card-icon" style="background: rgba(16, 185, 129, 0.1); color: var(--color-success);">
@@ -535,7 +535,7 @@
             <div class="summary-sub-value" style="font-size: 0.78rem; margin-top: 0.35rem; font-weight: 700; color: var(--text-secondary); display: flex; flex-direction: column; align-items: flex-start; gap: 0.15rem;">Uploaded: 0</div>
           </div>
           
-          <div class="card summary-card accent active" id="card-records-construction" onclick="selectRecordsTab('construction')" style="border-left: 4px solid var(--color-accent); cursor: pointer; opacity: 1; transform: scale(1.02); transition: all 0.2s;">
+          <div class="card summary-card accent" id="card-records-construction" onclick="selectRecordsTab('construction')" style="border-left: 4px solid var(--color-accent); cursor: pointer; opacity: 0.9; transition: all 0.2s;">
             <div class="summary-card-header">
               <span style="text-transform: uppercase; color: var(--color-accent);">CONSTRUCTION</span>
               <div class="summary-card-icon" style="background: rgba(var(--color-accent-rgb), 0.1); color: var(--color-accent);">
@@ -548,7 +548,7 @@
           
         </div>
         
-        <div id="section-records-bills" style="display: none;">
+        <div id="section-records-bills" style="display: block;">
           <div class="card" style="margin-bottom: 1.25rem;">
             <div class="section-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
               <h2 style="margin-bottom: 0; display: flex; align-items: center; gap: 0.5rem;">
@@ -586,7 +586,7 @@
           </div>
         </div>
 
-        <div id="section-records-construction">
+        <div id="section-records-construction" style="display: none;">
         
         <!-- Construction Tracking -->
         <div class="card" style="margin-bottom: 1.25rem;">

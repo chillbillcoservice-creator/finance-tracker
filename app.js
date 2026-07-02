@@ -1172,7 +1172,7 @@ const VIEWS = {
   records: { title: 'Records', subtitle: 'Bills, documents, construction, and settings.', render: renderRecords }
 };
 
-let activeRecordsTab = 'construction';
+let activeRecordsTab = 'bills';
 
 function selectRecordsTab(tab) {
   activeRecordsTab = tab;
@@ -1188,7 +1188,7 @@ function selectRecordsTab(tab) {
         el.style.transform = 'scale(1.02)';
       } else {
         el.classList.remove('active');
-        el.style.opacity = '0.6';
+        el.style.opacity = '0.9';
         el.style.transform = 'scale(1)';
       }
     }
