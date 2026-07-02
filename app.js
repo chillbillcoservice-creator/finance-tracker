@@ -357,7 +357,11 @@ function toggleReminderFilter(filterType) {
   renderDashboard();
   if (currentReminderFilter !== 'all') {
     setTimeout(() => {
-      const el = document.getElementById('notifications-wrapper-card');
+      let scrollTargetId = 'notifications-wrapper-card';
+      if (currentReminderFilter === 'expenses') scrollTargetId = 'notifications-expenses-view';
+      if (currentReminderFilter === 'reports') scrollTargetId = 'notifications-reports-view';
+      
+      const el = document.getElementById(scrollTargetId);
       if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }, 50);
   }
