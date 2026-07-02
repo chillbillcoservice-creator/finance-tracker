@@ -3,17 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <meta name="description" content="A private, offline-first personal tracker for lending, borrowing, and rental management.">
-  <meta name="theme-color" content="#0ea5e9">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="CapitalFlow">
+  <meta name="description" content="A simple app to manage rent.">
+  <meta name="theme-color" content="#0b101f">
   <link rel="manifest" href="manifest.json">
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%230ea5e9'/><text x='50' y='65' font-size='40' font-weight='bold' text-anchor='middle' fill='white' font-family='Arial'>CF</text></svg>">
-  <title>Capital Flow | Personal Finance Tracker</title>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
-  <script type="module" crossorigin src="/finance-tracker/assets/index-B4Y5Z_iu.js"></script>
-  <link rel="stylesheet" crossorigin href="/finance-tracker/assets/index-BZ-y3Nh_.css">
+  <title>RENT</title>
+  <script type="module" crossorigin src="/finance-tracker/assets/index-DPAnMfr1.js"></script>
+  <link rel="stylesheet" crossorigin href="/finance-tracker/assets/index-1s-VTQ4D.css">
 </head>
 <body>
   
@@ -22,8 +17,7 @@
     <!-- Sidebar Navigation (Desktop) -->
     <aside class="sidebar">
       <div class="logo-container">
-        <div class="logo-icon">CF</div>
-        <span class="logo-text">CapitalFlow</span>
+        <span class="logo-text">RENT</span>
       </div>
 
       <nav style="flex: 1;">
@@ -37,34 +31,11 @@
           <li class="nav-item">
             <a class="nav-link" data-tab="rental">
               <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-              <span>Rent</span>
-            </a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" data-tab="interest">
-              <svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-              <span>Interest</span>
-            </a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" data-tab="docs">
-              <div class="nav-icon"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
-              <span>Docs</span>
-            </a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" data-tab="settings">
-              <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-              <span>Reports</span>
+              <span>Tenants</span>
             </a>
           </li>
         </ul>
       </nav>
-
-      <div class="sidebar-footer">
-        <div class="version">CapitalFlow v1.0.0</div>
-        <div class="version">Local Database Sync</div>
-      </div>
     </aside>
     
     <!-- Mobile Bottom Navigation -->
@@ -75,18 +46,7 @@
       </a>
       <a class="mobile-nav-link" data-tab="rental">
         <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-        <span>Rent</span>
-      </a>
-      <a class="mobile-nav-link" data-tab="interest">
-        <svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-        <span>Interest</span>
-      </a>
-      <a class="mobile-nav-link" data-tab="docs">
-        <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-      </a>
-      <a class="mobile-nav-link" data-tab="settings">
-        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-        <span>Reports</span>
+        <span>Tenants</span>
       </a>
     </nav>
 
@@ -94,224 +54,38 @@
     <main class="main-content">
       
       <!-- Top header bar -->
-      <header class="page-header">
+      <header class="page-header" style="display: flex; justify-content: space-between; align-items: center;">
         <div class="page-title">
           <h1 id="current-view-title">Summary</h1>
         </div>
-        <div id="header-month-display" style="font-size: 0.85rem; font-weight: 700; color: var(--color-accent); letter-spacing: 0.5px;"></div>
         <div class="header-actions">
-          <div class="date-badge" id="current-date-badge">
-            <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          <div class="date-badge" style="background: rgba(255,255,255,0.05); padding: 0.5rem 1rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); font-size: 0.85rem; font-weight: 600; color: #8b9dc3;">
             <span id="header-date">--</span>
           </div>
         </div>
       </header>
 
-      <!-- Month Selector Bar (shown in Monthly mode) -->
-      <div class="month-selector-bar" id="month-selector-bar" style="display: none;">
-        <div class="month-nav">
-          <button class="month-nav-btn" onclick="navigateMonth(-1)">&lt;</button>
-          <span id="month-selector-label">July 2026</span>
-          <button class="month-nav-btn" onclick="navigateMonth(1)">&gt;</button>
-        </div>
-        <div class="month-grid" id="month-grid">
-          <!-- Months injected via JS -->
-        </div>
-      </div>
-
-      <!-- Year Selector Bar (shown in Yearly mode) -->
-      <div class="year-selector-bar" id="year-selector-bar" style="display: none;">
-        <div class="month-nav">
-          <button class="month-nav-btn" onclick="navigateYear(-1)">&lt;</button>
-          <span id="year-selector-label">2026</span>
-          <button class="month-nav-btn" onclick="navigateYear(1)">&gt;</button>
-        </div>
-        <div class="month-grid" id="year-grid">
-          <!-- Years injected via JS -->
-        </div>
-      </div>
-
       <!-- VIEW: DASHBOARD -->
       <section id="view-dashboard" class="tab-content active">
-        <!-- Search bar -->
-        <div class="card" style="margin-bottom: 1rem; padding: 0.75rem 1.25rem; display: flex; align-items: center; gap: 0.75rem;">
-          <svg viewBox="0 0 24 24" width="20" height="20" stroke="var(--text-secondary)" stroke-width="2" fill="none" style="flex-shrink: 0;"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-          <input type="text" id="dashboard-search" class="form-input" placeholder="Search by name (Borrower, Financier, Tenant, Property)..." style="border: none; background: transparent; padding: 0; margin: 0; box-shadow: none;">
-        </div>
-
-        <!-- Search Results Section -->
-        <div id="search-results-section" class="card" style="margin-bottom: 1rem; display: none;">
-          <div class="section-header" style="margin-bottom: 1rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;">
-            <h2 style="font-size: 1.15rem; color: var(--color-accent); display: flex; align-items: center; gap: 0.5rem;">
-              <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-              Search Results
-            </h2>
-            <button class="btn btn-secondary btn-sm" id="btn-clear-search" style="padding: 0.2rem 0.6rem; font-size: 0.75rem;">Clear</button>
-          </div>
-          <div class="list-container" id="search-results-list">
-            <!-- Search items injected dynamically -->
-          </div>
-        </div>
-
-        <!-- Direct Quick Action Buttons -->
-        <div style="display: flex; gap: 0.6rem; flex-wrap: wrap; margin-bottom: 1.25rem;">
-          <button class="btn btn-primary btn-sm" id="btn-quick-rent" onclick="toggleReminderFilter('rent')" style="transition: opacity 0.2s ease, box-shadow 0.2s ease;">
-            <svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" stroke-width="2" fill="none"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-            Rent
-          </button>
-          <button class="btn btn-sm" style="background: linear-gradient(135deg, var(--color-success), #059669); color: #fff; box-shadow: 0 4px 14px rgba(16,185,129,0.3); transition: opacity 0.2s ease, box-shadow 0.2s ease;" id="btn-quick-interest" onclick="toggleReminderFilter('interest')">
-            <svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" stroke-width="2" fill="none"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-            Interest
-          </button>
-          <button class="btn btn-sm" style="background: linear-gradient(135deg, #f59e0b, #d97706); color: #fff; box-shadow: 0 4px 14px rgba(245,158,11,0.3); transition: opacity 0.2s ease, box-shadow 0.2s ease;" id="btn-quick-renewals" onclick="toggleReminderFilter('renewals')">
-            <svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" stroke-width="2" fill="none"><path d="M21 12a9 9 0 11-6.219-8.56"/><polyline points="22 2 22 8 16 8"/></svg>
-            Renewals
-          </button>
-          <button class="btn btn-sm" style="background: linear-gradient(135deg, var(--color-accent), #0369a1); color: #fff; box-shadow: 0 4px 14px rgba(14,165,233,0.3);" id="btn-quick-lend" onclick="openQuickLend()">
-            <svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" stroke-width="2" fill="none"><path d="M7 17L17 7M17 7H7M17 7V17"/></svg>
-            Lend Money
-          </button>
-          <button class="btn btn-sm" style="background: linear-gradient(135deg, var(--color-danger), #b91c1c); color: #fff; box-shadow: 0 4px 14px rgba(239,68,68,0.3);" id="btn-quick-expenses" onclick="openExpenseModal()">
-            <svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" stroke-width="2" fill="none"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M12 4v16M2 12h20"/></svg>
-            Expenses
-          </button>
-        </div>
-
-        <!-- Upcoming Payment Reminders -->
-        <div class="card" style="margin-bottom: 1.25rem;">
-          <div class="section-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
-            <h2 style="margin-bottom: 0;">
-              <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-              Upcoming Payment Reminders
-            </h2>
-          </div>
-          <div id="reminder-filter-summary" style="display: none; padding: 0.65rem 1rem; background: rgba(255, 255, 255, 0.02); border-bottom: 1px solid rgba(255, 255, 255, 0.05); font-size: 0.85rem; font-weight: 700; color: var(--text-secondary); margin: 0 0 0.75rem 0; border-radius: 6px; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.75rem;">
-            <!-- Will be populated dynamically via JS -->
-          </div>
-          <div class="reminders-list" id="dashboard-rent-reminders">
-            <div class="empty-state">
-              <div class="empty-state-icon">
-                <svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-              </div>
-              <p>No upcoming payments due this month.</p>
-            </div>
-          </div>
-        </div>
-
-        <!-- Summary Cards Grid -->
-        <div class="summary-grid" style="margin-bottom: 1.25rem;">
-          <div class="card summary-card warning" data-tab="rental">
-            <div class="summary-card-header">
-              <span>Rental Income / mo</span>
-              <div class="summary-card-icon">
+        <!-- New Rent Card based on screenshot -->
+        <div class="rent-status-card" id="rent-status-card">
+          <div class="rent-card-content">
+            <div class="rent-card-header">
+              <span class="rent-title">RENTAL INCOME<br>(COLLECTED)</span>
+              <div class="rent-icon">
                 <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
               </div>
             </div>
-            <div class="summary-value" id="dash-monthly-rent">Rs. 0.00</div>
-            <div class="summary-sub-value" id="dash-rental-balance" style="font-size: 0.78rem; margin-top: 0.35rem; font-weight: 700; color: var(--text-secondary); display: flex; align-items: center; gap: 0.25rem;">Balance to collect: Rs. 0.00</div>
-          </div>
-          <div class="card summary-card success" data-tab="interest" style="border-left: 4px solid var(--color-success); cursor: pointer;">
-            <div class="summary-card-header">
-              <span style="color: var(--color-success);">Interest Received</span>
-              <div class="summary-card-icon" style="background: rgba(16, 185, 129, 0.1); color: var(--color-success);">
-                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-              </div>
-            </div>
-            <div class="summary-value" id="dash-total-interest-received" style="color: var(--color-success);">Rs. 0.00</div>
-            <div class="summary-sub-value" id="dash-interest-received-balance" style="font-size: 0.78rem; margin-top: 0.35rem; font-weight: 700; color: var(--text-secondary); display: flex; align-items: center; gap: 0.25rem;">Balance: Rs. 0.00</div>
-          </div>
-
-          <div class="card summary-card danger" data-tab="expenses" style="border-left: 4px solid var(--color-danger);">
-            <div class="summary-card-header">
-              <span style="color: var(--color-danger);">Expenses</span>
-              <div class="summary-card-icon" style="background: rgba(239, 68, 68, 0.1); color: var(--color-danger);">
-                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
-              </div>
-            </div>
-            <div class="summary-value" id="dash-total-expenses" style="color: var(--color-danger);">Rs. 0.00</div>
-          </div>
-          <div class="card summary-card success" data-tab="settings" style="cursor: pointer;">
-            <div class="summary-card-header">
-              <span>Net Balance</span>
-              <div class="summary-card-icon">
-                <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-              </div>
-            </div>
-            <div class="summary-value" id="dash-net-balance">Rs. 0.00</div>
-          </div>
-        </div>
-
-
-
-      </section>
-
-      <!-- VIEW: LENDING (LENT) -->
-      <section id="view-interest" class="tab-content">
-        <div class="section-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem;">
-          <div style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
-            <h2 style="margin-bottom: 0;">Interest Ledger</h2>
-          </div>
-          <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
-            <button class="btn btn-primary" id="btn-add-loan-lent">
-              <svg viewBox="0 0 24 24" width="16" height="16"><path d="M7 17L17 7M17 7H7M17 7V17"/></svg>
-              Lend Money
-            </button>
-            <button class="btn btn-primary" id="btn-add-loan-borrowed" style="background: linear-gradient(135deg, var(--color-danger), #b91c1c); box-shadow: 0 4px 14px rgba(239,68,68,0.3);">
-              <svg viewBox="0 0 24 24" width="16" height="16"><path d="M17 17L7 7M7 7H17M7 7V17"/></svg>
-              Record Borrowing
-            </button>
-          </div>
-        </div>
-
-        <div class="list-container" id="lent-loans-list" style="margin-bottom: 1.25rem;">
-          <!-- Injected via JS -->
-        </div>
-
-        <div class="list-container" id="borrowed-loans-list">
-          <!-- Injected via JS -->
-        </div>
-
-        <!-- Summary Stats Bar -->
-        <div style="display: flex; gap: 0.75rem; margin-top: 1.25rem; flex-wrap: wrap;">
-          <!-- Lent Column -->
-          <div style="flex: 1; min-width: 140px; display: flex; flex-direction: column; gap: 0.5rem;">
-            <div class="card" style="padding: 0.75rem 1rem; display: flex; flex-direction: column; gap: 0.25rem; border-left: 3px solid var(--color-accent);">
-              <span style="font-size: 0.7rem; color: var(--text-secondary); font-weight: 600; text-transform: uppercase;">Lent Loans</span>
-              <span id="lending-total-loans" style="font-size: 1.15rem; font-weight: 800; color: var(--text-primary);">0</span>
-            </div>
-            <div class="card" style="padding: 0.75rem 1rem; display: flex; flex-direction: column; gap: 0.25rem; border-left: 3px solid var(--color-success);">
-              <span style="font-size: 0.7rem; color: var(--text-secondary); font-weight: 600; text-transform: uppercase;">Lent Principal</span>
-              <span id="lending-total-principal" style="font-size: 1.15rem; font-weight: 800; color: var(--color-success);">Rs. 0</span>
-            </div>
-            <div class="card" style="padding: 0.75rem 1rem; display: flex; flex-direction: column; gap: 0.25rem; border-left: 3px solid var(--color-purple);">
-              <span style="font-size: 0.7rem; color: var(--text-secondary); font-weight: 600; text-transform: uppercase;">Lent Outstanding</span>
-              <span id="lending-total-outstanding" style="font-size: 1.15rem; font-weight: 800; color: var(--color-purple);">Rs. 0</span>
-            </div>
-          </div>
-          <!-- Borrowed Column -->
-          <div style="flex: 1; min-width: 140px; display: flex; flex-direction: column; gap: 0.5rem;">
-            <div class="card" style="padding: 0.75rem 1rem; display: flex; flex-direction: column; gap: 0.25rem; border-left: 3px solid var(--color-danger);">
-              <span style="font-size: 0.7rem; color: var(--text-secondary); font-weight: 600; text-transform: uppercase;">Borrowed</span>
-              <span id="borrowing-total-loans" style="font-size: 1.15rem; font-weight: 800; color: var(--text-primary);">0</span>
-            </div>
-            <div class="card" style="padding: 0.75rem 1rem; display: flex; flex-direction: column; gap: 0.25rem; border-left: 3px solid var(--color-warning);">
-              <span style="font-size: 0.7rem; color: var(--text-secondary); font-weight: 600; text-transform: uppercase;">Borrowed Principal</span>
-              <span id="borrowing-total-principal" style="font-size: 1.15rem; font-weight: 800; color: var(--color-danger);">Rs. 0</span>
-            </div>
-            <div class="card" style="padding: 0.75rem 1rem; display: flex; flex-direction: column; gap: 0.25rem; border-left: 3px solid var(--color-purple);">
-              <span style="font-size: 0.7rem; color: var(--text-secondary); font-weight: 600; text-transform: uppercase;">Borrowed Outstanding</span>
-              <span id="borrowing-total-outstanding" style="font-size: 1.15rem; font-weight: 800; color: var(--color-warning);">Rs. 0</span>
-            </div>
+            <div class="rent-value" id="dash-monthly-rent">Rs. 0.00</div>
+            <div class="rent-status" id="dash-rental-status">All Collected</div>
           </div>
         </div>
       </section>
 
-      <!-- VIEW: RENTALS -->
+      <!-- VIEW: RENTALS (Tenants) -->
       <section id="view-rental" class="tab-content">
         <div class="section-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem;">
-          <div style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
-            <h2 style="margin-bottom: 0;">Tenant & Rent Ledger</h2>
-          </div>
+          <h2 style="margin-bottom: 0;">Tenants</h2>
           <button class="btn btn-primary" id="btn-add-rental">
             <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
             Add Tenant
@@ -321,357 +95,17 @@
         <div class="list-container" id="rentals-list">
           <!-- Injected via JS -->
         </div>
-
-        <!-- Summary Stats Bar -->
-        <div class="stats-summary-bar" style="display: flex; gap: 1rem; margin-top: 1.25rem; flex-wrap: wrap;">
-          <div class="card" style="flex: 1; min-width: 150px; padding: 0.75rem 1rem; display: flex; flex-direction: column; gap: 0.25rem; border-left: 3px solid var(--color-warning);">
-            <span style="font-size: 0.75rem; color: var(--text-secondary); font-weight: 600; text-transform: uppercase;">Active Leases</span>
-            <span id="rentals-active-leases" style="font-size: 1.25rem; font-weight: 800; color: var(--text-primary);">0</span>
-          </div>
-          <div class="card" style="flex: 1; min-width: 150px; padding: 0.75rem 1rem; display: flex; flex-direction: column; gap: 0.25rem; border-left: 3px solid var(--color-purple);">
-            <span style="font-size: 0.75rem; color: var(--text-secondary); font-weight: 600; text-transform: uppercase;">Monthly Rent Roll</span>
-            <span id="rentals-monthly-income" style="font-size: 1.25rem; font-weight: 800; color: var(--color-purple);">Rs. 0.00</span>
-          </div>
-          <div class="card" style="flex: 1; min-width: 150px; padding: 0.75rem 1rem; display: flex; flex-direction: column; gap: 0.25rem; border-left: 3px solid var(--color-success);">
-            <span style="font-size: 0.75rem; color: var(--text-secondary); font-weight: 600; text-transform: uppercase;">Cumulative Collected</span>
-            <span id="rentals-total-collected" style="font-size: 1.25rem; font-weight: 800; color: var(--color-success);">Rs. 0.00</span>
-          </div>
-        </div>
-      </section>
-
-      <!-- VIEW: EXPENSES -->
-      <section id="view-expenses" class="tab-content">
-        <div class="section-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem;">
-          <div style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
-            <h2 style="margin-bottom: 0;">Expenses Tracker</h2>
-          </div>
-        </div>
-        
-        <div class="card" id="inline-expense-form" style="margin-bottom: 1.5rem; padding: 1.25rem;">
-          <h3 id="expense-modal-title" style="margin-bottom: 1rem; font-size: 1.1rem; color: var(--text-primary);">Record Expense</h3>
-          <form id="form-expense">
-            <input type="hidden" id="expense-id">
-            <div class="form-group" style="margin-bottom: 1rem;">
-              <label class="form-label" style="margin-bottom: 0.4rem;">Quick Presets</label>
-              <div style="display: flex; gap: 0.4rem; flex-wrap: wrap;">
-                <button type="button" class="btn btn-secondary btn-sm" onclick="setExpensePreset('Fuel', 'Travel')" style="padding: 0.3rem 0.5rem; min-height: auto; font-size: 0.72rem; border-color: rgba(255,255,255,0.06); background: var(--bg-secondary);">⛽ Fuel</button>
-                <button type="button" class="btn btn-secondary btn-sm" onclick="setExpensePreset('Rent', 'Others')" style="padding: 0.3rem 0.5rem; min-height: auto; font-size: 0.72rem; border-color: rgba(255,255,255,0.06); background: var(--bg-secondary);">🏠 Rent</button>
-                <button type="button" class="btn btn-secondary btn-sm" onclick="setExpensePreset('Wifi bill', 'Utilities')" style="padding: 0.3rem 0.5rem; min-height: auto; font-size: 0.72rem; border-color: rgba(255,255,255,0.06); background: var(--bg-secondary);">🌐 Wifi Bill</button>
-                <button type="button" class="btn btn-secondary btn-sm" onclick="setExpensePreset('Phone bill', 'Utilities')" style="padding: 0.3rem 0.5rem; min-height: auto; font-size: 0.72rem; border-color: rgba(255,255,255,0.06); background: var(--bg-secondary);">📱 Phone Bill</button>
-                <button type="button" class="btn btn-secondary btn-sm" onclick="setExpensePreset('Car Insurance', 'Insurance')" style="padding: 0.3rem 0.5rem; min-height: auto; font-size: 0.72rem; border-color: rgba(255,255,255,0.06); background: var(--bg-secondary);">🚗 Car Insurance</button>
-                <button type="button" class="btn btn-secondary btn-sm" onclick="setExpensePreset('Health Insurance', 'Insurance')" style="padding: 0.3rem 0.5rem; min-height: auto; font-size: 0.72rem; border-color: rgba(255,255,255,0.06); background: var(--bg-secondary);">🏥 Health Insurance</button>
-                <button type="button" class="btn btn-secondary btn-sm" onclick="setExpensePreset('Pollution Certificate', 'Certificate')" style="padding: 0.3rem 0.5rem; min-height: auto; font-size: 0.72rem; border-color: rgba(255,255,255,0.06); background: var(--bg-secondary);">🌿 Pollution</button>
-                <button type="button" class="btn btn-secondary btn-sm" onclick="setExpensePreset('House Tax', 'Taxes')" style="padding: 0.3rem 0.5rem; min-height: auto; font-size: 0.72rem; border-color: rgba(255,255,255,0.06); background: var(--bg-secondary);">🏠 House Tax</button>
-                <button type="button" class="btn btn-secondary btn-sm" onclick="setExpensePreset('I.T.R Filing', 'Taxes')" style="padding: 0.3rem 0.5rem; min-height: auto; font-size: 0.72rem; border-color: rgba(255,255,255,0.06); background: var(--bg-secondary);">📋 I.T.R</button>
-              </div>
-            </div>
-            <div class="form-group">
-              <label class="form-label" for="expense-amount">Amount (Rs.)</label>
-              <input type="number" id="expense-amount" class="form-input" min="0.01" step="any" placeholder="0.00" required>
-              <div id="expense-amount-presets" style="display: flex; gap: 0.35rem; margin-top: 0.4rem; flex-wrap: wrap;"></div>
-              <div id="expense-property-shortcuts" style="display: none; gap: 0.35rem; margin-top: 0.8rem; flex-wrap: wrap;">
-                <button type="button" class="btn btn-secondary btn-sm preset-btn" onclick="autoSelectProperty('23/48 Ground Floor')">23/48 Ground Floor</button>
-                <button type="button" class="btn btn-secondary btn-sm preset-btn" onclick="autoSelectProperty('23/48 3rd Floor')">23/48 3rd Floor</button>
-                <button type="button" class="btn btn-secondary btn-sm preset-btn" onclick="autoSelectProperty('1/104')">1/104</button>
-              </div>
-            </div>
-            
-            <div class="form-group-row">
-              <div class="form-group">
-                <label class="form-label" for="expense-date">Expense Date</label>
-                <input type="date" id="expense-date" class="form-input" required>
-              </div>
-              <div class="form-group">
-                <label class="form-label" for="expense-category">Category</label>
-                <select id="expense-category" class="form-input" required style="background-color: var(--bg-primary); color: var(--text-primary); border: 1px solid var(--border-color);" onchange="handleCategoryChange()">
-                  <option value="Maintenance" selected>Maintenance</option>
-                  <option value="Taxes">Taxes / Fees</option>
-                  <option value="House Tax">House Tax</option>
-                  <option value="ITR">ITR</option>
-                  <option value="Utilities">Utilities (Bills)</option>
-                  <option value="Insurance">Insurance</option>
-                  <option value="Car Insurance">Car Insurance</option>
-                  <option value="Health">Health</option>
-                  <option value="Pollution">Pollution</option>
-                  <option value="Certificate">Certificate</option>
-                  <option value="Travel">Travel / Fuel</option>
-                  <option value="Others">Others</option>
-                </select>
-              </div>
-            </div>
-
-            <div class="form-group" id="expense-renewal-date-group" style="display: none;">
-              <label class="form-label" for="expense-renewal-date">Next Renewal Date</label>
-              <input type="date" id="expense-renewal-date" class="form-input">
-              <p style="font-size: 0.72rem; color: var(--text-muted); margin-top: 0.3rem;">Auto-created as a Renewal reminder for next year</p>
-            </div>
-
-            <div class="form-group" id="expense-property-group">
-              <label class="form-label" for="expense-property">Associate with Property (Optional)</label>
-              <select id="expense-property" class="form-input" style="background-color: var(--bg-primary); color: var(--text-primary); border: 1px solid var(--border-color);">
-                <option value="">General / None</option>
-              </select>
-            </div>
-
-            <div class="form-group">
-              <label class="form-label" for="expense-note">Description / Notes</label>
-              <input type="text" id="expense-note" class="form-input" placeholder="e.g. Plumber for kitchen sink leaking">
-            </div>
-            
-            <div style="display: flex; justify-content: flex-end; gap: 0.6rem; margin-top: 1.25rem;">
-              <button type="button" class="btn btn-secondary" onclick="openExpenseModal()">Clear / Cancel Edit</button>
-              <button type="submit" class="btn btn-primary">Save Expense</button>
-            </div>
-          </form>
-        </div>
-        
-        <div class="card" style="margin-bottom: 1.5rem; background: linear-gradient(135deg, rgba(239, 68, 68, 0.05), rgba(245, 158, 11, 0.02)); border-color: rgba(239, 68, 68, 0.15);">
-          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
-            <div>
-              <span class="amount-label" style="text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px; color: var(--text-secondary);">Total Logged Expenses</span>
-              <div class="amount-value" id="expenses-total-value" style="font-size: 2.2rem; font-weight: 800; color: var(--color-danger); margin-top: 0.25rem;">Rs. 0.00</div>
-            </div>
-          </div>
-        </div>
-
-        <div class="list-container" id="expenses-list">
-          <!-- Injected via JS -->
-        </div>
-      </section>
-
-      <!-- VIEW: DOCS -->
-      <section id="view-docs" class="tab-content">
-        <div class="section-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem;">
-          <h2 style="margin-bottom: 0;">Documents</h2>
-          <div style="display: flex; gap: 0.5rem;">
-            <label class="btn btn-primary" style="cursor: pointer;">
-              <input type="file" id="doc-upload-input" accept="image/*,application/pdf" style="display: none;" multiple>
-              <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-              Upload
-            </label>
-            <label class="btn btn-secondary" style="cursor: pointer;">
-              <input type="file" id="doc-camera-input" accept="image/*" capture="environment" style="display: none;">
-              <svg viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
-              Camera
-            </label>
-          </div>
-        </div>
-        <div id="docs-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 1rem; margin-top: 1rem;">
-          <!-- Injected via JS -->
-        </div>
-      </section>
-
-      <!-- VIEW: REPORTS -->
-      <section id="view-settings" class="tab-content">
-        <div class="section-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem;">
-          <h2 style="margin-bottom: 0;">Reports</h2>
-        </div>
-
-        <!-- View Mode Toggle -->
-        <div class="card" style="margin-bottom: 1.25rem; padding: 1rem; display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
-          <span style="font-size: 0.8rem; color: var(--text-secondary); font-weight: 600;">VIEW MODE:</span>
-          <div style="display: flex; gap: 0.35rem; background: var(--bg-primary); border-radius: 8px; padding: 3px;">
-            <button class="mode-btn" id="reports-btn-mode-monthly" onclick="reportsSetViewMode('month')">Monthly</button>
-            <button class="mode-btn" id="reports-btn-mode-yearly" onclick="reportsSetViewMode('year')">Yearly</button>
-          </div>
-        </div>
-
-        <!-- Month/Year Selector -->
-        <div id="reports-selector-bar" class="card" style="margin-bottom: 1.25rem; padding: 0.75rem 1rem; display: none;">
-          <div style="display: flex; align-items: center; justify-content: space-between; gap: 0.5rem;">
-            <button class="month-nav-btn" onclick="reportsNavigate(-1)">&lt;</button>
-            <span id="reports-selector-label" style="font-weight: 700; font-size: 0.9rem;">July 2026</span>
-            <button class="month-nav-btn" onclick="reportsNavigate(1)">&gt;</button>
-          </div>
-        </div>
-
-        <!-- Chart -->
-        <div class="card" style="margin-bottom: 1.25rem; padding: 1.25rem;">
-          <h3 style="margin: 0 0 1rem 0; font-size: 1rem; color: var(--text-primary);">Income vs Expenses</h3>
-          <div style="position: relative; width: 100%; height: 280px;">
-            <canvas id="reports-chart"></canvas>
-          </div>
-        </div>
-
-        <!-- Summary Cards -->
-        <div style="display: flex; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 1.25rem;">
-          <div class="card" style="flex: 1; min-width: 100px; padding: 0.75rem 1rem; border-left: 3px solid var(--color-success);">
-            <span style="font-size: 0.7rem; color: var(--text-secondary); font-weight: 600; text-transform: uppercase;">Total Income</span>
-            <div id="reports-total-income" style="font-size: 1.15rem; font-weight: 800; color: var(--color-success); margin-top: 0.25rem;">Rs. 0</div>
-          </div>
-          <div class="card" style="flex: 1; min-width: 100px; padding: 0.75rem 1rem; border-left: 3px solid var(--color-danger);">
-            <span style="font-size: 0.7rem; color: var(--text-secondary); font-weight: 600; text-transform: uppercase;">Total Expenses</span>
-            <div id="reports-total-expenses" style="font-size: 1.15rem; font-weight: 800; color: var(--color-danger); margin-top: 0.25rem;">Rs. 0</div>
-          </div>
-          <div class="card" style="flex: 1; min-width: 100px; padding: 0.75rem 1rem; border-left: 3px solid var(--color-accent);">
-            <span style="font-size: 0.7rem; color: var(--text-secondary); font-weight: 600; text-transform: uppercase;">Net Balance</span>
-            <div id="reports-net-balance" style="font-size: 1.15rem; font-weight: 800; color: var(--text-primary); margin-top: 0.25rem;">Rs. 0</div>
-          </div>
-        </div>
-
-        <!-- Earnings -->
-        <div class="card" style="margin-bottom: 1.25rem;">
-          <div class="section-header">
-            <h2>
-              <svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-              Earnings
-            </h2>
-          </div>
-          <div class="summary-grid" id="dash-interest-stats" style="margin-bottom: 0; gap: 1rem;">
-            <!-- Lent Card -->
-            <div class="reminder-item" data-tab="interest" style="cursor: pointer; align-items: flex-start;">
-              <div class="reminder-icon-wrapper" style="background: rgba(16, 185, 129, 0.15); color: var(--color-success); margin-top: 0.25rem;">
-                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-              </div>
-              <div class="reminder-details" style="display: flex; flex-direction: column; gap: 1rem; width: 100%;">
-                <div>
-                  <div class="reminder-title" id="dash-interest-received" style="color: var(--color-success); font-size: 1.25rem;">Rs. 0.00</div>
-                  <div class="reminder-subtitle">Cumulative Interest Received (Lent)</div>
-                </div>
-                <div>
-                  <div class="reminder-title" id="dash-total-lent" style="color: var(--color-accent); font-size: 1.25rem;">Rs. 0.00</div>
-                  <div class="reminder-subtitle">Total Lent</div>
-                </div>
-              </div>
-            </div>
-            
-            <!-- Borrowed Card -->
-            <div class="reminder-item" data-tab="interest" style="cursor: pointer; align-items: flex-start;">
-              <div class="reminder-icon-wrapper" style="background: rgba(239, 68, 68, 0.15); color: var(--color-danger); margin-top: 0.25rem;">
-                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-              </div>
-              <div class="reminder-details" style="display: flex; flex-direction: column; gap: 1rem; width: 100%;">
-                <div>
-                  <div class="reminder-title" id="dash-interest-paid" style="color: var(--color-danger); font-size: 1.25rem;">Rs. 0.00</div>
-                  <div class="reminder-subtitle">Cumulative Interest Paid (Borrowed)</div>
-                </div>
-                <div>
-                  <div class="reminder-title" id="dash-total-borrowed" style="color: var(--color-purple); font-size: 1.25rem;">Rs. 0.00</div>
-                  <div class="reminder-subtitle">Total Borrowed</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Export Summary -->
-        <div class="card" style="margin-bottom: 1.25rem; padding: 1.25rem;">
-          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem; margin-bottom: 1rem;">
-            <h3 style="margin: 0; font-size: 1rem; color: var(--text-primary);">Export Summary</h3>
-            <button class="btn btn-primary" onclick="exportReportsCSV()" style="display: flex; align-items: center; gap: 0.4rem;">
-              <svg viewBox="0 0 24 24" width="16" height="16"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-              Export as CSV
-            </button>
-          </div>
-          <div class="table-responsive">
-            <table class="data-table" id="yearly-reports-table">
-              <thead>
-                <tr>
-                  <th>Year</th>
-                  <th>Total Rent</th>
-                  <th>Interest Received</th>
-                  <th>Interest Paid</th>
-                  <th>Expenses</th>
-                  <th>Net Earnings</th>
-                </tr>
-              </thead>
-              <tbody></tbody>
-            </table>
-          </div>
-        </div>
-
-        <!-- Reset System -->
-        <div class="card settings-box" style="border-color: rgba(239, 68, 68, 0.3);">
-          <div class="settings-box-title" style="color: var(--color-danger);">Reset System</div>
-          <div class="settings-box-desc">Permanently remove all logged loans, tenants, and payment details from your browser's local cache. This action cannot be undone.</div>
-          <div>
-            <button class="btn btn-danger" id="btn-reset-data">
-              <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
-              Reset Database
-            </button>
-          </div>
-        </div>
       </section>
 
     </main>
     
   </div>
 
-  <!-- MODAL: ADD/EDIT LOAN (LENT & BORROWED) -->
-  <div class="modal-overlay" id="modal-loan">
-    <div class="modal-container">
-      <div class="modal-header">
-        <h3 class="modal-title" id="loan-modal-title">Record New Transaction</h3>
-        <button class="modal-close" onclick="closeModal('modal-loan')">
-          <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-        </button>
-      </div>
-      <form id="form-loan">
-        <input type="hidden" id="loan-id">
-        <input type="hidden" id="loan-direction"> <!-- 'lent' or 'borrowed' -->
-        <div class="modal-body">
-          <div class="form-group-row">
-            <div class="form-group" style="flex: 1;">
-              <label class="form-label" id="loan-party-label" for="loan-party">Borrower Name</label>
-              <input type="text" id="loan-party" class="form-input" placeholder="e.g. John Doe" required>
-            </div>
-            <div class="form-group" style="flex: 1;">
-              <label class="form-label" for="loan-phone">Mobile Number (Optional)</label>
-              <input type="tel" id="loan-phone" class="form-input" placeholder="e.g. 9876543210">
-            </div>
-          </div>
-          
-          <div class="form-group-row">
-            <div class="form-group">
-              <label class="form-label" for="loan-principal">Principal Amount (Rs.)</label>
-              <input type="number" id="loan-principal" class="form-input" min="1" step="any" placeholder="0.00" required>
-              <div id="principal-presets-lending" style="display: none; gap: 0.5rem; margin-top: 0.4rem; flex-wrap: wrap;">
-                <button type="button" class="btn btn-secondary btn-sm" onclick="setPrincipalPreset(25000)" style="padding: 0.2rem 0.5rem; font-size: 0.75rem;">25k</button>
-                <button type="button" class="btn btn-secondary btn-sm" onclick="setPrincipalPreset(50000)" style="padding: 0.2rem 0.5rem; font-size: 0.75rem;">50k</button>
-                <button type="button" class="btn btn-secondary btn-sm" onclick="setPrincipalPreset(100000)" style="padding: 0.2rem 0.5rem; font-size: 0.75rem;">100k</button>
-              </div>
-              <div id="principal-presets-borrowing" style="display: none; gap: 0.5rem; margin-top: 0.4rem; flex-wrap: wrap;">
-                <button type="button" class="btn btn-secondary btn-sm" onclick="setPrincipalPreset(10000)" style="padding: 0.2rem 0.5rem; font-size: 0.75rem;">10k</button>
-                <button type="button" class="btn btn-secondary btn-sm" onclick="setPrincipalPreset(25000)" style="padding: 0.2rem 0.5rem; font-size: 0.75rem;">25k</button>
-                <button type="button" class="btn btn-secondary btn-sm" onclick="setPrincipalPreset(50000)" style="padding: 0.2rem 0.5rem; font-size: 0.75rem;">50k</button>
-                <button type="button" class="btn btn-secondary btn-sm" onclick="setPrincipalPreset(100000)" style="padding: 0.2rem 0.5rem; font-size: 0.75rem;">100k</button>
-              </div>
-            </div>
-            <div class="form-group">
-              <label class="form-label" for="loan-rate">Monthly Interest Rate (%)</label>
-              <input type="number" id="loan-rate" class="form-input" min="0" max="100" step="0.01" placeholder="4.00" required>
-            </div>
-          </div>
-          
-          <div class="form-group-row">
-            <div class="form-group">
-              <label class="form-label" for="loan-start-date">Date Issued</label>
-              <input type="date" id="loan-start-date" class="form-input" required>
-            </div>
-            <div class="form-group">
-              <label class="form-label" for="loan-due-date">Due Date (Optional)</label>
-              <input type="date" id="loan-due-date" class="form-input">
-            </div>
-          </div>
-          
-          <div class="form-group">
-            <label class="form-label" for="loan-notes">Notes</label>
-            <input type="text" id="loan-notes" class="form-input" placeholder="Add details or purpose...">
-          </div>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" onclick="closeModal('modal-loan')">Cancel</button>
-          <button type="submit" class="btn btn-primary">Save Entry</button>
-        </div>
-      </form>
-    </div>
-  </div>
-
   <!-- MODAL: ADD/EDIT RENTAL -->
   <div class="modal-overlay" id="modal-rental">
     <div class="modal-container">
       <div class="modal-header">
-        <h3 class="modal-title" id="rental-modal-title">Record Tenant Lease</h3>
+        <h3 class="modal-title" id="rental-modal-title">Add Tenant</h3>
         <button class="modal-close" onclick="closeModal('modal-rental')">
           <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
         </button>
@@ -680,121 +114,27 @@
         <input type="hidden" id="rental-id">
         <div class="modal-body">
           <div class="form-group">
-            <label class="form-label" for="rental-property">Property / Unit Name</label>
-            <input type="text" id="rental-property" class="form-input" placeholder="e.g. Apt 4B, Pine Towers" required>
-            <div id="rental-property-presets" style="margin-top: 0.35rem; display: flex; flex-wrap: wrap; gap: 0.35rem;">
-              <button type="button" class="btn btn-secondary btn-sm" onclick="setRentalPropertyPreset('23/48 ground floor')" style="padding: 0.25rem 0.5rem; min-height: auto; font-size: 0.72rem; border-color: rgba(255,255,255,0.06); background: var(--bg-secondary); cursor: pointer;">23/48 ground floor</button>
-              <button type="button" class="btn btn-secondary btn-sm" onclick="setRentalPropertyPreset('23/48 3rd floor')" style="padding: 0.25rem 0.5rem; min-height: auto; font-size: 0.72rem; border-color: rgba(255,255,255,0.06); background: var(--bg-secondary); cursor: pointer;">23/48 3rd floor</button>
-              <button type="button" class="btn btn-secondary btn-sm" onclick="setRentalPropertyPreset('1/104')" style="padding: 0.25rem 0.5rem; min-height: auto; font-size: 0.72rem; border-color: rgba(255,255,255,0.06); background: var(--bg-secondary); cursor: pointer;">1/104</button>
-            </div>
+            <label class="form-label" for="rental-tenant">Tenant Name</label>
+            <input type="text" id="rental-tenant" class="form-input" required>
           </div>
-          
           <div class="form-group">
-            <label class="form-label" for="rental-tenant">Tenant Full Name</label>
-            <input type="text" id="rental-tenant" class="form-input" placeholder="e.g. Sarah Smith" required>
+            <label class="form-label" for="rental-property">Property / Unit</label>
+            <input type="text" id="rental-property" class="form-input" required>
           </div>
-          
           <div class="form-group">
-            <label class="form-label" for="rental-contact">Contact Details (Phone / Email)</label>
-            <input type="text" id="rental-contact" class="form-input" placeholder="e.g. +1 555-0199 or sarah@email.com">
-          </div>
-          
-          <div class="form-group-row">
-            <div class="form-group">
-              <label class="form-label" for="rental-rent">Monthly Rent (Rs.)</label>
-              <input type="number" id="rental-rent" class="form-input" min="1" step="any" placeholder="0.00" required>
-            </div>
-            <div class="form-group">
-              <label class="form-label" for="rental-deposit">Security Deposit (Rs.)</label>
-              <input type="number" id="rental-deposit" class="form-input" min="0" step="any" placeholder="0.00" required>
-            </div>
-          </div>
-          
-          <div class="form-group-row">
-            <div class="form-group">
-              <label class="form-label" for="rental-start-date">Lease Start Date</label>
-              <input type="date" id="rental-start-date" class="form-input" required>
-            </div>
-            <div class="form-group">
-              <label class="form-label" for="rental-due-day">Rent Due Day of Month</label>
-              <input type="number" id="rental-due-day" class="form-input" min="1" max="31" placeholder="1" required>
-            </div>
-          </div>
-
-          <div class="form-group-row">
-            <div class="form-group">
-              <label class="form-label" for="rental-aadhaar-file">Aadhaar Card (Image)</label>
-              <input type="file" id="rental-aadhaar-file" class="form-input" accept="image/*" onchange="handleRentalFileSelect(this, 'rental-aadhaar-base64', 'rental-aadhaar-status')">
-              <input type="hidden" id="rental-aadhaar-base64">
-              <span id="rental-aadhaar-status" style="font-size: 0.75rem; color: var(--color-success); display: none; margin-top: 0.25rem;">✓ Aadhaar Card uploaded</span>
-            </div>
-            <div class="form-group">
-              <label class="form-label" for="rental-agreement-file">Rent Agreement (Image)</label>
-              <input type="file" id="rental-agreement-file" class="form-input" accept="image/*" onchange="handleRentalFileSelect(this, 'rental-agreement-base64', 'rental-agreement-status')">
-              <input type="hidden" id="rental-agreement-base64">
-              <span id="rental-agreement-status" style="font-size: 0.75rem; color: var(--color-success); display: none; margin-top: 0.25rem;">✓ Agreement uploaded</span>
-            </div>
+            <label class="form-label" for="rental-rent">Monthly Rent (Rs.)</label>
+            <input type="number" id="rental-rent" class="form-input" required min="1" step="any">
           </div>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" onclick="closeModal('modal-rental')">Cancel</button>
-          <button type="submit" class="btn btn-primary">Save Lease</button>
+          <button type="submit" class="btn btn-primary">Save Tenant</button>
         </div>
       </form>
     </div>
   </div>
 
-
-
-  <!-- MODAL: RECORD PAYMENT (Interest for Lent or Borrowed) -->
-  <div class="modal-overlay" id="modal-payment">
-    <div class="modal-container">
-      <div class="modal-header">
-        <h3 class="modal-title" id="payment-modal-title">Record Interest Receipt</h3>
-        <button class="modal-close" onclick="closeModal('modal-payment')">
-          <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-        </button>
-      </div>
-      <form id="form-payment">
-        <input type="hidden" id="payment-loan-id">
-        <input type="hidden" id="payment-type"> <!-- 'received' or 'paid' -->
-        <div class="modal-body">
-          <div class="form-group">
-            <label class="form-label" for="payment-category">Payment Category</label>
-            <select id="payment-category" class="form-input" required>
-              <option value="interest" selected>Interest Payment</option>
-              <option value="principal">Principal Repayment</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label class="form-label" for="payment-amount">Payment Amount (Rs.)</label>
-            <input type="number" id="payment-amount" class="form-input" min="0.01" step="any" placeholder="0.00" required>
-            <div id="payment-amount-presets" style="display: flex; gap: 0.5rem; margin-top: 0.4rem; flex-wrap: wrap;">
-              <button type="button" class="btn btn-secondary btn-sm" onclick="setPaymentAmountPreset(25000)" style="padding: 0.2rem 0.5rem; font-size: 0.75rem;">25k</button>
-              <button type="button" class="btn btn-secondary btn-sm" onclick="setPaymentAmountPreset(50000)" style="padding: 0.2rem 0.5rem; font-size: 0.75rem;">50k</button>
-              <button type="button" class="btn btn-secondary btn-sm" onclick="setPaymentAmountPreset(100000)" style="padding: 0.2rem 0.5rem; font-size: 0.75rem;">100k</button>
-            </div>
-          </div>
-          
-          <div class="form-group">
-            <label class="form-label" for="payment-date">Payment Date</label>
-            <input type="date" id="payment-date" class="form-input" required>
-          </div>
-          
-          <div class="form-group">
-            <label class="form-label" for="payment-note">Note / Remarks</label>
-            <input type="text" id="payment-note" class="form-input" placeholder="e.g. Month of June Interest">
-          </div>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" onclick="closeModal('modal-payment')">Cancel</button>
-          <button type="submit" class="btn btn-primary">Record Payment</button>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <!-- MODAL: RECORD RENT PAYMENT -->
+  <!-- MODAL: RENT PAYMENT -->
   <div class="modal-overlay" id="modal-rent-payment">
     <div class="modal-container">
       <div class="modal-header">
@@ -808,22 +148,15 @@
         <div class="modal-body">
           <div class="form-group">
             <label class="form-label" for="rent-payment-amount">Rent Amount Paid (Rs.)</label>
-            <input type="number" id="rent-payment-amount" class="form-input" min="0.01" step="any" placeholder="0.00" required>
+            <input type="number" id="rent-payment-amount" class="form-input" required min="1" step="any">
           </div>
-          
           <div class="form-group">
-            <label class="form-label" for="rent-payment-month">For Month / Period</label>
+            <label class="form-label" for="rent-payment-month">For Month</label>
             <input type="month" id="rent-payment-month" class="form-input" required>
           </div>
-          
           <div class="form-group">
             <label class="form-label" for="rent-payment-date">Payment Date</label>
             <input type="date" id="rent-payment-date" class="form-input" required>
-          </div>
-          
-          <div class="form-group">
-            <label class="form-label" for="rent-payment-note">Remarks</label>
-            <input type="text" id="rent-payment-note" class="form-input" placeholder="e.g. Bank Transfer Ref: 28491">
           </div>
         </div>
         <div class="modal-footer">
@@ -834,277 +167,5 @@
     </div>
   </div>
 
-  <!-- MODAL: ADD/EDIT RENEWAL -->
-  <div class="modal-overlay" id="modal-renewal">
-    <div class="modal-container" style="max-width: 450px;">
-      <div class="modal-header">
-        <h3 class="modal-title" id="renewal-modal-title">Add Renewal</h3>
-        <button class="modal-close" onclick="closeModal('modal-renewal')">
-          <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-        </button>
-      </div>
-      <form id="form-renewal">
-        <input type="hidden" id="renewal-id">
-        <div class="modal-body">
-          <div class="form-group">
-            <label class="form-label" for="renewal-title">Renewal Title</label>
-            <input type="text" id="renewal-title" class="form-input" placeholder="e.g. Car Insurance" required>
-          </div>
-          <div class="form-group">
-            <label class="form-label" for="renewal-category">Category</label>
-            <select id="renewal-category" class="form-input" required style="background-color: var(--bg-primary); color: var(--text-primary); border: 1px solid var(--border-color);">
-              <option value="Insurance">Insurance</option>
-              <option value="Tax">Tax</option>
-              <option value="Certificate">Certificate</option>
-              <option value="Subscription">Subscription</option>
-              <option value="Others">Others</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label class="form-label" for="renewal-amount">Amount (Rs.) (Optional)</label>
-            <input type="number" id="renewal-amount" class="form-input" min="0" step="any" placeholder="0.00">
-          </div>
-          <div class="form-group-row">
-            <div class="form-group">
-              <label class="form-label" for="renewal-date">Renewal Due Date</label>
-              <input type="date" id="renewal-date" class="form-input" required>
-            </div>
-            <div class="form-group">
-              <label class="form-label" for="renewal-frequency">Frequency</label>
-              <select id="renewal-frequency" class="form-input" required style="background-color: var(--bg-primary); color: var(--text-primary); border: 1px solid var(--border-color);">
-                <option value="yearly" selected>Yearly</option>
-                <option value="monthly">Monthly</option>
-                <option value="once">Once</option>
-              </select>
-            </div>
-          </div>
-          <div class="form-group">
-            <label class="form-label" for="renewal-note">Notes</label>
-            <input type="text" id="renewal-note" class="form-input" placeholder="e.g. Policy No: XYZ123">
-          </div>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" onclick="closeModal('modal-renewal')">Cancel</button>
-          <button type="submit" class="btn btn-primary">Save Renewal</button>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <!-- MODAL: LEDGER HISTORY DETAILS -->
-  <div class="modal-overlay" id="modal-ledger">
-    <div class="modal-container">
-      <div class="modal-header">
-        <h3 class="modal-title" id="ledger-title">Payment History Ledger</h3>
-        <button class="modal-close" onclick="closeModal('modal-ledger')">
-          <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-        </button>
-      </div>
-      <div class="modal-body">
-        <div class="loan-stats-grid" id="ledger-stats">
-          <!-- Injected dynamically -->
-        </div>
-        <h4 style="margin-top: 1.5rem; font-size: 0.95rem; font-weight: 700;">Recorded Transactions</h4>
-        <div class="ledger-list" id="ledger-list-container">
-          <!-- List of payments injected via JS -->
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button class="btn btn-secondary" onclick="closeModal('modal-ledger')">Close</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- MODAL: QUICK COLLECT (Rent / Interest) -->
-  <div class="modal-overlay" id="modal-quick-collect">
-    <div class="modal-container">
-      <div class="modal-header">
-        <h3 class="modal-title" id="quick-collect-title">Collect Rent</h3>
-        <button class="modal-close" onclick="closeModal('modal-quick-collect')">
-          <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-        </button>
-      </div>
-      <div class="modal-body">
-        <!-- People list -->
-        <div style="margin-bottom: 1.25rem;">
-          <label class="form-label" id="quick-people-label" style="margin-bottom: 0.75rem; display: block;">Select Person</label>
-          <div id="quick-collect-people" style="display: flex; flex-direction: column; gap: 0.5rem; max-height: 250px; overflow-y: auto;">
-            <!-- Injected dynamically -->
-          </div>
-        </div>
-        <!-- Amount input -->
-        <div class="form-group" style="margin-bottom: 1.25rem;">
-          <label class="form-label" id="quick-amount-label">Amount Received (Rs.)</label>
-          <input type="number" id="quick-collect-amount" class="form-input" min="0.01" step="any" placeholder="0.00">
-          <p style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.4rem;" id="quick-amount-hint">Leave blank to use each person's default amount</p>
-        </div>
-        <!-- Date input -->
-        <div class="form-group" style="margin-bottom: 1.25rem;">
-          <label class="form-label">Date</label>
-          <input type="date" id="quick-collect-date" class="form-input">
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" onclick="closeModal('modal-quick-collect')">Cancel</button>
-        <button type="button" class="btn btn-primary" id="btn-quick-collect-save" onclick="submitQuickCollect()">Record Payment</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- MODAL: QUICK LEND -->
-  <div class="modal-overlay" id="modal-quick-lend">
-    <div class="modal-container">
-      <div class="modal-header">
-        <h3 class="modal-title">Quick Lend Money</h3>
-        <button class="modal-close" onclick="closeModal('modal-quick-lend')">
-          <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-        </button>
-      </div>
-      <form id="form-quick-lend">
-        <div class="modal-body">
-          <!-- Borrower Selector -->
-          <div class="form-group" style="margin-bottom: 1rem;">
-            <label class="form-label" for="quick-lend-borrower-select">Borrower</label>
-            <select id="quick-lend-borrower-select" class="form-input" required>
-              <!-- Populated dynamically -->
-            </select>
-          </div>
-          <!-- New Borrower Name Input (initially hidden or shown if selected) -->
-          <div class="form-group" id="quick-lend-new-name-group" style="margin-bottom: 1rem; display: none;">
-            <label class="form-label" for="quick-lend-new-name">New Borrower Name</label>
-            <input type="text" id="quick-lend-new-name" class="form-input" placeholder="e.g. John Doe">
-          </div>
-          <!-- Mobile Number -->
-          <div class="form-group" style="margin-bottom: 1rem;">
-            <label class="form-label" for="quick-lend-phone">Mobile Number (Optional)</label>
-            <input type="tel" id="quick-lend-phone" class="form-input" placeholder="e.g. 9876543210">
-          </div>
-          <!-- Principal Amount -->
-          <div class="form-group" style="margin-bottom: 1rem;">
-            <label class="form-label" for="quick-lend-principal">Principal Amount (Rs.)</label>
-            <input type="number" id="quick-lend-principal" class="form-input" min="1" step="any" placeholder="0.00" required>
-            <!-- 3 buttons 25k, 50k, 100k -->
-            <div style="display: flex; gap: 0.5rem; margin-top: 0.4rem; flex-wrap: wrap;">
-              <button type="button" class="btn btn-secondary btn-sm" onclick="setQuickLendPrincipal(25000)" style="padding: 0.2rem 0.5rem; font-size: 0.75rem;">25k</button>
-              <button type="button" class="btn btn-secondary btn-sm" onclick="setQuickLendPrincipal(50000)" style="padding: 0.2rem 0.5rem; font-size: 0.75rem;">50k</button>
-              <button type="button" class="btn btn-secondary btn-sm" onclick="setQuickLendPrincipal(100000)" style="padding: 0.2rem 0.5rem; font-size: 0.75rem;">100k</button>
-            </div>
-          </div>
-          <!-- Monthly Interest Rate -->
-          <div class="form-group" style="margin-bottom: 1rem;">
-            <label class="form-label" for="quick-lend-rate">Monthly Interest Rate (%)</label>
-            <input type="number" id="quick-lend-rate" class="form-input" min="0" max="100" step="0.01" value="4.00" required>
-          </div>
-          <!-- Date Issued -->
-          <div class="form-group" style="margin-bottom: 1rem;">
-            <label class="form-label" for="quick-lend-start-date">Date Issued</label>
-            <input type="date" id="quick-lend-start-date" class="form-input" required>
-          </div>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" onclick="closeModal('modal-quick-lend')">Cancel</button>
-          <button type="button" class="btn btn-primary" onclick="submitQuickLend(event)">Save Entry</button>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <!-- MODAL: IMAGE VIEWER (Lightbox) -->
-  <div class="modal-overlay" id="modal-image-viewer">
-    <div class="modal-container" style="max-width: 600px;">
-      <div class="modal-header">
-        <h3 class="modal-title" id="image-viewer-title">Document View</h3>
-        <button class="modal-close" onclick="closeModal('modal-image-viewer')">
-          <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-        </button>
-      </div>
-      <div class="modal-body" style="text-align: center; padding: 1rem;">
-        <img id="image-viewer-img" src="" alt="Document Image" style="max-width: 100%; max-height: 70vh; border-radius: var(--border-radius-md); box-shadow: 0 4px 12px rgba(0,0,0,0.15); border: 1px solid var(--border-color);">
-      </div>
-      <div class="modal-footer">
-        <button class="btn btn-secondary" onclick="closeModal('modal-image-viewer')">Close</button>
-        <a id="image-viewer-download" href="" download="document.jpg" class="btn btn-primary">Download</a>
-      </div>
-    </div>
-  </div>
-  </div>
-
-  <!-- MODAL: REPORTS VIEWER -->
-  <div class="modal-overlay" id="modal-reports">
-    <div class="modal-container" style="max-width: 800px;">
-      <div class="modal-header">
-        <h3 class="modal-title">Financial Reports & Summaries</h3>
-        <button class="modal-close" onclick="closeModal('modal-reports')">
-          <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-        </button>
-      </div>
-      <div class="modal-body" style="max-height: 60vh; overflow-y: auto;">
-        <div style="display: flex; gap: 1rem; margin-bottom: 1.5rem; flex-wrap: wrap;">
-           <button class="btn btn-primary" onclick="exportReportsCSV()">
-             <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-             Export as CSV
-           </button>
-        </div>
-        
-        <h3 style="margin-bottom: 0.75rem;">Yearly Summary</h3>
-        <div class="table-responsive" style="margin-bottom: 2rem;">
-          <table class="data-table" id="yearly-reports-table">
-            <thead>
-              <tr>
-                <th>Year</th>
-                <th>Total Rent</th>
-                <th>Interest Received</th>
-                <th>Interest Paid</th>
-                <th>Expenses</th>
-                <th>Net Earnings</th>
-              </tr>
-            </thead>
-            <tbody></tbody>
-          </table>
-        </div>
-        
-        <h3 style="margin-bottom: 0.75rem;">Month-wise Summary</h3>
-        <div class="table-responsive">
-          <table class="data-table" id="monthly-reports-table">
-            <thead>
-              <tr>
-                <th>Month</th>
-                <th>Rent</th>
-                <th>Interest Received</th>
-                <th>Interest Paid</th>
-                <th>Expenses</th>
-                <th>Net Earnings</th>
-              </tr>
-            </thead>
-            <tbody></tbody>
-          </table>
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button class="btn btn-secondary" onclick="closeModal('modal-reports')">Close</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- MODAL: VIEW DOCUMENT -->
-  <div class="modal-overlay" id="modal-view-doc">
-    <div class="modal-container" style="max-width: 90vw; background: transparent; box-shadow: none; border: none;">
-      <div style="display: flex; justify-content: flex-end; gap: 0.5rem; margin-bottom: 0.5rem;">
-        <button class="btn btn-secondary" id="btn-share-doc" style="background: rgba(0,0,0,0.5); border-color: transparent; color: white; display: inline-flex; align-items: center;">
-          <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" fill="none" style="margin-right:4px;"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
-          Share
-        </button>
-        <button class="btn btn-primary" id="btn-download-doc" style="background: rgba(0,0,0,0.5); border-color: transparent; color: white; display: inline-flex; align-items: center;">
-          <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" fill="none" style="margin-right:4px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-          Down
-        </button>
-        <button class="btn btn-secondary" onclick="closeModal('modal-view-doc')" style="background: rgba(0,0,0,0.5); border-color: transparent; color: white; display: inline-flex; align-items: center;">Close</button>
-      </div>
-      <img id="view-doc-img" src="" style="max-width: 100%; max-height: 80vh; border-radius: 8px; display: none; object-fit: contain;">
-      <iframe id="view-doc-pdf" style="width: 100%; height: 80vh; border: none; border-radius: 8px; display: none; background: white;"></iframe>
-    </div>
-  </div>
-
-  <!-- JavaScript Modules -->
 </body>
 </html>
