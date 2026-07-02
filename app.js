@@ -1312,8 +1312,18 @@ function renderDashboard() {
       .reduce((sum, exp) => sum + Number(exp.amount), 0);
   }
 
-  // I. Calculate Net Balance
-  const netBalance = activeLent - activeBorrowed + totalRentCollected + totalInterestReceived - totalExpenses;
+  // I. Calculate Balance To Receive
+  const expectedInterestReceived = activeLendingLoans.reduce((sum, loan) => {
+    const outstanding = getOutstandingPrincipalAtMonth(loan.id, loan.principal, selectedMonthStr);
+    if (outstanding > 0) {
+      return sum + (outstanding * (Number(loan.interestRate) / 100));
+    }
+    return sum;
+  }, 0);
+
+  const totalPendingRent = Math.max(0, monthlyRent - totalRentCollected);
+  const totalPendingInterest = Math.max(0, expectedInterestReceived - totalInterestReceived);
+  const netBalance = totalPendingRent + totalPendingInterest;
 
   // Update Summary DOM elements
   document.getElementById('dash-total-lent').textContent = formatCurrency(activeLent);
@@ -1351,13 +1361,7 @@ function renderDashboard() {
   document.getElementById('dash-interest-received').textContent = formatCurrency(totalInterestReceived);
   document.getElementById('dash-interest-paid').textContent = formatCurrency(totalInterestPaid);
 
-  const expectedInterestReceived = activeLendingLoans.reduce((sum, loan) => {
-    const outstanding = getOutstandingPrincipalAtMonth(loan.id, loan.principal, selectedMonthStr);
-    if (outstanding > 0) {
-      return sum + (outstanding * (Number(loan.interestRate) / 100));
-    }
-    return sum;
-  }, 0);
+  // expectedInterestReceived is calculated above
 
   const totalInterestReceivedNode = document.getElementById('dash-total-interest-received');
   if (totalInterestReceivedNode) {
