@@ -338,6 +338,7 @@ function updateHeaderDateDisplay() {
 
 function toggleReminderFilter(filterType) {
   currentReminderFilter = (currentReminderFilter === filterType) ? 'all' : filterType;
+  if (currentReminderFilter === 'all') _expandedCards.clear();
   renderDashboard();
 }
 
@@ -456,8 +457,8 @@ function seedInitialData() {
 // 3. UI Helpers & Formatting
 const formatCurrency = (val) => {
   return 'Rs. ' + Number(val).toLocaleString('en-IN', {
-    maximumFractionDigits: 2,
-    minimumFractionDigits: 2
+    maximumFractionDigits: 0,
+    minimumFractionDigits: 0
   });
 };
 
@@ -994,12 +995,23 @@ function quickMarkInterestPaid(loanId, type, amount, monthStr) {
 
 window.quickMarkInterestPaid = quickMarkInterestPaid;
 
+function el(id) {
+  return document.getElementById(id);
+}
+
 function navigateAndHighlightCard(tabId, itemId) {
-  switchTab(tabId);
   _expandedCards.add(itemId);
-  
-  if (tabId === 'rental') renderRentals();
-  else if (tabId === 'interest') renderInterest();
+  if (tabId === 'rental') {
+    switchTab('dashboard');
+    currentReminderFilter = 'rent';
+    renderDashboard();
+  } else if (tabId === 'interest') {
+    switchTab('dashboard');
+    currentReminderFilter = 'interest';
+    renderDashboard();
+  } else {
+    switchTab(tabId);
+  }
   
   setTimeout(() => {
     const card = document.querySelector(`[data-id="${itemId}"]`);
@@ -1008,9 +1020,9 @@ function navigateAndHighlightCard(tabId, itemId) {
       card.classList.add('card-highlight-active');
       setTimeout(() => {
         card.classList.remove('card-highlight-active');
-      }, 1800);
+      }, 2000);
     }
-  }, 150);
+  }, 300);
 }
 
 function handleRentalFileSelect(input, targetHiddenId, statusSpanId) {
@@ -1136,19 +1148,20 @@ window.selectMonth = selectMonth;
 window.selectYear = selectYear;
 
 // 5. Navigation & Routing Handler
+function renderRecords() {
+  // Records dashboard - static cards, no dynamic data needed
+}
+
 const VIEWS = {
   dashboard: { title: 'Summary', subtitle: 'Your aggregated financial overview at a glance.', render: renderDashboard },
-  interest: { title: 'Interest Ledger', subtitle: 'Track loans you\'ve lent and amounts you\'ve borrowed, with accrued interest.', render: renderInterest },
-  rental: { title: 'Rent Tracker', subtitle: 'Oversee properties, tenant agreements, deposits, and rent collections.', render: renderRentals },
-  expenses: { title: 'Expenses Tracker', subtitle: 'Manage maintenance, utilities, tax payments, and general spending.', render: renderExpenses },
-  docs: { title: 'Bills', subtitle: 'Manage your bills, files, and receipts.', render: renderDocs },
-  settings: { title: 'Reports', subtitle: 'View charts, summaries, and reset your financial data.', render: renderReports }
+  records: { title: 'Records', subtitle: 'Bills, documents, construction, and settings.', render: renderRecords }
 };
 
 let currentTab = 'dashboard';
 
 function switchTab(tabId) {
   currentTab = tabId;
+  window.scrollTo(0, 0);
   // Update Navigation Active States
   document.querySelectorAll('.nav-link, .mobile-nav-link').forEach(link => {
     if (link.getAttribute('data-tab') === tabId) {
@@ -1178,6 +1191,7 @@ function switchTab(tabId) {
     VIEWS[tabId].render();
   }
 }
+window.switchTab = switchTab;
 
 // Init Tabs click listeners
 function initNavigation() {
@@ -1480,7 +1494,7 @@ function renderDashboard() {
       dashboardRemindersList.push({
         id: rental.id,
         partyName: rental.tenantName,
-        propertyName: `${rental.propertyName} (Agreement Renewal)`,
+        propertyName: rental.propertyName,
         amount: 0,
         type: 'agreement-renewal',
         status: renewalStatus,
@@ -1731,8 +1745,7 @@ function renderDashboard() {
       
       // Determine tab target for navigation click
       let tabTarget = 'rental';
-      if (item.type === 'interest-collection') tabTarget = 'lending';
-      else if (item.type === 'interest-payment') tabTarget = 'borrowing';
+      if (item.type === 'interest-collection' || item.type === 'interest-payment') tabTarget = 'interest';
 
       div.addEventListener('click', () => {
         navigateAndHighlightCard(tabTarget, item.id);
@@ -1744,16 +1757,16 @@ function renderDashboard() {
         if (item.type === 'rent-payment') {
           markPaidBtn = `
             <label style="display: inline-flex; align-items: center; gap: 5px; font-size: 0.72rem; font-weight: 700; color: var(--color-success); margin-right: 0.5rem; cursor: pointer; user-select: none;" onclick="event.stopPropagation();">
-              <input type="checkbox" style="width: 14px; height: 14px; accent-color: var(--color-success); cursor: pointer; margin: 0;" onchange="if(this.checked) quickMarkRentalPaid('${item.id}', ${item.amount}, '${selectedMonthStr}')">
               Mark Paid
+              <input type="checkbox" style="width: 14px; height: 14px; accent-color: var(--color-success); cursor: pointer; margin: 0;" onchange="if(this.checked) quickMarkRentalPaid('${item.id}', ${item.amount}, '${selectedMonthStr}')">
             </label>
           `;
         } else if (item.type === 'interest-collection' || item.type === 'interest-payment') {
           const typeStr = item.type === 'interest-collection' ? 'received' : 'paid';
           markPaidBtn = `
             <label style="display: inline-flex; align-items: center; gap: 5px; font-size: 0.72rem; font-weight: 700; color: var(--color-success); margin-right: 0.5rem; cursor: pointer; user-select: none;" onclick="event.stopPropagation();">
-              <input type="checkbox" style="width: 14px; height: 14px; accent-color: var(--color-success); cursor: pointer; margin: 0;" onchange="if(this.checked) quickMarkInterestPaid('${item.id}', '${typeStr}', ${item.amount}, '${selectedMonthStr}')">
               Mark Paid
+              <input type="checkbox" style="width: 14px; height: 14px; accent-color: var(--color-success); cursor: pointer; margin: 0;" onchange="if(this.checked) quickMarkInterestPaid('${item.id}', '${typeStr}', ${item.amount}, '${selectedMonthStr}')">
             </label>
           `;
         }
@@ -1765,7 +1778,7 @@ function renderDashboard() {
             <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
           </div>
           <div class="reminder-details">
-            <div class="reminder-title">${item.propertyName}</div>
+            <div class="reminder-title">Agreement Renewal: ${item.propertyName}</div>
             <div class="reminder-subtitle">Tenant: ${item.partyName} | Renewal: ${item.dueStr}</div>
           </div>
           <div style="display: flex; align-items: center;">${badgeHTML}</div>
@@ -1786,7 +1799,7 @@ function renderDashboard() {
             <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 11-6.219-8.56"/><polyline points="22 2 22 8 16 8"/></svg>
           </div>
           <div class="reminder-details">
-            <div class="reminder-title">${item.partyName}</div>
+            <div class="reminder-title">Renewal: ${item.partyName}</div>
             <div class="reminder-subtitle">${item.category}${item.amount ? ' | ' + formatCurrency(item.amount) : ''}${item.frequency !== 'once' ? ' | ' + item.frequency : ''}</div>
           </div>
           <div style="display: flex; align-items: center; gap: 0.25rem;">
@@ -1801,7 +1814,7 @@ function renderDashboard() {
             <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
           </div>
           <div class="reminder-details">
-            <div class="reminder-title">${item.propertyName} (Rent Collection)</div>
+            <div class="reminder-title">Rent Collection: ${item.propertyName}</div>
             <div class="reminder-subtitle">Tenant: ${item.partyName} | Rent: ${formatCurrency(item.amount)}</div>
           </div>
           <div style="display: flex; align-items: center; gap: 0.25rem;">
@@ -1819,7 +1832,7 @@ function renderDashboard() {
             <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
           </div>
           <div class="reminder-details">
-            <div class="reminder-title">${item.partyName} (${isCollect ? 'Collect Interest' : 'Pay Interest'}) <span style="margin-left: 0.5rem;">${badgeHTML}</span></div>
+            <div class="reminder-title">${isCollect ? 'Collect Interest' : 'Pay Interest'}: ${item.partyName} <span style="margin-left: 0.5rem;">${badgeHTML}</span></div>
             <div class="reminder-subtitle">${isCollect ? 'Lending Yield' : 'Funding Cost'} | Interest: ${formatCurrency(item.amount)}</div>
           </div>
           <div style="display: flex; align-items: center; gap: 0.25rem;">
@@ -1936,15 +1949,16 @@ function renderLending() {
     .filter(p => p.type === 'received' && p.category === 'interest' && p.date <= endDateOfSelectedMonth)
     .reduce((sum, p) => sum + Number(p.amount), 0);
 
-  const totalLoansNode = document.getElementById('lending-total-loans');
-  const totalPrincipalNode = document.getElementById('lending-total-principal');
-  const totalOutstandingNode = document.getElementById('lending-total-outstanding');
+  const totalLoansNode = el('lending-total-loans');
+  const totalPrincipalNode = el('lending-total-principal');
+  const totalOutstandingNode = el('lending-total-outstanding');
   
   if (totalLoansNode) totalLoansNode.textContent = totalLoans;
   if (totalPrincipalNode) totalPrincipalNode.textContent = formatCurrency(totalOriginalPrincipal);
   if (totalOutstandingNode) totalOutstandingNode.textContent = formatCurrency(totalInterestEarned);
 
-  const listContainer = document.getElementById('lent-loans-list');
+  const listContainer = el('lent-loans-list');
+  if (!listContainer) return;
   listContainer.innerHTML = '';
 
   // Only show loans that existed in the selected month
@@ -2038,7 +2052,7 @@ function renderLending() {
             ${stampHtml}
           </div>
           <div style="display: flex; align-items: center; gap: 0.35rem; margin-top: 0.4rem;" onclick="event.stopPropagation();">
-            ${isInterestFullyPaidThisMonth ? '' : `<input type="checkbox" id="chk-interest-received-${loan.id}" onchange="if(this.checked) { quickMarkInterestPaid('${loan.id}', 'received', ${monthlyYield}, '${selectedMonthStr}'); }" style="width: 15px; height: 15px; cursor: pointer; accent-color: var(--color-success); margin: 0; flex-shrink: 0;"><label for="chk-interest-received-${loan.id}" style="cursor: pointer; font-size: 0.85rem; color: var(--text-primary); margin: 0;">Interest Received</label>`}
+            ${isInterestFullyPaidThisMonth ? '' : `<label for="chk-interest-received-${loan.id}" style="cursor: pointer; font-size: 0.85rem; color: var(--text-primary); margin: 0;">Interest Received</label><input type="checkbox" id="chk-interest-received-${loan.id}" onchange="if(this.checked) { quickMarkInterestPaid('${loan.id}', 'received', ${monthlyYield}, '${selectedMonthStr}'); }" style="width: 15px; height: 15px; cursor: pointer; accent-color: var(--color-success); margin: 0; flex-shrink: 0;">`}
           </div>
           ${loan.phone ? `<div style="margin-top: 0.25rem; font-size: 0.85rem; color: var(--text-secondary);">${getContactActionsHTML(loan.phone)}</div>` : ''}
           <div class="item-meta" style="margin-top: 0.25rem;">
@@ -2116,15 +2130,16 @@ function renderBorrowing() {
     .filter(p => p.type === 'paid' && p.category === 'interest' && p.date <= endDateOfSelectedMonth)
     .reduce((sum, p) => sum + Number(p.amount), 0);
 
-  const totalLoansNode = document.getElementById('borrowing-total-loans');
-  const totalPrincipalNode = document.getElementById('borrowing-total-principal');
-  const totalOutstandingNode = document.getElementById('borrowing-total-outstanding');
+  const totalLoansNode = el('borrowing-total-loans');
+  const totalPrincipalNode = el('borrowing-total-principal');
+  const totalOutstandingNode = el('borrowing-total-outstanding');
   
   if (totalLoansNode) totalLoansNode.textContent = totalLoans;
   if (totalPrincipalNode) totalPrincipalNode.textContent = formatCurrency(totalOriginalPrincipal);
   if (totalOutstandingNode) totalOutstandingNode.textContent = formatCurrency(totalInterestPaid);
 
-  const listContainer = document.getElementById('borrowed-loans-list');
+  const listContainer = el('borrowed-loans-list');
+  if (!listContainer) return;
   listContainer.innerHTML = '';
 
   // Only show loans that existed in the selected month
@@ -2218,7 +2233,7 @@ function renderBorrowing() {
             ${stampHtml}
           </div>
           <div style="display: flex; align-items: center; gap: 0.35rem; margin-top: 0.4rem;" onclick="event.stopPropagation();">
-            ${isInterestFullyPaidThisMonth ? '' : `<input type="checkbox" id="chk-interest-paid-${loan.id}" onchange="if(this.checked) { quickMarkInterestPaid('${loan.id}', 'paid', ${monthlyCost}, '${selectedMonthStr}'); }" style="width: 15px; height: 15px; cursor: pointer; accent-color: var(--color-danger); margin: 0; flex-shrink: 0;"><label for="chk-interest-paid-${loan.id}" style="cursor: pointer; font-size: 0.85rem; color: var(--text-primary); margin: 0;">Interest Paid</label>`}
+            ${isInterestFullyPaidThisMonth ? '' : `<label for="chk-interest-paid-${loan.id}" style="cursor: pointer; font-size: 0.85rem; color: var(--text-primary); margin: 0;">Interest Paid</label><input type="checkbox" id="chk-interest-paid-${loan.id}" onchange="if(this.checked) { quickMarkInterestPaid('${loan.id}', 'paid', ${monthlyCost}, '${selectedMonthStr}'); }" style="width: 15px; height: 15px; cursor: pointer; accent-color: var(--color-danger); margin: 0; flex-shrink: 0;">`}
           </div>
           ${loan.phone ? `<div style="margin-top: 0.25rem; font-size: 0.85rem; color: var(--text-secondary);">${getContactActionsHTML(loan.phone)}</div>` : ''}
           <div class="item-meta" style="margin-top: 0.25rem;">
@@ -2290,7 +2305,7 @@ function renderRentals() {
   const currentMonthName = MONTH_UPPER_NAMES[selMonth - 1];
   const activeMonthStr = `${currentMonthName} ${selYear}`;
   
-  const activeMonthBadge = document.getElementById('rentals-active-month-badge');
+  const activeMonthBadge = el('rentals-active-month-badge');
   if (activeMonthBadge) {
     activeMonthBadge.textContent = activeMonthStr;
   }
@@ -2305,15 +2320,16 @@ function renderRentals() {
     .filter(p => p.monthYear <= selectedMonthStr)
     .reduce((sum, p) => sum + Number(p.amount), 0);
 
-  const activeLeasesNode = document.getElementById('rentals-active-leases');
-  const monthlyIncomeNode = document.getElementById('rentals-monthly-income');
-  const totalCollectedNode = document.getElementById('rentals-total-collected');
+  const activeLeasesNode = el('rentals-active-leases');
+  const monthlyIncomeNode = el('rentals-monthly-income');
+  const totalCollectedNode = el('rentals-total-collected');
   
   if (activeLeasesNode) activeLeasesNode.textContent = totalLeases;
   if (monthlyIncomeNode) monthlyIncomeNode.textContent = formatCurrency(monthlyRentRoll);
   if (totalCollectedNode) totalCollectedNode.textContent = formatCurrency(totalCollected);
 
-  const listContainer = document.getElementById('rentals-list');
+  const listContainer = el('rentals-list');
+  if (!listContainer) return;
   listContainer.innerHTML = '';
 
   // Only show rentals that existed in the selected month
@@ -3489,7 +3505,7 @@ function renderExpenses() {
     });
   }
 
-  const listContainer = document.getElementById('expenses-list');
+  const listContainer = el('expenses-list');
   if (!listContainer) return;
   listContainer.innerHTML = '';
 
@@ -3863,234 +3879,12 @@ window.openReportsModal = openReportsModal;
 window.exportReportsCSV = exportReportsCSV;
 
 // ==========================================
-// DOCS STORAGE (IndexedDB)
-// ==========================================
-class DocStorage {
-  constructor() {
-    this.dbName = 'FinanceTrackerDocs';
-    this.storeName = 'documents';
-    this.db = null;
-  }
-
-  async init() {
-    return new Promise((resolve, reject) => {
-      const request = indexedDB.open(this.dbName, 1);
-      request.onerror = (e) => reject(e);
-      request.onsuccess = (e) => {
-        this.db = e.target.result;
-        resolve();
-      };
-      request.onupgradeneeded = (e) => {
-        const db = e.target.result;
-        if (!db.objectStoreNames.contains(this.storeName)) {
-          db.createObjectStore(this.storeName, { keyPath: 'id' });
-        }
-      };
-    });
-  }
-
-  async save(id, dataUrl, type, name) {
-    if (!this.db) await this.init();
-    return new Promise((resolve, reject) => {
-      const tx = this.db.transaction([this.storeName], 'readwrite');
-      const store = tx.objectStore(this.storeName);
-      const request = store.put({ id, dataUrl, type, name, timestamp: Date.now() });
-      request.onsuccess = () => resolve();
-      request.onerror = (e) => reject(e);
-    });
-  }
-
-  async get(id) {
-    if (!this.db) await this.init();
-    return new Promise((resolve, reject) => {
-      const tx = this.db.transaction([this.storeName], 'readonly');
-      const store = tx.objectStore(this.storeName);
-      const request = store.get(id);
-      request.onsuccess = (e) => resolve(e.target.result);
-      request.onerror = (e) => reject(e);
-    });
-  }
-
-  async getAllMeta() {
-    if (!this.db) await this.init();
-    return new Promise((resolve, reject) => {
-      const tx = this.db.transaction([this.storeName], 'readonly');
-      const store = tx.objectStore(this.storeName);
-      const request = store.getAll();
-      request.onsuccess = (e) => {
-        const items = e.target.result || [];
-        resolve(items.map(item => ({ id: item.id, name: item.name, type: item.type, timestamp: item.timestamp, dataUrl: item.dataUrl })).sort((a,b) => b.timestamp - a.timestamp));
-      };
-      request.onerror = (e) => reject(e);
-    });
-  }
-
-  async delete(id) {
-    if (!this.db) await this.init();
-    return new Promise((resolve, reject) => {
-      const tx = this.db.transaction([this.storeName], 'readwrite');
-      const store = tx.objectStore(this.storeName);
-      const request = store.delete(id);
-      request.onsuccess = () => resolve();
-      request.onerror = (e) => reject(e);
-    });
-  }
-}
-
-const docStorage = new DocStorage();
-
-async function handleDocUpload(event) {
-  const files = event.target.files;
-  if (!files || files.length === 0) return;
-
-  for (let i = 0; i < files.length; i++) {
-    const file = files[i];
-    const reader = new FileReader();
-    reader.onload = async (e) => {
-      const id = 'doc_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5);
-      await docStorage.save(id, e.target.result, file.type, file.name || 'Captured Photo');
-      renderDocs();
-    };
-    reader.readAsDataURL(file);
-  }
-  event.target.value = ''; // reset
-}
-
-async function renderDocs() {
-  const grid = document.getElementById('docs-grid');
-  if (!grid) return;
-
-  try {
-    const docs = await docStorage.getAllMeta();
-    
-    if (docs.length === 0) {
-      grid.innerHTML = `<div class="empty-state" style="grid-column: 1 / -1;"><p>No documents uploaded yet.</p></div>`;
-      return;
-    }
-
-    grid.innerHTML = docs.map(doc => {
-      const isImg = doc.type.startsWith('image/');
-      let mediaPreview = '';
-      if (isImg && doc.dataUrl) {
-          mediaPreview = `<div style="width: 100%; height: 90px; overflow: hidden; border-radius: 6px; margin-bottom: 0.5rem;"><img src="${doc.dataUrl}" style="width: 100%; height: 100%; object-fit: cover; opacity: 0.9; transition: opacity 0.2s;" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.9"></div>`;
-      } else {
-          const icon = isImg 
-            ? `<svg viewBox="0 0 24 24" width="32" height="32" stroke="currentColor" fill="none"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>`
-            : `<svg viewBox="0 0 24 24" width="32" height="32" stroke="currentColor" fill="none"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>`;
-          mediaPreview = `<div style="color: var(--color-accent); height: 90px; display: flex; align-items: center; justify-content: center;">${icon}</div>`;
-      }
-      
-      const dateStr = new Date(doc.timestamp).toLocaleDateString();
-
-      return `
-        <div class="card" style="padding: 1rem; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 0.25rem; position: relative;">
-          ${mediaPreview}
-          <div style="font-size: 0.75rem; font-weight: 600; word-break: break-all; color: var(--text-primary); width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${doc.name}">${doc.name}</div>
-          <div style="font-size: 0.65rem; color: var(--text-muted);">${dateStr}</div>
-          
-          <div style="display: flex; gap: 0.4rem; margin-top: 0.75rem; width: 100%;">
-            <button class="btn btn-primary btn-sm" style="flex: 1; padding: 0.3rem;" onclick="viewDoc('${doc.id}')">View</button>
-            <button class="btn btn-secondary btn-sm" style="flex: 1; padding: 0.3rem; border-color: rgba(239, 68, 68, 0.3); color: var(--color-danger);" onclick="deleteDoc('${doc.id}')">Del</button>
-          </div>
-        </div>
-      `;
-    }).join('');
-  } catch (err) {
-    console.error('Failed to render docs:', err);
-    grid.innerHTML = `<p style="color: red;">Error loading documents.</p>`;
-  }
-}
-
-async function viewDoc(id) {
-  try {
-    const doc = await docStorage.get(id);
-    if (!doc) return;
-
-    const imgEl = document.getElementById('view-doc-img');
-    const pdfEl = document.getElementById('view-doc-pdf');
-    
-    imgEl.style.display = 'none';
-    pdfEl.style.display = 'none';
-
-    if (doc.type.startsWith('image/')) {
-      imgEl.src = doc.dataUrl;
-      imgEl.style.display = 'block';
-    } else if (doc.type === 'application/pdf') {
-      pdfEl.src = doc.dataUrl;
-      pdfEl.style.display = 'block';
-    } else {
-      alert('Unsupported file type for viewing.');
-      return;
-    }
-
-    const btnShare = document.getElementById('btn-share-doc');
-    const btnDownload = document.getElementById('btn-download-doc');
-    
-    // Always display share button so users know it exists
-    btnShare.style.display = 'inline-flex';
-    
-    if (navigator.share) {
-      btnShare.onclick = () => shareDoc(id);
-    } else {
-      btnShare.onclick = () => {
-        alert('Your browser does not support direct sharing to WhatsApp. Please download the image and send it manually.');
-      };
-    }
-    btnDownload.onclick = () => downloadDoc(id);
-
-    openModal('modal-view-doc');
-  } catch (err) {
-    console.error('Error viewing doc', err);
-  }
-}
-
-window.downloadDoc = async function(id) {
-  try {
-    const doc = await docStorage.get(id);
-    if (!doc) return;
-    const a = document.createElement('a');
-    a.href = doc.dataUrl;
-    a.download = doc.name;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-  } catch (err) {
-    console.error('Failed to download doc:', err);
-  }
-};
-
-window.shareDoc = async function(id) {
-  try {
-    const doc = await docStorage.get(id);
-    if (!doc) return;
-    if (navigator.share) {
-      const res = await fetch(doc.dataUrl);
-      const blob = await res.blob();
-      const file = new File([blob], doc.name, { type: doc.type });
-      await navigator.share({
-        title: doc.name,
-        files: [file]
-      });
-    }
-  } catch (err) {
-    console.error('Failed to share doc:', err);
-  }
-};
-
-async function deleteDoc(id) {
-  if (!confirm('Delete this document?')) return;
-  await docStorage.delete(id);
-  renderDocs();
-}
-
-window.viewDoc = viewDoc;
-window.deleteDoc = deleteDoc;
-
 window.addEventListener('DOMContentLoaded', () => {
   initApp();
   
   const datePickerInput = document.getElementById('date-picker-input');
   if (datePickerInput) {
+    datePickerInput.max = new Date().toISOString().split('T')[0];
     datePickerInput.addEventListener('change', (e) => {
       if (e.target.value) {
         selectedDateStr = e.target.value;
@@ -4102,20 +3896,10 @@ window.addEventListener('DOMContentLoaded', () => {
     });
   }
   
-  // Attach doc upload listeners
-  const docUploadInput = document.getElementById('doc-upload-input');
-  if (docUploadInput) docUploadInput.addEventListener('change', handleDocUpload);
-  
-  const docCameraInput = document.getElementById('doc-camera-input');
-  if (docCameraInput) docCameraInput.addEventListener('change', handleDocUpload);
-  
-  // Render docs initially
-  renderDocs();
-
   // ==========================================
   // SWIPE GESTURES FOR MOBILE NAVIGATION
   // ==========================================
-  const tabsOrder = ['dashboard', 'rental', 'interest', 'docs', 'settings'];
+  const tabsOrder = ['dashboard', 'records'];
   let touchStartX = 0;
   let touchEndX = 0;
   let touchStartY = 0;

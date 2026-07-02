@@ -34,9 +34,9 @@
             </a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" data-tab="docs">
-              <div class="nav-icon"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
-              <span>Bills</span>
+            <a class="nav-link" data-tab="records">
+              <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+              <span>Records</span>
             </a>
           </li>
 
@@ -55,9 +55,9 @@
         <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>
         <span>Summary</span>
       </a>
-      <a class="mobile-nav-link" data-tab="docs">
-        <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-        <span>Bills</span>
+      <a class="mobile-nav-link" data-tab="records">
+        <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+        <span>Records</span>
       </a>
 
     </nav>
@@ -74,7 +74,7 @@
           <label class="date-badge" id="current-date-badge" style="cursor: pointer; position: relative; display: flex; align-items: center; gap: 0.5rem;">
             <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
             <span id="header-date">--</span>
-            <input type="date" id="date-picker-input" onclick="this.showPicker()" style="position: absolute; opacity: 0; width: 100%; height: 100%; left: 0; top: 0; cursor: pointer; z-index: 10;">
+            <input type="date" id="date-picker-input" max="" onclick="this.showPicker()" style="position: absolute; opacity: 0; width: 100%; height: 100%; left: 0; top: 0; cursor: pointer; z-index: 10;">
           </label>
         </div>
       </header>
@@ -131,7 +131,7 @@
 
         <!-- Summary Cards Grid -->
         <div class="summary-grid" style="margin-bottom: 1.25rem;">
-          <div class="card summary-card warning" id="card-rent" onclick="toggleReminderFilter('rent')" style="cursor: pointer;">
+          <div class="card summary-card warning" id="card-rent" onclick="toggleReminderFilter('rent')" style="border-left: 4px solid var(--color-warning); cursor: pointer;">
             <div class="summary-card-header">
               <span style="text-transform: uppercase;">RENT</span>
               <div class="summary-card-icon">
@@ -504,28 +504,58 @@
         </div>
       </div>
         </div>
-
-      </section>
-
-      <!-- VIEW: DOCS -->
-      <section id="view-docs" class="tab-content">
-        <div class="section-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem;">
-          <h2 style="margin-bottom: 0;">Documents</h2>
-          <div style="display: flex; gap: 0.5rem;">
-            <label class="btn btn-primary" style="cursor: pointer;">
-              <input type="file" id="doc-upload-input" accept="image/*,application/pdf" style="display: none;" multiple>
-              <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-              Upload
-            </label>
-            <label class="btn btn-secondary" style="cursor: pointer;">
-              <input type="file" id="doc-camera-input" accept="image/*" capture="environment" style="display: none;">
-              <svg viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
-              Camera
-            </label>
-          </div>
+      <!-- VIEW: RECORDS -->
+      <section id="view-records" class="tab-content">
+        <!-- Search bar -->
+        <div class="card" style="margin-bottom: 1rem; padding: 0.75rem 1.25rem; display: flex; align-items: center; gap: 0.75rem;">
+          <svg viewBox="0 0 24 24" width="20" height="20" stroke="var(--text-secondary)" stroke-width="2" fill="none" style="flex-shrink: 0;"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="text" id="records-search" class="form-input" placeholder="Search records..." style="border: none; background: transparent; padding: 0; margin: 0; box-shadow: none;">
         </div>
-        <div id="docs-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 1rem; margin-top: 1rem;">
-          <!-- Injected via JS -->
+        
+        <div class="summary-grid" style="margin-bottom: 1.25rem;">
+          <div class="card summary-card warning" onclick="alert('Bills - Coming soon')" style="border-left: 4px solid var(--color-warning); cursor: pointer;">
+            <div class="summary-card-header">
+              <span style="text-transform: uppercase; color: var(--color-warning);">BILLS</span>
+              <div class="summary-card-icon" style="background: rgba(245,158,11,0.15); color: #f59e0b;">
+                <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+              </div>
+            </div>
+            <div class="summary-value" style="color: var(--color-warning);">0</div>
+            <div class="summary-sub-value" style="font-size: 0.78rem; margin-top: 0.35rem; font-weight: 700; color: var(--text-secondary); display: flex; flex-direction: column; align-items: flex-start; gap: 0.15rem;">Pending: 0</div>
+          </div>
+          
+          <div class="card summary-card success" onclick="alert('Documents - Coming soon')" style="border-left: 4px solid var(--color-success); cursor: pointer;">
+            <div class="summary-card-header">
+              <span style="text-transform: uppercase; color: var(--color-success);">DOCUMENTS</span>
+              <div class="summary-card-icon" style="background: rgba(16, 185, 129, 0.1); color: var(--color-success);">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              </div>
+            </div>
+            <div class="summary-value" style="color: var(--color-success);">0</div>
+            <div class="summary-sub-value" style="font-size: 0.78rem; margin-top: 0.35rem; font-weight: 700; color: var(--text-secondary); display: flex; flex-direction: column; align-items: flex-start; gap: 0.15rem;">Uploaded: 0</div>
+          </div>
+          
+          <div class="card summary-card accent" onclick="alert('Construction - Coming soon')" style="border-left: 4px solid var(--color-accent); cursor: pointer;">
+            <div class="summary-card-header">
+              <span style="text-transform: uppercase; color: var(--color-accent);">CONSTRUCTION</span>
+              <div class="summary-card-icon" style="background: rgba(var(--color-accent-rgb), 0.1); color: var(--color-accent);">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M12 12h.01"/><path d="M17 12h.01"/><path d="M7 12h.01"/></svg>
+              </div>
+            </div>
+            <div class="summary-value" style="color: var(--color-accent);">0</div>
+            <div class="summary-sub-value" style="font-size: 0.78rem; margin-top: 0.35rem; font-weight: 700; color: var(--text-secondary); display: flex; flex-direction: column; align-items: flex-start; gap: 0.15rem;">Projects: 0</div>
+          </div>
+          
+          <div class="card summary-card success" onclick="switchTab('settings')" style="border-left: 4px solid var(--color-success); cursor: pointer;">
+            <div class="summary-card-header">
+              <span style="text-transform: uppercase; color: var(--color-success);">SETTINGS</span>
+              <div class="summary-card-icon" style="background: rgba(16, 185, 129, 0.1); color: var(--color-success);">
+                <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              </div>
+            </div>
+            <div class="summary-value" style="color: var(--color-success);">--</div>
+            <div class="summary-sub-value" style="font-size: 0.78rem; margin-top: 0.35rem; font-weight: 700; color: var(--text-secondary); display: flex; flex-direction: column; align-items: flex-start; gap: 0.15rem;">App Configuration</div>
+          </div>
         </div>
       </section>
 
@@ -1022,25 +1052,6 @@
       <div class="modal-footer">
         <button class="btn btn-secondary" onclick="closeModal('modal-reports')">Close</button>
       </div>
-    </div>
-  </div>
-
-  <!-- MODAL: VIEW DOCUMENT -->
-  <div class="modal-overlay" id="modal-view-doc">
-    <div class="modal-container" style="max-width: 90vw; background: transparent; box-shadow: none; border: none;">
-      <div style="display: flex; justify-content: flex-end; gap: 0.5rem; margin-bottom: 0.5rem;">
-        <button class="btn btn-secondary" id="btn-share-doc" style="background: rgba(0,0,0,0.5); border-color: transparent; color: white; display: inline-flex; align-items: center;">
-          <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" fill="none" style="margin-right:4px;"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
-          Share (WA)
-        </button>
-        <button class="btn btn-primary" id="btn-download-doc" style="background: rgba(0,0,0,0.5); border-color: transparent; color: white; display: inline-flex; align-items: center;">
-          <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" fill="none" style="margin-right:4px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-          Download
-        </button>
-        <button class="btn btn-secondary" onclick="closeModal('modal-view-doc')" style="background: rgba(0,0,0,0.5); border-color: transparent; color: white; display: inline-flex; align-items: center;">Close</button>
-      </div>
-      <img id="view-doc-img" src="" style="max-width: 100%; max-height: 80vh; border-radius: 8px; display: none; object-fit: contain;">
-      <iframe id="view-doc-pdf" style="width: 100%; height: 80vh; border: none; border-radius: 8px; display: none; background: white;"></iframe>
     </div>
   </div>
 
