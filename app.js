@@ -331,7 +331,7 @@ function updateHeaderDateDisplay() {
   // Update title
   const titleNode = document.getElementById('current-view-title');
   if (titleNode) {
-    let baseTitle = VIEWS[currentTab]?.title || 'Summary';
+    let baseTitle = VIEWS[currentTab]?.title || 'Status';
     
     if (currentTab === 'dashboard' && currentReminderFilter !== 'all') {
       const filterTitles = {
@@ -354,6 +354,12 @@ function toggleReminderFilter(filterType) {
   if (currentReminderFilter === 'all') _expandedCards.clear();
   refreshActiveTab(); // Refresh active tab handles title update too
   renderDashboard();
+  if (currentReminderFilter !== 'all') {
+    setTimeout(() => {
+      const el = document.getElementById('notifications-wrapper-card');
+      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 50);
+  }
 }
 
 function updateCardHighlights() {
@@ -1196,7 +1202,7 @@ function renderRecords() {
 }
 
 const VIEWS = {
-  dashboard: { title: 'Summary', subtitle: 'Your aggregated financial overview at a glance.', render: renderDashboard },
+  dashboard: { title: 'Status', subtitle: 'Your aggregated financial overview at a glance.', render: renderDashboard },
   records: { title: 'Records', subtitle: 'Bills, documents, construction, and settings.', render: renderRecords }
 };
 
@@ -3349,6 +3355,12 @@ window.selectConstCategory = function(projIdx, cat) {
     window._selectedConstCats[projIdx] = cat;
   }
   renderConstruction();
+  if (window._selectedConstCats[projIdx]) {
+    setTimeout(() => {
+      const amtInput = document.getElementById(`const-amount-${projIdx}`);
+      if (amtInput) amtInput.focus();
+    }, 50);
+  }
 };
 
 window.submitQuickConst = function(projIdx, project) {
@@ -3408,7 +3420,7 @@ function renderConstruction() {
             <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.5rem; background: var(--input-bg); border-radius: 6px;">
               <div style="display: flex; flex-direction: column; gap: 0.15rem;">
                 <span style="font-weight: 600; font-size: 0.85rem; color: var(--text-primary);">${exp.laborType || 'General'}</span>
-                <span style="font-size: 0.7rem; color: var(--text-muted);">${formatDateString(exp.date)} - ${exp.note || ''}</span>
+                <span style="font-size: 0.7rem; color: var(--text-muted);">${formatDate(exp.date)} - ${exp.note || ''}</span>
               </div>
               <div style="display: flex; align-items: center; gap: 0.75rem;">
                 <span style="font-weight: 700; color: var(--color-danger); font-size: 0.85rem;">- ${formatCurrency(exp.amount)}</span>
