@@ -4290,7 +4290,7 @@ window.addEventListener('DOMContentLoaded', () => {
   // ==========================================
   // SWIPE GESTURES FOR MOBILE NAVIGATION
   // ==========================================
-  const tabsOrder = ['dashboard', 'records'];
+  const tabsOrder = ['dashboard', 'records', 'settings'];
   let touchStartX = 0;
   let touchEndX = 0;
   let touchStartY = 0;
