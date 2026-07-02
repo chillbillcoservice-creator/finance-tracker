@@ -331,7 +331,20 @@ function updateHeaderDateDisplay() {
   // Update title
   const titleNode = document.getElementById('current-view-title');
   if (titleNode) {
-    const baseTitle = VIEWS[currentTab]?.title || 'Summary';
+    let baseTitle = VIEWS[currentTab]?.title || 'Summary';
+    
+    if (currentTab === 'dashboard' && currentReminderFilter !== 'all') {
+      const filterTitles = {
+        rent: 'Rent',
+        interest: 'Interest',
+        expenses: 'Expenses',
+        reports: 'Balance To Receive'
+      };
+      if (filterTitles[currentReminderFilter]) {
+        baseTitle = filterTitles[currentReminderFilter];
+      }
+    }
+    
     titleNode.textContent = baseTitle;
   }
 }
@@ -339,6 +352,7 @@ function updateHeaderDateDisplay() {
 function toggleReminderFilter(filterType) {
   currentReminderFilter = (currentReminderFilter === filterType) ? 'all' : filterType;
   if (currentReminderFilter === 'all') _expandedCards.clear();
+  refreshActiveTab(); // Refresh active tab handles title update too
   renderDashboard();
 }
 
@@ -1149,13 +1163,47 @@ window.selectYear = selectYear;
 
 // 5. Navigation & Routing Handler
 function renderRecords() {
-  // Records dashboard - static cards, no dynamic data needed
+  // Records dashboard
+  renderConstruction();
 }
 
 const VIEWS = {
   dashboard: { title: 'Summary', subtitle: 'Your aggregated financial overview at a glance.', render: renderDashboard },
   records: { title: 'Records', subtitle: 'Bills, documents, construction, and settings.', render: renderRecords }
 };
+
+let activeRecordsTab = 'construction';
+
+function selectRecordsTab(tab) {
+  activeRecordsTab = tab;
+  
+  // Update UI highlights
+  const cards = { bills: 'card-records-bills', documents: 'card-records-documents', construction: 'card-records-construction' };
+  Object.entries(cards).forEach(([key, id]) => {
+    const el = document.getElementById(id);
+    if (el) {
+      if (key === tab) {
+        el.classList.add('active');
+        el.style.opacity = '1';
+        el.style.transform = 'scale(1.02)';
+      } else {
+        el.classList.remove('active');
+        el.style.opacity = '0.6';
+        el.style.transform = 'scale(1)';
+      }
+    }
+  });
+
+  // Toggle sections
+  const billsEl = document.getElementById('section-records-bills');
+  const docsEl = document.getElementById('section-records-documents');
+  const constrEl = document.getElementById('section-records-construction');
+  
+  if(billsEl) billsEl.style.display = tab === 'bills' ? 'block' : 'none';
+  if(docsEl) docsEl.style.display = tab === 'documents' ? 'block' : 'none';
+  if(constrEl) constrEl.style.display = tab === 'construction' ? 'block' : 'none';
+}
+window.selectRecordsTab = selectRecordsTab;
 
 let currentTab = 'dashboard';
 
@@ -3236,6 +3284,114 @@ function initSearch() {
   });
 }
 
+// CONSTRUCTION TRACKING LOGIC
+window.openConstructionModal = function(id = null) {
+  document.getElementById('form-construction').reset();
+  document.getElementById('construction-id').value = '';
+  document.getElementById('const-date').value = new Date().toISOString().slice(0, 10);
+  
+  if (id) {
+    const expense = state.expenses.find(e => e.id === id);
+    if (expense) {
+      document.getElementById('construction-id').value = expense.id;
+      document.getElementById('const-project').value = expense.project || '';
+      document.getElementById('const-labor').value = expense.laborType || '';
+      document.getElementById('const-worker').value = expense.workerName || '';
+      document.getElementById('const-amount').value = expense.amount || '';
+      document.getElementById('const-date').value = expense.date || '';
+      document.getElementById('const-notes').value = expense.note || '';
+    }
+  }
+  
+  document.getElementById('modal-construction').style.display = 'flex';
+};
+
+window.deleteConstruction = function(id) {
+  if(confirm('Are you sure you want to delete this construction payment?')) {
+    state.expenses = state.expenses.filter(e => e.id !== id);
+    saveState();
+    refreshActiveTab();
+  }
+};
+
+function renderConstruction() {
+  const container = document.getElementById('construction-list-container');
+  if (!container) return;
+  
+  const constructionExpenses = state.expenses.filter(e => e.category === 'construction');
+  
+  if (constructionExpenses.length === 0) {
+    container.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-state-icon">
+          <svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        </div>
+        <p>No construction payments logged yet.</p>
+      </div>`;
+    return;
+  }
+
+  // Group by project
+  const projects = {
+    '23/48 Ground Floor': [],
+    '23/48 3rd Floor': [],
+    '1/104': [],
+    'Other': []
+  };
+
+  constructionExpenses.forEach(exp => {
+    const proj = exp.project || 'Other';
+    if (projects[proj]) {
+      projects[proj].push(exp);
+    } else {
+      projects['Other'].push(exp);
+    }
+  });
+
+  let html = '';
+  
+  for (const [project, exps] of Object.entries(projects)) {
+    if (exps.length === 0) continue;
+    
+    // Sort by date desc
+    exps.sort((a, b) => new Date(b.date) - new Date(a.date));
+    const total = exps.reduce((sum, e) => sum + Number(e.amount), 0);
+    
+    html += `
+      <div style="margin-bottom: 1.5rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--border-color); padding-bottom: 0.5rem; margin-bottom: 0.75rem;">
+          <h3 style="margin: 0; color: var(--color-accent); font-size: 1.05rem;">${project}</h3>
+          <span style="font-weight: 700; color: var(--text-primary);">Total: ${formatCurrency(total)}</span>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+    `;
+    
+    exps.forEach(exp => {
+      html += `
+        <div class="list-item" style="cursor: pointer;" onclick="openConstructionModal('${exp.id}')">
+          <div class="list-item-icon" style="background: rgba(var(--color-accent-rgb), 0.1); color: var(--color-accent);">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/></svg>
+          </div>
+          <div class="list-item-content">
+            <div class="list-item-title">${exp.workerName} (${exp.laborType})</div>
+            <div class="list-item-subtitle">${formatDateString(exp.date)} ${exp.note ? ' - ' + exp.note : ''}</div>
+          </div>
+          <div class="list-item-right" style="display: flex; align-items: center; gap: 0.75rem;">
+            <div class="list-item-amount" style="color: var(--color-danger);">- ${formatCurrency(exp.amount)}</div>
+            <button class="btn btn-secondary btn-sm" onclick="event.stopPropagation(); deleteConstruction('${exp.id}')" style="padding: 0.2rem; min-width: auto; border: none; background: transparent; color: var(--text-secondary);">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+            </button>
+          </div>
+        </div>
+      `;
+    });
+    
+    html += `</div></div>`;
+  }
+  
+  container.innerHTML = html;
+}
+
 // 13. BOOTSTRAP INITIALIZATION
 function initApp() {
   loadState();
@@ -3956,5 +4112,41 @@ window.addEventListener('DOMContentLoaded', () => {
         }
       }
     }, {passive: true});
+  }
+  
+  // Initialize Construction Form Listener
+  const formConstruction = document.getElementById('form-construction');
+  if (formConstruction) {
+    formConstruction.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const id = document.getElementById('construction-id').value;
+      const project = document.getElementById('const-project').value;
+      const laborType = document.getElementById('const-labor').value;
+      const workerName = document.getElementById('const-worker').value;
+      const amount = Number(document.getElementById('const-amount').value);
+      const date = document.getElementById('const-date').value;
+      const notes = document.getElementById('const-notes').value;
+      
+      if (id) {
+        const index = state.expenses.findIndex(exp => exp.id === id);
+        if (index !== -1) {
+          state.expenses[index] = {
+            ...state.expenses[index],
+            project, laborType, workerName, amount, date, note: notes
+          };
+        }
+      } else {
+        state.expenses.push({
+          id: 'exp_' + Math.random().toString(36).substr(2, 9),
+          category: 'construction',
+          project, laborType, workerName, amount, date, note: notes,
+          propertyId: ''
+        });
+      }
+      
+      saveState();
+      closeModal('modal-construction');
+      refreshActiveTab();
+    });
   }
 });
