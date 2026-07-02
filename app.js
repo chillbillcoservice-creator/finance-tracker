@@ -3340,82 +3340,134 @@ window.deleteConstruction = function(id) {
   }
 };
 
+window._selectedConstCats = window._selectedConstCats || {};
+
+window.selectConstCategory = function(projIdx, cat) {
+  if (window._selectedConstCats[projIdx] === cat) {
+    window._selectedConstCats[projIdx] = null;
+  } else {
+    window._selectedConstCats[projIdx] = cat;
+  }
+  renderConstruction();
+};
+
+window.submitQuickConst = function(projIdx, project) {
+  const amtInput = document.getElementById(`const-amount-${projIdx}`);
+  const notesInput = document.getElementById(`const-notes-${projIdx}`);
+  if (!amtInput || !notesInput) return;
+  
+  const amt = Number(amtInput.value);
+  if (!amt || amt <= 0) {
+    alert('Please enter a valid amount.');
+    return;
+  }
+  
+  const cat = window._selectedConstCats[projIdx] || 'Labour';
+  
+  const newExp = {
+    id: 'exp_' + Date.now(),
+    category: 'construction',
+    project: project,
+    laborType: cat,
+    amount: amt,
+    date: new Date().toISOString().slice(0, 10),
+    note: notesInput.value.trim()
+  };
+  
+  state.expenses.push(newExp);
+  saveState();
+  
+  amtInput.value = '';
+  notesInput.value = '';
+  window._selectedConstCats[projIdx] = null;
+  
+  refreshActiveTab();
+};
+
 function renderConstruction() {
   const container = document.getElementById('construction-list-container');
   if (!container) return;
   
-  const constructionExpenses = state.expenses.filter(e => e.category === 'construction');
-  
-  if (constructionExpenses.length === 0) {
-    container.innerHTML = `
-      <div class="empty-state">
-        <div class="empty-state-icon">
-          <svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-        </div>
-        <p>No construction payments logged yet.</p>
-      </div>`;
-    return;
-  }
-
-  // Group by project
-  const projects = {
-    '23/48 Ground Floor': [],
-    '23/48 3rd Floor': [],
-    '1/104': [],
-    'Other': []
-  };
-
-  constructionExpenses.forEach(exp => {
-    const proj = exp.project || 'Other';
-    if (projects[proj]) {
-      projects[proj].push(exp);
-    } else {
-      projects['Other'].push(exp);
-    }
-  });
-
-  let html = '';
-  
-  for (const [project, exps] of Object.entries(projects)) {
-    if (exps.length === 0) continue;
+  try {
+    const constructionExpenses = (state.expenses || []).filter(e => e && e.category === 'construction');
     
-    // Sort by date desc
-    exps.sort((a, b) => new Date(b.date) - new Date(a.date));
-    const total = exps.reduce((sum, e) => sum + Number(e.amount), 0);
+    const projectsList = ['23/48 Ground Floor', '23/48 3rd Floor', '1/104'];
+    const categories = ['Carpenter', 'Painter', 'Welding', 'Labour', 'Electrician', 'Plumber', 'Malba', 'Hardware'];
     
-    html += `
-      <div style="margin-bottom: 1.5rem;">
-        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--border-color); padding-bottom: 0.5rem; margin-bottom: 0.75rem;">
-          <h3 style="margin: 0; color: var(--color-accent); font-size: 1.05rem;">${project}</h3>
-          <span style="font-weight: 700; color: var(--text-primary);">Total: ${formatCurrency(total)}</span>
-        </div>
-        <div style="display: flex; flex-direction: column; gap: 0.5rem;">
-    `;
+    let html = '';
     
-    exps.forEach(exp => {
+    projectsList.forEach((project, idx) => {
+      const exps = constructionExpenses.filter(e => e && e.project === project).sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0));
+      const total = exps.reduce((sum, e) => sum + (Number(e.amount) || 0), 0);
+      const selectedCat = window._selectedConstCats ? window._selectedConstCats[idx] : null;
+      
+      let expensesListHtml = '';
+      if (exps.length > 0) {
+        exps.slice(0, 5).forEach(exp => {
+          expensesListHtml += `
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.5rem; background: var(--input-bg); border-radius: 6px;">
+              <div style="display: flex; flex-direction: column; gap: 0.15rem;">
+                <span style="font-weight: 600; font-size: 0.85rem; color: var(--text-primary);">${exp.laborType || 'General'}</span>
+                <span style="font-size: 0.7rem; color: var(--text-muted);">${formatDateString(exp.date)} - ${exp.note || ''}</span>
+              </div>
+              <div style="display: flex; align-items: center; gap: 0.75rem;">
+                <span style="font-weight: 700; color: var(--color-danger); font-size: 0.85rem;">- ${formatCurrency(exp.amount)}</span>
+                <button class="btn btn-secondary btn-sm" onclick="event.stopPropagation(); deleteConstruction('${exp.id}')" style="padding: 0.2rem; min-width: auto; border: none; background: transparent; color: var(--text-secondary);">
+                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                </button>
+              </div>
+            </div>
+          `;
+        });
+      }
+      
+      const catButtonsHtml = categories.map(cat => {
+        const isSelected = selectedCat === cat;
+        const bg = isSelected ? 'var(--color-accent)' : 'var(--bg-primary)';
+        const color = isSelected ? '#fff' : 'var(--text-secondary)';
+        const border = isSelected ? '1px solid var(--color-accent)' : '1px solid var(--border-color)';
+        return `<button type="button" class="const-cat-btn-${idx}" data-cat="${cat}" onclick="selectConstCategory('${idx}', '${cat}')" style="padding: 0.35rem 0.5rem; font-size: 0.75rem; border-radius: 4px; background: ${bg}; color: ${color}; border: ${border}; cursor: pointer; transition: all 0.2s;">${cat}</button>`;
+      }).join('');
+      
       html += `
-        <div class="list-item" style="cursor: pointer;" onclick="openConstructionModal('${exp.id}')">
-          <div class="list-item-icon" style="background: rgba(var(--color-accent-rgb), 0.1); color: var(--color-accent);">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/></svg>
+        <div class="card" style="margin-bottom: 1.5rem; padding: 1rem; border: 1px solid var(--border-color); background: var(--bg-card);">
+          <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 0.75rem; margin-bottom: 1rem;">
+            <h3 style="margin: 0; color: var(--color-accent); font-size: 1.1rem;">${project}</h3>
+            <span style="font-weight: 700; color: var(--text-primary);">Total: ${formatCurrency(total)}</span>
           </div>
-          <div class="list-item-content">
-            <div class="list-item-title">${exp.workerName} (${exp.laborType})</div>
-            <div class="list-item-subtitle">${formatDateString(exp.date)} ${exp.note ? ' - ' + exp.note : ''}</div>
+          
+          <!-- Quick Entry Form -->
+          <div style="background: var(--bg-secondary); padding: 0.85rem; border-radius: 8px; margin-bottom: 1rem; border: 1px solid var(--border-color);">
+            <div style="font-size: 0.75rem; font-weight: 700; margin-bottom: 0.5rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px;">Quick Log Labor Payment</div>
+            
+            <div style="display: flex; flex-wrap: wrap; gap: 0.35rem; margin-bottom: 0.85rem;">
+              ${catButtonsHtml}
+            </div>
+            
+            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: stretch;">
+              <input type="number" id="const-amount-${idx}" class="form-input" placeholder="Amount (Rs)" style="flex: 1; min-width: 120px; background: var(--input-bg); margin: 0;">
+              <input type="text" id="const-notes-${idx}" class="form-input" placeholder="Notes (What for)" style="flex: 2; min-width: 150px; background: var(--input-bg); margin: 0;">
+              <button class="btn btn-primary" onclick="submitQuickConst('${idx}', '${project}')" style="min-width: 80px; margin: 0; display: flex; align-items: center; justify-content: center;">
+                <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" style="margin-right: 4px;"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                Save
+              </button>
+            </div>
           </div>
-          <div class="list-item-right" style="display: flex; align-items: center; gap: 0.75rem;">
-            <div class="list-item-amount" style="color: var(--color-danger);">- ${formatCurrency(exp.amount)}</div>
-            <button class="btn btn-secondary btn-sm" onclick="event.stopPropagation(); deleteConstruction('${exp.id}')" style="padding: 0.2rem; min-width: auto; border: none; background: transparent; color: var(--text-secondary);">
-              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
-            </button>
+          
+          <!-- Expenses List -->
+          <div style="font-size: 0.75rem; font-weight: 700; margin-bottom: 0.5rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px;">Recent Payments</div>
+          <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+            ${expensesListHtml || '<div style="font-size: 0.8rem; color: var(--text-muted); text-align: center; padding: 1rem; background: var(--input-bg); border-radius: 6px;">No payments logged for this property.</div>'}
           </div>
         </div>
       `;
     });
     
-    html += `</div></div>`;
+    container.innerHTML = html;
+  } catch (err) {
+    container.innerHTML = `<div style="color:var(--color-danger); padding: 1rem; background: var(--bg-card); border-radius: 8px;">Error loading construction data: ${err.message}. Please clear your cache or check data integrity.</div>`;
+    console.error('Construction render error:', err);
   }
-  
-  container.innerHTML = html;
 }
 
 // 13. BOOTSTRAP INITIALIZATION
