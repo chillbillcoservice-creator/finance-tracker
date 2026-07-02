@@ -1221,7 +1221,8 @@ function selectRecordsTab(tab) {
   renderConstruction();
   
   // Update UI highlights
-  const cards = { bills: 'card-records-bills', documents: 'card-records-documents', construction: 'card-records-construction' };
+  // Update UI highlights
+  const cards = { bills: 'card-records-bills', documents: 'card-records-documents', policies: 'card-records-policies', construction: 'card-records-construction' };
   Object.entries(cards).forEach(([key, id]) => {
     const el = document.getElementById(id);
     if (el) {
@@ -1240,11 +1241,24 @@ function selectRecordsTab(tab) {
   // Toggle sections
   const billsEl = document.getElementById('section-records-bills');
   const docsEl = document.getElementById('section-records-documents');
+  const polEl = document.getElementById('section-records-policies');
   const constrEl = document.getElementById('section-records-construction');
   
   if(billsEl) billsEl.style.display = tab === 'bills' ? 'block' : 'none';
   if(docsEl) docsEl.style.display = tab === 'documents' ? 'block' : 'none';
+  if(polEl) polEl.style.display = tab === 'policies' ? 'block' : 'none';
   if(constrEl) constrEl.style.display = tab === 'construction' ? 'block' : 'none';
+  
+  // Auto-scroll to the activated section
+  setTimeout(() => {
+    let scrollTargetId = 'section-records-bills';
+    if (tab === 'documents') scrollTargetId = 'section-records-documents';
+    if (tab === 'policies') scrollTargetId = 'section-records-policies';
+    if (tab === 'construction') scrollTargetId = 'section-records-construction';
+    
+    const el = document.getElementById(scrollTargetId);
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, 50);
 }
 window.selectRecordsTab = selectRecordsTab;
 
