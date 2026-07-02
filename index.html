@@ -12,7 +12,7 @@
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%230ea5e9'/><text x='50' y='65' font-size='40' font-weight='bold' text-anchor='middle' fill='white' font-family='Arial'>CF</text></svg>">
   <title>Capital Flow | Personal Finance Tracker</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
-  <script type="module" crossorigin src="/finance-tracker/assets/index-B4Y5Z_iu.js"></script>
+  <script type="module" crossorigin src="/finance-tracker/assets/index-qD-jCUHQ.js"></script>
   <link rel="stylesheet" crossorigin href="/finance-tracker/assets/index-BZ-y3Nh_.css">
 </head>
 <body>
@@ -27,7 +27,7 @@
       </div>
 
       <nav style="flex: 1;">
-        <ul class="nav-links">
+        <ul class="nav-list">
           <li class="nav-item">
             <a class="nav-link active" data-tab="dashboard">
               <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>
@@ -35,29 +35,12 @@
             </a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" data-tab="rental">
-              <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-              <span>Rent</span>
-            </a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" data-tab="interest">
-              <svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-              <span>Interest</span>
-            </a>
-          </li>
-          <li class="nav-item">
             <a class="nav-link" data-tab="docs">
               <div class="nav-icon"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
-              <span>Docs</span>
+              <span>Bills</span>
             </a>
           </li>
-          <li class="nav-item">
-            <a class="nav-link" data-tab="settings">
-              <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-              <span>Reports</span>
-            </a>
-          </li>
+
         </ul>
       </nav>
 
@@ -73,21 +56,11 @@
         <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>
         <span>Summary</span>
       </a>
-      <a class="mobile-nav-link" data-tab="rental">
-        <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-        <span>Rent</span>
-      </a>
-      <a class="mobile-nav-link" data-tab="interest">
-        <svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-        <span>Interest</span>
-      </a>
       <a class="mobile-nav-link" data-tab="docs">
         <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        <span>Bills</span>
       </a>
-      <a class="mobile-nav-link" data-tab="settings">
-        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-        <span>Reports</span>
-      </a>
+
     </nav>
 
     <!-- Main Content -->
@@ -98,12 +71,12 @@
         <div class="page-title">
           <h1 id="current-view-title">Summary</h1>
         </div>
-        <div id="header-month-display" style="font-size: 0.85rem; font-weight: 700; color: var(--color-accent); letter-spacing: 0.5px;"></div>
         <div class="header-actions">
-          <div class="date-badge" id="current-date-badge">
+          <label class="date-badge" id="current-date-badge" style="cursor: pointer; position: relative; display: flex; align-items: center; gap: 0.5rem;">
             <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
             <span id="header-date">--</span>
-          </div>
+            <input type="date" id="date-picker-input" onclick="this.showPicker()" style="position: absolute; opacity: 0; width: 100%; height: 100%; left: 0; top: 0; cursor: pointer; z-index: 10;">
+          </label>
         </div>
       </header>
 
@@ -153,75 +126,34 @@
           </div>
         </div>
 
-        <!-- Direct Quick Action Buttons -->
-        <div style="display: flex; gap: 0.6rem; flex-wrap: wrap; margin-bottom: 1.25rem;">
-          <button class="btn btn-primary btn-sm" id="btn-quick-rent" onclick="toggleReminderFilter('rent')" style="transition: opacity 0.2s ease, box-shadow 0.2s ease;">
-            <svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" stroke-width="2" fill="none"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-            Rent
-          </button>
-          <button class="btn btn-sm" style="background: linear-gradient(135deg, var(--color-success), #059669); color: #fff; box-shadow: 0 4px 14px rgba(16,185,129,0.3); transition: opacity 0.2s ease, box-shadow 0.2s ease;" id="btn-quick-interest" onclick="toggleReminderFilter('interest')">
-            <svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" stroke-width="2" fill="none"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-            Interest
-          </button>
-          <button class="btn btn-sm" style="background: linear-gradient(135deg, #f59e0b, #d97706); color: #fff; box-shadow: 0 4px 14px rgba(245,158,11,0.3); transition: opacity 0.2s ease, box-shadow 0.2s ease;" id="btn-quick-renewals" onclick="toggleReminderFilter('renewals')">
-            <svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" stroke-width="2" fill="none"><path d="M21 12a9 9 0 11-6.219-8.56"/><polyline points="22 2 22 8 16 8"/></svg>
-            Renewals
-          </button>
-          <button class="btn btn-sm" style="background: linear-gradient(135deg, var(--color-accent), #0369a1); color: #fff; box-shadow: 0 4px 14px rgba(14,165,233,0.3);" id="btn-quick-lend" onclick="openQuickLend()">
-            <svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" stroke-width="2" fill="none"><path d="M7 17L17 7M17 7H7M17 7V17"/></svg>
-            Lend Money
-          </button>
-          <button class="btn btn-sm" style="background: linear-gradient(135deg, var(--color-danger), #b91c1c); color: #fff; box-shadow: 0 4px 14px rgba(239,68,68,0.3);" id="btn-quick-expenses" onclick="openExpenseModal()">
-            <svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" stroke-width="2" fill="none"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M12 4v16M2 12h20"/></svg>
-            Expenses
-          </button>
-        </div>
 
-        <!-- Upcoming Payment Reminders -->
-        <div class="card" style="margin-bottom: 1.25rem;">
-          <div class="section-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
-            <h2 style="margin-bottom: 0;">
-              <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-              Upcoming Payment Reminders
-            </h2>
-          </div>
-          <div id="reminder-filter-summary" style="display: none; padding: 0.65rem 1rem; background: rgba(255, 255, 255, 0.02); border-bottom: 1px solid rgba(255, 255, 255, 0.05); font-size: 0.85rem; font-weight: 700; color: var(--text-secondary); margin: 0 0 0.75rem 0; border-radius: 6px; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.75rem;">
-            <!-- Will be populated dynamically via JS -->
-          </div>
-          <div class="reminders-list" id="dashboard-rent-reminders">
-            <div class="empty-state">
-              <div class="empty-state-icon">
-                <svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-              </div>
-              <p>No upcoming payments due this month.</p>
-            </div>
-          </div>
-        </div>
+
+
 
         <!-- Summary Cards Grid -->
         <div class="summary-grid" style="margin-bottom: 1.25rem;">
-          <div class="card summary-card warning" data-tab="rental">
+          <div class="card summary-card warning" onclick="toggleReminderFilter('rent')" style="cursor: pointer;">
             <div class="summary-card-header">
-              <span>Rental Income / mo</span>
+              <span style="text-transform: uppercase;">RENT</span>
               <div class="summary-card-icon">
                 <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
               </div>
             </div>
             <div class="summary-value" id="dash-monthly-rent">Rs. 0.00</div>
-            <div class="summary-sub-value" id="dash-rental-balance" style="font-size: 0.78rem; margin-top: 0.35rem; font-weight: 700; color: var(--text-secondary); display: flex; align-items: center; gap: 0.25rem;">Balance to collect: Rs. 0.00</div>
+            <div class="summary-sub-value" id="dash-rental-balance" style="font-size: 0.78rem; margin-top: 0.35rem; font-weight: 700; color: var(--text-secondary); display: flex; flex-direction: column; align-items: flex-start; gap: 0.15rem;">Balance to collect: Rs. 0.00</div>
           </div>
-          <div class="card summary-card success" data-tab="interest" style="border-left: 4px solid var(--color-success); cursor: pointer;">
+          <div class="card summary-card success" onclick="toggleReminderFilter('interest')" style="border-left: 4px solid var(--color-success); cursor: pointer;">
             <div class="summary-card-header">
-              <span style="color: var(--color-success);">Interest Received</span>
+              <span style="color: var(--color-success); text-transform: uppercase;">INTEREST</span>
               <div class="summary-card-icon" style="background: rgba(16, 185, 129, 0.1); color: var(--color-success);">
                 <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
               </div>
             </div>
             <div class="summary-value" id="dash-total-interest-received" style="color: var(--color-success);">Rs. 0.00</div>
-            <div class="summary-sub-value" id="dash-interest-received-balance" style="font-size: 0.78rem; margin-top: 0.35rem; font-weight: 700; color: var(--text-secondary); display: flex; align-items: center; gap: 0.25rem;">Balance: Rs. 0.00</div>
+            <div class="summary-sub-value" id="dash-interest-received-balance" style="font-size: 0.78rem; margin-top: 0.35rem; font-weight: 700; color: var(--text-secondary); display: flex; flex-direction: column; align-items: flex-start; gap: 0.15rem;">Balance: Rs. 0.00</div>
           </div>
 
-          <div class="card summary-card danger" data-tab="expenses" style="border-left: 4px solid var(--color-danger);">
+          <div class="card summary-card danger" onclick="toggleReminderFilter('expenses')" style="border-left: 4px solid var(--color-danger); cursor: pointer;">
             <div class="summary-card-header">
               <span style="color: var(--color-danger);">Expenses</span>
               <div class="summary-card-icon" style="background: rgba(239, 68, 68, 0.1); color: var(--color-danger);">
@@ -230,7 +162,7 @@
             </div>
             <div class="summary-value" id="dash-total-expenses" style="color: var(--color-danger);">Rs. 0.00</div>
           </div>
-          <div class="card summary-card success" data-tab="settings" style="cursor: pointer;">
+          <div class="card summary-card success" onclick="toggleReminderFilter('reports')" style="border-left: 4px solid var(--color-success); cursor: pointer;">
             <div class="summary-card-header">
               <span>Net Balance</span>
               <div class="summary-card-icon">
@@ -241,253 +173,233 @@
           </div>
         </div>
 
-
-
-      </section>
-
-      <!-- VIEW: LENDING (LENT) -->
-      <section id="view-interest" class="tab-content">
-        <div class="section-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem;">
-          <div style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
-            <h2 style="margin-bottom: 0;">Interest Ledger</h2>
+        <!-- Upcoming Payment Reminders (Moved below grid) -->
+        <div class="card" id="notifications-wrapper-card" style="margin-bottom: 1.25rem;">
+          <div class="section-header" id="notifications-main-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
+            <h2 style="margin-bottom: 0;">
+              <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              <span id="notifications-title">Notifications</span>
+            </h2>
           </div>
-          <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
-            <button class="btn btn-primary" id="btn-add-loan-lent">
-              <svg viewBox="0 0 24 24" width="16" height="16"><path d="M7 17L17 7M17 7H7M17 7V17"/></svg>
-              Lend Money
-            </button>
-            <button class="btn btn-primary" id="btn-add-loan-borrowed" style="background: linear-gradient(135deg, var(--color-danger), #b91c1c); box-shadow: 0 4px 14px rgba(239,68,68,0.3);">
-              <svg viewBox="0 0 24 24" width="16" height="16"><path d="M17 17L7 7M7 7H17M7 7V17"/></svg>
-              Record Borrowing
-            </button>
-          </div>
-        </div>
 
-        <div class="list-container" id="lent-loans-list" style="margin-bottom: 1.25rem;">
-          <!-- Injected via JS -->
-        </div>
 
-        <div class="list-container" id="borrowed-loans-list">
-          <!-- Injected via JS -->
-        </div>
-
-        <!-- Summary Stats Bar -->
-        <div style="display: flex; gap: 0.75rem; margin-top: 1.25rem; flex-wrap: wrap;">
-          <!-- Lent Column -->
-          <div style="flex: 1; min-width: 140px; display: flex; flex-direction: column; gap: 0.5rem;">
-            <div class="card" style="padding: 0.75rem 1rem; display: flex; flex-direction: column; gap: 0.25rem; border-left: 3px solid var(--color-accent);">
-              <span style="font-size: 0.7rem; color: var(--text-secondary); font-weight: 600; text-transform: uppercase;">Lent Loans</span>
-              <span id="lending-total-loans" style="font-size: 1.15rem; font-weight: 800; color: var(--text-primary);">0</span>
-            </div>
-            <div class="card" style="padding: 0.75rem 1rem; display: flex; flex-direction: column; gap: 0.25rem; border-left: 3px solid var(--color-success);">
-              <span style="font-size: 0.7rem; color: var(--text-secondary); font-weight: 600; text-transform: uppercase;">Lent Principal</span>
-              <span id="lending-total-principal" style="font-size: 1.15rem; font-weight: 800; color: var(--color-success);">Rs. 0</span>
-            </div>
-            <div class="card" style="padding: 0.75rem 1rem; display: flex; flex-direction: column; gap: 0.25rem; border-left: 3px solid var(--color-purple);">
-              <span style="font-size: 0.7rem; color: var(--text-secondary); font-weight: 600; text-transform: uppercase;">Lent Outstanding</span>
-              <span id="lending-total-outstanding" style="font-size: 1.15rem; font-weight: 800; color: var(--color-purple);">Rs. 0</span>
-            </div>
-          </div>
-          <!-- Borrowed Column -->
-          <div style="flex: 1; min-width: 140px; display: flex; flex-direction: column; gap: 0.5rem;">
-            <div class="card" style="padding: 0.75rem 1rem; display: flex; flex-direction: column; gap: 0.25rem; border-left: 3px solid var(--color-danger);">
-              <span style="font-size: 0.7rem; color: var(--text-secondary); font-weight: 600; text-transform: uppercase;">Borrowed</span>
-              <span id="borrowing-total-loans" style="font-size: 1.15rem; font-weight: 800; color: var(--text-primary);">0</span>
-            </div>
-            <div class="card" style="padding: 0.75rem 1rem; display: flex; flex-direction: column; gap: 0.25rem; border-left: 3px solid var(--color-warning);">
-              <span style="font-size: 0.7rem; color: var(--text-secondary); font-weight: 600; text-transform: uppercase;">Borrowed Principal</span>
-              <span id="borrowing-total-principal" style="font-size: 1.15rem; font-weight: 800; color: var(--color-danger);">Rs. 0</span>
-            </div>
-            <div class="card" style="padding: 0.75rem 1rem; display: flex; flex-direction: column; gap: 0.25rem; border-left: 3px solid var(--color-purple);">
-              <span style="font-size: 0.7rem; color: var(--text-secondary); font-weight: 600; text-transform: uppercase;">Borrowed Outstanding</span>
-              <span id="borrowing-total-outstanding" style="font-size: 1.15rem; font-weight: 800; color: var(--color-warning);">Rs. 0</span>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- VIEW: RENTALS -->
-      <section id="view-rental" class="tab-content">
-        <div class="section-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem;">
-          <div style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
-            <h2 style="margin-bottom: 0;">Tenant & Rent Ledger</h2>
-          </div>
-          <button class="btn btn-primary" id="btn-add-rental">
-            <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-            Add Tenant
-          </button>
-        </div>
-
-        <div class="list-container" id="rentals-list">
-          <!-- Injected via JS -->
-        </div>
-
-        <!-- Summary Stats Bar -->
-        <div class="stats-summary-bar" style="display: flex; gap: 1rem; margin-top: 1.25rem; flex-wrap: wrap;">
-          <div class="card" style="flex: 1; min-width: 150px; padding: 0.75rem 1rem; display: flex; flex-direction: column; gap: 0.25rem; border-left: 3px solid var(--color-warning);">
-            <span style="font-size: 0.75rem; color: var(--text-secondary); font-weight: 600; text-transform: uppercase;">Active Leases</span>
-            <span id="rentals-active-leases" style="font-size: 1.25rem; font-weight: 800; color: var(--text-primary);">0</span>
-          </div>
-          <div class="card" style="flex: 1; min-width: 150px; padding: 0.75rem 1rem; display: flex; flex-direction: column; gap: 0.25rem; border-left: 3px solid var(--color-purple);">
-            <span style="font-size: 0.75rem; color: var(--text-secondary); font-weight: 600; text-transform: uppercase;">Monthly Rent Roll</span>
-            <span id="rentals-monthly-income" style="font-size: 1.25rem; font-weight: 800; color: var(--color-purple);">Rs. 0.00</span>
-          </div>
-          <div class="card" style="flex: 1; min-width: 150px; padding: 0.75rem 1rem; display: flex; flex-direction: column; gap: 0.25rem; border-left: 3px solid var(--color-success);">
-            <span style="font-size: 0.75rem; color: var(--text-secondary); font-weight: 600; text-transform: uppercase;">Cumulative Collected</span>
-            <span id="rentals-total-collected" style="font-size: 1.25rem; font-weight: 800; color: var(--color-success);">Rs. 0.00</span>
-          </div>
-        </div>
-      </section>
-
-      <!-- VIEW: EXPENSES -->
-      <section id="view-expenses" class="tab-content">
-        <div class="section-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem;">
-          <div style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
-            <h2 style="margin-bottom: 0;">Expenses Tracker</h2>
-          </div>
-        </div>
-        
-        <div class="card" id="inline-expense-form" style="margin-bottom: 1.5rem; padding: 1.25rem;">
-          <h3 id="expense-modal-title" style="margin-bottom: 1rem; font-size: 1.1rem; color: var(--text-primary);">Record Expense</h3>
-          <form id="form-expense">
-            <input type="hidden" id="expense-id">
-            <div class="form-group" style="margin-bottom: 1rem;">
-              <label class="form-label" style="margin-bottom: 0.4rem;">Quick Presets</label>
-              <div style="display: flex; gap: 0.4rem; flex-wrap: wrap;">
-                <button type="button" class="btn btn-secondary btn-sm" onclick="setExpensePreset('Fuel', 'Travel')" style="padding: 0.3rem 0.5rem; min-height: auto; font-size: 0.72rem; border-color: rgba(255,255,255,0.06); background: var(--bg-secondary);">⛽ Fuel</button>
-                <button type="button" class="btn btn-secondary btn-sm" onclick="setExpensePreset('Rent', 'Others')" style="padding: 0.3rem 0.5rem; min-height: auto; font-size: 0.72rem; border-color: rgba(255,255,255,0.06); background: var(--bg-secondary);">🏠 Rent</button>
-                <button type="button" class="btn btn-secondary btn-sm" onclick="setExpensePreset('Wifi bill', 'Utilities')" style="padding: 0.3rem 0.5rem; min-height: auto; font-size: 0.72rem; border-color: rgba(255,255,255,0.06); background: var(--bg-secondary);">🌐 Wifi Bill</button>
-                <button type="button" class="btn btn-secondary btn-sm" onclick="setExpensePreset('Phone bill', 'Utilities')" style="padding: 0.3rem 0.5rem; min-height: auto; font-size: 0.72rem; border-color: rgba(255,255,255,0.06); background: var(--bg-secondary);">📱 Phone Bill</button>
-                <button type="button" class="btn btn-secondary btn-sm" onclick="setExpensePreset('Car Insurance', 'Insurance')" style="padding: 0.3rem 0.5rem; min-height: auto; font-size: 0.72rem; border-color: rgba(255,255,255,0.06); background: var(--bg-secondary);">🚗 Car Insurance</button>
-                <button type="button" class="btn btn-secondary btn-sm" onclick="setExpensePreset('Health Insurance', 'Insurance')" style="padding: 0.3rem 0.5rem; min-height: auto; font-size: 0.72rem; border-color: rgba(255,255,255,0.06); background: var(--bg-secondary);">🏥 Health Insurance</button>
-                <button type="button" class="btn btn-secondary btn-sm" onclick="setExpensePreset('Pollution Certificate', 'Certificate')" style="padding: 0.3rem 0.5rem; min-height: auto; font-size: 0.72rem; border-color: rgba(255,255,255,0.06); background: var(--bg-secondary);">🌿 Pollution</button>
-                <button type="button" class="btn btn-secondary btn-sm" onclick="setExpensePreset('House Tax', 'Taxes')" style="padding: 0.3rem 0.5rem; min-height: auto; font-size: 0.72rem; border-color: rgba(255,255,255,0.06); background: var(--bg-secondary);">🏠 House Tax</button>
-                <button type="button" class="btn btn-secondary btn-sm" onclick="setExpensePreset('I.T.R Filing', 'Taxes')" style="padding: 0.3rem 0.5rem; min-height: auto; font-size: 0.72rem; border-color: rgba(255,255,255,0.06); background: var(--bg-secondary);">📋 I.T.R</button>
+          <!-- DEFAULT REMINDERS VIEW -->
+          <div id="notifications-reminders-view">
+            <div class="reminders-list" id="dashboard-rent-reminders">
+              <div class="empty-state">
+                <div class="empty-state-icon">
+                  <svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                </div>
+                <p>No upcoming payments due this month.</p>
               </div>
             </div>
-            <div class="form-group">
-              <label class="form-label" for="expense-amount">Amount (Rs.)</label>
-              <input type="number" id="expense-amount" class="form-input" min="0.01" step="any" placeholder="0.00" required>
-              <div id="expense-amount-presets" style="display: flex; gap: 0.35rem; margin-top: 0.4rem; flex-wrap: wrap;"></div>
-              <div id="expense-property-shortcuts" style="display: none; gap: 0.35rem; margin-top: 0.8rem; flex-wrap: wrap;">
-                <button type="button" class="btn btn-secondary btn-sm preset-btn" onclick="autoSelectProperty('23/48 Ground Floor')">23/48 Ground Floor</button>
-                <button type="button" class="btn btn-secondary btn-sm preset-btn" onclick="autoSelectProperty('23/48 3rd Floor')">23/48 3rd Floor</button>
-                <button type="button" class="btn btn-secondary btn-sm preset-btn" onclick="autoSelectProperty('1/104')">1/104</button>
+          </div>
+
+          <!-- INJECTED RENT DASHBOARD -->
+          <div id="notifications-rent-view" style="display: none;">
+            <div class="section-header" style="display: flex; justify-content: flex-end; align-items: center; flex-wrap: wrap; gap: 0.75rem; margin-top: 1rem;">
+              <button class="btn btn-primary" id="btn-add-rental">
+                <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                Add Tenant
+              </button>
+            </div>
+
+            <div class="list-container" id="rentals-list">
+              <!-- Injected via JS -->
+            </div>
+
+            <!-- Summary Stats Bar -->
+            <div class="stats-summary-bar" style="display: flex; gap: 1rem; margin-top: 1.25rem; flex-wrap: wrap;">
+              <div class="card" style="flex: 1; min-width: 150px; padding: 0.75rem 1rem; display: flex; flex-direction: column; gap: 0.25rem; border-left: 3px solid var(--color-warning);">
+                <span style="font-size: 0.75rem; color: var(--text-secondary); font-weight: 600; text-transform: uppercase;">Active Leases</span>
+                <span id="rentals-active-leases" style="font-size: 1.25rem; font-weight: 800; color: var(--text-primary);">0</span>
+              </div>
+              <div class="card" style="flex: 1; min-width: 150px; padding: 0.75rem 1rem; display: flex; flex-direction: column; gap: 0.25rem; border-left: 3px solid var(--color-purple);">
+                <span style="font-size: 0.75rem; color: var(--text-secondary); font-weight: 600; text-transform: uppercase;">Monthly Rent Roll</span>
+                <span id="rentals-monthly-income" style="font-size: 1.25rem; font-weight: 800; color: var(--color-purple);">Rs. 0.00</span>
+              </div>
+              <div class="card" style="flex: 1; min-width: 150px; padding: 0.75rem 1rem; display: flex; flex-direction: column; gap: 0.25rem; border-left: 3px solid var(--color-success);">
+                <span style="font-size: 0.75rem; color: var(--text-secondary); font-weight: 600; text-transform: uppercase;">Cumulative Collected</span>
+                <span id="rentals-total-collected" style="font-size: 1.25rem; font-weight: 800; color: var(--color-success);">Rs. 0.00</span>
+              </div>
+            </div>
+          </div>
+          
+          <!-- INJECTED INTEREST DASHBOARD -->
+          <div id="notifications-interest-view" style="display: none;">
+            <div class="section-header" style="display: flex; justify-content: flex-end; align-items: center; flex-wrap: wrap; gap: 0.75rem; margin-top: 1rem;">
+              <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                <button class="btn btn-primary" id="btn-add-loan-lent">
+                  <svg viewBox="0 0 24 24" width="16" height="16"><path d="M7 17L17 7M17 7H7M17 7V17"/></svg>
+                  Lend Money
+                </button>
+                <button class="btn btn-primary" id="btn-add-loan-borrowed" style="background: linear-gradient(135deg, var(--color-danger), #b91c1c); box-shadow: 0 4px 14px rgba(239,68,68,0.3);">
+                  <svg viewBox="0 0 24 24" width="16" height="16"><path d="M17 17L7 7M7 7H17M7 7V17"/></svg>
+                  Record Borrowing
+                </button>
+              </div>
+            </div>
+
+            <h3 style="margin-top: 1rem; margin-bottom: 0.5rem; color: var(--color-success); font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 0.5rem;">Lent Funds</h3>
+            <div class="list-container" id="lent-loans-list" style="margin-bottom: 1.25rem;">
+              <!-- Injected via JS -->
+            </div>
+
+            <h3 style="margin-top: 1.5rem; margin-bottom: 0.5rem; color: var(--color-danger); font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 0.5rem;">Borrowed Funds</h3>
+            <div class="list-container" id="borrowed-loans-list">
+              <!-- Injected via JS -->
+            </div>
+
+            <!-- Summary Stats Bar -->
+            <div style="display: flex; gap: 0.75rem; margin-top: 1.25rem; flex-wrap: wrap;">
+              <!-- Lent Column -->
+              <div style="flex: 1; min-width: 140px; display: flex; flex-direction: column; gap: 0.5rem;">
+                <div class="card" style="padding: 0.75rem 1rem; display: flex; flex-direction: column; gap: 0.25rem; border-left: 3px solid var(--color-accent);">
+                  <span style="font-size: 0.7rem; color: var(--text-secondary); font-weight: 600; text-transform: uppercase;">Lent Loans</span>
+                  <span id="lending-total-loans" style="font-size: 1.15rem; font-weight: 800; color: var(--text-primary);">0</span>
+                </div>
+                <div class="card" style="padding: 0.75rem 1rem; display: flex; flex-direction: column; gap: 0.25rem; border-left: 3px solid var(--color-success);">
+                  <span style="font-size: 0.7rem; color: var(--text-secondary); font-weight: 600; text-transform: uppercase;">Lent Principal</span>
+                  <span id="lending-total-principal" style="font-size: 1.15rem; font-weight: 800; color: var(--color-success);">Rs. 0</span>
+                </div>
+                <div class="card" style="padding: 0.75rem 1rem; display: flex; flex-direction: column; gap: 0.25rem; border-left: 3px solid var(--color-purple);">
+                  <span style="font-size: 0.7rem; color: var(--text-secondary); font-weight: 600; text-transform: uppercase;">Overall Interest</span>
+                  <span id="lending-total-outstanding" style="font-size: 1.15rem; font-weight: 800; color: var(--color-purple);">Rs. 0</span>
+                </div>
+              </div>
+              <!-- Borrowed Column -->
+              <div style="flex: 1; min-width: 140px; display: flex; flex-direction: column; gap: 0.5rem;">
+                <div class="card" style="padding: 0.75rem 1rem; display: flex; flex-direction: column; gap: 0.25rem; border-left: 3px solid var(--color-danger);">
+                  <span style="font-size: 0.7rem; color: var(--text-secondary); font-weight: 600; text-transform: uppercase;">Borrowed</span>
+                  <span id="borrowing-total-loans" style="font-size: 1.15rem; font-weight: 800; color: var(--text-primary);">0</span>
+                </div>
+                <div class="card" style="padding: 0.75rem 1rem; display: flex; flex-direction: column; gap: 0.25rem; border-left: 3px solid var(--color-warning);">
+                  <span style="font-size: 0.7rem; color: var(--text-secondary); font-weight: 600; text-transform: uppercase;">Borrowed Principal</span>
+                  <span id="borrowing-total-principal" style="font-size: 1.15rem; font-weight: 800; color: var(--color-danger);">Rs. 0</span>
+                </div>
+                <div class="card" style="padding: 0.75rem 1rem; display: flex; flex-direction: column; gap: 0.25rem; border-left: 3px solid var(--color-purple);">
+                  <span style="font-size: 0.7rem; color: var(--text-secondary); font-weight: 600; text-transform: uppercase;">Overall Interest</span>
+                  <span id="borrowing-total-outstanding" style="font-size: 1.15rem; font-weight: 800; color: var(--color-warning);">Rs. 0</span>
+                </div>
+              </div>
+              </div>
+            </div>
+          </div>
+          <!-- INJECTED EXPENSES DASHBOARD -->
+          <div id="notifications-expenses-view" style="display: none;">
+            <div class="section-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem;">
+              <div style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
               </div>
             </div>
             
-            <div class="form-group-row">
-              <div class="form-group">
-                <label class="form-label" for="expense-date">Expense Date</label>
-                <input type="date" id="expense-date" class="form-input" required>
-              </div>
-              <div class="form-group">
-                <label class="form-label" for="expense-category">Category</label>
-                <select id="expense-category" class="form-input" required style="background-color: var(--bg-primary); color: var(--text-primary); border: 1px solid var(--border-color);" onchange="handleCategoryChange()">
-                  <option value="Maintenance" selected>Maintenance</option>
-                  <option value="Taxes">Taxes / Fees</option>
-                  <option value="House Tax">House Tax</option>
-                  <option value="ITR">ITR</option>
-                  <option value="Utilities">Utilities (Bills)</option>
-                  <option value="Insurance">Insurance</option>
-                  <option value="Car Insurance">Car Insurance</option>
-                  <option value="Health">Health</option>
-                  <option value="Pollution">Pollution</option>
-                  <option value="Certificate">Certificate</option>
-                  <option value="Travel">Travel / Fuel</option>
-                  <option value="Others">Others</option>
-                </select>
-              </div>
-            </div>
+            <div class="card" id="inline-expense-form" style="margin-bottom: 1.5rem; padding: 1.25rem;">
+              <h3 id="expense-modal-title" style="margin-bottom: 1rem; font-size: 1.1rem; color: var(--text-primary);">Record Expense</h3>
+              <form id="form-expense">
+                <input type="hidden" id="expense-id">
+                <div class="form-group" style="margin-bottom: 1rem;">
+                  <label class="form-label" style="margin-bottom: 0.4rem;">Quick Presets</label>
+                  <div style="display: flex; gap: 0.4rem; flex-wrap: wrap;">
+                    <button type="button" class="btn btn-secondary btn-sm" onclick="setExpensePreset('Fuel', 'Travel')" style="padding: 0.3rem 0.5rem; min-height: auto; font-size: 0.72rem; border-color: rgba(255,255,255,0.06); background: var(--bg-secondary);">⛽ Fuel</button>
+                    <button type="button" class="btn btn-secondary btn-sm" onclick="setExpensePreset('Rent', 'Others')" style="padding: 0.3rem 0.5rem; min-height: auto; font-size: 0.72rem; border-color: rgba(255,255,255,0.06); background: var(--bg-secondary);">🏠 Rent</button>
+                    <button type="button" class="btn btn-secondary btn-sm" onclick="setExpensePreset('Wifi bill', 'Utilities')" style="padding: 0.3rem 0.5rem; min-height: auto; font-size: 0.72rem; border-color: rgba(255,255,255,0.06); background: var(--bg-secondary);">🌐 Wifi Bill</button>
+                    <button type="button" class="btn btn-secondary btn-sm" onclick="setExpensePreset('Phone bill', 'Utilities')" style="padding: 0.3rem 0.5rem; min-height: auto; font-size: 0.72rem; border-color: rgba(255,255,255,0.06); background: var(--bg-secondary);">📱 Phone Bill</button>
+                    <button type="button" class="btn btn-secondary btn-sm" onclick="setExpensePreset('Car Insurance', 'Insurance')" style="padding: 0.3rem 0.5rem; min-height: auto; font-size: 0.72rem; border-color: rgba(255,255,255,0.06); background: var(--bg-secondary);">🚗 Car Insurance</button>
+                    <button type="button" class="btn btn-secondary btn-sm" onclick="setExpensePreset('Health Insurance', 'Insurance')" style="padding: 0.3rem 0.5rem; min-height: auto; font-size: 0.72rem; border-color: rgba(255,255,255,0.06); background: var(--bg-secondary);">🏥 Health Insurance</button>
+                    <button type="button" class="btn btn-secondary btn-sm" onclick="setExpensePreset('Pollution Certificate', 'Certificate')" style="padding: 0.3rem 0.5rem; min-height: auto; font-size: 0.72rem; border-color: rgba(255,255,255,0.06); background: var(--bg-secondary);">🌿 Pollution</button>
+                    <button type="button" class="btn btn-secondary btn-sm" onclick="setExpensePreset('House Tax', 'Taxes')" style="padding: 0.3rem 0.5rem; min-height: auto; font-size: 0.72rem; border-color: rgba(255,255,255,0.06); background: var(--bg-secondary);">🏠 House Tax</button>
+                    <button type="button" class="btn btn-secondary btn-sm" onclick="setExpensePreset('I.T.R Filing', 'Taxes')" style="padding: 0.3rem 0.5rem; min-height: auto; font-size: 0.72rem; border-color: rgba(255,255,255,0.06); background: var(--bg-secondary);">📋 I.T.R</button>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="expense-amount">Amount (Rs.)</label>
+                  <input type="number" id="expense-amount" class="form-input" min="0.01" step="any" placeholder="0.00" required>
+                  <div id="expense-amount-presets" style="display: flex; gap: 0.35rem; margin-top: 0.4rem; flex-wrap: wrap;"></div>
+                  <div id="expense-property-shortcuts" style="display: none; gap: 0.35rem; margin-top: 0.8rem; flex-wrap: wrap;">
+                    <button type="button" class="btn btn-secondary btn-sm preset-btn" onclick="autoSelectProperty('23/48 Ground Floor')">23/48 Ground Floor</button>
+                    <button type="button" class="btn btn-secondary btn-sm preset-btn" onclick="autoSelectProperty('23/48 3rd Floor')">23/48 3rd Floor</button>
+                    <button type="button" class="btn btn-secondary btn-sm preset-btn" onclick="autoSelectProperty('1/104')">1/104</button>
+                  </div>
+                </div>
+                
+                <div class="form-group-row">
+                  <div class="form-group">
+                    <label class="form-label" for="expense-date">Expense Date</label>
+                    <input type="date" id="expense-date" class="form-input" required>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label" for="expense-category">Category</label>
+                    <select id="expense-category" class="form-input" required style="background-color: var(--bg-primary); color: var(--text-primary); border: 1px solid var(--border-color);" onchange="handleCategoryChange()">
+                      <option value="Maintenance" selected>Maintenance</option>
+                      <option value="Taxes">Taxes / Fees</option>
+                      <option value="House Tax">House Tax</option>
+                      <option value="ITR">ITR</option>
+                      <option value="Utilities">Utilities (Bills)</option>
+                      <option value="Insurance">Insurance</option>
+                      <option value="Car Insurance">Car Insurance</option>
+                      <option value="Health">Health</option>
+                      <option value="Pollution">Pollution</option>
+                      <option value="Certificate">Certificate</option>
+                      <option value="Travel">Travel / Fuel</option>
+                      <option value="Others">Others</option>
+                    </select>
+                  </div>
+                </div>
 
-            <div class="form-group" id="expense-renewal-date-group" style="display: none;">
-              <label class="form-label" for="expense-renewal-date">Next Renewal Date</label>
-              <input type="date" id="expense-renewal-date" class="form-input">
-              <p style="font-size: 0.72rem; color: var(--text-muted); margin-top: 0.3rem;">Auto-created as a Renewal reminder for next year</p>
-            </div>
+                <div class="form-group" id="expense-renewal-date-group" style="display: none;">
+                  <label class="form-label" for="expense-renewal-date">Next Renewal Date</label>
+                  <input type="date" id="expense-renewal-date" class="form-input">
+                  <p style="font-size: 0.72rem; color: var(--text-muted); margin-top: 0.3rem;">Auto-created as a Renewal reminder for next year</p>
+                </div>
 
-            <div class="form-group" id="expense-property-group">
-              <label class="form-label" for="expense-property">Associate with Property (Optional)</label>
-              <select id="expense-property" class="form-input" style="background-color: var(--bg-primary); color: var(--text-primary); border: 1px solid var(--border-color);">
-                <option value="">General / None</option>
-              </select>
-            </div>
+                <div class="form-group" id="expense-property-group">
+                  <label class="form-label" for="expense-property">Associate with Property (Optional)</label>
+                  <select id="expense-property" class="form-input" style="background-color: var(--bg-primary); color: var(--text-primary); border: 1px solid var(--border-color);">
+                    <option value="">General / None</option>
+                  </select>
+                </div>
 
-            <div class="form-group">
-              <label class="form-label" for="expense-note">Description / Notes</label>
-              <input type="text" id="expense-note" class="form-input" placeholder="e.g. Plumber for kitchen sink leaking">
+                <div class="form-group">
+                  <label class="form-label" for="expense-note">Description / Notes</label>
+                  <input type="text" id="expense-note" class="form-input" placeholder="e.g. Plumber for kitchen sink leaking">
+                </div>
+                
+                <div style="display: flex; justify-content: flex-end; gap: 0.6rem; margin-top: 1.25rem;">
+                  <button type="button" class="btn btn-secondary" onclick="openExpenseModal()">Clear / Cancel Edit</button>
+                  <button type="submit" class="btn btn-primary">Save Expense</button>
+                </div>
+              </form>
             </div>
             
-            <div style="display: flex; justify-content: flex-end; gap: 0.6rem; margin-top: 1.25rem;">
-              <button type="button" class="btn btn-secondary" onclick="openExpenseModal()">Clear / Cancel Edit</button>
-              <button type="submit" class="btn btn-primary">Save Expense</button>
+
+            <div class="list-container" id="expenses-list">
+              <!-- Injected via JS -->
             </div>
-          </form>
-        </div>
+          </div>
+          <!-- INJECTED REPORTS VIEW -->
+          <div id="notifications-reports-view" style="display: none;">
         
-        <div class="card" style="margin-bottom: 1.5rem; background: linear-gradient(135deg, rgba(239, 68, 68, 0.05), rgba(245, 158, 11, 0.02)); border-color: rgba(239, 68, 68, 0.15);">
-          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
-            <div>
-              <span class="amount-label" style="text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px; color: var(--text-secondary);">Total Logged Expenses</span>
-              <div class="amount-value" id="expenses-total-value" style="font-size: 2.2rem; font-weight: 800; color: var(--color-danger); margin-top: 0.25rem;">Rs. 0.00</div>
-            </div>
-          </div>
-        </div>
-
-        <div class="list-container" id="expenses-list">
-          <!-- Injected via JS -->
-        </div>
-      </section>
-
-      <!-- VIEW: DOCS -->
-      <section id="view-docs" class="tab-content">
-        <div class="section-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem;">
-          <h2 style="margin-bottom: 0;">Documents</h2>
-          <div style="display: flex; gap: 0.5rem;">
-            <label class="btn btn-primary" style="cursor: pointer;">
-              <input type="file" id="doc-upload-input" accept="image/*,application/pdf" style="display: none;" multiple>
-              <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-              Upload
-            </label>
-            <label class="btn btn-secondary" style="cursor: pointer;">
-              <input type="file" id="doc-camera-input" accept="image/*" capture="environment" style="display: none;">
-              <svg viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
-              Camera
-            </label>
-          </div>
-        </div>
-        <div id="docs-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 1rem; margin-top: 1rem;">
-          <!-- Injected via JS -->
-        </div>
-      </section>
-
-      <!-- VIEW: REPORTS -->
-      <section id="view-settings" class="tab-content">
-        <div class="section-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem;">
-          <h2 style="margin-bottom: 0;">Reports</h2>
-        </div>
-
-        <!-- View Mode Toggle -->
-        <div class="card" style="margin-bottom: 1.25rem; padding: 1rem; display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
-          <span style="font-size: 0.8rem; color: var(--text-secondary); font-weight: 600;">VIEW MODE:</span>
-          <div style="display: flex; gap: 0.35rem; background: var(--bg-primary); border-radius: 8px; padding: 3px;">
-            <button class="mode-btn" id="reports-btn-mode-monthly" onclick="reportsSetViewMode('month')">Monthly</button>
-            <button class="mode-btn" id="reports-btn-mode-yearly" onclick="reportsSetViewMode('year')">Yearly</button>
-          </div>
-        </div>
-
-        <!-- Month/Year Selector -->
-        <div id="reports-selector-bar" class="card" style="margin-bottom: 1.25rem; padding: 0.75rem 1rem; display: none;">
-          <div style="display: flex; align-items: center; justify-content: space-between; gap: 0.5rem;">
-            <button class="month-nav-btn" onclick="reportsNavigate(-1)">&lt;</button>
-            <span id="reports-selector-label" style="font-weight: 700; font-size: 0.9rem;">July 2026</span>
-            <button class="month-nav-btn" onclick="reportsNavigate(1)">&gt;</button>
-          </div>
-        </div>
-
         <!-- Chart -->
         <div class="card" style="margin-bottom: 1.25rem; padding: 1.25rem;">
-          <h3 style="margin: 0 0 1rem 0; font-size: 1rem; color: var(--text-primary);">Income vs Expenses</h3>
+          
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem; margin-bottom: 1rem;">
+            <h3 style="margin: 0; font-size: 1.1rem; color: var(--text-primary); padding-top: 0.3rem;">Income vs Expenses</h3>
+            
+            <div style="display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;">
+              <!-- View Mode Toggle -->
+              <div style="display: flex; gap: 0.35rem; background: var(--bg-primary); border-radius: 8px; padding: 3px;">
+                <button class="mode-btn" id="reports-btn-mode-monthly" onclick="reportsSetViewMode('month')">Monthly</button>
+                <button class="mode-btn" id="reports-btn-mode-yearly" onclick="reportsSetViewMode('year')">Yearly</button>
+              </div>
+
+              <!-- Month/Year Selector -->
+              <div id="reports-selector-bar" style="display: flex; align-items: center; gap: 0.75rem; background: var(--bg-primary); padding: 0.35rem 0.5rem; border-radius: 8px; display: none;">
+                <button class="month-nav-btn" onclick="reportsNavigate(-1)" style="padding: 0.25rem 0.5rem;">&lt;</button>
+                <span id="reports-selector-label" style="font-weight: 700; font-size: 0.9rem; min-width: 100px; text-align: center;">July 2026</span>
+                <button class="month-nav-btn" onclick="reportsNavigate(1)" style="padding: 0.25rem 0.5rem;">&gt;</button>
+              </div>
+            </div>
+          </div>
+
           <div style="position: relative; width: 100%; height: 280px;">
             <canvas id="reports-chart"></canvas>
           </div>
@@ -591,7 +503,34 @@
             </button>
           </div>
         </div>
+      </div>
+        </div>
+
       </section>
+
+      <!-- VIEW: DOCS -->
+      <section id="view-docs" class="tab-content">
+        <div class="section-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem;">
+          <h2 style="margin-bottom: 0;">Documents</h2>
+          <div style="display: flex; gap: 0.5rem;">
+            <label class="btn btn-primary" style="cursor: pointer;">
+              <input type="file" id="doc-upload-input" accept="image/*,application/pdf" style="display: none;" multiple>
+              <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              Upload
+            </label>
+            <label class="btn btn-secondary" style="cursor: pointer;">
+              <input type="file" id="doc-camera-input" accept="image/*" capture="environment" style="display: none;">
+              <svg viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+              Camera
+            </label>
+          </div>
+        </div>
+        <div id="docs-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 1rem; margin-top: 1rem;">
+          <!-- Injected via JS -->
+        </div>
+      </section>
+
+      
 
     </main>
     
@@ -680,6 +619,16 @@
         <input type="hidden" id="rental-id">
         <div class="modal-body">
           <div class="form-group">
+            <label class="form-label" for="rental-tenant">Tenant Full Name</label>
+            <input type="text" id="rental-tenant" class="form-input" placeholder="e.g. Sarah Smith" required>
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label" for="rental-contact">Contact Details (Phone)</label>
+            <input type="text" id="rental-contact" class="form-input" placeholder="e.g. +91 9876543210">
+          </div>
+
+          <div class="form-group">
             <label class="form-label" for="rental-property">Property / Unit Name</label>
             <input type="text" id="rental-property" class="form-input" placeholder="e.g. Apt 4B, Pine Towers" required>
             <div id="rental-property-presets" style="margin-top: 0.35rem; display: flex; flex-wrap: wrap; gap: 0.35rem;">
@@ -687,16 +636,6 @@
               <button type="button" class="btn btn-secondary btn-sm" onclick="setRentalPropertyPreset('23/48 3rd floor')" style="padding: 0.25rem 0.5rem; min-height: auto; font-size: 0.72rem; border-color: rgba(255,255,255,0.06); background: var(--bg-secondary); cursor: pointer;">23/48 3rd floor</button>
               <button type="button" class="btn btn-secondary btn-sm" onclick="setRentalPropertyPreset('1/104')" style="padding: 0.25rem 0.5rem; min-height: auto; font-size: 0.72rem; border-color: rgba(255,255,255,0.06); background: var(--bg-secondary); cursor: pointer;">1/104</button>
             </div>
-          </div>
-          
-          <div class="form-group">
-            <label class="form-label" for="rental-tenant">Tenant Full Name</label>
-            <input type="text" id="rental-tenant" class="form-input" placeholder="e.g. Sarah Smith" required>
-          </div>
-          
-          <div class="form-group">
-            <label class="form-label" for="rental-contact">Contact Details (Phone / Email)</label>
-            <input type="text" id="rental-contact" class="form-input" placeholder="e.g. +1 555-0199 or sarah@email.com">
           </div>
           
           <div class="form-group-row">
@@ -713,7 +652,8 @@
           <div class="form-group-row">
             <div class="form-group">
               <label class="form-label" for="rental-start-date">Lease Start Date</label>
-              <input type="date" id="rental-start-date" class="form-input" required>
+              <input type="date" id="rental-start-date" class="form-input" oninput="updateRentalRenewalDate()" required>
+              <div id="rental-renewal-date-display" style="font-size: 0.75rem; color: var(--color-warning); margin-top: 0.35rem; font-weight: 600;"></div>
             </div>
             <div class="form-group">
               <label class="form-label" for="rental-due-day">Rent Due Day of Month</label>
@@ -1092,11 +1032,11 @@
       <div style="display: flex; justify-content: flex-end; gap: 0.5rem; margin-bottom: 0.5rem;">
         <button class="btn btn-secondary" id="btn-share-doc" style="background: rgba(0,0,0,0.5); border-color: transparent; color: white; display: inline-flex; align-items: center;">
           <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" fill="none" style="margin-right:4px;"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
-          Share
+          Share (WA)
         </button>
         <button class="btn btn-primary" id="btn-download-doc" style="background: rgba(0,0,0,0.5); border-color: transparent; color: white; display: inline-flex; align-items: center;">
           <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" fill="none" style="margin-right:4px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-          Down
+          Download
         </button>
         <button class="btn btn-secondary" onclick="closeModal('modal-view-doc')" style="background: rgba(0,0,0,0.5); border-color: transparent; color: white; display: inline-flex; align-items: center;">Close</button>
       </div>
