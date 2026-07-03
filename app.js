@@ -3527,6 +3527,10 @@ window.openUploadModal = function(type, method) {
   
   document.getElementById('upload-modal-title').textContent = 'Upload ' + type.charAt(0).toUpperCase() + type.slice(1);
   openModal('modal-upload');
+  
+  if (method === 'camera' && fileInput) {
+    fileInput.click();
+  }
 };
 
 window.deleteFile = function(id) {
