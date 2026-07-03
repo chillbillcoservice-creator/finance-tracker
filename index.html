@@ -15,8 +15,8 @@
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%230ea5e9'/><text x='50' y='65' font-size='40' font-weight='bold' text-anchor='middle' fill='white' font-family='Arial'>CF</text></svg>">
   <title>Capital Flow | Personal Finance Tracker</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
-  <script type="module" crossorigin src="./assets/index-C1PIgtQ5.js"></script>
-  <link rel="stylesheet" crossorigin href="./assets/index-BPaYHKAe.css">
+  <script type="module" crossorigin src="./assets/index-pjhcIciW.js"></script>
+  <link rel="stylesheet" crossorigin href="./assets/index-DC4Of1ke.css">
 </head>
 <body>
   
@@ -30,7 +30,7 @@
       </div>
 
       <nav style="flex: 1;">
-        <ul class="nav-links">
+        <ul class="nav-list">
           <li class="nav-item">
             <a class="nav-link active" data-tab="dashboard">
               <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>
@@ -80,18 +80,18 @@
     <main class="main-content">
       
       <!-- Top header bar -->
-      <header class="page-header" style="align-items: center; justify-content: space-between; flex-wrap: nowrap; gap: 1rem;">
-        <div class="page-title" style="flex: 1; min-width: 0;">
-          <label class="date-badge" id="current-date-badge" style="cursor: pointer; position: relative; display: inline-flex; align-items: center; gap: 0.5rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; background: var(--bg-secondary); padding: 0.5rem 1rem; border-radius: var(--radius-full); border: 1px solid var(--border-color);">
-            <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" style="flex-shrink: 0;"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-            <span id="header-date" style="overflow: hidden; text-overflow: ellipsis;">--</span>
+      <header class="page-header" style="flex-direction: row; gap: 1rem; align-items: center;">
+        <div class="page-title" style="flex: 0 0 auto;">
+          <label class="date-badge" id="current-date-badge" style="cursor: pointer; position: relative; display: flex; align-items: center; gap: 0.5rem; margin: 0; padding: 0.5rem 0.75rem; background: var(--bg-secondary); border-radius: 4px;">
+            <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            <span id="header-date" style="font-size: 1.1rem; font-weight: 700;">--</span>
             <input type="date" id="date-picker-input" max="" onclick="this.showPicker()" style="position: absolute; opacity: 0; width: 100%; height: 100%; left: 0; top: 0; cursor: pointer; z-index: 10;">
           </label>
         </div>
-        <div class="header-actions" style="flex: 2; display: flex; justify-content: flex-end;">
-          <div class="search-container" style="background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: var(--radius-full); padding: 0.4rem 0.8rem; display: flex; align-items: center; gap: 0.5rem; width: 100%; max-width: 300px;">
-            <svg viewBox="0 0 24 24" width="16" height="16" stroke="var(--text-secondary)" stroke-width="2" fill="none" style="flex-shrink: 0;"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-            <input type="text" id="dashboard-search" class="form-input" placeholder="Search..." style="border: none; background: transparent; padding: 0; margin: 0; box-shadow: none; font-size: 0.85rem; width: 100%;">
+        <div class="header-actions" style="flex: 1;">
+          <div class="card" style="margin-bottom: 0; padding: 0.4rem 0.75rem; display: flex; align-items: center; gap: 0.5rem; width: 100%; border-radius: 4px; box-shadow: none; border: 1px solid var(--border-color); background: var(--bg-primary);">
+            <svg viewBox="0 0 24 24" width="18" height="18" stroke="var(--text-secondary)" stroke-width="2" fill="none" style="flex-shrink: 0;"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="text" id="dashboard-search" class="form-input" placeholder="Search by name (Borrower, Financier, Tenant)..." style="border: none; background: transparent; padding: 0; margin: 0; box-shadow: none;">
           </div>
         </div>
       </header>
@@ -122,7 +122,6 @@
 
       <!-- VIEW: DASHBOARD -->
       <section id="view-dashboard" class="tab-content active">
-        <!-- Search bar moved to header -->
 
         <!-- Search Results Section -->
         <div id="search-results-section" class="card" style="margin-bottom: 1rem; display: none;">
@@ -666,26 +665,22 @@
           </div>
           
           <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 0.75rem; margin-top: 1rem;">
-            
-            <div class="theme-btn" id="theme-btn-black-and-colored" onclick="setTheme('black-and-colored')" style="cursor: pointer; border: 2px solid var(--border-color); border-radius: var(--radius-sm); padding: 0.75rem; background: #000000; color: #f8fafc; display: flex; flex-direction: column; gap: 0.5rem; transition: all 0.2s;">
-              <div style="font-weight: 600; font-size: 0.9rem;">Black & Colored</div>
+
+            <div class="theme-btn" id="theme-btn-light-elegant" onclick="setTheme('light-elegant')" style="cursor: pointer; border: 2px solid var(--border-color); border-radius: var(--radius-sm); padding: 0.75rem; background: #f8fafc; color: #0f172a; display: flex; flex-direction: column; gap: 0.5rem; transition: all 0.2s;">
               <div style="display: flex; gap: 0.25rem;">
-                <div style="width: 16px; height: 16px; border-radius: 50%; background: #000000; border: 1px solid #333;"></div>
-                <div style="width: 16px; height: 16px; border-radius: 50%; background: #3b82f6;"></div>
-                <div style="width: 16px; height: 16px; border-radius: 50%; background: #10b981;"></div>
+                <div style="width: 16px; height: 16px; border-radius: 50%; background: #0284c7;"></div>
+                <div style="width: 16px; height: 16px; border-radius: 50%; background: #ffffff; border: 1px solid #e2e8f0;"></div>
               </div>
+              <span style="font-size: 0.75rem; font-weight: 600;">Light Elegant</span>
             </div>
 
-            <div class="theme-btn" id="theme-btn-black-and-colored-straight" onclick="setTheme('black-and-colored-straight')" style="cursor: pointer; border: 2px solid var(--border-color); border-radius: 4px; padding: 0.75rem; background: #000000; color: #f8fafc; display: flex; flex-direction: column; gap: 0.5rem; transition: all 0.2s;">
-              <div style="font-weight: 600; font-size: 0.9rem;">B&C Straight</div>
+            <div class="theme-btn" id="theme-btn-midnight-purple" onclick="setTheme('midnight-purple')" style="cursor: pointer; border: 2px solid var(--border-color); border-radius: var(--radius-sm); padding: 0.75rem; background: #0b0714; color: #f8fafc; display: flex; flex-direction: column; gap: 0.5rem; transition: all 0.2s;">
               <div style="display: flex; gap: 0.25rem;">
-                <div style="width: 16px; height: 16px; border-radius: 0; background: #000000; border: 1px solid #333;"></div>
-                <div style="width: 16px; height: 16px; border-radius: 0; background: #3b82f6;"></div>
-                <div style="width: 16px; height: 16px; border-radius: 0; background: #10b981;"></div>
+                <div style="width: 16px; height: 16px; border-radius: 50%; background: #c084fc;"></div>
+                <div style="width: 16px; height: 16px; border-radius: 50%; background: #1c1135;"></div>
               </div>
+              <span style="font-size: 0.75rem; font-weight: 600;">Midnight Purple</span>
             </div>
-
-
 
             <div class="theme-btn" id="theme-btn-soft-sage" onclick="setTheme('soft-sage')" style="cursor: pointer; border: 2px solid var(--border-color); border-radius: var(--radius-sm); padding: 0.75rem; background: #f4f5f0; color: #2d3725; display: flex; flex-direction: column; gap: 0.5rem; transition: all 0.2s;">
               <div style="display: flex; gap: 0.25rem;">
@@ -828,81 +823,6 @@
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" onclick="closeModal('modal-loan')">Cancel</button>
           <button type="submit" class="btn btn-primary">Save Entry</button>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <!-- MODAL: CONVERT TO EMI -->
-  <div class="modal-overlay" id="modal-emi-convert">
-    <div class="modal-container">
-      <div class="modal-header">
-        <h3 class="modal-title">Convert to EMI</h3>
-        <button class="modal-close" onclick="closeModal('modal-emi-convert')">
-          <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-        </button>
-      </div>
-      <form id="form-emi-convert">
-        <input type="hidden" id="emi-convert-loan-id">
-        <input type="hidden" id="emi-convert-direction">
-        <div class="modal-body">
-          <div style="background: var(--bg-secondary); padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
-            <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
-              <span style="color: var(--text-secondary); font-size: 0.85rem;">Outstanding Principal:</span>
-              <strong id="emi-convert-principal" style="color: var(--color-danger);">Rs. 0</strong>
-            </div>
-            <div style="display: flex; justify-content: space-between;">
-              <span style="color: var(--text-secondary); font-size: 0.85rem;">Interest Rate:</span>
-              <strong id="emi-convert-rate" style="color: var(--text-primary);">0% / mo</strong>
-            </div>
-          </div>
-          <div class="form-group">
-            <label class="form-label" for="emi-convert-tenure">Tenure (Months)</label>
-            <input type="number" id="emi-convert-tenure" class="form-input" min="1" step="1" required placeholder="e.g. 12" oninput="calculateEMIPreview()">
-          </div>
-          <div class="form-group">
-            <label class="form-label">Calculated EMI Amount</label>
-            <div id="emi-convert-preview" style="font-size: 1.5rem; font-weight: 800; color: var(--color-success);">Rs. 0 / mo</div>
-          </div>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" onclick="closeModal('modal-emi-convert')">Cancel</button>
-          <button type="submit" class="btn btn-primary">Confirm Conversion</button>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <!-- MODAL: RECORD EMI -->
-  <div class="modal-overlay" id="modal-record-emi">
-    <div class="modal-container">
-      <div class="modal-header">
-        <h3 class="modal-title">Record EMI Payment</h3>
-        <button class="modal-close" onclick="closeModal('modal-record-emi')">
-          <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-        </button>
-      </div>
-      <form id="form-record-emi">
-        <input type="hidden" id="record-emi-loan-id">
-        <input type="hidden" id="record-emi-direction">
-        <input type="hidden" id="record-emi-amount-val">
-        <div class="modal-body">
-          <div style="text-align: center; margin-bottom: 1.5rem;">
-            <div style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 0.5rem;">Fixed EMI Amount</div>
-            <div id="record-emi-display-amount" style="font-size: 2rem; font-weight: 800; color: var(--color-success);">Rs. 0</div>
-          </div>
-          <div class="form-group">
-            <label class="form-label" for="record-emi-date">Payment Date</label>
-            <input type="date" id="record-emi-date" class="form-input" required>
-          </div>
-          <div class="form-group">
-            <label class="form-label" for="record-emi-notes">Notes</label>
-            <input type="text" id="record-emi-notes" class="form-input" placeholder="e.g. Month 1 EMI">
-          </div>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" onclick="closeModal('modal-record-emi')">Cancel</button>
-          <button type="submit" class="btn btn-primary">Record Payment</button>
         </div>
       </form>
     </div>
