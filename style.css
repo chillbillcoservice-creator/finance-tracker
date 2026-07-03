@@ -482,6 +482,56 @@ body::before {
   flex-shrink: 0;
 }
 
+.summary-card-sparkline {
+  position: absolute;
+  right: 1.25rem;
+  bottom: 1.25rem;
+  width: 45%;
+  height: 40px;
+  stroke: var(--color-accent);
+  stroke-width: 1.8;
+  fill: none;
+  flex-shrink: 0;
+}
+
+.pending-names-list {
+  position: absolute;
+  right: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  max-width: 45%;
+  max-height: 80%;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 0.15rem;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  text-align: right;
+  z-index: 2;
+  padding-right: 0.25rem;
+}
+
+.pending-names-list::-webkit-scrollbar {
+  width: 2px;
+}
+.pending-names-list::-webkit-scrollbar-thumb {
+  background: var(--border-color-hover);
+}
+
+.pending-name-item {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+.pending-name-item span {
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
 .nav-link:hover {
   background: rgba(255, 255, 255, 0.04);
   color: var(--text-primary);

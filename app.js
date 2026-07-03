@@ -395,6 +395,10 @@ function loadState() {
       state.expenses = state.expenses || [];
       state.renewals = state.renewals || [];
       state.files = state.files || [];
+      state.showPendingNames = state.showPendingNames !== false;
+      
+      const t = document.getElementById('toggle-pending-names');
+      if(t) t.checked = state.showPendingNames;
     } catch (e) {
       console.error('Failed to parse local storage data, resetting to default.', e);
       saveState();
@@ -1480,6 +1484,55 @@ function renderDashboard() {
     } else {
       const interestPending = Math.max(0, expectedInterestReceived - totalInterestReceived);
       interestReceivedBalanceNode.innerHTML = `<span>Collected: <span style="color: var(--color-success); font-weight: 800; margin-left: 2px;">${formatCurrency(totalInterestReceived)}</span></span><span>Pending: <span style="color: ${interestPending > 0 ? 'var(--color-danger)' : 'var(--color-success)'}; font-weight: 800; margin-left: 2px;">${formatCurrency(interestPending)}</span></span>`;
+    }
+  }
+
+  // Clear existing pending names lists
+  ['card-rent', 'card-interest', 'card-reports'].forEach(id => {
+    const card = document.getElementById(id);
+    if(card) {
+      const oldList = card.querySelector('.pending-names-list');
+      if(oldList) oldList.remove();
+    }
+  });
+
+  // Inject Pending Names if enabled
+  if (state.showPendingNames !== false && !isDayMode && !isYearMode) {
+    const pTenants = [];
+    state.rentals.forEach(r => {
+      if (r.startDate <= endDateOfSelectedMonth && r.status === 'active') {
+        const pPaid = state.rentPayments.filter(p => p.rentalId === r.id && p.monthYear === selectedMonthStr).reduce((sum, p) => sum + Number(p.amount), 0);
+        const pOwe = Number(r.monthlyRent) - pPaid;
+        if (pOwe > 0) pTenants.push({name: r.tenantName, owe: pOwe});
+      }
+    });
+    
+    if (pTenants.length > 0) {
+      const pendingTenantsHTML = '<div class="pending-names-list">' + pTenants.map(t => `<div class="pending-name-item"><span>${t.name}</span> (${formatCurrency(t.owe)})</div>`).join('') + '</div>';
+      document.getElementById('card-rent').insertAdjacentHTML('beforeend', pendingTenantsHTML);
+    }
+
+    const pBorrowers = [];
+    activeLendingLoans.forEach(l => {
+      const outstanding = getOutstandingPrincipalAtMonth(l.id, l.principal, selectedMonthStr);
+      if (outstanding > 0) {
+        const expected = outstanding * (Number(l.interestRate) / 100);
+        const pPaid = state.interestPayments.filter(p => p.type === 'received' && p.loanId === l.id && p.date.startsWith(selectedMonthStr)).reduce((sum, p) => sum + Number(p.amount), 0);
+        const pOwe = expected - pPaid;
+        if (pOwe > 0) pBorrowers.push({name: l.borrowerName, owe: pOwe});
+      }
+    });
+
+    if (pBorrowers.length > 0) {
+      const pendingBorrowersHTML = '<div class="pending-names-list">' + pBorrowers.map(b => `<div class="pending-name-item"><span>${b.name}</span> (${formatCurrency(b.owe)})</div>`).join('') + '</div>';
+      document.getElementById('card-interest').insertAdjacentHTML('beforeend', pendingBorrowersHTML);
+    }
+    
+    const combined = [...pTenants, ...pBorrowers];
+    if (combined.length > 0) {
+      const combinedPendingHTML = '<div class="pending-names-list">' + combined.map(c => `<div class="pending-name-item"><span>${c.name}</span> (${formatCurrency(c.owe)})</div>`).join('') + '</div>';
+      const netCard = document.getElementById('card-reports');
+      if (netCard) netCard.insertAdjacentHTML('beforeend', combinedPendingHTML);
     }
   }
 
@@ -4274,6 +4327,13 @@ window.renderExpenses = renderExpenses;
 window.setExpensePreset = setExpensePreset;
 window.openReportsModal = openReportsModal;
 window.exportReportsCSV = exportReportsCSV;
+window.setTheme = setTheme;
+
+window.togglePendingNames = function() {
+  state.showPendingNames = document.getElementById('toggle-pending-names').checked;
+  saveState();
+  renderDashboard();
+};
 
 // ==========================================
 window.addEventListener('DOMContentLoaded', () => {

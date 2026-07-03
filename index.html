@@ -734,6 +734,15 @@
             </h2>
           </div>
 
+          <!-- Preferences Toggle -->
+          <div style="border-bottom: 1px solid var(--border-color); padding: 0 0 1.25rem 0; margin-bottom: 1.25rem; display: flex; justify-content: space-between; align-items: center;">
+            <div>
+              <h3 style="margin: 0 0 0.25rem 0;">Show Pending Names</h3>
+              <p style="color: var(--text-secondary); margin: 0; font-size: 0.85rem;">Display who owes money on the dashboard cards</p>
+            </div>
+            <input type="checkbox" id="toggle-pending-names" onchange="window.togglePendingNames()" style="width: 20px; height: 20px; cursor: pointer;">
+          </div>
+
           <!-- Reset System -->
           <div style="border-bottom: 1px solid var(--border-color); padding: 0 0 1.25rem 0; margin-bottom: 1.25rem;">
             <h3 style="margin: 0 0 0.5rem 0; color: var(--color-danger);">Reset System</h3>
