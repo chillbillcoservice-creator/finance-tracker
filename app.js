@@ -3519,8 +3519,10 @@ window.openUploadModal = function(type, method) {
   const fileInput = document.getElementById('upload-file-input');
   if (fileInput) {
     if (method === 'camera') {
+      fileInput.setAttribute('accept', 'image/*');
       fileInput.setAttribute('capture', 'environment');
     } else {
+      fileInput.setAttribute('accept', 'image/*,application/pdf');
       fileInput.removeAttribute('capture');
     }
   }
