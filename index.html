@@ -15,7 +15,7 @@
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%230ea5e9'/><text x='50' y='65' font-size='40' font-weight='bold' text-anchor='middle' fill='white' font-family='Arial'>CF</text></svg>">
   <title>Capital Flow | Personal Finance Tracker</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
-  <script type="module" crossorigin src="./assets/index-DVLJcCXK.js"></script>
+  <script type="module" crossorigin src="./assets/index-DOJWR61P.js"></script>
   <link rel="stylesheet" crossorigin href="./assets/index-CASKNNcg.css">
 </head>
 <body>
@@ -824,6 +824,81 @@
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" onclick="closeModal('modal-loan')">Cancel</button>
           <button type="submit" class="btn btn-primary">Save Entry</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: CONVERT TO EMI -->
+  <div class="modal-overlay" id="modal-emi-convert">
+    <div class="modal-container">
+      <div class="modal-header">
+        <h3 class="modal-title">Convert to EMI</h3>
+        <button class="modal-close" onclick="closeModal('modal-emi-convert')">
+          <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <form id="form-emi-convert">
+        <input type="hidden" id="emi-convert-loan-id">
+        <input type="hidden" id="emi-convert-direction">
+        <div class="modal-body">
+          <div style="background: var(--bg-secondary); padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+              <span style="color: var(--text-secondary); font-size: 0.85rem;">Outstanding Principal:</span>
+              <strong id="emi-convert-principal" style="color: var(--color-danger);">Rs. 0</strong>
+            </div>
+            <div style="display: flex; justify-content: space-between;">
+              <span style="color: var(--text-secondary); font-size: 0.85rem;">Interest Rate:</span>
+              <strong id="emi-convert-rate" style="color: var(--text-primary);">0% / mo</strong>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="emi-convert-tenure">Tenure (Months)</label>
+            <input type="number" id="emi-convert-tenure" class="form-input" min="1" step="1" required placeholder="e.g. 12" oninput="calculateEMIPreview()">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Calculated EMI Amount</label>
+            <div id="emi-convert-preview" style="font-size: 1.5rem; font-weight: 800; color: var(--color-success);">Rs. 0 / mo</div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('modal-emi-convert')">Cancel</button>
+          <button type="submit" class="btn btn-primary">Confirm Conversion</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: RECORD EMI -->
+  <div class="modal-overlay" id="modal-record-emi">
+    <div class="modal-container">
+      <div class="modal-header">
+        <h3 class="modal-title">Record EMI Payment</h3>
+        <button class="modal-close" onclick="closeModal('modal-record-emi')">
+          <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <form id="form-record-emi">
+        <input type="hidden" id="record-emi-loan-id">
+        <input type="hidden" id="record-emi-direction">
+        <input type="hidden" id="record-emi-amount-val">
+        <div class="modal-body">
+          <div style="text-align: center; margin-bottom: 1.5rem;">
+            <div style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 0.5rem;">Fixed EMI Amount</div>
+            <div id="record-emi-display-amount" style="font-size: 2rem; font-weight: 800; color: var(--color-success);">Rs. 0</div>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="record-emi-date">Payment Date</label>
+            <input type="date" id="record-emi-date" class="form-input" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="record-emi-notes">Notes</label>
+            <input type="text" id="record-emi-notes" class="form-input" placeholder="e.g. Month 1 EMI">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('modal-record-emi')">Cancel</button>
+          <button type="submit" class="btn btn-primary">Record Payment</button>
         </div>
       </form>
     </div>
