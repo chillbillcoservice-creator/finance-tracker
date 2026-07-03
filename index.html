@@ -15,8 +15,8 @@
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%230ea5e9'/><text x='50' y='65' font-size='40' font-weight='bold' text-anchor='middle' fill='white' font-family='Arial'>CF</text></svg>">
   <title>Capital Flow | Personal Finance Tracker</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
-  <script type="module" crossorigin src="./assets/index-GbcgRkwT.js"></script>
-  <link rel="stylesheet" crossorigin href="./assets/index-BHqwKXZs.css">
+  <script type="module" crossorigin src="./assets/index-DMQkvWWZ.js"></script>
+  <link rel="stylesheet" crossorigin href="./assets/index-D899t8mY.css">
 </head>
 <body>
   
@@ -747,17 +747,11 @@
           <!-- Reset System -->
           <div style="border-bottom: 1px solid var(--border-color); padding: 0 0 1.25rem 0; margin-bottom: 1.25rem;">
             <h3 style="margin: 0 0 0.5rem 0; color: var(--color-danger);">Reset System</h3>
-            <p style="color: var(--text-secondary); margin: 0 0 1rem 0; font-size: 0.9rem;">Permanently remove all logged loans, tenants, and payment details from your browser's local cache. This action cannot be undone.</p>
+
             <button class="btn btn-danger" id="btn-reset-data">
               <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
               Reset Database
             </button>
-          </div>
-
-          <!-- About -->
-          <div>
-            <h3 style="margin: 0 0 0.5rem 0;">About CapitalFlow</h3>
-            <p style="color: var(--text-secondary); margin: 0; font-size: 0.9rem;">Version 1.0.0 — Local Database Sync. All data is stored locally in your browser.</p>
           </div>
         </div>
       </section>
@@ -1285,6 +1279,25 @@
       </div>
       <div class="modal-footer">
         <button class="btn btn-secondary" onclick="closeModal('modal-reports')">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="modal-collection-details">
+    <div class="modal-container" style="max-width: 500px;">
+      <div class="modal-header">
+        <h3 class="modal-title" id="collection-details-title">Collection Details</h3>
+        <button class="modal-close" onclick="closeModal('modal-collection-details')">
+          <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="modal-body" style="max-height: 60vh; overflow-y: auto; padding: 0.5rem 1.5rem 1.5rem 1.5rem;">
+        <div id="collection-details-list" style="display: flex; flex-direction: column; gap: 0.75rem;">
+          <!-- Content injected via JS -->
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('modal-collection-details')">Close</button>
       </div>
     </div>
   </div>
