@@ -787,11 +787,34 @@ function toggleQuickLendNewName() {
 }
 
 function setQuickLendPrincipal(val) {
-  document.getElementById('quick-lend-principal').value = val;
+  var input = document.getElementById('quick-lend-principal');
+  var current = Number(input.value) || 0;
+  input.value = current + val;
+  input.focus();
+  document.querySelectorAll('.quick-lend-preset-btn').forEach(function(b) {
+    b.style.borderColor = '';
+    b.style.background = '';
+  });
+  if (event && event.target) {
+    event.target.style.borderColor = 'var(--color-accent)';
+    event.target.style.background = 'rgba(var(--color-accent-rgb), 0.1)';
+  }
 }
 
 function setPrincipalPreset(val) {
-  document.getElementById('loan-principal').value = val;
+  var input = document.getElementById('loan-principal');
+  var current = Number(input.value) || 0;
+  input.value = current + val;
+  input.focus();
+  // highlight active button
+  document.querySelectorAll('#principal-presets-lending .btn, #principal-presets-borrowing .btn').forEach(function(b) {
+    b.style.borderColor = '';
+    b.style.background = '';
+  });
+  if (event && event.target) {
+    event.target.style.borderColor = 'var(--color-accent)';
+    event.target.style.background = 'rgba(var(--color-accent-rgb), 0.1)';
+  }
 }
 
 function setPaymentAmountPreset(val) {
@@ -872,8 +895,23 @@ function submitQuickLend(event) {
       saveState();
       closeModal('modal-quick-lend');
       renderDashboard();
-      renderLending();
-      setTimeout(() => { _isSubmittingQuickLend = false; }, 500);
+      var normName = (borrowerName || '').toLowerCase().trim();
+    var groupId = 'group-' + btoa(encodeURIComponent(normName)).replace(/[^a-zA-Z0-9]/g, '');
+      _expandedCards.add(groupId);
+      setTimeout(function() {
+        switchTab('dashboard');
+        if (currentReminderFilter === 'interest') currentReminderFilter = 'all';
+        toggleReminderFilter('interest');
+        var card = document.getElementById('card-interest');
+        if (card) card.classList.add('highlight-card');
+        setTimeout(function() {
+          var newCard = document.querySelector('[data-group-id="' + groupId + '"]');
+          if (newCard) newCard.classList.add('new-entry-highlight');
+        }, 100);
+      }, 150);
+      _isSubmittingQuickLend = false;
+      alert(`✓ Added ${formatCurrency(principal)} to ${borrowerName}'s existing loan.\nNew principal: ${formatCurrency(Number(existingLoan.principal) + principal)}`);
+      return;
       alert(`✓ Added ${formatCurrency(principal)} to ${borrowerName}'s existing loan.\nNew principal: ${formatCurrency(Number(existingLoan.principal) + principal)}`);
       return;
     }
@@ -910,9 +948,21 @@ function submitQuickLend(event) {
   saveState();
   closeModal('modal-quick-lend');
   renderDashboard();
-  renderLending();
-
-  setTimeout(() => { _isSubmittingQuickLend = false; }, 500);
+  var normName = (borrowerName || '').toLowerCase().trim();
+  var groupId = 'group-' + btoa(encodeURIComponent(normName)).replace(/[^a-zA-Z0-9]/g, '');
+  _expandedCards.add(groupId);
+  setTimeout(function() {
+    switchTab('dashboard');
+    if (currentReminderFilter === 'interest') currentReminderFilter = 'all';
+    toggleReminderFilter('interest');
+    var card = document.getElementById('card-interest');
+    if (card) card.classList.add('highlight-card');
+    setTimeout(function() {
+      var newCard = document.querySelector('[data-group-id="' + groupId + '"]');
+      if (newCard) newCard.classList.add('new-entry-highlight');
+    }, 100);
+  }, 150);
+  _isSubmittingQuickLend = false;
   alert(`✓ Successfully lent ${formatCurrency(principal)} to ${borrowerName}!`);
 }
 
@@ -1211,7 +1261,10 @@ const VIEWS = {
 
 let activeRecordsTab = 'bills';
 
-function selectRecordsTab(tab) {
+function selectRecordsTab(tab, projectName) {
+  if (projectName) {
+    window._selectedConstProject = projectName;
+  }
   activeRecordsTab = tab;
   
   renderConstruction();
@@ -1512,6 +1565,36 @@ function renderDashboard() {
     } else {
       expenseCardDetails.style.display = 'none';
     }
+    
+    // Active construction projects (always shown)
+    var constProjectsDiv = document.getElementById('dash-construction-projects');
+    if (!constProjectsDiv) {
+      constProjectsDiv = document.createElement('div');
+      constProjectsDiv.id = 'dash-construction-projects';
+      constProjectsDiv.style.marginTop = '0.5rem';
+      expenseCardDetails.parentNode.insertBefore(constProjectsDiv, expenseCardDetails.nextSibling);
+    }
+    var constExps = state.expenses.filter(function(e) { return e && e.category === 'construction'; });
+    var projectTotals = {};
+    constExps.forEach(function(e) {
+      if (e.project) {
+        projectTotals[e.project] = (projectTotals[e.project] || 0) + Number(e.amount);
+      }
+    });
+    var activeProjects = Object.keys(projectTotals).filter(function(p) { return p; });
+    if (activeProjects.length > 0) {
+      var projHtml = '<div style="padding: 0.3rem 0.4rem; background: rgba(var(--color-accent-rgb), 0.08); border-radius: 4px; border-left: 3px solid var(--color-accent);">';
+      projHtml += '<div style="font-size: 0.6rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-secondary); margin-bottom: 0.2rem;">Ongoing Projects</div>';
+      activeProjects.forEach(function(p) {
+        var total = projectTotals[p];
+        projHtml += '<div style="cursor: pointer; font-size: 0.78rem; font-weight: 600; color: var(--color-accent); padding: 0.15rem 0; display: flex; justify-content: space-between; align-items: center;" onclick="event.stopPropagation(); switchTab(\'records\'); setTimeout(function(){ selectRecordsTab(\'construction\', \'' + p.replace(/'/g, "\\'") + '\'); }, 100);"><span>🏗 ' + p + '</span><span style="color: var(--color-danger); font-weight: 700;">' + formatCurrency(total) + '</span></div>';
+      });
+      projHtml += '</div>';
+      constProjectsDiv.innerHTML = projHtml;
+      constProjectsDiv.style.display = 'block';
+    } else {
+      constProjectsDiv.style.display = 'none';
+    }
   }
   document.getElementById('dash-interest-received').textContent = formatCurrency(totalInterestReceived);
   document.getElementById('dash-interest-paid').textContent = formatCurrency(totalInterestPaid);
@@ -1586,6 +1669,17 @@ function renderDashboard() {
       }).filter(Boolean).join('') + '</div>';
       document.getElementById('card-interest').insertAdjacentHTML('beforeend', pendingBorrowersHTML);
     }
+    
+    // Attach click-selection to all pending-name-items
+    document.querySelectorAll('.pending-name-item').forEach(function(el) {
+      el.addEventListener('click', function(e) {
+        e.stopPropagation();
+        document.querySelectorAll('.pending-name-item.selected').forEach(function(x) {
+          if (x !== el) x.classList.remove('selected');
+        });
+        el.classList.toggle('selected');
+      });
+    });
     
     // Removed pending names from balance to receive card per user request
   }
@@ -2674,16 +2768,32 @@ function renderRentals() {
     
     let stampHtml = '';
     if (isRentPaidThisMonth) {
-      stampHtml = `<div class="card-stamp stamp-received">RENT RECEIVED</div>`;
+      stampHtml = `<div class="card-stamp stamp-received" style="margin-left: 0; margin-bottom: 0.25rem;">RENT RECEIVED</div>`;
     } else {
       if (rentPayments.length > 0) {
-        stampHtml = `<div class="card-stamp stamp-received">RENT RECEIVED</div>`;
+        stampHtml = `<div class="card-stamp stamp-received" style="margin-left: 0; margin-bottom: 0.25rem;">RENT RECEIVED</div>`;
       }
     }
 
     const card = document.createElement('div');
+    const renewData = getNextRenewal(rental.startDate);
+    const isRenewalSoon = renewData && renewData.daysLeft <= 30;
     card.className = `card loan-card ${_expandedCards.has(rental.id) ? 'expanded' : ''}`;
+    card.style.padding = '0.85rem';
     card.setAttribute('data-id', rental.id);
+    if (isRenewalSoon) {
+      card.style.borderColor = '#ef4444';
+      card.style.borderWidth = '2px';
+    } else if (!isRentPaidThisMonth && rental.status === 'active') {
+      var now = new Date();
+      var todayDate = now.getDate();
+      var dueDay = Number(rental.rentDueDay);
+      var daysUntilDue = dueDay - todayDate;
+      if (daysUntilDue >= 0 && daysUntilDue <= 7) {
+        card.style.borderColor = '#eab308';
+        card.style.borderWidth = '2px';
+      }
+    }
 
     card.innerHTML = `
       <div class="item-row">
@@ -2691,32 +2801,26 @@ function renderRentals() {
           <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
             <svg class="card-chevron" viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2.5" fill="none"><polyline points="6 9 12 15 18 9"/></svg>
             <span class="item-name">${rental.tenantName}</span>
+            <span style="font-size: 0.75rem; color: var(--text-secondary); font-weight: 500;">${rental.propertyName}</span>
             ${rental.status === 'active' ? '' : '<span class="badge badge-muted">Ended</span>'}
-            ${stampHtml}
           </div>
-          ${rental.contactInfo ? `<div style="margin-top: 0.25rem; font-size: 0.85rem; color: var(--text-secondary);">${getContactActionsHTML(rental.contactInfo)}</div>` : ''}
-          <div class="item-meta" style="margin-top: 0.25rem;">
-            <span>Property: <strong>${rental.propertyName}</strong></span>
-            ${(() => { const r = getNextRenewal(rental.startDate); return r ? ` &middot; Renewal: <strong>${r.dateStr}</strong> (<span style="color: var(--color-warning);">${r.daysLeft}d</span>)` : ''; })()}
+          ${rental.contactInfo ? `<div style="font-size: 0.85rem; color: var(--text-secondary);">${getContactActionsHTML(rental.contactInfo)}</div>` : ''}
+          <div class="item-meta" style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; font-size: 0.68rem;">
+            <span>Due: <strong>${rental.rentDueDay}<sup>th</sup></strong></span>
+            <span class="meta-divider"></span>
+            <span>Since <strong>${formatDate(rental.startDate)}</strong></span>
+            ${renewData ? `<span class="meta-divider"></span><span>Renews: <strong>${renewData.dateStr}</strong></span>` : ''}
           </div>
         </div>
         <div class="amount-display" style="text-align: right; display: flex; flex-direction: column; align-items: flex-end;">
+          ${stampHtml}
           <div class="amount-value" style="color: var(--color-success);">${formatCurrency(rental.monthlyRent)}</div>
-          <div class="amount-in-words" style="font-size: 0.68rem; color: var(--text-secondary); max-width: 180px; line-height: 1.25; margin-top: 0.15rem; font-style: italic; text-align: right; word-wrap: break-word;">(${numberToIndianWords(rental.monthlyRent)})</div>
-          <div class="amount-label" style="margin-top: 0.2rem; margin-bottom: 0.2rem;">Monthly Rent</div>
-          <div style="display: flex; align-items: center; gap: 0.3rem; margin-top: 0.2rem;">
-            <input type="checkbox" id="chk-rent-paid-${rental.id}" ${isRentPaidThisMonth ? 'checked disabled' : ''} onchange="if(this.checked) { quickMarkRentalPaid('${rental.id}', ${rental.monthlyRent}, '${selectedMonthStr}'); }" style="width: 14px; height: 14px; cursor: pointer; accent-color: var(--color-success); margin: 0;">
-            <label for="chk-rent-paid-${rental.id}" style="font-size: 0.72rem; font-weight: 700; color: ${isRentPaidThisMonth ? 'var(--color-success)' : 'var(--text-secondary)'}; cursor: pointer; margin: 0; line-height: 1;">Received</label>
-          </div>
+          <div class="amount-label" style="margin-top: 0.15rem;">Monthly Rent</div>
         </div>
       </div>
 
       <div class="card-collapse-content">
         <div class="loan-stats-grid" style="margin-top: 1rem;">
-          <div class="loan-stat-box">
-            <span class="loan-stat-val">${rental.rentDueDay}<sup>th</sup></span>
-            <span class="loan-stat-lbl">Rent Due Day</span>
-          </div>
           <div class="loan-stat-box">
             <span class="loan-stat-val">${formatCurrency(rental.securityDeposit)}</span>
             <span class="loan-stat-lbl">Security Deposit</span>
@@ -2725,11 +2829,10 @@ function renderRentals() {
             <span class="loan-stat-val">${formatCurrency(totalCollected)}</span>
             <span class="loan-stat-lbl">Total Rent Collected</span>
           </div>
-        </div>
-
-        <div style="font-size: 0.8rem; color: var(--text-secondary); display:flex; justify-content:space-between; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.75rem; margin-bottom: 0.75rem;">
-          <span>Lease Start: <strong>${formatDate(rental.startDate)}</strong></span>
-          <span>Payments Logged: <strong>${rentPayments.length} month(s)</strong></span>
+          <div class="loan-stat-box">
+            <span class="loan-stat-val">${rentPayments.length}</span>
+            <span class="loan-stat-lbl">Payments Logged</span>
+          </div>
         </div>
 
         <div class="loan-actions">
@@ -2836,9 +2939,37 @@ document.getElementById('form-loan').addEventListener('submit', (e) => {
   closeModal('modal-loan');
   
   if (direction === 'lent') {
-    renderLending();
+    var normName = (party || '').toLowerCase().trim();
+    var groupId = 'group-' + btoa(encodeURIComponent(normName)).replace(/[^a-zA-Z0-9]/g, '');
+    _expandedCards.add(groupId);
+    renderDashboard();
+    setTimeout(function() {
+      switchTab('dashboard');
+      if (currentReminderFilter === 'interest') currentReminderFilter = 'all';
+      toggleReminderFilter('interest');
+      var card = document.getElementById('card-interest');
+      if (card) card.classList.add('highlight-card');
+      setTimeout(function() {
+        var newCard = document.querySelector('[data-group-id="' + groupId + '"]');
+        if (newCard) newCard.classList.add('new-entry-highlight');
+      }, 100);
+    }, 150);
   } else {
-    renderBorrowing();
+    var normName = (party || '').toLowerCase().trim();
+    var groupId = 'group-b-' + btoa(encodeURIComponent(normName)).replace(/[^a-zA-Z0-9]/g, '');
+    _expandedCards.add(groupId);
+    renderDashboard();
+    setTimeout(function() {
+      switchTab('dashboard');
+      if (currentReminderFilter === 'interest') currentReminderFilter = 'all';
+      toggleReminderFilter('interest');
+      var card = document.getElementById('card-interest');
+      if (card) card.classList.add('highlight-card');
+      setTimeout(function() {
+        var newCard = document.querySelector('[data-group-id="' + groupId + '"]');
+        if (newCard) newCard.classList.add('new-entry-highlight-red');
+      }, 100);
+    }, 150);
   }
 });
 
@@ -3321,6 +3452,9 @@ document.getElementById('form-rental').addEventListener('submit', (e) => {
         agreementImg: agreementImg || state.rentals[index].agreementImg
       };
     }
+    saveState();
+    closeModal('modal-rental');
+    renderRentals();
   } else {
     // Add
     const newId = 'r' + Math.random().toString(36).substr(2, 9);
@@ -3337,11 +3471,21 @@ document.getElementById('form-rental').addEventListener('submit', (e) => {
       agreementImg,
       status: 'active'
     });
+    saveState();
+    closeModal('modal-rental');
+    renderDashboard();
+    setTimeout(function() {
+      switchTab('dashboard');
+      if (currentReminderFilter === 'rent') currentReminderFilter = 'all';
+      toggleReminderFilter('rent');
+      var card = document.getElementById('card-rent');
+      if (card) card.classList.add('highlight-card');
+      setTimeout(function() {
+        var newCard = document.querySelector('[data-id="' + newId + '"]');
+        if (newCard) newCard.classList.add('new-entry-highlight');
+      }, 100);
+    }, 150);
   }
-
-  saveState();
-  closeModal('modal-rental');
-  renderRentals();
 });
 
 function updateRentalRenewalDate() {
@@ -3805,7 +3949,15 @@ window.submitQuickConst = function() {
   notesInput.value = '';
   window._selectedConstCat = null;
   
-  refreshActiveTab();
+  switchTab('dashboard');
+  renderDashboard();
+  setTimeout(function() {
+    var card = document.getElementById('card-expenses');
+    if (card) {
+      card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      card.classList.add('highlight-card');
+    }
+  }, 150);
 };
 
 function renderConstruction() {
@@ -4947,10 +5099,10 @@ window.markPendingCollected = function(collectionType, itemType, id, amount, mon
   saveState();
   renderDashboard();
   renderRentals();
-  openCollectionDetails(collectionType, null);
+  window.openCollectionDetails(collectionType, null);
 };
 
-window.openCollectionDetails = function(type, event) {
+window.window.openCollectionDetails = function(type, event) {
   if (event) event.stopPropagation();
   let collected = [];
   let pending = [];
@@ -5225,6 +5377,9 @@ window.addEventListener('DOMContentLoaded', () => {
             project, laborType, workerName, amount, date, note: notes
           };
         }
+        saveState();
+        closeModal('modal-construction');
+        refreshActiveTab();
       } else {
         state.expenses.push({
           id: 'exp_' + Math.random().toString(36).substr(2, 9),
@@ -5232,11 +5387,18 @@ window.addEventListener('DOMContentLoaded', () => {
           project, laborType, workerName, amount, date, note: notes,
           propertyId: ''
         });
+        saveState();
+        closeModal('modal-construction');
+        switchTab('dashboard');
+        renderDashboard();
+        setTimeout(function() {
+          var card = document.getElementById('card-expenses');
+          if (card) {
+            card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            card.classList.add('highlight-card');
+          }
+        }, 150);
       }
-      
-      saveState();
-      closeModal('modal-construction');
-      refreshActiveTab();
     });
   }
 });

@@ -131,10 +131,6 @@
   background: var(--bg-primary);
 }
 
-[data-theme="black-and-colored"] .summary-card-icon {
-  display: none !important;
-}
-
 [data-theme="black-and-colored"] .btn, [data-theme="black-and-colored"] input, [data-theme="black-and-colored"] select {
   box-shadow: none !important;
 }
@@ -199,10 +195,6 @@
   border-radius: 0 !important;
 }
 
-[data-theme="black-and-colored-plain"] .summary-card-icon {
-  display: none !important;
-}
-
 [data-theme="black-and-colored-plain"] .btn, [data-theme="black-and-colored-plain"] input, [data-theme="black-and-colored-plain"] select {
   box-shadow: none !important;
   border-radius: 0 !important;
@@ -265,10 +257,6 @@
   border-radius: 0 !important;
 }
 
-[data-theme="black-and-white"] .summary-card-icon {
-  display: none !important;
-}
-
 [data-theme="black-and-white"] .btn, [data-theme="black-and-white"] input, [data-theme="black-and-white"] select {
   box-shadow: none !important;
   border-radius: 0 !important;
@@ -329,10 +317,6 @@
   border-bottom: 1px solid var(--border-color);
   background: var(--bg-primary);
   border-radius: 0 !important;
-}
-
-[data-theme="white-and-black"] .summary-card-icon {
-  display: none !important;
 }
 
 [data-theme="white-and-black"] .btn, [data-theme="white-and-black"] input, [data-theme="white-and-black"] select {
@@ -683,9 +667,18 @@ body::before {
   text-overflow: ellipsis;
   max-width: 100%;
   color: var(--text-primary);
+  cursor: pointer;
+  padding: 0.15rem 0.3rem;
+  border-left: 3px solid transparent;
+  transition: all 0.2s;
 }
 .pending-name-item span {
   font-weight: 600;
+}
+.pending-name-item.selected {
+  border-left-color: #3b82f6;
+  background: rgba(59, 130, 246, 0.1);
+  border-radius: 0 4px 4px 0;
 }
 
 .contact-btn-group {
@@ -2038,13 +2031,39 @@ body::before {
 }
 
 .highlight-card {
-  animation: cardPulse 3s ease-out;
+  animation: cardGlow 3s ease-out forwards;
 }
 
-@keyframes cardPulse {
-  0% { box-shadow: 0 0 0 0 rgba(var(--color-accent-rgb), 0); border-color: var(--border-color); }
-  25% { box-shadow: 0 0 0 5px rgba(var(--color-accent-rgb), 0.5); border-color: var(--color-accent); }
-  100% { box-shadow: 0 0 0 0 rgba(var(--color-accent-rgb), 0); border-color: var(--border-color); }
+@keyframes cardGlow {
+  0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); border-left-color: var(--border-color); }
+  15% { box-shadow: 0 0 20px 8px rgba(59, 130, 246, 0.6); border-left-color: #3b82f6; }
+  100% { box-shadow: 0 0 10px 3px rgba(59, 130, 246, 0.35); border-left-color: #3b82f6; }
+}
+
+.loan-card.new-entry-highlight {
+  border: 2px solid #3b82f6 !important;
+  box-shadow: 0 0 20px 6px rgba(59, 130, 246, 0.4), 0 0 0 2px rgba(59, 130, 246, 0.15) !important;
+  animation: newCardPop 4s ease-out forwards;
+}
+
+@keyframes newCardPop {
+  0% { transform: scale(1); }
+  10% { transform: scale(1.02); box-shadow: 0 0 30px 12px rgba(59, 130, 246, 0.6), 0 0 0 3px rgba(59, 130, 246, 0.25) !important; }
+  30% { transform: scale(1); }
+  100% { box-shadow: 0 0 12px 3px rgba(59, 130, 246, 0.25) !important; border-color: #3b82f6 !important; }
+}
+
+.loan-card.new-entry-highlight-red {
+  border: 2px solid #ef4444 !important;
+  box-shadow: 0 0 20px 6px rgba(239, 68, 68, 0.4), 0 0 0 2px rgba(239, 68, 68, 0.15) !important;
+  animation: newCardPopRed 4s ease-out forwards;
+}
+
+@keyframes newCardPopRed {
+  0% { transform: scale(1); }
+  10% { transform: scale(1.02); box-shadow: 0 0 30px 12px rgba(239, 68, 68, 0.6), 0 0 0 3px rgba(239, 68, 68, 0.25) !important; }
+  30% { transform: scale(1); }
+  100% { box-shadow: 0 0 12px 3px rgba(239, 68, 68, 0.25) !important; border-color: #ef4444 !important; }
 }
 
 /* ══════════════════════════════════════

@@ -146,10 +146,9 @@
             <div class="summary-card-header">
               <span style="font-weight: 600; font-size: 0.75rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.3px;">Rent To Receive</span>
               <div style="display: flex; align-items: center; gap: 0.3rem;">
-                <div class="summary-card-icon">
+                <div class="summary-card-icon" onclick="event.stopPropagation(); openCollectionDetails('rent', event)" style="cursor: pointer;">
                   <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
                 </div>
-                <button class="btn btn-sm" style="font-size: 0.6rem; padding: 0.15rem 0.25rem; display: flex; align-items: center; justify-content: center; background: rgba(var(--color-success-rgb), 0.15); border-color: rgba(var(--color-success-rgb), 0.3); color: var(--color-success);" onclick="event.stopPropagation(); openCollectionDetails('rent', event)"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
               </div>
             </div>
             <div class="summary-value" id="dash-monthly-rent" style="color: var(--color-success);">Rs. 0.00</div>
@@ -162,10 +161,9 @@
             <div class="summary-card-header">
               <span style="font-weight: 600; font-size: 0.75rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.3px;">Interest To Collect</span>
               <div style="display: flex; align-items: center; gap: 0.3rem;">
-                <div class="summary-card-icon" style="background: rgba(16, 185, 129, 0.1); color: var(--color-success);">
+                <div class="summary-card-icon" style="background: rgba(16, 185, 129, 0.1); color: var(--color-success); cursor: pointer;" onclick="event.stopPropagation(); openCollectionDetails('interest', event)">
                   <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
                 </div>
-                <button class="btn btn-sm" style="font-size: 0.6rem; padding: 0.15rem 0.25rem; display: flex; align-items: center; justify-content: center; background: rgba(var(--color-success-rgb), 0.15); border-color: rgba(var(--color-success-rgb), 0.3); color: var(--color-success);" onclick="event.stopPropagation(); openCollectionDetails('interest', event)"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
               </div>
             </div>
             <div class="summary-value" id="dash-total-interest-received" style="color: var(--color-success);">Rs. 0.00</div>
@@ -180,10 +178,9 @@
             <div class="summary-card-header">
               <span style="font-weight: 600; font-size: 0.75rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.3px;">Total Balance To Receive</span>
               <div style="display: flex; align-items: center; gap: 0.3rem;">
-                <div class="summary-card-icon">
+                <div class="summary-card-icon" onclick="event.stopPropagation(); openCollectionDetails('all', event)" style="cursor: pointer;">
                   <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
                 </div>
-                <button class="btn btn-sm" style="font-size: 0.6rem; padding: 0.15rem 0.25rem; display: flex; align-items: center; justify-content: center; background: rgba(var(--color-success-rgb), 0.15); border-color: rgba(var(--color-success-rgb), 0.3); color: var(--color-success);" onclick="event.stopPropagation(); openCollectionDetails('all', event)"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
               </div>
             </div>
             <div class="summary-value" id="dash-net-balance" style="color: var(--color-success);">Rs. 0.00</div>
@@ -194,10 +191,9 @@
             <div class="summary-card-header">
               <span style="font-weight: 600; font-size: 0.75rem; color: var(--color-danger); text-transform: uppercase; letter-spacing: 0.3px;">Today's Expenses</span>
               <div style="display: flex; align-items: center; gap: 0.3rem;">
-                <div class="summary-card-icon" style="background: rgba(239, 68, 68, 0.1); color: var(--color-danger);">
+                <div class="summary-card-icon" style="background: rgba(239, 68, 68, 0.1); color: var(--color-danger); cursor: pointer;" onclick="event.stopPropagation(); openExpenseDetails(event)">
                   <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
                 </div>
-                <button class="btn btn-sm" style="font-size: 0.6rem; padding: 0.15rem 0.25rem; display: flex; align-items: center; justify-content: center; background: rgba(var(--color-danger-rgb), 0.15); border-color: rgba(var(--color-danger-rgb), 0.3); color: var(--color-danger);" onclick="event.stopPropagation(); openExpenseDetails(event)"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
               </div>
             </div>
             <div class="summary-value" id="dash-total-expenses" style="color: var(--color-danger);">Rs. 0.00</div>
@@ -783,8 +779,6 @@
 
           <!-- Reset System -->
           <div style="border-bottom: 1px solid var(--border-color); padding: 0 0 1.25rem 0; margin-bottom: 1.25rem;">
-            <h3 style="margin: 0 0 0.5rem 0; color: var(--color-danger);">Reset System</h3>
-            <p style="color: var(--text-secondary); margin: 0 0 1rem 0; font-size: 0.9rem;">Permanently remove all logged loans, tenants, and payment details from your browser's local cache. This action cannot be undone.</p>
             <button class="btn btn-danger" id="btn-reset-data">
               <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
               Reset Database
@@ -1332,9 +1326,9 @@
             <input type="number" id="quick-lend-principal" class="form-input" min="1" step="any" placeholder="0.00" required>
             <!-- 3 buttons 25k, 50k, 100k -->
             <div style="display: flex; gap: 0.5rem; margin-top: 0.4rem; flex-wrap: wrap;">
-              <button type="button" class="btn btn-secondary btn-sm" onclick="setQuickLendPrincipal(25000)" style="padding: 0.2rem 0.5rem; font-size: 0.75rem;">25k</button>
-              <button type="button" class="btn btn-secondary btn-sm" onclick="setQuickLendPrincipal(50000)" style="padding: 0.2rem 0.5rem; font-size: 0.75rem;">50k</button>
-              <button type="button" class="btn btn-secondary btn-sm" onclick="setQuickLendPrincipal(100000)" style="padding: 0.2rem 0.5rem; font-size: 0.75rem;">100k</button>
+              <button type="button" class="btn btn-secondary btn-sm quick-lend-preset-btn" onclick="setQuickLendPrincipal(25000)" style="padding: 0.2rem 0.5rem; font-size: 0.75rem;">25k</button>
+              <button type="button" class="btn btn-secondary btn-sm quick-lend-preset-btn" onclick="setQuickLendPrincipal(50000)" style="padding: 0.2rem 0.5rem; font-size: 0.75rem;">50k</button>
+              <button type="button" class="btn btn-secondary btn-sm quick-lend-preset-btn" onclick="setQuickLendPrincipal(100000)" style="padding: 0.2rem 0.5rem; font-size: 0.75rem;">100k</button>
             </div>
           </div>
           <!-- Monthly Interest Rate -->
