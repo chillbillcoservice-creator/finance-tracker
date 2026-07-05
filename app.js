@@ -955,6 +955,33 @@ function getNextRenewal(startDateStr) {
   };
 }
 
+function quickMarkPaidInModal(pType, id, amount, modalType) {
+  loadState();
+  if (pType === 'rent') {
+    state.rentPayments.push({
+      id: 'rp' + Math.random().toString(36).substr(2, 9),
+      rentalId: id,
+      amount: Number(amount),
+      monthYear: selectedMonthStr,
+      datePaid: new Date().toISOString().split('T')[0],
+      note: 'Marked from Collections'
+    });
+  } else {
+    state.interestPayments.push({
+      id: 'p' + Math.random().toString(36).substr(2, 9),
+      loanId: id,
+      type: 'received',
+      category: 'interest',
+      amount: Number(amount),
+      date: new Date().toISOString().split('T')[0],
+      note: 'Recorded from Collections'
+    });
+  }
+  saveState();
+  renderDashboard();
+  openCollectionDetails(modalType);
+}
+
 function quickMarkRentalPaid(rentalId, amount, monthYear) {
   loadState();
   const rental = state.rentals.find(r => r.id === rentalId);
@@ -4936,7 +4963,7 @@ window.openCollectionDetails = function(type, event) {
           if (pOwe > 0) {
             const normName = (l.borrowerName || '').toLowerCase().trim();
             const groupId = 'group-' + btoa(encodeURIComponent(normName)).replace(/[^a-zA-Z0-9]/g, '');
-            pending.push({name: l.borrowerName, phone: l.phone, owe: pOwe, id: groupId, type: 'interest'});
+            pending.push({name: l.borrowerName, phone: l.phone, owe: pOwe, id: l.id, navId: groupId, type: 'interest'});
           }
         }
       });
@@ -4961,7 +4988,7 @@ window.openCollectionDetails = function(type, event) {
           if (pOwe > 0) {
             const normName = (l.borrowerName || '').toLowerCase().trim();
             const groupId = 'group-' + btoa(encodeURIComponent(normName)).replace(/[^a-zA-Z0-9]/g, '');
-            pending.push({name: l.borrowerName, type: 'interest', phone: l.phone, owe: pOwe, id: groupId});
+            pending.push({name: l.borrowerName, type: 'interest', phone: l.phone, owe: pOwe, id: l.id, navId: groupId});
           }
         }
       });
@@ -4979,7 +5006,7 @@ window.openCollectionDetails = function(type, event) {
       const cleanPhone = p.phone ? p.phone.replace(/\D/g, '') : '';
       const waLink = p.phone ? `<a href="https://wa.me/91${cleanPhone}" target="_blank" class="btn-contact btn-whatsapp"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg></a>` : '';
       const callLink = p.phone ? `<a href="tel:${cleanPhone}" class="btn-contact btn-call"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg></a>` : '';
-      const navAttr = p.id ? `navigateToCard('${p.type}', '${p.id}', '${p.type}')` : '';
+      const navAttr = p.navId ? `navigateToCard('${p.type}', '${p.navId}', '${p.type}')` : (p.id ? `navigateToCard('${p.type}', '${p.id}', '${p.type}')` : '');
       return `
       <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 0; border-bottom: 1px solid var(--border-color);">
         <div style="display: flex; align-items: center; gap: 0.5rem;">
@@ -5005,13 +5032,14 @@ window.openCollectionDetails = function(type, event) {
       const navAttrCol = p.ids && p.ids.length === 1 ? `navigateToCard('${p.type}', '${p.ids[0]}', '${p.type}')` : '';
       if (navAttrCol) clickAttr = ` style="cursor: pointer;" onclick="${navAttrCol}"`;
       return `
-      <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 0; border-bottom: 1px solid var(--border-color);"${clickAttr}>
-        <div style="display: flex; align-items: center; gap: 0.4rem;">
-          <span style="font-weight: 500; color: var(--text-primary);${navAttrCol ? ' cursor: pointer;' : ''}">${p.name}</span>
+      <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 0; border-bottom: 1px solid var(--border-color);">
+        <div style="display: flex; align-items: center; gap: 0.5rem;">
+          <span style="font-weight: 500; color: var(--text-primary); cursor: pointer;" ${navAttr ? `onclick="${navAttr}"` : ''}>${p.name}</span>
+          <div class="contact-btn-group" style="display: inline-flex;">${callLink}${waLink}</div>
           ${type === 'all' ? `<span style="font-size: 0.6rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; padding: 0.1rem 0.35rem; border-radius: 4px; background: ${p.type === 'rent' ? 'rgba(34,197,94,0.15)' : 'rgba(59,130,246,0.15)'}; color: ${p.type === 'rent' ? 'var(--color-success)' : 'var(--color-accent)'};">${p.type === 'rent' ? 'RENT' : 'INTEREST'}</span>` : ''}
-          <span style="font-size: 0.8em;">✅</span>
+          <input type="checkbox" style="width: 16px; height: 16px; cursor: pointer; accent-color: var(--color-success); margin: 0;" onchange="quickMarkPaidInModal('${p.type}', '${p.id}', ${p.owe}, '${type}')">
         </div>
-        <span style="color: var(--text-primary); font-weight: 600;">${formatCurrency(p.amount)}</span>
+        <span style="color: var(--color-success); font-weight: 600;">${formatCurrency(p.owe)}</span>
       </div>`;
     }).join('');
     const collTotal = collected.reduce((s, p) => s + p.amount, 0);
