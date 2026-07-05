@@ -339,7 +339,7 @@ function updateHeaderDateDisplay() {
         rent: 'Rent',
         interest: 'Interest',
         expenses: 'Expenses',
-        reports: 'Balance To Receive'
+        reports: 'Total Balance To Receive'
       };
       if (filterTitles[currentReminderFilter]) {
         baseTitle = filterTitles[currentReminderFilter];
@@ -386,7 +386,13 @@ function loadState() {
     try {
       state = JSON.parse(data);
       // Ensure all arrays are initialized
-      state.theme = state.theme || 'dark-blue';
+      // Migrate removed themes to valid ones
+      const removedThemes = ['dark-blue', 'light-elegant', 'midnight-purple'];
+      if (removedThemes.includes(state.theme)) {
+        const themeMap = { 'dark-blue': 'black-and-colored', 'light-elegant': 'white-and-black', 'midnight-purple': 'soft-sage' };
+        state.theme = themeMap[state.theme];
+      }
+      state.theme = state.theme || 'black-and-colored';
       state.lent = state.lent || [];
       state.borrowed = state.borrowed || [];
       state.rentals = state.rentals || [];
@@ -418,70 +424,40 @@ function saveState() {
 
 // Seed initial values if empty (gives a premium impression out of the box)
 function seedInitialData() {
-  const today = new Date();
-  const dateStr = (offsetDays) => {
-    const d = new Date(today);
-    d.setDate(d.getDate() + offsetDays);
-    return d.toISOString().split('T')[0];
-  };
-
-  const currentMonthStr = today.toISOString().slice(0, 7); // YYYY-MM
-  const prevMonthStr = (() => {
-    const d = new Date(today);
-    d.setMonth(d.getMonth() - 1);
-    return d.toISOString().slice(0, 7);
-  })();
-
   state.lent = [
-    { id: 'l1', borrowerName: 'Rajesh Kumar', phone: '9876543210', principal: 250000, interestRate: 2, startDate: dateStr(-120), dueDate: dateStr(240), status: 'active', notes: 'Medical emergency loan' },
-    { id: 'l2', borrowerName: 'Suresh Patil', phone: '9988776655', principal: 500000, interestRate: 1.5, startDate: dateStr(-90), dueDate: null, status: 'active', notes: 'Shop renovation funds' },
-    { id: 'l3', borrowerName: 'Anita Sharma', phone: '9123456789', principal: 100000, interestRate: 2, startDate: dateStr(-45), dueDate: dateStr(320), status: 'active', notes: 'Daughter wedding advance' }
+    { id: 'loan_1', borrowerName: 'Rahul Sharma', phone: '9876543210', principal: '100000', interestRate: '2', startDate: '2026-01-15', notes: 'Business loan', status: 'active' },
+    { id: 'loan_2', borrowerName: 'Priya Patel', phone: '9876543211', principal: '50000', interestRate: '1.5', startDate: '2026-03-01', notes: 'Personal loan', status: 'active' }
   ];
-
   state.borrowed = [
-    { id: 'b1', financierName: 'HDFC Bank', principal: 1500000, interestRate: 0.85, startDate: dateStr(-180), dueDate: dateStr(1980), status: 'active', notes: 'Home loan EMI' },
-    { id: 'b2', financierName: 'Vikram Mehta', phone: '9871234567', principal: 200000, interestRate: 1.5, startDate: dateStr(-60), dueDate: dateStr(120), status: 'active', notes: 'Car down payment borrowed' }
+    { id: 'borrow_1', lenderName: 'SBI Bank', phone: '', principal: '500000', interestRate: '1', startDate: '2025-06-01', notes: 'Home renovation loan', status: 'active' }
   ];
-
   state.rentals = [
-    { id: 'r1', tenantName: 'Priya & Arjun Mehta', propertyName: '23/48 Ground Floor', contactInfo: '9812345678', startDate: dateStr(-395), securityDeposit: 50000, monthlyRent: 23000, rentDueDay: 5, status: 'active' },
-    { id: 'r2', tenantName: 'Kavita Joshi', propertyName: '23/48 3rd Floor', contactInfo: '9900112233', startDate: dateStr(-210), securityDeposit: 32000, monthlyRent: 15000, rentDueDay: 1, status: 'active' },
-    { id: 'r3', tenantName: 'Deepak Nair', propertyName: '1/104', contactInfo: '9011223344', startDate: dateStr(-30), securityDeposit: 60000, monthlyRent: 35000, rentDueDay: 10, status: 'active' }
+    { id: 'rent_1', propertyName: '23/48 Ground Floor', tenantName: 'Amit Verma', contactInfo: '9876543212', monthlyRent: '23000', securityDeposit: '46000', startDate: '2025-11-01', dueDay: '5', status: 'active' },
+    { id: 'rent_2', propertyName: '23/48 3rd Floor', tenantName: 'Sunita Yadav', contactInfo: '9876543213', monthlyRent: '32000', securityDeposit: '64000', startDate: '2026-02-01', dueDay: '7', status: 'active' },
+    { id: 'rent_3', propertyName: '1/104', tenantName: 'Vikram Singh', contactInfo: '9876543214', monthlyRent: '18000', securityDeposit: '36000', startDate: '2026-04-01', dueDay: '10', status: 'active' }
   ];
-
-  // Seed payments
-  state.interestPayments = [
-    { id: 'ip1', loanId: 'l1', type: 'received', category: 'interest', amount: 5000, date: dateStr(-90), note: 'Sept interest' },
-    { id: 'ip2', loanId: 'l1', type: 'received', category: 'interest', amount: 5000, date: dateStr(-60), note: 'Oct interest' },
-    { id: 'ip3', loanId: 'l1', type: 'received', category: 'interest', amount: 5000, date: dateStr(-30), note: 'Nov interest' },
-    { id: 'ip4', loanId: 'l2', type: 'received', category: 'interest', amount: 7500, date: dateStr(-60), note: 'Sept interest' },
-    { id: 'ip5', loanId: 'l2', type: 'received', category: 'interest', amount: 7500, date: dateStr(-30), note: 'Oct interest' },
-    { id: 'ip6', loanId: 'l3', type: 'received', category: 'interest', amount: 2000, date: dateStr(-15), note: 'First month interest' },
-    { id: 'ip7', loanId: 'b1', type: 'paid', category: 'interest', amount: 12750, date: dateStr(-30), note: 'HDFC EMI Oct' },
-    { id: 'ip8', loanId: 'b2', type: 'paid', category: 'interest', amount: 3000, date: dateStr(-30), note: 'Nov interest to Vikram' }
-  ];
-
   state.rentPayments = [
-    { id: 'rp1', rentalId: 'r1', amount: 23000, monthYear: prevMonthStr, datePaid: dateStr(-25), note: 'UPI - arjun.mehta@okicici' },
-    { id: 'rp2', rentalId: 'r1', amount: 23000, monthYear: currentMonthStr, datePaid: dateStr(-2), note: 'Cash received' },
-    { id: 'rp3', rentalId: 'r2', amount: 15000, monthYear: prevMonthStr, datePaid: dateStr(-20), note: 'NEFT transfer' },
-    { id: 'rp4', rentalId: 'r2', amount: 15000, monthYear: currentMonthStr, datePaid: dateStr(-1), note: 'Google Pay' },
-    { id: 'rp5', rentalId: 'r3', amount: 35000, monthYear: currentMonthStr, datePaid: dateStr(0), note: 'Cheque #4521' }
+    { id: 'rp_1', rentalId: 'rent_1', monthYear: '2026-07', amount: '23000', datePaid: '2026-07-05', note: 'Full payment' },
+    { id: 'rp_2', rentalId: 'rent_2', monthYear: '2026-07', amount: '15000', datePaid: '2026-07-07', note: 'Partial' },
+    { id: 'rp_3', rentalId: 'rent_3', monthYear: '2026-06', amount: '18000', datePaid: '2026-06-10', note: 'June cleared' },
+    { id: 'rp_4', rentalId: 'rent_1', monthYear: '2026-06', amount: '23000', datePaid: '2026-06-05', note: '' },
+    { id: 'rp_5', rentalId: 'rent_2', monthYear: '2026-06', amount: '32000', datePaid: '2026-06-07', note: '' }
   ];
-
+  state.interestPayments = [
+    { id: 'ip_1', type: 'received', loanId: 'loan_1', amount: '2000', date: '2026-07-01', category: 'interest', note: 'July interest' },
+    { id: 'ip_2', type: 'received', loanId: 'loan_2', amount: '500', date: '2026-06-15', category: 'interest', note: 'June interest' },
+    { id: 'ip_3', type: 'paid', loanId: 'borrow_1', amount: '5000', date: '2026-07-01', category: 'interest', note: 'July interest to bank' },
+    { id: 'ip_4', type: 'received', loanId: 'loan_1', amount: '2000', date: '2026-06-01', category: 'interest', note: 'June interest' }
+  ];
   state.expenses = [
-    { id: 'exp1', amount: 23000, date: dateStr(-45), category: 'House Tax', propertyId: 'r1', note: 'House tax 2026-27' },
-    { id: 'exp2', amount: 8500, date: dateStr(-30), category: 'Car Insurance', note: 'Maruti Swift comprehensive' },
-    { id: 'exp3', amount: 1200, date: dateStr(-15), category: 'Travel', note: 'Fuel - Pune trip' },
-    { id: 'exp4', amount: 707, date: dateStr(-10), category: 'Utilities', note: 'Airtel broadband' },
-    { id: 'exp5', amount: 4500, date: dateStr(-5), category: 'Maintenance', propertyId: 'r2', note: 'Plumber for kitchen sink' }
+    { id: 'exp_1', amount: '1500', date: '2026-07-03', category: 'Utilities', note: 'Electricity bill', propertyId: '' },
+    { id: 'exp_2', amount: '500', date: '2026-07-03', category: 'Travel', note: 'Fuel', propertyId: '' },
+    { id: 'exp_3', amount: '3000', date: '2026-07-01', category: 'Maintenance', note: 'Plumber repair', propertyId: 'rent_1' },
+    { id: 'exp_4', amount: '250', date: '2026-06-28', category: 'Food', note: 'Office snacks', propertyId: '' },
+    { id: 'exp_5', amount: '12000', date: '2026-06-25', category: 'Insurance', note: 'Car Insurance', propertyId: '' }
   ];
-
-  state.renewals = [
-    { id: 'renewal1', title: 'Car Insurance Renewal', category: 'Insurance', amount: 8500, dueDate: dateStr(335), frequency: 'yearly', note: 'Maruti Swift - ICICI Lombard', lastRenewed: null, createdAt: new Date().toISOString() },
-    { id: 'renewal2', title: 'Health Insurance Premium', category: 'Insurance', amount: 18000, dueDate: dateStr(180), frequency: 'yearly', note: 'Star Health Family Floater', lastRenewed: null, createdAt: new Date().toISOString() }
-  ];
-
+  state.renewals = [];
+  state.files = [];
   saveState();
 }
 
@@ -559,6 +535,16 @@ const formatDate = (dateStr) => {
   if (!dateStr) return 'N/A';
   const options = { year: 'numeric', month: 'short', day: 'numeric' };
   return new Date(dateStr).toLocaleDateString('en-US', options);
+};
+
+const formatDisplayDate = (dateStr) => {
+  if (!dateStr) return 'N/A';
+  if (/^\d{4}-\d{2}$/.test(dateStr)) {
+    const d = new Date(dateStr + '-01');
+    return d.toLocaleDateString('en-US', { year: 'numeric', month: 'long' });
+  }
+  const d = new Date(dateStr);
+  return d.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
 };
 
 // Calculate Days Remaining/Passed
@@ -1406,20 +1392,28 @@ function renderDashboard() {
   }
 
   // H. Calculate expenses in the selected period
-  let totalExpenses;
-  if (isDayMode) {
-    totalExpenses = state.expenses
-      .filter(p => p.date === selectedDateStr)
-      .reduce((sum, exp) => sum + Number(exp.amount), 0);
-  } else if (isYearMode) {
-    totalExpenses = state.expenses
-      .filter(p => p.date && p.date.startsWith(selectedYear))
-      .reduce((sum, exp) => sum + Number(exp.amount), 0);
-  } else {
-    totalExpenses = state.expenses
-      .filter(p => p.date.startsWith(selectedMonthStr))
-      .reduce((sum, exp) => sum + Number(exp.amount), 0);
-  }
+  const selectedDayExpenses = state.expenses
+    .filter(p => p.date === selectedDateStr)
+    .reduce((sum, exp) => sum + Number(exp.amount), 0);
+    
+  const selD = new Date(selectedDateStr);
+  const selDay = selD.getDay();
+  const diff = selD.getDate() - selDay + (selDay === 0 ? -6 : 1);
+  const weekStart = new Date(selD);
+  weekStart.setDate(diff);
+  const weekEnd = new Date(weekStart);
+  weekEnd.setDate(weekEnd.getDate() + 6);
+  const pad = n => String(n).padStart(2, '0');
+  const weekStartStr = `${weekStart.getFullYear()}-${pad(weekStart.getMonth()+1)}-${pad(weekStart.getDate())}`;
+  const weekEndStr = `${weekEnd.getFullYear()}-${pad(weekEnd.getMonth()+1)}-${pad(weekEnd.getDate())}`;
+
+  const selectedWeekExpenses = state.expenses
+    .filter(p => p.date >= weekStartStr && p.date <= weekEndStr)
+    .reduce((sum, exp) => sum + Number(exp.amount), 0);
+
+  const selectedMonthExpenses = state.expenses
+    .filter(p => p.date.startsWith(selectedMonthStr))
+    .reduce((sum, exp) => sum + Number(exp.amount), 0);
 
   // I. Calculate Balance To Receive
   const expectedInterestReceived = activeLendingLoans.reduce((sum, loan) => {
@@ -1446,44 +1440,66 @@ function renderDashboard() {
     netNode.style.color = 'var(--color-danger)';
   }
   
+  const netCollectedNode = document.getElementById('dash-net-collected');
+  if (netCollectedNode) {
+    const totalCollected = totalRentCollected + totalInterestReceived;
+    netCollectedNode.innerHTML = `Total Collected: <span style="color: var(--color-warning); font-weight: 800;">${formatCurrency(totalCollected)}</span>`;
+  }
+  
+  const netIncomeNode = document.getElementById('dash-net-income');
+  if (netIncomeNode) {
+    const totalIncome = monthlyRent + expectedInterestReceived;
+    netIncomeNode.innerHTML = `Total Income: <span style="color: var(--text-primary); font-weight: 800;">${formatCurrency(totalIncome)}</span>`;
+  }
+  
   // Dynamic header for the Rental Income card
   const rentLabelNode = document.querySelector('[data-tab="rental"] .summary-card-header span');
   if (rentLabelNode) {
     rentLabelNode.textContent = isDayMode ? 'Rent Collected (Day)' : isYearMode ? 'Rent Collected (Year)' : 'Rental Income (Collected)';
   }
-  document.getElementById('dash-monthly-rent').textContent = formatCurrency(monthlyRent);
+  const rentPending = Math.max(0, monthlyRent - totalRentCollected);
+  document.getElementById('dash-monthly-rent').textContent = formatCurrency(rentPending);
   
   const rentalBalanceNode = document.getElementById('dash-rental-balance');
   if (rentalBalanceNode) {
     if (isDayMode || isYearMode) {
-      rentalBalanceNode.innerHTML = `<span style="color: var(--text-secondary); font-weight: 700;">${isYearMode ? 'Year' : 'Day'} view active</span>`;
+      rentalBalanceNode.innerHTML = `<span style="color: var(--text-primary);">Collected: <span style="color: var(--color-warning); font-weight: 800; margin-left: 2px;">${formatCurrency(totalRentCollected)}</span></span> <span style="color: var(--text-primary); font-weight: 600; margin-left: 10px;">${isYearMode ? '(Year view)' : '(Day view)'}</span>`;
     } else {
-      const rentPending = Math.max(0, monthlyRent - totalRentCollected);
-      rentalBalanceNode.innerHTML = `<span>Collected: <span style="color: var(--color-success); font-weight: 800; margin-left: 2px;">${formatCurrency(totalRentCollected)}</span></span><span>Pending: <span style="color: ${rentPending > 0 ? 'var(--color-danger)' : 'var(--color-success)'}; font-weight: 800; margin-left: 2px;">${formatCurrency(rentPending)}</span></span>`;
+      rentalBalanceNode.innerHTML = `<span style="color: var(--text-primary);">Collected: <span style="color: var(--color-warning); font-weight: 800; margin-left: 2px;">${formatCurrency(totalRentCollected)}</span></span> <span style="color: var(--text-primary);">Total: <span style="color: var(--text-primary); font-weight: 800; margin-left: 2px;">${formatCurrency(monthlyRent)}</span></span>`;
     }
   }
   
   const expensesNode = document.getElementById('dash-total-expenses');
   if (expensesNode) {
-    expensesNode.textContent = formatCurrency(totalExpenses);
+    expensesNode.textContent = formatCurrency(selectedDayExpenses);
+  }
+  
+  const weeklyExpensesNode = document.getElementById('dash-weekly-expenses');
+  if (weeklyExpensesNode) {
+    weeklyExpensesNode.innerHTML = `This Week: <span style="color: var(--color-danger); font-weight: 800;">${formatCurrency(selectedWeekExpenses)}</span>`;
+  }
+  
+  const monthlyExpensesNode = document.getElementById('dash-monthly-expenses');
+  if (monthlyExpensesNode) {
+    monthlyExpensesNode.innerHTML = `This Month: <span style="color: var(--color-danger); font-weight: 800;">${formatCurrency(selectedMonthExpenses)}</span>`;
   }
   document.getElementById('dash-interest-received').textContent = formatCurrency(totalInterestReceived);
   document.getElementById('dash-interest-paid').textContent = formatCurrency(totalInterestPaid);
 
   // expectedInterestReceived is calculated above
 
+  const interestPending = Math.max(0, expectedInterestReceived - totalInterestReceived);
   const totalInterestReceivedNode = document.getElementById('dash-total-interest-received');
   if (totalInterestReceivedNode) {
-    totalInterestReceivedNode.textContent = formatCurrency(expectedInterestReceived);
+    totalInterestReceivedNode.textContent = formatCurrency(interestPending);
   }
 
   const interestReceivedBalanceNode = document.getElementById('dash-interest-received-balance');
   if (interestReceivedBalanceNode) {
     if (isDayMode || isYearMode) {
-      interestReceivedBalanceNode.innerHTML = `<span style="color: var(--text-secondary); font-weight: 700;">${isYearMode ? 'Year' : 'Day'} view active</span>`;
+      interestReceivedBalanceNode.innerHTML = `<span style="color: var(--text-primary);">Collected: <span style="color: var(--color-warning); font-weight: 800; margin-left: 2px;">${formatCurrency(totalInterestReceived)}</span></span> <span style="color: var(--text-primary); font-weight: 600; margin-left: 10px;">${isYearMode ? '(Year view)' : '(Day view)'}</span>`;
     } else {
-      const interestPending = Math.max(0, expectedInterestReceived - totalInterestReceived);
-      interestReceivedBalanceNode.innerHTML = `<span>Collected: <span style="color: var(--color-success); font-weight: 800; margin-left: 2px;">${formatCurrency(totalInterestReceived)}</span></span><span>Pending: <span style="color: ${interestPending > 0 ? 'var(--color-danger)' : 'var(--color-success)'}; font-weight: 800; margin-left: 2px;">${formatCurrency(interestPending)}</span></span>`;
+      interestReceivedBalanceNode.innerHTML = `<span style="color: var(--text-primary);">Collected: <span style="color: var(--color-warning); font-weight: 800; margin-left: 2px;">${formatCurrency(totalInterestReceived)}</span></span> <span style="color: var(--text-primary);">Total: <span style="color: var(--text-primary); font-weight: 800; margin-left: 2px;">${formatCurrency(expectedInterestReceived)}</span></span>`;
     }
   }
 
@@ -1507,10 +1523,15 @@ function renderDashboard() {
       }
     });
     
-    if (pTenants.length > 0) {
-      const pendingTenantsHTML = '<div class="pending-names-list">' + pTenants.map(t => `<div class="pending-name-item"><span>${t.name}</span> (${formatCurrency(t.owe)})</div>`).join('') + '</div>';
-      document.getElementById('card-rent').insertAdjacentHTML('beforeend', pendingTenantsHTML);
-    }
+      if (pTenants.length > 0) {
+        const pendingTenantsHTML = '<div class="pending-names-list">' + state.rentals.filter(r => r.startDate <= endDateOfSelectedMonth && r.status === 'active').map(r => {
+          const pPaid = state.rentPayments.filter(p => p.rentalId === r.id && p.monthYear === selectedMonthStr).reduce((sum, p) => sum + Number(p.amount), 0);
+          const pOwe = Number(r.monthlyRent) - pPaid;
+          if (pOwe <= 0) return '';
+          return `<div class="pending-name-item"><span>${r.tenantName}</span> (${formatCurrency(pOwe)})</div>`;
+        }).filter(Boolean).join('') + '</div>';
+        document.getElementById('card-rent').insertAdjacentHTML('beforeend', pendingTenantsHTML);
+      }
 
     const pBorrowers = [];
     activeLendingLoans.forEach(l => {
@@ -1524,16 +1545,19 @@ function renderDashboard() {
     });
 
     if (pBorrowers.length > 0) {
-      const pendingBorrowersHTML = '<div class="pending-names-list">' + pBorrowers.map(b => `<div class="pending-name-item"><span>${b.name}</span> (${formatCurrency(b.owe)})</div>`).join('') + '</div>';
+      const pendingBorrowersHTML = '<div class="pending-names-list">' + activeLendingLoans.map(l => {
+        const outstanding = getOutstandingPrincipalAtMonth(l.id, l.principal, selectedMonthStr);
+        if (outstanding <= 0) return '';
+        const expected = outstanding * (Number(l.interestRate) / 100);
+        const pPaid = state.interestPayments.filter(p => p.type === 'received' && p.loanId === l.id && p.date.startsWith(selectedMonthStr)).reduce((sum, p) => sum + Number(p.amount), 0);
+        const pOwe = expected - pPaid;
+        if (pOwe <= 0) return '';
+        return `<div class="pending-name-item"><span>${l.borrowerName}</span> (${formatCurrency(pOwe)})</div>`;
+      }).filter(Boolean).join('') + '</div>';
       document.getElementById('card-interest').insertAdjacentHTML('beforeend', pendingBorrowersHTML);
     }
     
-    const combined = [...pTenants, ...pBorrowers];
-    if (combined.length > 0) {
-      const combinedPendingHTML = '<div class="pending-names-list">' + combined.map(c => `<div class="pending-name-item"><span>${c.name}</span> (${formatCurrency(c.owe)})</div>`).join('') + '</div>';
-      const netCard = document.getElementById('card-reports');
-      if (netCard) netCard.insertAdjacentHTML('beforeend', combinedPendingHTML);
-    }
+    // Removed pending names from balance to receive card per user request
   }
 
   // F. Reminders Logic (for the selected month)
@@ -1569,7 +1593,7 @@ function renderDashboard() {
       if (notifMainHeader) notifMainHeader.style.display = 'none';
       renderInterest();
     } else if (currentReminderFilter === 'expenses') {
-      if (notifWrapper) notifWrapper.style.display = 'none';
+      if (notifWrapper) notifWrapper.style.display = 'block';
       notifReminders.style.display = 'none';
       notifRent.style.display = 'none';
       notifInterest.style.display = 'none';
@@ -1578,7 +1602,7 @@ function renderDashboard() {
       if (notifMainHeader) notifMainHeader.style.display = 'none';
       renderExpenses();
     } else if (currentReminderFilter === 'reports') {
-      if (notifWrapper) notifWrapper.style.display = 'none';
+      if (notifWrapper) notifWrapper.style.display = 'block';
       notifReminders.style.display = 'none';
       notifRent.style.display = 'none';
       notifInterest.style.display = 'none';
@@ -2099,176 +2123,230 @@ function renderDashboard() {
 // 7. LENDING TAB LOGIC
 function renderLending() {
   loadState();
-  
+
   const [selYear, selMonth] = selectedMonthStr.split('-').map(Number);
   const endDateOfSelectedMonth = `${selectedMonthStr}-${String(new Date(selYear, selMonth, 0).getDate()).padStart(2, '0')}`;
-  
-  // Calculate top summary stats for active lending based on the selected month
-  const activeLentList = state.lent.filter(l => l.startDate <= endDateOfSelectedMonth && getOutstandingPrincipalAtMonth(l.id, l.principal, selectedMonthStr) > 0);
-  const totalLoans = activeLentList.length;
-  const totalOriginalPrincipal = activeLentList.reduce((sum, l) => sum + Number(l.principal), 0);
-  const totalInterestEarned = state.interestPayments
-    .filter(p => p.type === 'received' && p.category === 'interest' && p.date <= endDateOfSelectedMonth)
-    .reduce((sum, p) => sum + Number(p.amount), 0);
 
-  const totalLoansNode = el('lending-total-loans');
-  const totalPrincipalNode = el('lending-total-principal');
-  const totalOutstandingNode = el('lending-total-outstanding');
-  
-  if (totalLoansNode) totalLoansNode.textContent = totalLoans;
-  if (totalPrincipalNode) totalPrincipalNode.textContent = formatCurrency(totalOriginalPrincipal);
-  if (totalOutstandingNode) totalOutstandingNode.textContent = formatCurrency(totalInterestEarned);
+  const lentOutstandingNode = el('lending-total-outstanding');
+  if (lentOutstandingNode) {
+    const totalInterestReceived = state.interestPayments
+      .filter(p => p.type === 'received' && p.category === 'interest' && p.date <= endDateOfSelectedMonth)
+      .reduce((sum, p) => sum + Number(p.amount), 0);
+    lentOutstandingNode.textContent = formatCurrency(totalInterestReceived);
+  }
 
   const listContainer = el('lent-loans-list');
   if (!listContainer) return;
   listContainer.innerHTML = '';
 
-  // Only show loans that existed in the selected month
   const visibleLoans = state.lent.filter(l => l.startDate <= endDateOfSelectedMonth);
 
+  const countEl = document.getElementById('lent-loans-count');
+  const principalEl = document.getElementById('lent-loans-principal');
+  if (countEl) countEl.textContent = visibleLoans.length;
+  if (principalEl) {
+    const totalPrincipal = visibleLoans.reduce((s, l) => s + Number(l.principal), 0);
+    principalEl.textContent = formatCurrency(totalPrincipal);
+  }
   if (visibleLoans.length === 0) {
     listContainer.innerHTML = `
-      <div class="card empty-state">
+      <div class="empty-state">
         <div class="empty-state-icon">
-          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          <svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
         </div>
-        <p>No lending records found for this period. Tap "Lend Money" to create one.</p>
-      </div>
-    `;
+        <p>No active lending records for this period.</p>
+        <button class="btn btn-primary" onclick="openModal('modal-add-lent')" style="margin-top: 1rem;">Add First Loan</button>
+      </div>`;
     return;
   }
 
-  // Sort: active first in the selected month, then settled
-  const sortedLent = [...visibleLoans].sort((a,b) => {
-    const outstandingA = getOutstandingPrincipalAtMonth(a.id, a.principal, selectedMonthStr);
-    const outstandingB = getOutstandingPrincipalAtMonth(b.id, b.principal, selectedMonthStr);
-    const statusA = outstandingA > 0 ? 'active' : 'paid';
-    const statusB = outstandingB > 0 ? 'active' : 'paid';
-    if (statusA === statusB) return new Date(b.startDate) - new Date(a.startDate);
-    return statusA === 'active' ? -1 : 1;
+  const groupedLent = {};
+  visibleLoans.forEach(loan => {
+    const normName = (loan.borrowerName || '').toLowerCase().trim();
+    if (!groupedLent[normName]) {
+      groupedLent[normName] = {
+        id: 'group-' + btoa(encodeURIComponent(normName)).replace(/[^a-zA-Z0-9]/g, ''),
+        name: loan.borrowerName,
+        phone: loan.phone || '',
+        loans: [],
+        totalPrincipal: 0,
+        totalOutstanding: 0,
+        totalRepaid: 0,
+        totalReceived: 0,
+        statusInMonth: 'paid',
+        allActiveInterestPaid: true,
+        hasActiveLoans: false
+      };
+    }
+    groupedLent[normName].phone = groupedLent[normName].phone || loan.phone;
+    groupedLent[normName].loans.push(loan);
   });
 
-  sortedLent.forEach(loan => {
-    // Calculate interest and principal repayments up to selected month
-    const loanPayments = state.interestPayments.filter(p => p.loanId === loan.id && p.type === 'received' && p.date <= endDateOfSelectedMonth);
-    const interestPayments = loanPayments.filter(p => p.category === 'interest');
-    const principalPayments = loanPayments.filter(p => p.category === 'principal');
-    const topupPayments = loanPayments.filter(p => p.category === 'increase');
+  Object.values(groupedLent).forEach(group => {
+    group.loans.sort((a,b) => new Date(a.startDate) - new Date(b.startDate));
+    
+    group.loans.forEach(loan => {
+      const loanPayments = state.interestPayments.filter(p => p.loanId === loan.id && p.type === 'received' && p.date <= endDateOfSelectedMonth);
+      const interestPayments = loanPayments.filter(p => p.category === 'interest');
+      const principalPayments = loanPayments.filter(p => p.category === 'principal');
+      const topupPayments = loanPayments.filter(p => p.category === 'increase');
 
-    const totalReceived = interestPayments.reduce((sum, p) => sum + Number(p.amount), 0);
-    const totalRepaid = principalPayments.reduce((sum, p) => sum + Number(p.amount), 0);
-    const totalTopups = topupPayments.reduce((sum, p) => sum + Number(p.amount), 0);
-    const outstandingPrincipal = Math.max(0, Number(loan.principal) + totalTopups - totalRepaid);
-    
-    // Sort payments to find latest date interest or principal was received
-    const lastPaymentDate = loanPayments.length > 0 
-      ? loanPayments.reduce((max, p) => p.date > max ? p.date : max, loanPayments[0].date)
-      : null;
+      const totalReceived = interestPayments.reduce((sum, p) => sum + Number(p.amount), 0);
+      const totalRepaid = principalPayments.reduce((sum, p) => sum + Number(p.amount), 0);
+      const totalTopups = topupPayments.reduce((sum, p) => sum + Number(p.amount), 0);
+      const outstandingPrincipal = Math.max(0, Number(loan.principal) + totalTopups - totalRepaid);
+      
+      const lastPaymentDate = loanPayments.length > 0 ? loanPayments.reduce((max, p) => p.date > max ? p.date : max, loanPayments[0].date) : null;
+      const monthlyYield = outstandingPrincipal * (Number(loan.interestRate) / 100);
+      const currentMonthPayments = interestPayments.filter(p => p.date.startsWith(selectedMonthStr));
+      const currentMonthSum = currentMonthPayments.reduce((sum, p) => sum + Number(p.amount), 0);
+      const isInterestFullyPaidThisMonth = monthlyYield > 0 && currentMonthSum >= (monthlyYield - 0.01);
+      const statusInMonth = outstandingPrincipal > 0 ? 'active' : 'paid';
 
-    // Monthly estimated yield (monthly interest rate) based on remaining principal
-    const monthlyYield = outstandingPrincipal * (Number(loan.interestRate) / 100);
+      loan._stats = {
+        outstandingPrincipal, totalReceived, totalRepaid, monthlyYield,
+        isInterestFullyPaidThisMonth, statusInMonth, lastPaymentDate
+      };
 
-    const card = document.createElement('div');
-    card.className = `card loan-card ${_expandedCards.has(loan.id) ? 'expanded' : ''}`;
-    card.setAttribute('data-id', loan.id);
+      group.totalPrincipal += Number(loan.principal);
+      group.totalOutstanding += outstandingPrincipal;
+      group.totalRepaid += totalRepaid;
+      group.totalReceived += totalReceived;
 
-    const [y, m] = selectedMonthStr.split('-').map(Number);
-    const currentMonthName = MONTH_UPPER_NAMES[m - 1];
-    
-    const actualInterestPayments = loanPayments.filter(p => p.category === 'interest');
-    
-    // Sum payments logged within the selected calendar month
-    const currentMonthPayments = actualInterestPayments.filter(p => p.date.startsWith(selectedMonthStr));
-    const currentMonthSum = currentMonthPayments.reduce((sum, p) => sum + Number(p.amount), 0);
-    
-    // Interest is fully paid if currentMonthSum >= expected monthly yield
-    const isInterestFullyPaidThisMonth = monthlyYield > 0 && currentMonthSum >= (monthlyYield - 0.01);
-    
-    let stampHtml = '';
-    if (isInterestFullyPaidThisMonth) {
-      stampHtml = `<div class="card-stamp stamp-received">INTEREST RECEIVED</div>`;
-    } else {
-      if (actualInterestPayments.length > 0) {
-        stampHtml = `<div class="card-stamp stamp-received">INTEREST RECEIVED</div>`;
+      if (statusInMonth === 'active') {
+        group.statusInMonth = 'active';
+        group.hasActiveLoans = true;
+        if (!isInterestFullyPaidThisMonth) {
+          group.allActiveInterestPaid = false;
+        }
       }
-    }
-    
-    const principalHtml = totalRepaid > 0 
-      ? `<div class="amount-value" style="color: var(--color-success);">${formatCurrency(outstandingPrincipal)}</div>
-         <div class="amount-in-words" style="font-size: 0.68rem; color: var(--text-secondary); max-width: 180px; line-height: 1.25; margin-top: 0.15rem; font-style: italic; text-align: right; word-wrap: break-word;">(${numberToIndianWords(outstandingPrincipal)})</div>
-         <div class="amount-label" style="margin-top: 0.25rem;">Outstanding Principal <span style="font-size: 0.75rem; color: var(--text-muted); font-weight: normal; display: block;">(Original: ${formatCurrency(loan.principal)})</span></div>`
-      : `<div class="amount-value" style="color: var(--color-success);">${formatCurrency(loan.principal)}</div>
-         <div class="amount-in-words" style="font-size: 0.68rem; color: var(--text-secondary); max-width: 180px; line-height: 1.25; margin-top: 0.15rem; font-style: italic; text-align: right; word-wrap: break-word;">(${numberToIndianWords(loan.principal)})</div>
-         <div class="amount-label" style="margin-top: 0.25rem;">Principal Amount</div>`;
+    });
+  });
 
-    const statusInMonth = outstandingPrincipal > 0 ? 'active' : 'paid';
+  const sortedGroups = Object.values(groupedLent).sort((a,b) => {
+    if (a.statusInMonth !== b.statusInMonth) return a.statusInMonth === 'active' ? -1 : 1;
+    return b.totalOutstanding - a.totalOutstanding;
+  });
+
+  sortedGroups.forEach(group => {
+    const card = document.createElement('div');
+    card.className = `card loan-card ${_expandedCards.has(group.id) ? 'expanded' : ''}`;
+    card.setAttribute('data-group-id', group.id);
+
+    let stampHtml = '';
+    if (group.hasActiveLoans && group.allActiveInterestPaid) {
+      stampHtml = `<div class="card-stamp stamp-received">INTEREST RECEIVED</div>`;
+    }
+
+    const principalHtml = `<div class="amount-value" style="color: var(--color-warning);">${formatCurrency(group.totalOutstanding)}</div>
+       <div class="amount-in-words" style="font-size: 0.68rem; color: var(--text-secondary); max-width: 180px; line-height: 1.25; margin-top: 0.15rem; font-style: italic; text-align: right; word-wrap: break-word;">(${numberToIndianWords(group.totalOutstanding)})</div>
+       <div class="amount-label" style="margin-top: 0.25rem;">Total Outstanding</div>`;
+
+    let loansHtml = '';
+    group.loans.forEach((loan, idx) => {
+      const stats = loan._stats;
+      const loanIdxStr = group.loans.length > 1 ? ` <span style="font-size: 0.8em; color: var(--text-secondary); font-weight: normal;">(Loan No ${String(idx + 1).padStart(2, '0')})</span>` : '';
+      
+      loansHtml += `
+      <div style="background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1rem; margin-top: 1rem;">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 0.75rem;">
+          <div>
+            <h4 style="margin: 0 0 0.25rem 0; font-size: 0.95rem;">${loan.borrowerName}${loanIdxStr} ${stats.statusInMonth !== 'active' ? '<span class="badge badge-muted">Settled</span>' : ''}</h4>
+            <div style="font-size: 0.8rem; color: var(--text-secondary);">Issued: ${formatDate(loan.startDate)} ${loan.dueDate ? `• Due: ${formatDate(loan.dueDate)}` : ''}</div>
+          </div>
+          <div class="contact-btn-group">${loan.phone ? getContactActionsHTML(loan.phone) : ''}</div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 0.75rem;">
+          <div class="card" style="padding: 0.75rem; text-align: center; background: var(--bg-secondary);">
+            <div style="font-size: 0.6rem; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.5px;">Principal</div>
+            <div style="font-size: 1.3rem; font-weight: 800; color: var(--color-warning); margin-top: 0.25rem;">${formatCurrency(stats.outstandingPrincipal)}</div>
+            <div style="font-size: 0.65rem; color: var(--text-muted); margin-top: 0.15rem;">Outstanding</div>
+          </div>
+          <div class="card" style="padding: 0.75rem; text-align: center; background: var(--bg-secondary);">
+            <div style="font-size: 0.6rem; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.5px;">Monthly Yield</div>
+            <div style="font-size: 1.3rem; font-weight: 800; color: #16a34a; margin-top: 0.25rem;">${formatCurrency(stats.monthlyYield)}</div>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.5rem; margin-bottom: 0.75rem;">
+          <div class="card" style="padding: 0.5rem; text-align: center;">
+            <div style="font-size: 0.6rem; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.5px;">${loan.isEMI ? 'EMI' : 'Interest Rate'}</div>
+            <div style="font-size: 1rem; font-weight: 700; color: var(--text-primary); margin-top: 0.2rem;">${loan.isEMI ? formatCurrency(loan.emiAmount) : loan.interestRate + '%'}</div>
+            <div style="font-size: 0.65rem; color: var(--text-muted); margin-top: 0.15rem;">/ month</div>
+          </div>
+          <div class="card" style="padding: 0.5rem; text-align: center;">
+            <div style="font-size: 0.6rem; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.5px;">${loan.isEMI ? 'Tenure' : 'Total Received'}</div>
+            <div style="font-size: 1rem; font-weight: 700; color: var(--color-success); margin-top: 0.2rem;">${loan.isEMI ? loan.tenureMonths + 'm' : formatCurrency(stats.totalReceived)}</div>
+          </div>
+          <div class="card" style="padding: 0.5rem; text-align: center;">
+            <div style="font-size: 0.6rem; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.5px;">Last Payment</div>
+            <div style="font-size: 1rem; font-weight: 700; margin-top: 0.2rem;">${stats.lastPaymentDate ? formatDate(stats.lastPaymentDate) : '—'}</div>
+          </div>
+        </div>
+        
+        <div style="display: flex; align-items: center; gap: 0.35rem; margin-bottom: 0.5rem;" onclick="event.stopPropagation();">
+          ${stats.isInterestFullyPaidThisMonth || stats.statusInMonth !== 'active' ? '' : `<label for="chk-interest-received-${loan.id}" style="cursor: pointer; font-size: 0.85rem; color: var(--text-primary); margin: 0;">Interest Received</label><input type="checkbox" id="chk-interest-received-${loan.id}" onchange="if(this.checked) { quickMarkInterestPaid('${loan.id}', 'received', ${stats.monthlyYield}, '${selectedMonthStr}'); }" style="width: 15px; height: 15px; cursor: pointer; accent-color: var(--color-success); margin: 0; flex-shrink: 0;">`}
+        </div>
+
+        ${loan.notes ? `<div style="font-size: 0.8rem; color: var(--text-secondary); font-style: italic; margin-bottom: 0.5rem;">Notes: ${loan.notes}</div>` : ''}
+
+        <div class="loan-actions" style="margin-top: 0.5rem;">
+          ${stats.statusInMonth === 'active' 
+            ? (loan.isEMI
+               ? `<button class="btn btn-primary btn-sm" onclick="promptRecordEMI('${loan.id}', 'received')">Record EMI</button>
+                  <button class="btn btn-sm" style="background: linear-gradient(135deg, var(--color-accent), #0369a1); color: #fff; box-shadow: 0 4px 14px rgba(14,165,233,0.3);" onclick="lendMore('${loan.id}')">Lend More</button>`
+               : `<button class="btn btn-primary btn-sm" onclick="promptPayment('${loan.id}', 'received', 'interest')">Record interest</button>
+                  <button class="btn btn-success btn-sm" onclick="promptPayment('${loan.id}', 'received', 'principal')">Repay principal</button>
+                  <button class="btn btn-sm" style="background: linear-gradient(135deg, var(--color-accent), #0369a1); color: #fff; box-shadow: 0 4px 14px rgba(14,165,233,0.3);" onclick="lendMore('${loan.id}')">Lend More</button>
+                  <button class="btn btn-secondary btn-sm" onclick="promptConvertEMI('${loan.id}', 'lent')">Convert to EMI</button>`)
+            : `<button class="btn btn-secondary btn-sm" onclick="toggleLoanStatus('${loan.id}', 'lent')">Reopen</button>`
+          }
+          <button class="btn btn-secondary btn-sm" onclick="showLedger('${loan.id}', 'lent')">History</button>
+          <button class="btn btn-secondary btn-sm" onclick="editLoan('${loan.id}', 'lent')">Edit</button>
+          <button class="btn btn-danger btn-sm" onclick="deleteLoan('${loan.id}', 'lent')">Del</button>
+        </div>
+      </div>`;
+    });
 
     card.innerHTML = `
       <div class="item-row">
         <div class="item-title-col">
           <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
-            <svg class="card-chevron" viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2.5" fill="none"><polyline points="6 9 12 15 18 9"/></svg>
-            <span class="item-name">${loan.borrowerName}</span>
-            ${statusInMonth === 'active' ? '' : '<span class="badge badge-muted">Settled</span>'}
+            <span class="item-name">${group.name}</span>
+            ${group.statusInMonth === 'active' ? '' : '<span class="badge badge-muted">Settled</span>'}
             ${stampHtml}
           </div>
-          <div style="display: flex; align-items: center; gap: 0.35rem; margin-top: 0.4rem;" onclick="event.stopPropagation();">
-            ${isInterestFullyPaidThisMonth ? '' : `<label for="chk-interest-received-${loan.id}" style="cursor: pointer; font-size: 0.85rem; color: var(--text-primary); margin: 0;">Interest Received</label><input type="checkbox" id="chk-interest-received-${loan.id}" onchange="if(this.checked) { quickMarkInterestPaid('${loan.id}', 'received', ${monthlyYield}, '${selectedMonthStr}'); }" style="width: 15px; height: 15px; cursor: pointer; accent-color: var(--color-success); margin: 0; flex-shrink: 0;">`}
-          </div>
-          ${loan.phone ? `<div style="margin-top: 0.25rem; font-size: 0.85rem; color: var(--text-secondary);">${getContactActionsHTML(loan.phone)}</div>` : ''}
-          <div class="item-meta" style="margin-top: 0.25rem;">
-            <span>Issued: ${formatDate(loan.startDate)}</span>
-            ${loan.dueDate ? `<span class="meta-divider"></span><span>Due: ${formatDate(loan.dueDate)}</span>` : ''}
+          ${group.phone ? `<div style="margin-top: 0.25rem; font-size: 0.85rem; color: var(--text-secondary);">${getContactActionsHTML(group.phone)}</div>` : ''}
+          <div class="item-meta" style="margin-top: 0.25rem; display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;">
+            <span>${group.loans.length} Loan${group.loans.length > 1 ? 's' : ''}</span>
+            <div style="display: flex; gap: 0.4rem; align-items: center;" onclick="event.stopPropagation()">
+              <input type="number" id="quick-pay-${group.id}" class="form-input" placeholder="₹ Amount" style="width: 90px; padding: 0.2rem 0.5rem; min-height: auto; font-size: 0.75rem;">
+              <button class="btn btn-primary" style="padding: 0.2rem 0.6rem; font-size: 0.75rem; min-height: auto;" onclick="quickGroupPayment('${group.id}', 'lent')">Recv</button>
+            </div>
           </div>
         </div>
         <div class="amount-display" style="text-align: right;">
           ${principalHtml}
         </div>
       </div>
-      
-      <div class="card-collapse-content">
-        <div class="loan-stats-grid" style="margin-top: 1rem;">
-          <div class="loan-stat-box">
-            <span class="loan-stat-val">${loan.interestRate}% / mo</span>
-            <span class="loan-stat-lbl">Interest Rate</span>
-          </div>
-          <div class="loan-stat-box">
-            <span class="loan-stat-val">${formatCurrency(totalReceived)}</span>
-            <span class="loan-stat-lbl">Interest Received</span>
-          </div>
-          <div class="loan-stat-box">
-            <span class="loan-stat-val">${lastPaymentDate ? formatDate(lastPaymentDate) : 'Never'}</span>
-            <span class="loan-stat-lbl">Last Payment Date</span>
-          </div>
-        </div>
-
-        <div style="font-size: 0.8rem; color: var(--text-secondary); display:flex; justify-content:space-between; flex-wrap:wrap; gap: 0.5rem; margin-top: 0.75rem; margin-bottom: 0.75rem;">
-          <div><span><strong>${formatCurrency(monthlyYield)}</strong>/mo</span></div>
-          ${loan.notes ? `<div><span style="font-style: italic;">Notes: ${loan.notes}</span></div>` : ''}
-        </div>
-
-        <div class="loan-actions">
-          <button class="btn btn-secondary btn-sm" onclick="showLedger('${loan.id}', 'lent')">History</button>
-          <button class="btn btn-secondary btn-sm" onclick="editLoan('${loan.id}', 'lent')">Edit</button>
-          ${statusInMonth === 'active' 
-            ? `${isInterestFullyPaidThisMonth ? '' : `<button class="btn btn-primary btn-sm" onclick="promptPayment('${loan.id}', 'received', 'interest')">Record interest</button>`}
-               <button class="btn btn-success btn-sm" onclick="promptPayment('${loan.id}', 'received', 'principal')">Repay principal</button>
-               <button class="btn btn-sm" style="background: linear-gradient(135deg, var(--color-accent), #0369a1); color: #fff; box-shadow: 0 4px 14px rgba(14,165,233,0.3);" onclick="lendMore('${loan.id}')">Lend More</button>`
-            : `<button class="btn btn-secondary btn-sm" onclick="toggleLoanStatus('${loan.id}', 'lent')">Reopen Loan</button>`
-          }
-          <button class="btn btn-danger btn-sm" onclick="deleteLoan('${loan.id}', 'lent')">Delete</button>
-        </div>
-      </div>
     `;
 
     const itemRow = card.querySelector('.item-row');
     itemRow.addEventListener('click', (e) => {
-      if (e.target.closest('.contact-action-btn')) return;
-      const isExpanded = card.classList.toggle('expanded');
-      if (isExpanded) {
-        _expandedCards.add(loan.id);
-      } else {
-        _expandedCards.delete(loan.id);
+      try {
+        if (e.target.closest('.contact-action-btn')) return;
+        const titleEl = document.getElementById('group-details-title');
+        const bodyEl = document.getElementById('group-details-body');
+        if (!titleEl || !bodyEl) {
+          alert('Error: Modal elements not found. Please do a hard refresh (Ctrl+F5) to clear your cache.');
+          return;
+        }
+        titleEl.textContent = `${group.name}'s Loans`;
+        bodyEl.innerHTML = loansHtml;
+        openModal('modal-group-details');
+      } catch (err) {
+        alert('Error opening modal: ' + err.message);
       }
     });
 
@@ -2283,172 +2361,216 @@ function renderBorrowing() {
   const [selYear, selMonth] = selectedMonthStr.split('-').map(Number);
   const endDateOfSelectedMonth = `${selectedMonthStr}-${String(new Date(selYear, selMonth, 0).getDate()).padStart(2, '0')}`;
 
-  // Calculate top summary stats for active borrowing based on selected month
-  const activeBorrowedList = state.borrowed.filter(b => b.startDate <= endDateOfSelectedMonth && getOutstandingPrincipalAtMonth(b.id, b.principal, selectedMonthStr) > 0);
-  const totalLoans = activeBorrowedList.length;
-  const totalOriginalPrincipal = activeBorrowedList.reduce((sum, b) => sum + Number(b.principal), 0);
-  const totalInterestPaid = state.interestPayments
-    .filter(p => p.type === 'paid' && p.category === 'interest' && p.date <= endDateOfSelectedMonth)
-    .reduce((sum, p) => sum + Number(p.amount), 0);
-
-  const totalLoansNode = el('borrowing-total-loans');
-  const totalPrincipalNode = el('borrowing-total-principal');
-  const totalOutstandingNode = el('borrowing-total-outstanding');
-  
-  if (totalLoansNode) totalLoansNode.textContent = totalLoans;
-  if (totalPrincipalNode) totalPrincipalNode.textContent = formatCurrency(totalOriginalPrincipal);
-  if (totalOutstandingNode) totalOutstandingNode.textContent = formatCurrency(totalInterestPaid);
+  const borrowedOutstandingNode = el('borrowing-total-outstanding');
+  if (borrowedOutstandingNode) {
+    const totalInterestPaid = state.interestPayments
+      .filter(p => p.type === 'paid' && p.category === 'interest' && p.date <= endDateOfSelectedMonth)
+      .reduce((sum, p) => sum + Number(p.amount), 0);
+    borrowedOutstandingNode.textContent = formatCurrency(totalInterestPaid);
+  }
 
   const listContainer = el('borrowed-loans-list');
   if (!listContainer) return;
   listContainer.innerHTML = '';
 
-  // Only show loans that existed in the selected month
   const visibleLoans = state.borrowed.filter(b => b.startDate <= endDateOfSelectedMonth);
+
+  const countEl = document.getElementById('borrowed-loans-count');
+  const principalEl = document.getElementById('borrowed-loans-principal');
+  if (countEl) countEl.textContent = visibleLoans.length;
+  if (principalEl) {
+    const totalPrincipal = visibleLoans.reduce((s, b) => s + Number(b.principal), 0);
+    principalEl.textContent = formatCurrency(totalPrincipal);
+  }
 
   if (visibleLoans.length === 0) {
     listContainer.innerHTML = `
-      <div class="card empty-state">
+      <div class="empty-state">
         <div class="empty-state-icon">
-          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          <svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
         </div>
-        <p>No borrowing records found for this period. Tap "Record Borrowing" to create one.</p>
-      </div>
-    `;
+        <p>No active borrowing records for this period.</p>
+        <button class="btn btn-primary" onclick="openModal('modal-add-borrowed')" style="margin-top: 1rem;">Add First Borrowing</button>
+      </div>`;
     return;
   }
 
-  // Sort: active first in selected month, then settled
-  const sortedBorrowed = [...visibleLoans].sort((a,b) => {
-    const outstandingA = getOutstandingPrincipalAtMonth(a.id, a.principal, selectedMonthStr);
-    const outstandingB = getOutstandingPrincipalAtMonth(b.id, b.principal, selectedMonthStr);
-    const statusA = outstandingA > 0 ? 'active' : 'paid';
-    const statusB = outstandingB > 0 ? 'active' : 'paid';
-    if (statusA === statusB) return new Date(b.startDate) - new Date(a.startDate);
-    return statusA === 'active' ? -1 : 1;
+  const groupedBorrowed = {};
+  visibleLoans.forEach(loan => {
+    const normName = (loan.financierName || '').toLowerCase().trim();
+    if (!groupedBorrowed[normName]) {
+      groupedBorrowed[normName] = {
+        id: 'group-b-' + btoa(encodeURIComponent(normName)).replace(/[^a-zA-Z0-9]/g, ''),
+        name: loan.financierName,
+        phone: loan.phone || '',
+        loans: [],
+        totalPrincipal: 0,
+        totalOutstanding: 0,
+        totalRepaid: 0,
+        totalPaid: 0,
+        statusInMonth: 'paid',
+        allActiveInterestPaid: true,
+        hasActiveLoans: false
+      };
+    }
+    groupedBorrowed[normName].phone = groupedBorrowed[normName].phone || loan.phone;
+    groupedBorrowed[normName].loans.push(loan);
   });
 
-  sortedBorrowed.forEach(loan => {
-    // Calculate interest and principal repayments up to selected month
-    const loanPayments = state.interestPayments.filter(p => p.loanId === loan.id && p.type === 'paid' && p.date <= endDateOfSelectedMonth);
-    const interestPayments = loanPayments.filter(p => p.category === 'interest');
-    const principalPayments = loanPayments.filter(p => p.category === 'principal');
-    const topupPayments = loanPayments.filter(p => p.category === 'increase');
-
-    const totalPaid = interestPayments.reduce((sum, p) => sum + Number(p.amount), 0);
-    const totalRepaid = principalPayments.reduce((sum, p) => sum + Number(p.amount), 0);
-    const totalTopups = topupPayments.reduce((sum, p) => sum + Number(p.amount), 0);
-    const outstandingPrincipal = Math.max(0, Number(loan.principal) + totalTopups - totalRepaid);
+  Object.values(groupedBorrowed).forEach(group => {
+    group.loans.sort((a,b) => new Date(a.startDate) - new Date(b.startDate));
     
-    // Sort payments to find latest date interest or principal was paid
-    const lastPaymentDate = loanPayments.length > 0 
-      ? loanPayments.reduce((max, p) => p.date > max ? p.date : max, loanPayments[0].date)
-      : null;
+    group.loans.forEach(loan => {
+      const loanPayments = state.interestPayments.filter(p => p.loanId === loan.id && p.type === 'paid' && p.date <= endDateOfSelectedMonth);
+      const interestPayments = loanPayments.filter(p => p.category === 'interest');
+      const principalPayments = loanPayments.filter(p => p.category === 'principal');
+      const topupPayments = loanPayments.filter(p => p.category === 'increase');
 
-    // Monthly estimated cost (monthly interest rate) based on remaining principal
-    const monthlyCost = outstandingPrincipal * (Number(loan.interestRate) / 100);
+      const totalPaid = interestPayments.reduce((sum, p) => sum + Number(p.amount), 0);
+      const totalRepaid = principalPayments.reduce((sum, p) => sum + Number(p.amount), 0);
+      const totalTopups = topupPayments.reduce((sum, p) => sum + Number(p.amount), 0);
+      const outstandingPrincipal = Math.max(0, Number(loan.principal) + totalTopups - totalRepaid);
+      
+      const lastPaymentDate = loanPayments.length > 0 ? loanPayments.reduce((max, p) => p.date > max ? p.date : max, loanPayments[0].date) : null;
+      const monthlyCost = outstandingPrincipal * (Number(loan.interestRate) / 100);
+      const currentMonthPayments = interestPayments.filter(p => p.date.startsWith(selectedMonthStr));
+      const currentMonthSum = currentMonthPayments.reduce((sum, p) => sum + Number(p.amount), 0);
+      const isInterestFullyPaidThisMonth = monthlyCost > 0 && currentMonthSum >= (monthlyCost - 0.01);
+      const statusInMonth = outstandingPrincipal > 0 ? 'active' : 'paid';
 
+      loan._stats = {
+        outstandingPrincipal, totalPaid, totalRepaid, monthlyCost,
+        isInterestFullyPaidThisMonth, statusInMonth, lastPaymentDate
+      };
+
+      group.totalPrincipal += Number(loan.principal);
+      group.totalOutstanding += outstandingPrincipal;
+      group.totalRepaid += totalRepaid;
+      group.totalPaid += totalPaid;
+
+      if (statusInMonth === 'active') {
+        group.statusInMonth = 'active';
+        group.hasActiveLoans = true;
+        if (!isInterestFullyPaidThisMonth) {
+          group.allActiveInterestPaid = false;
+        }
+      }
+    });
+  });
+
+  const sortedGroups = Object.values(groupedBorrowed).sort((a,b) => {
+    if (a.statusInMonth !== b.statusInMonth) return a.statusInMonth === 'active' ? -1 : 1;
+    return b.totalOutstanding - a.totalOutstanding;
+  });
+
+  sortedGroups.forEach(group => {
     const card = document.createElement('div');
-    card.className = `card loan-card ${_expandedCards.has(loan.id) ? 'expanded' : ''}`;
-    card.setAttribute('data-id', loan.id);
+    card.className = `card loan-card ${_expandedCards.has(group.id) ? 'expanded' : ''}`;
+    card.setAttribute('data-group-id', group.id);
 
-    const [y, m] = selectedMonthStr.split('-').map(Number);
-    const currentMonthName = MONTH_UPPER_NAMES[m - 1];
-    
-    const actualInterestPayments = loanPayments.filter(p => p.category === 'interest');
-    
-    // Sum payments logged within the selected calendar month
-    const currentMonthPayments = actualInterestPayments.filter(p => p.date.startsWith(selectedMonthStr));
-    const currentMonthSum = currentMonthPayments.reduce((sum, p) => sum + Number(p.amount), 0);
-    
-    // Interest is fully paid if currentMonthSum >= expected monthly cost
-    const isInterestFullyPaidThisMonth = monthlyCost > 0 && currentMonthSum >= (monthlyCost - 0.01);
-    
     let stampHtml = '';
-    if (isInterestFullyPaidThisMonth) {
-       stampHtml = `<div class="card-stamp stamp-paid">INTEREST PAID</div>`;
-    } else {
-       if (actualInterestPayments.length > 0) {
-          stampHtml = `<div class="card-stamp stamp-paid">INTEREST PAID</div>`;
-       }
+    if (group.hasActiveLoans && group.allActiveInterestPaid) {
+      stampHtml = `<div class="card-stamp stamp-paid">INTEREST PAID</div>`;
     }
 
-    const principalHtml = totalRepaid > 0 
-      ? `<div class="amount-value" style="color: var(--color-danger);">${formatCurrency(outstandingPrincipal)}</div>
-         <div class="amount-in-words" style="font-size: 0.68rem; color: var(--text-secondary); max-width: 180px; line-height: 1.25; margin-top: 0.15rem; font-style: italic; text-align: right; word-wrap: break-word;">(${numberToIndianWords(outstandingPrincipal)})</div>
-         <div class="amount-label" style="margin-top: 0.25rem;">Outstanding Principal Owed <span style="font-size: 0.75rem; color: var(--text-muted); font-weight: normal; display: block;">(Original: ${formatCurrency(loan.principal)})</span></div>`
-      : `<div class="amount-value" style="color: var(--color-danger);">${formatCurrency(loan.principal)}</div>
-         <div class="amount-in-words" style="font-size: 0.68rem; color: var(--text-secondary); max-width: 180px; line-height: 1.25; margin-top: 0.15rem; font-style: italic; text-align: right; word-wrap: break-word;">(${numberToIndianWords(loan.principal)})</div>
-         <div class="amount-label" style="margin-top: 0.25rem;">Principal Owed</div>`;
+    const principalHtml = `<div class="amount-value" style="color: var(--color-danger); font-size: 1.1rem;">${formatCurrency(group.totalOutstanding)}</div>
+       <div class="amount-in-words" style="font-size: 0.68rem; color: var(--text-secondary); max-width: 180px; line-height: 1.25; margin-top: 0.15rem; font-style: italic; text-align: right; word-wrap: break-word;">(${numberToIndianWords(group.totalOutstanding)})</div>
+       <div class="amount-label" style="margin-top: 0.25rem;">Total Outstanding</div>`;
 
-    const statusInMonth = outstandingPrincipal > 0 ? 'active' : 'paid';
+    let loansHtml = '';
+    group.loans.forEach((loan, idx) => {
+      const stats = loan._stats;
+      const loanIdxStr = group.loans.length > 1 ? ` <span style="font-size: 0.8em; color: var(--text-secondary); font-weight: normal;">(Loan No ${String(idx + 1).padStart(2, '0')})</span>` : '';
+      
+      loansHtml += `
+      <div style="background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1rem; margin-top: 1rem;">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.75rem;">
+          <div>
+            <h4 style="margin: 0 0 0.25rem 0; font-size: 0.95rem;">${loan.financierName}${loanIdxStr} ${stats.statusInMonth !== 'active' ? '<span class="badge badge-muted">Settled</span>' : ''}</h4>
+            <div style="font-size: 0.8rem; color: var(--text-secondary);">Issued: ${formatDate(loan.startDate)} ${loan.dueDate ? `• Due: ${formatDate(loan.dueDate)}` : ''}</div>
+          </div>
+          <div style="text-align: right;">
+            <div style="color: var(--color-danger); font-weight: bold;">${formatCurrency(stats.outstandingPrincipal)}</div>
+            <div style="font-size: 0.75rem; color: var(--text-muted);">Principal</div>
+          </div>
+        </div>
+        
+        <div style="display: flex; align-items: center; gap: 0.35rem; margin-bottom: 0.75rem;" onclick="event.stopPropagation();">
+          ${stats.isInterestFullyPaidThisMonth || stats.statusInMonth !== 'active' ? '' : `<label for="chk-interest-paid-${loan.id}" style="cursor: pointer; font-size: 0.85rem; color: var(--text-primary); margin: 0;">Interest Paid</label><input type="checkbox" id="chk-interest-paid-${loan.id}" onchange="if(this.checked) { quickMarkInterestPaid('${loan.id}', 'paid', ${stats.monthlyCost}, '${selectedMonthStr}'); }" style="width: 15px; height: 15px; cursor: pointer; accent-color: var(--color-success); margin: 0; flex-shrink: 0;">`}
+        </div>
+
+        <div class="loan-stats-grid">
+          <div class="loan-stat-box" style="padding: 0.5rem;">
+            <span class="loan-stat-val" style="font-size: 0.9rem;">${loan.isEMI ? `${formatCurrency(loan.emiAmount)} / mo` : `${loan.interestRate}% / mo`}</span>
+            <span class="loan-stat-lbl" style="font-size: 0.7rem;">${loan.isEMI ? 'EMI Amount' : 'Interest Rate'}</span>
+          </div>
+          <div class="loan-stat-box" style="padding: 0.5rem;">
+            <span class="loan-stat-val" style="font-size: 0.9rem;">${loan.isEMI ? loan.tenureMonths + ' Months' : formatCurrency(stats.totalPaid)}</span>
+            <span class="loan-stat-lbl" style="font-size: 0.7rem;">${loan.isEMI ? 'Tenure' : 'Interest Paid'}</span>
+          </div>
+          <div class="loan-stat-box" style="padding: 0.5rem;">
+            <span class="loan-stat-val" style="font-size: 0.9rem;">${stats.lastPaymentDate ? formatDate(stats.lastPaymentDate) : 'Never'}</span>
+            <span class="loan-stat-lbl" style="font-size: 0.7rem;">Last Payment</span>
+          </div>
+        </div>
+
+        <div style="font-size: 0.8rem; color: var(--text-secondary); display:flex; justify-content:space-between; flex-wrap:wrap; gap: 0.5rem; margin-top: 0.75rem; margin-bottom: 0.75rem;">
+          <div><span><strong>${formatCurrency(stats.monthlyCost)}</strong>/mo ${loan.isEMI ? '(Interest part)' : ''}</span></div>
+          ${loan.notes ? `<div><span style="font-style: italic;">Notes: ${loan.notes}</span></div>` : ''}
+        </div>
+
+        <div class="loan-actions" style="margin-top: 0.5rem;">
+          <button class="btn btn-secondary btn-sm" onclick="showLedger('${loan.id}', 'borrowed')">History</button>
+          <button class="btn btn-secondary btn-sm" onclick="editLoan('${loan.id}', 'borrowed')">Edit</button>
+          ${stats.statusInMonth === 'active' 
+            ? (loan.isEMI
+               ? `<button class="btn btn-primary btn-sm" onclick="promptRecordEMI('${loan.id}', 'paid')">Record EMI</button>
+                  <button class="btn btn-sm" style="background: linear-gradient(135deg, var(--color-accent), #0369a1); color: #fff; box-shadow: 0 4px 14px rgba(14,165,233,0.3);" onclick="lendMore('${loan.id}')">Borrow More</button>`
+               : `${stats.isInterestFullyPaidThisMonth ? '' : `<button class="btn btn-primary btn-sm" onclick="promptPayment('${loan.id}', 'paid', 'interest')">Record payout</button>`}
+                  <button class="btn btn-success btn-sm" onclick="promptPayment('${loan.id}', 'paid', 'principal')">Repay principal</button>
+                  <button class="btn btn-secondary btn-sm" onclick="toggleLoanStatus('${loan.id}', 'borrowed')">Mark Settled</button>`)
+            : `<button class="btn btn-secondary btn-sm" onclick="toggleLoanStatus('${loan.id}', 'borrowed')">Reopen</button>`
+          }
+          ${loan.isEMI ? '' : `<button class="btn btn-secondary btn-sm" onclick="promptConvertEMI('${loan.id}', 'borrowed')">Convert to EMI</button>`}
+          <button class="btn btn-danger btn-sm" onclick="deleteLoan('${loan.id}', 'borrowed')">Del</button>
+        </div>
+      </div>`;
+    });
 
     card.innerHTML = `
       <div class="item-row">
         <div class="item-title-col">
           <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
-            <svg class="card-chevron" viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2.5" fill="none"><polyline points="6 9 12 15 18 9"/></svg>
-            <span class="item-name">${loan.financierName}</span>
-            ${statusInMonth === 'active' ? '' : '<span class="badge badge-muted">Settled</span>'}
+            <span class="item-name">${group.name}</span>
+            ${group.statusInMonth === 'active' ? '' : '<span class="badge badge-muted">Settled</span>'}
             ${stampHtml}
           </div>
-          <div style="display: flex; align-items: center; gap: 0.35rem; margin-top: 0.4rem;" onclick="event.stopPropagation();">
-            ${isInterestFullyPaidThisMonth ? '' : `<label for="chk-interest-paid-${loan.id}" style="cursor: pointer; font-size: 0.85rem; color: var(--text-primary); margin: 0;">Interest Paid</label><input type="checkbox" id="chk-interest-paid-${loan.id}" onchange="if(this.checked) { quickMarkInterestPaid('${loan.id}', 'paid', ${monthlyCost}, '${selectedMonthStr}'); }" style="width: 15px; height: 15px; cursor: pointer; accent-color: var(--color-danger); margin: 0; flex-shrink: 0;">`}
-          </div>
-          ${loan.phone ? `<div style="margin-top: 0.25rem; font-size: 0.85rem; color: var(--text-secondary);">${getContactActionsHTML(loan.phone)}</div>` : ''}
+          ${group.phone ? `<div style="margin-top: 0.25rem; font-size: 0.85rem; color: var(--text-secondary);">${getContactActionsHTML(group.phone)}</div>` : ''}
           <div class="item-meta" style="margin-top: 0.25rem;">
-            <span>Received: ${formatDate(loan.startDate)}</span>
-            ${loan.dueDate ? `<span class="meta-divider"></span><span>Due: ${formatDate(loan.dueDate)}</span>` : ''}
+            <span>${group.loans.length} Loan${group.loans.length > 1 ? 's' : ''}</span>
           </div>
         </div>
         <div class="amount-display" style="text-align: right;">
           ${principalHtml}
         </div>
       </div>
-      
-      <div class="card-collapse-content">
-        <div class="loan-stats-grid" style="margin-top: 1rem;">
-          <div class="loan-stat-box">
-            <span class="loan-stat-val">${loan.interestRate}% / mo</span>
-            <span class="loan-stat-lbl">Interest Rate</span>
-          </div>
-          <div class="loan-stat-box">
-            <span class="loan-stat-val">${formatCurrency(totalPaid)}</span>
-            <span class="loan-stat-lbl">Interest Paid</span>
-          </div>
-          <div class="loan-stat-box">
-            <span class="loan-stat-val">${lastPaymentDate ? formatDate(lastPaymentDate) : 'Never'}</span>
-            <span class="loan-stat-lbl">Last Payment Date</span>
-          </div>
-        </div>
-
-        <div style="font-size: 0.8rem; color: var(--text-secondary); display:flex; justify-content:space-between; flex-wrap:wrap; gap: 0.5rem; margin-top: 0.75rem; margin-bottom: 0.75rem;">
-          <div><span><strong>${formatCurrency(monthlyCost)}</strong>/mo</span></div>
-          ${loan.notes ? `<div><span style="font-style: italic;">Notes: ${loan.notes}</span></div>` : ''}
-        </div>
-
-        <div class="loan-actions">
-          <button class="btn btn-secondary btn-sm" onclick="showLedger('${loan.id}', 'borrowed')">History</button>
-          <button class="btn btn-secondary btn-sm" onclick="editLoan('${loan.id}', 'borrowed')">Edit</button>
-          ${statusInMonth === 'active' 
-            ? `${isInterestFullyPaidThisMonth ? '' : `<button class="btn btn-primary btn-sm" onclick="promptPayment('${loan.id}', 'paid', 'interest')">Record payout</button>`}
-               <button class="btn btn-success btn-sm" onclick="promptPayment('${loan.id}', 'paid', 'principal')">Repay principal</button>
-               <button class="btn btn-secondary btn-sm" onclick="toggleLoanStatus('${loan.id}', 'borrowed')">Mark Settled</button>`
-            : `<button class="btn btn-secondary btn-sm" onclick="toggleLoanStatus('${loan.id}', 'borrowed')">Reopen Loan</button>`
-          }
-          <button class="btn btn-danger btn-sm" onclick="deleteLoan('${loan.id}', 'borrowed')">Delete</button>
-        </div>
-      </div>
     `;
 
     const itemRow = card.querySelector('.item-row');
     itemRow.addEventListener('click', (e) => {
-      if (e.target.closest('.contact-action-btn')) return;
-      const isExpanded = card.classList.toggle('expanded');
-      if (isExpanded) {
-        _expandedCards.add(loan.id);
-      } else {
-        _expandedCards.delete(loan.id);
+      try {
+        if (e.target.closest('.contact-action-btn')) return;
+        const titleEl = document.getElementById('group-details-title');
+        const bodyEl = document.getElementById('group-details-body');
+        if (!titleEl || !bodyEl) {
+          alert('Error: Modal elements not found. Please do a hard refresh (Ctrl+F5) to clear your cache.');
+          return;
+        }
+        titleEl.textContent = `${group.name}'s Loans`;
+        bodyEl.innerHTML = loansHtml;
+        openModal('modal-group-details');
+      } catch (err) {
+        alert('Error opening modal: ' + err.message);
       }
     });
 
@@ -2481,11 +2603,9 @@ function renderRentals() {
 
   const activeLeasesNode = el('rentals-active-leases');
   const monthlyIncomeNode = el('rentals-monthly-income');
-  const totalCollectedNode = el('rentals-total-collected');
   
   if (activeLeasesNode) activeLeasesNode.textContent = totalLeases;
   if (monthlyIncomeNode) monthlyIncomeNode.textContent = formatCurrency(monthlyRentRoll);
-  if (totalCollectedNode) totalCollectedNode.textContent = formatCurrency(totalCollected);
 
   const listContainer = el('rentals-list');
   if (!listContainer) return;
@@ -2547,10 +2667,11 @@ function renderRentals() {
           ${rental.contactInfo ? `<div style="margin-top: 0.25rem; font-size: 0.85rem; color: var(--text-secondary);">${getContactActionsHTML(rental.contactInfo)}</div>` : ''}
           <div class="item-meta" style="margin-top: 0.25rem;">
             <span>Property: <strong>${rental.propertyName}</strong></span>
+            ${(() => { const r = getNextRenewal(rental.startDate); return r ? ` &middot; Renewal: <strong>${r.dateStr}</strong> (<span style="color: var(--color-warning);">${r.daysLeft}d</span>)` : ''; })()}
           </div>
         </div>
         <div class="amount-display" style="text-align: right; display: flex; flex-direction: column; align-items: flex-end;">
-          <div class="amount-value" style="color: var(--color-purple);">${formatCurrency(rental.monthlyRent)}</div>
+          <div class="amount-value" style="color: var(--color-success);">${formatCurrency(rental.monthlyRent)}</div>
           <div class="amount-in-words" style="font-size: 0.68rem; color: var(--text-secondary); max-width: 180px; line-height: 1.25; margin-top: 0.15rem; font-style: italic; text-align: right; word-wrap: break-word;">(${numberToIndianWords(rental.monthlyRent)})</div>
           <div class="amount-label" style="margin-top: 0.2rem; margin-bottom: 0.2rem;">Monthly Rent</div>
           <div style="display: flex; align-items: center; gap: 0.3rem; margin-top: 0.2rem;">
@@ -2578,7 +2699,6 @@ function renderRentals() {
 
         <div style="font-size: 0.8rem; color: var(--text-secondary); display:flex; justify-content:space-between; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.75rem; margin-bottom: 0.75rem;">
           <span>Lease Start: <strong>${formatDate(rental.startDate)}</strong></span>
-          <span>Renewal due in: <strong style="color: var(--color-warning);">${getNextRenewal(rental.startDate).daysLeft} days</strong></span>
           <span>Payments Logged: <strong>${rentPayments.length} month(s)</strong></span>
         </div>
 
@@ -2598,14 +2718,14 @@ function renderRentals() {
     `;
 
     const itemRow = card.querySelector('.item-row');
-    itemRow.addEventListener('click', (e) => {
-      if (e.target.closest('.contact-action-btn')) return;
-      const isExpanded = card.classList.toggle('expanded');
-      if (isExpanded) {
-        _expandedCards.add(rental.id);
-      } else {
-        _expandedCards.delete(rental.id);
-      }
+    const cardClick = (e) => {
+      if (e.target.closest('.contact-action-btn, button, .btn, input')) return;
+      window.openTenantDetails(rental.id);
+    };
+    itemRow.addEventListener('click', cardClick);
+    card.addEventListener('click', (e) => {
+      if (e.target.closest('.contact-action-btn, button, .btn, input')) return;
+      window.openTenantDetails(rental.id);
     });
 
     listContainer.appendChild(card);
@@ -2694,6 +2814,7 @@ document.getElementById('form-loan').addEventListener('submit', (e) => {
 
 // Edit Loan Action Trigger
 function editLoan(id, direction) {
+  closeModal('modal-group-details');
   loadState();
   const list = direction === 'lent' ? state.lent : state.borrowed;
   const loan = list.find(l => l.id === id);
@@ -2737,6 +2858,7 @@ function toggleLoanStatus(id, direction) {
 
 // Delete Loan
 function deleteLoan(id, direction) {
+  closeModal('modal-group-details');
   if (!confirm(`Are you sure you want to permanently delete this loan transaction? All associated interest payments logged will also be removed.`)) return;
 
   loadState();
@@ -2751,8 +2873,169 @@ function deleteLoan(id, direction) {
   else renderBorrowing();
 }
 
+// EMI Features
+function promptConvertEMI(loanId, direction) {
+  closeModal('modal-group-details');
+  loadState();
+  const listName = direction === 'lent' ? 'lent' : 'borrowed';
+  const loan = state[listName].find(x => x.id === loanId);
+  if (!loan) return;
+
+  const outstandingPrincipal = getOutstandingPrincipal(loan.id, loan.principal);
+  
+  document.getElementById('form-emi-convert').reset();
+  document.getElementById('emi-convert-loan-id').value = loanId;
+  document.getElementById('emi-convert-direction').value = direction;
+  document.getElementById('emi-convert-name').textContent = loan.borrowerName;
+  document.getElementById('emi-convert-principal').textContent = formatCurrency(outstandingPrincipal);
+  document.getElementById('emi-convert-rate').value = loan.interestRate;
+  document.getElementById('emi-convert-preview').textContent = 'Rs. 0 / mo';
+  
+  window._currentEMIPrincipal = outstandingPrincipal;
+  
+  openModal('modal-emi-convert');
+}
+
+function selectTenure(btn, months) {
+  document.getElementById('emi-convert-tenure').value = months;
+  document.querySelectorAll('#tenure-shortcuts .btn').forEach(b => {
+    b.style.background = '';
+    b.style.color = '';
+    b.style.borderColor = '';
+  });
+  btn.style.background = 'var(--color-accent)';
+  btn.style.color = '#fff';
+  btn.style.borderColor = 'var(--color-accent)';
+  calculateEMIPreview();
+}
+
+function calculateEMIPreview() {
+  const tenure = Number(document.getElementById('emi-convert-tenure').value);
+  const rateInput = Number(document.getElementById('emi-convert-rate').value);
+  if (!tenure || tenure <= 0 || !rateInput || rateInput <= 0) {
+    document.getElementById('emi-convert-preview').textContent = 'Rs. 0 / mo';
+    document.getElementById('emi-convert-total-interest').textContent = formatCurrency(0);
+    document.getElementById('emi-convert-total-amount').textContent = formatCurrency(0);
+    return;
+  }
+  const P = window._currentEMIPrincipal;
+  const r = rateInput / 100;
+  const n = tenure;
+  let emi;
+  if (r === 0) emi = P / n;
+  else emi = P * r * Math.pow(1 + r, n) / (Math.pow(1 + r, n) - 1);
+  const totalInterest = emi * n - P;
+  
+  document.getElementById('emi-convert-preview').textContent = `${formatCurrency(emi)} / mo`;
+  document.getElementById('emi-convert-total-interest').textContent = formatCurrency(totalInterest);
+  document.getElementById('emi-convert-total-amount').textContent = formatCurrency(P + totalInterest);
+}
+
+document.getElementById('form-emi-convert').addEventListener('submit', (e) => {
+  e.preventDefault();
+  loadState();
+  const loanId = document.getElementById('emi-convert-loan-id').value;
+  const direction = document.getElementById('emi-convert-direction').value;
+  const tenure = Number(document.getElementById('emi-convert-tenure').value);
+  const rateInput = Number(document.getElementById('emi-convert-rate').value);
+  
+  const listName = direction === 'lent' ? 'lent' : 'borrowed';
+  const loan = state[listName].find(x => x.id === loanId);
+  if (!loan) return;
+  
+  const P = getOutstandingPrincipal(loan.id, loan.principal);
+  const r = rateInput / 100;
+  const n = tenure;
+  let emi = (r === 0) ? P / n : P * r * Math.pow(1 + r, n) / (Math.pow(1 + r, n) - 1);
+  
+  loan.interestRate = rateInput;
+  loan.isEMI = true;
+  loan.tenureMonths = tenure;
+  loan.emiAmount = emi;
+  
+  saveState();
+  closeModal('modal-emi-convert');
+  if (direction === 'lent') renderLending();
+  else renderBorrowing();
+});
+
+function promptRecordEMI(loanId, type) {
+  loadState();
+  const direction = type === 'received' ? 'lent' : 'borrowed';
+  const listName = direction === 'lent' ? 'lent' : 'borrowed';
+  const loan = state[listName].find(x => x.id === loanId);
+  if (!loan) return;
+  
+  document.getElementById('form-record-emi').reset();
+  document.getElementById('record-emi-loan-id').value = loanId;
+  document.getElementById('record-emi-direction').value = direction;
+  document.getElementById('record-emi-amount-val').value = loan.emiAmount;
+  document.getElementById('record-emi-date').value = new Date().toISOString().split('T')[0];
+  
+  document.getElementById('record-emi-display-amount').textContent = formatCurrency(loan.emiAmount);
+  
+  openModal('modal-record-emi');
+}
+
+document.getElementById('form-record-emi').addEventListener('submit', (e) => {
+  e.preventDefault();
+  loadState();
+  
+  const loanId = document.getElementById('record-emi-loan-id').value;
+  const direction = document.getElementById('record-emi-direction').value;
+  const date = document.getElementById('record-emi-date').value;
+  const notes = document.getElementById('record-emi-notes').value;
+  
+  const listName = direction === 'lent' ? 'lent' : 'borrowed';
+  const loan = state[listName].find(x => x.id === loanId);
+  if (!loan) return;
+  
+  const emiAmount = Number(loan.emiAmount);
+  const P = getOutstandingPrincipal(loan.id, loan.principal);
+  const r = Number(loan.interestRate) / 100;
+  
+  const interestPart = P * r;
+  const principalPart = emiAmount - interestPart;
+  
+  const type = direction === 'lent' ? 'received' : 'paid';
+  const [y, m] = date.split('-');
+  const monthYearStr = `${y}-${m}`;
+  
+  if (interestPart > 0) {
+    state.interestPayments.push({
+      id: 'p' + Math.random().toString(36).substr(2, 9),
+      loanId: loan.id,
+      amount: interestPart,
+      date: date,
+      monthYear: monthYearStr,
+      type: type,
+      category: 'interest',
+      notes: notes ? notes + ' (EMI Interest)' : '(EMI Interest)'
+    });
+  }
+  if (principalPart > 0) {
+    state.interestPayments.push({
+      id: 'p' + Math.random().toString(36).substr(2, 9),
+      loanId: loan.id,
+      amount: principalPart,
+      date: date,
+      monthYear: monthYearStr,
+      type: type,
+      category: 'principal',
+      notes: notes ? notes + ' (EMI Principal)' : '(EMI Principal)'
+    });
+  }
+  
+  saveState();
+  closeModal('modal-record-emi');
+  if (direction === 'lent') renderLending();
+  else renderBorrowing();
+  renderDashboard();
+});
+
 // Open Interest/Principal Payment Dialog
 function promptPayment(loanId, type, category = 'interest') {
+  closeModal('modal-group-details');
   loadState();
   document.getElementById('form-payment').reset();
   document.getElementById('payment-loan-id').value = loanId;
@@ -2833,6 +3116,7 @@ document.getElementById('form-payment').addEventListener('submit', (e) => {
 
 // View Ledger details (Interest & Principal Transactions)
 function showLedger(loanId, direction) {
+  closeModal('modal-group-details');
   loadState();
   const list = direction === 'lent' ? state.lent : state.borrowed;
   const loan = list.find(l => l.id === loanId);
@@ -3229,6 +3513,8 @@ window.promptRentPayment = promptRentPayment;
 window.showRentalLedger = showRentalLedger;
 window.deleteRentPayment = deleteRentPayment;
 
+} catch(e) { console.error('Top-level handler error:', e); }
+
 // 12. SYSTEM SETTINGS HANDLERS
 
 // Hard system reset
@@ -3246,7 +3532,7 @@ document.getElementById('btn-reset-data').addEventListener('click', () => {
         expenses: [],
         renewals: [],
         files: [],
-        theme: 'dark-blue'
+        theme: 'black-and-colored'
       };
       seedInitialData();
       localStorage.setItem(STORAGE_KEY + '_v', SEED_VERSION);
@@ -3255,7 +3541,6 @@ document.getElementById('btn-reset-data').addEventListener('click', () => {
     }
   }
 });
-} catch(e) { console.error('Top-level handler error:', e); }
 
 // Search feature in Dashboard
 function initSearch() {
@@ -3329,6 +3614,8 @@ function initSearch() {
       `;
       item.addEventListener('click', () => {
         switchTab('interest');
+        searchInput.value = '';
+        performSearch();
       });
       resultsList.appendChild(item);
     });
@@ -3355,6 +3642,8 @@ function initSearch() {
       `;
       item.addEventListener('click', () => {
         switchTab('interest');
+        searchInput.value = '';
+        performSearch();
       });
       resultsList.appendChild(item);
     });
@@ -3379,6 +3668,8 @@ function initSearch() {
       `;
       item.addEventListener('click', () => {
         switchTab('rental');
+        searchInput.value = '';
+        performSearch();
       });
       resultsList.appendChild(item);
     });
@@ -3525,8 +3816,6 @@ function renderConstruction() {
           
           <!-- Quick Entry Form -->
           <div style="background: var(--bg-secondary); padding: 0.85rem; border-radius: 8px; margin-bottom: 1rem; border: 1px solid var(--border-color);">
-            <div style="font-size: 0.75rem; font-weight: 700; margin-bottom: 0.5rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px;">Quick Log Labor Payment</div>
-            
             <div style="display: flex; flex-wrap: wrap; gap: 0.35rem; margin-bottom: 0.85rem;">
               ${catButtonsHtml}
             </div>
@@ -3875,6 +4164,7 @@ function openExpenseModal(expenseId = null) {
   loadState();
   const form = document.getElementById('form-expense');
   form.reset();
+  document.querySelectorAll('.expense-preset-btn').forEach(b => b.classList.remove('active'));
   
   if(window.handleCategoryChange) window.handleCategoryChange();
 
@@ -4023,13 +4313,16 @@ function renderExpenses() {
   });
 }
 
-function setExpensePreset(noteText, categoryValue) {
+function setExpensePreset(noteText, categoryValue, btn) {
   const noteInput = document.getElementById('expense-note');
   const catSelect = document.getElementById('expense-category');
   const amtInput = document.getElementById('expense-amount');
   const presetsContainer = document.getElementById('expense-amount-presets');
   const renewalDateGroup = document.getElementById('expense-renewal-date-group');
   const renewalDateInput = document.getElementById('expense-renewal-date');
+  
+  document.querySelectorAll('.expense-preset-btn').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
   
   if (noteInput) noteInput.value = noteText;
   if (catSelect) catSelect.value = categoryValue;
@@ -4328,6 +4621,10 @@ window.setExpensePreset = setExpensePreset;
 window.openReportsModal = openReportsModal;
 window.exportReportsCSV = exportReportsCSV;
 window.setTheme = setTheme;
+window.promptConvertEMI = promptConvertEMI;
+window.calculateEMIPreview = calculateEMIPreview;
+window.selectTenure = selectTenure;
+window.promptRecordEMI = promptRecordEMI;
 
 window.togglePendingNames = function() {
   state.showPendingNames = document.getElementById('toggle-pending-names').checked;
@@ -4335,9 +4632,417 @@ window.togglePendingNames = function() {
   renderDashboard();
 };
 
+window.openExpenseDetails = function(mode, event) {
+  if (event) event.stopPropagation();
+  if (typeof mode !== 'string') { event = mode; mode = undefined; }
+  if (window._expenseMode === mode) mode = undefined;
+  window._expenseMode = mode;
+  loadState();
+  
+  const today = new Date();
+  const todayStr = new Date().toISOString().split('T')[0];
+  const pad = n => String(n).padStart(2, '0');
+  
+  const todayExps = state.expenses.filter(e => e.date === todayStr);
+  const todayTotal = todayExps.reduce((sum, e) => sum + Number(e.amount), 0);
+  
+  const dayOfWeek = today.getDay();
+  const startOfWeek = new Date(today);
+  startOfWeek.setDate(today.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1));
+  const endOfWeek = new Date(startOfWeek);
+  endOfWeek.setDate(startOfWeek.getDate() + 6);
+  const startStr = `${startOfWeek.getFullYear()}-${pad(startOfWeek.getMonth()+1)}-${pad(startOfWeek.getDate())}`;
+  const endStr = `${endOfWeek.getFullYear()}-${pad(endOfWeek.getMonth()+1)}-${pad(endOfWeek.getDate())}`;
+  const weekExps = state.expenses.filter(e => e.date >= startStr && e.date <= endStr);
+  const weekTotal = weekExps.reduce((sum, e) => sum + Number(e.amount), 0);
+  
+  const monthExps = state.expenses.filter(e => e.date.startsWith(selectedMonthStr));
+  const monthTotal = monthExps.reduce((sum, e) => sum + Number(e.amount), 0);
+  
+  let filteredExpenses = [];
+  let title = '';
+  
+  if (mode === 'month') {
+    title = "This Month's Expenses";
+    filteredExpenses = monthExps;
+  } else if (mode === 'week') {
+    title = "This Week's Expenses";
+    filteredExpenses = weekExps;
+  } else {
+    title = "Today's Expenses";
+    filteredExpenses = todayExps;
+  }
+  
+  document.getElementById('expense-details-title').textContent = title;
+  
+  const listContainer = document.getElementById('expense-details-list');
+  
+  const allExps = !mode ? [...state.expenses].sort((a, b) => new Date(b.date) - new Date(a.date)) : filteredExpenses;
+  const allTotal = !mode ? allExps.reduce((sum, e) => sum + Number(e.amount), 0) : filteredExpenses.reduce((sum, e) => sum + Number(e.amount), 0);
+  
+  const modeLabel = mode === 'day' ? 'Today' : mode === 'week' ? 'This Week' : mode === 'month' ? 'This Month' : '';
+  
+  let html = '';
+  
+  html = `
+    <div style="display: flex; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 0.75rem;">
+      <div class="card" style="flex: 1; min-width: 100px; padding: 0.75rem; border-left: 4px solid var(--color-danger); cursor: pointer; ${mode === 'day' ? 'box-shadow: 0 0 0 2px var(--color-danger);' : ''}" onclick="window.openExpenseDetails('day', event)">
+        <div style="font-size: 0.65rem; font-weight: 700; text-transform: uppercase; color: var(--text-secondary);">Today</div>
+        <div style="font-size: 1.1rem; font-weight: 800; color: var(--color-danger); margin-top: 0.2rem;">${formatCurrency(todayTotal)}</div>
+      </div>
+      <div class="card" style="flex: 1; min-width: 100px; padding: 0.75rem; border-left: 4px solid var(--color-danger); cursor: pointer; ${mode === 'week' ? 'box-shadow: 0 0 0 2px var(--color-danger);' : ''}" onclick="window.openExpenseDetails('week', event)">
+          <div style="font-size: 0.65rem; font-weight: 700; text-transform: uppercase; color: var(--text-secondary);">This Week</div>
+          <div style="font-size: 1.1rem; font-weight: 800; color: var(--color-danger); margin-top: 0.2rem;">${formatCurrency(weekTotal)}</div>
+        </div>
+        <div class="card" style="flex: 1; min-width: 100px; padding: 0.75rem; border-left: 4px solid var(--color-danger); cursor: pointer; ${mode === 'month' ? 'box-shadow: 0 0 0 2px var(--color-danger);' : ''}" onclick="window.openExpenseDetails('month', event)">
+          <div style="font-size: 0.65rem; font-weight: 700; text-transform: uppercase; color: var(--text-secondary);">This Month</div>
+          <div style="font-size: 1.1rem; font-weight: 800; color: var(--color-danger); margin-top: 0.2rem;">${formatCurrency(monthTotal)}</div>
+      </div>
+    </div>
+    <div style="border-top: 1px solid var(--border-color); padding-top: 0.75rem;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+        <h4 style="margin: 0; font-size: 0.95rem;">${modeLabel || 'All Expenses'}</h4>
+        <span style="font-weight: 800; color: var(--color-danger);">${formatCurrency(allTotal)}</span>
+      </div>`;
+  
+  if (allExps.length > 0) {
+    html += allExps.map(e => {
+      const prop = e.propertyId ? state.rentals.find(r => r.id === e.propertyId) : null;
+      return `
+        <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.6rem 0; border-bottom: 1px solid var(--border-color);">
+          <div style="display: flex; flex-direction: column; gap: 0.1rem;">
+            <span style="font-weight: 600; font-size: 0.85rem;">${e.note || e.description || e.category || 'Expense'}</span>
+            <span style="font-size: 0.7rem; color: var(--text-muted);">${formatDisplayDate(e.date)}${e.category ? ' · ' + e.category : ''}${prop ? ' · ' + prop.propertyName : ''}</span>
+          </div>
+          <span style="font-weight: 700; color: var(--color-danger); font-size: 0.9rem;">${formatCurrency(e.amount)}</span>
+        </div>`;
+    }).join('');
+  } else {
+    html += '<div style="text-align: center; color: var(--text-muted); padding: 1rem;">No expenses recorded.</div>';
+  }
+  
+  html += `</div>`;
+  
+  listContainer.innerHTML = html;
+  
+  openModal('modal-expense-details');
+};
+
+window.openTenantDetails = function(rentalId) {
+  loadState();
+  const rental = state.rentals.find(r => r.id === rentalId);
+  if (!rental) return;
+  
+  const titleEl = document.getElementById('group-details-title');
+  const bodyEl = document.getElementById('group-details-body');
+  if (!titleEl || !bodyEl) return;
+  
+  const payments = state.rentPayments.filter(p => p.rentalId === rentalId).sort((a, b) => new Date(b.datePaid) - new Date(a.datePaid));
+  const totalPaid = payments.reduce((sum, p) => sum + Number(p.amount), 0);
+  const phone = rental.contactInfo || '';
+  const waLink = phone ? `<a href="https://wa.me/91${phone.replace(/\D/g, '')}" target="_blank" class="btn-contact btn-whatsapp"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg></a>` : '';
+  const callLink = phone ? `<a href="tel:${phone.replace(/\D/g, '')}" class="btn-contact btn-call"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg></a>` : '';
+  
+  titleEl.textContent = rental.tenantName;
+  
+  let html = `
+    <div style="margin-bottom: 1rem;">
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 0.75rem;">
+        <div style="font-weight: 600; font-size: 1rem;">${rental.propertyName || 'Property'}</div>
+        <div class="contact-btn-group">${callLink}${waLink}</div>
+      </div>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 0.75rem;">
+        <div class="card" style="padding: 0.75rem; text-align: center; background: var(--bg-secondary);">
+          <div style="font-size: 0.6rem; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.5px;">Monthly Rent</div>
+          <div style="font-size: 1.3rem; font-weight: 800; color: var(--color-accent); margin-top: 0.25rem;">${formatCurrency(rental.monthlyRent)}</div>
+        </div>
+        <div class="card" style="padding: 0.75rem; text-align: center; background: var(--bg-secondary);">
+          <div style="font-size: 0.6rem; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.5px;">Security Deposit</div>
+          <div style="font-size: 1.3rem; font-weight: 800; color: var(--color-purple); margin-top: 0.25rem;">${formatCurrency(rental.securityDeposit || 0)}</div>
+        </div>
+      </div>
+      <div style="display: flex; gap: 0.75rem;">
+        <div class="card" style="flex: 1; padding: 0.5rem; text-align: center;">
+          <div style="font-size: 0.65rem; text-transform: uppercase; color: var(--text-secondary);">Status</div>
+          <div style="font-weight: 700; color: ${rental.status === 'active' ? 'var(--color-success)' : 'var(--color-danger)'};">${rental.status === 'active' ? 'Active' : 'Inactive'}</div>
+        </div>
+        <div class="card" style="flex: 1; padding: 0.5rem; text-align: center;">
+          <div style="font-size: 0.65rem; text-transform: uppercase; color: var(--text-secondary);">Total Paid</div>
+          <div style="font-weight: 700; color: var(--color-success);">${formatCurrency(totalPaid)}</div>
+        </div>
+      </div>
+    </div>
+    <div style="border-top: 1px solid var(--border-color); padding-top: 0.75rem;">
+      <h4 style="margin: 0 0 0.5rem 0; font-size: 0.9rem;">Payment History</h4>
+      ${payments.length > 0 ? payments.map(p => `
+        <div style="display: flex; justify-content: space-between; padding: 0.4rem 0; border-bottom: 1px solid var(--border-color); font-size: 0.85rem;">
+          <span style="color: var(--text-secondary);">${formatDisplayDate(p.monthYear || p.datePaid)}</span>
+          <span style="font-weight: 600; color: var(--color-success);">${formatCurrency(p.amount)}</span>
+        </div>
+      `).join('') : '<div style="color: var(--text-muted); font-size: 0.85rem;">No payments recorded yet.</div>'}
+    </div>
+  `;
+  
+  bodyEl.innerHTML = html;
+  openModal('modal-group-details');
+};
+
+window.openInterestDetails = function(loanId) {
+  loadState();
+  const loan = state.lent.find(l => l.id === loanId);
+  if (!loan) return;
+  
+  const titleEl = document.getElementById('group-details-title');
+  const bodyEl = document.getElementById('group-details-body');
+  if (!titleEl || !bodyEl) return;
+  
+  const payments = state.interestPayments.filter(p => p.loanId === loanId && p.type === 'received').sort((a, b) => new Date(b.date) - new Date(a.date));
+  const totalPaid = payments.reduce((sum, p) => sum + Number(p.amount), 0);
+  const phone = loan.phone || '';
+  const waLink = phone ? `<a href="https://wa.me/91${phone.replace(/\D/g, '')}" target="_blank" class="btn-contact btn-whatsapp"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg></a>` : '';
+  const callLink = phone ? `<a href="tel:${phone.replace(/\D/g, '')}" class="btn-contact btn-call"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg></a>` : '';
+  
+  const outstanding = getOutstandingPrincipalAtMonth(loan.id, loan.principal, selectedMonthStr);
+  const expectedInterest = outstanding > 0 ? outstanding * (Number(loan.interestRate) / 100) : 0;
+  
+  titleEl.textContent = loan.borrowerName;
+  
+  let html = `
+    <div style="margin-bottom: 1rem;">
+      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
+        <div>
+          <div style="font-size: 0.8rem; color: var(--text-secondary);">Principal: ${formatCurrency(loan.principal)}</div>
+          <div style="font-size: 0.8rem; color: var(--text-secondary);">Rate: ${loan.interestRate}%/month</div>
+          <div style="font-size: 0.8rem; color: var(--text-secondary);">Started: ${formatDate(loan.startDate)}</div>
+        </div>
+        <div class="contact-btn-group">${callLink}${waLink}</div>
+      </div>
+      <div style="margin-top: 0.75rem; display: flex; gap: 0.75rem;">
+        <div class="card" style="flex: 1; padding: 0.5rem; text-align: center;">
+          <div style="font-size: 0.65rem; text-transform: uppercase; color: var(--text-secondary);">Outstanding</div>
+          <div style="font-weight: 700;">${formatCurrency(outstanding)}</div>
+        </div>
+        <div class="card" style="flex: 1; padding: 0.5rem; text-align: center;">
+          <div style="font-size: 0.65rem; text-transform: uppercase; color: var(--text-secondary);">Expected Interest</div>
+          <div style="font-weight: 700; color: var(--color-warning);">${formatCurrency(expectedInterest)}</div>
+        </div>
+        <div class="card" style="flex: 1; padding: 0.5rem; text-align: center;">
+          <div style="font-size: 0.65rem; text-transform: uppercase; color: var(--text-secondary);">Total Received</div>
+          <div style="font-weight: 700; color: var(--color-success);">${formatCurrency(totalPaid)}</div>
+        </div>
+      </div>
+    </div>
+    <div style="border-top: 1px solid var(--border-color); padding-top: 0.75rem;">
+      <h4 style="margin: 0 0 0.5rem 0; font-size: 0.9rem;">Payment History</h4>
+      ${payments.length > 0 ? payments.map(p => `
+        <div style="display: flex; justify-content: space-between; padding: 0.4rem 0; border-bottom: 1px solid var(--border-color); font-size: 0.85rem;">
+          <span style="color: var(--text-secondary);">${formatDisplayDate(p.date)} ${p.category ? '· ' + p.category : ''}</span>
+          <span style="font-weight: 600; color: var(--color-success);">${formatCurrency(p.amount)}</span>
+        </div>
+      `).join('') : '<div style="color: var(--text-muted); font-size: 0.85rem;">No payments received yet.</div>'}
+    </div>
+  `;
+  
+  bodyEl.innerHTML = html;
+  openModal('modal-group-details');
+};
+
+window.navigateToCard = function(filterType, id, type) {
+  currentReminderFilter = filterType;
+  refreshActiveTab();
+  renderDashboard();
+  setTimeout(() => {
+    const selector = type === 'rent' ? `[data-id="${id}"]` : `[data-group-id="${id}"]`;
+    const el = document.querySelector(selector);
+    if (el) {
+      el.scrollIntoView({behavior:'smooth', block:'center'});
+      el.classList.add('highlight-card');
+      setTimeout(() => el.classList.remove('highlight-card'), 3000);
+    }
+  }, 200);
+  closeModal('modal-collection-details');
+};
+
+window.openCollectionDetails = function(type, event) {
+  if (event) event.stopPropagation();
+  let collected = [];
+  let pending = [];
+  let title = '';
+
+  const isDayMode = viewMode === 'day';
+  const isYearMode = viewMode === 'year';
+  const selectedYear = selectedDateStr.slice(0, 4);
+
+  const filterPayment = (p) => {
+    if (isDayMode) return (p.date || p.datePaid) === selectedDateStr;
+    if (isYearMode) return (p.date || p.datePaid || p.monthYear || '').startsWith(selectedYear);
+    return (p.date || p.datePaid || p.monthYear || '').startsWith(selectedMonthStr);
+  };
+  
+  const selParts = selectedMonthStr.split('-');
+  const selYear = parseInt(selParts[0], 10);
+  const selMonth = parseInt(selParts[1], 10);
+  const endDateOfSelectedMonth = `${selectedMonthStr}-${String(new Date(selYear, selMonth, 0).getDate()).padStart(2, '0')}`;
+
+  if (type === 'rent') {
+    title = 'Rent Collections';
+    const rawPayments = state.rentPayments.filter(filterPayment);
+    const groupedCol = {};
+    const groupedIds = {};
+    rawPayments.forEach(p => {
+      const r = state.rentals.find(x => x.id === p.rentalId);
+      const name = r ? r.tenantName : 'Unknown';
+      if(!groupedCol[name]) { groupedCol[name] = 0; groupedIds[name] = []; }
+      groupedCol[name] += Number(p.amount);
+      if (r && !groupedIds[name].includes(r.id)) groupedIds[name].push(r.id);
+    });
+    collected = Object.keys(groupedCol).map(name => ({name, amount: groupedCol[name], ids: groupedIds[name], type: 'rent'}));
+    
+    if (!isDayMode && !isYearMode) {
+      state.rentals.forEach(r => {
+        if (r.startDate <= endDateOfSelectedMonth && r.status === 'active') {
+          const pPaid = state.rentPayments.filter(p => p.rentalId === r.id && p.monthYear === selectedMonthStr).reduce((sum, p) => sum + Number(p.amount), 0);
+          const pOwe = Number(r.monthlyRent) - pPaid;
+          if (pOwe > 0) pending.push({name: r.tenantName, phone: r.contactInfo, owe: pOwe, id: r.id, type: 'rent'});
+        }
+      });
+    }
+  } else if (type === 'interest') {
+    title = 'Interest Collections';
+    const rawPayments = state.interestPayments.filter(p => p.type === 'received' && filterPayment(p));
+    const groupedCol = {};
+    const groupedIds = {};
+    rawPayments.forEach(p => {
+      const l = state.lent.find(x => x.id === p.loanId);
+      const name = l ? l.borrowerName : 'Unknown';
+      if(!groupedCol[name]) { groupedCol[name] = 0; groupedIds[name] = []; }
+      groupedCol[name] += Number(p.amount);
+      if (l && !groupedIds[name].includes(l.id)) groupedIds[name].push(l.id);
+    });
+    collected = Object.keys(groupedCol).map(name => {
+      const normName = name.toLowerCase().trim();
+      const groupId = 'group-' + btoa(encodeURIComponent(normName)).replace(/[^a-zA-Z0-9]/g, '');
+      return {name, amount: groupedCol[name], ids: [groupId], type: 'interest'};
+    });
+    
+    if (!isDayMode && !isYearMode) {
+      const activeLendingLoans = state.lent.filter(l => l.startDate <= endDateOfSelectedMonth);
+      activeLendingLoans.forEach(l => {
+        const outstanding = getOutstandingPrincipalAtMonth(l.id, l.principal, selectedMonthStr);
+        if (outstanding > 0) {
+          const expected = outstanding * (Number(l.interestRate) / 100);
+          const pPaid = state.interestPayments.filter(p => p.type === 'received' && p.loanId === l.id && p.date.startsWith(selectedMonthStr)).reduce((sum, p) => sum + Number(p.amount), 0);
+          const pOwe = expected - pPaid;
+          if (pOwe > 0) {
+            const normName = (l.borrowerName || '').toLowerCase().trim();
+            const groupId = 'group-' + btoa(encodeURIComponent(normName)).replace(/[^a-zA-Z0-9]/g, '');
+            pending.push({name: l.borrowerName, phone: l.phone, owe: pOwe, id: groupId, type: 'interest'});
+          }
+        }
+      });
+    }
+  } else if (type === 'all') {
+    title = 'All Pending Collections';
+    if (!isDayMode && !isYearMode) {
+      state.rentals.forEach(r => {
+        if (r.startDate <= endDateOfSelectedMonth && r.status === 'active') {
+          const pPaid = state.rentPayments.filter(p => p.rentalId === r.id && p.monthYear === selectedMonthStr).reduce((sum, p) => sum + Number(p.amount), 0);
+          const pOwe = Number(r.monthlyRent) - pPaid;
+          if (pOwe > 0) pending.push({name: r.tenantName, type: 'rent', phone: r.contactInfo, owe: pOwe, id: r.id});
+        }
+      });
+      const activeLendingLoans = state.lent.filter(l => l.startDate <= endDateOfSelectedMonth);
+      activeLendingLoans.forEach(l => {
+        const outstanding = getOutstandingPrincipalAtMonth(l.id, l.principal, selectedMonthStr);
+        if (outstanding > 0) {
+          const expected = outstanding * (Number(l.interestRate) / 100);
+          const pPaid = state.interestPayments.filter(p => p.type === 'received' && p.loanId === l.id && p.date.startsWith(selectedMonthStr)).reduce((sum, p) => sum + Number(p.amount), 0);
+          const pOwe = expected - pPaid;
+          if (pOwe > 0) {
+            const normName = (l.borrowerName || '').toLowerCase().trim();
+            const groupId = 'group-' + btoa(encodeURIComponent(normName)).replace(/[^a-zA-Z0-9]/g, '');
+            pending.push({name: l.borrowerName, type: 'interest', phone: l.phone, owe: pOwe, id: groupId});
+          }
+        }
+      });
+    }
+  }
+
+  document.getElementById('collection-details-title').textContent = title;
+  
+  const listContainer = document.getElementById('collection-details-list');
+  let html = '';
+
+  if (pending.length > 0) {
+    html += '<h4 style="margin-top: 0.5rem; margin-bottom: 0.5rem; color: var(--color-danger);">Pending</h4>';
+    html += pending.map(p => {
+      const cleanPhone = p.phone ? p.phone.replace(/\D/g, '') : '';
+      const waLink = p.phone ? `<a href="https://wa.me/91${cleanPhone}" target="_blank" class="btn-contact btn-whatsapp"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg></a>` : '';
+      const callLink = p.phone ? `<a href="tel:${cleanPhone}" class="btn-contact btn-call"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg></a>` : '';
+      const navAttr = p.id ? `navigateToCard('${p.type}', '${p.id}', '${p.type}')` : '';
+      return `
+      <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 0; border-bottom: 1px solid var(--border-color);">
+        <div style="display: flex; align-items: center; gap: 0.5rem;">
+          <span style="font-weight: 500; color: var(--text-primary); cursor: pointer;" ${navAttr ? `onclick="${navAttr}"` : ''}>${p.name}</span>
+          <div class="contact-btn-group" style="display: inline-flex;">${callLink}${waLink}</div>
+          ${type === 'all' ? `<span style="font-size: 0.6rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; padding: 0.1rem 0.35rem; border-radius: 4px; background: ${p.type === 'rent' ? 'rgba(34,197,94,0.15)' : 'rgba(59,130,246,0.15)'}; color: ${p.type === 'rent' ? 'var(--color-success)' : 'var(--color-accent)'};">${p.type === 'rent' ? 'RENT' : 'INTEREST'}</span>` : ''}
+        </div>
+        <span style="color: var(--color-success); font-weight: 600;">${formatCurrency(p.owe)}</span>
+      </div>
+    `}).join('');
+    const pendTotal = pending.reduce((s, p) => s + p.owe, 0);
+    html += `<div style="display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 0; border-top: 2px solid rgba(255, 255, 255, 0.5);">
+      <span style="font-weight: 700; color: var(--text-primary);">Total</span>
+      <span style="font-weight: 800; color: var(--color-success); font-size: 1.1rem;">${formatCurrency(pendTotal)}</span>
+    </div>
+    <div style="border-top: 2px solid rgba(255,255,255,0.4); margin: 0.25rem 0 0.25rem;"></div>`;
+  }
+
+  if (collected.length > 0) {
+    html += `<h4 style="margin-top: ${pending.length > 0 ? '1.5rem' : '0.5rem'}; margin-bottom: 0.5rem; color: var(--color-success);">Collected</h4>`;
+    html += collected.map(p => {
+      let clickAttr = '';
+      const navAttrCol = p.ids && p.ids.length === 1 ? `navigateToCard('${p.type}', '${p.ids[0]}', '${p.type}')` : '';
+      if (navAttrCol) clickAttr = ` style="cursor: pointer;" onclick="${navAttrCol}"`;
+      return `
+      <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 0; border-bottom: 1px solid var(--border-color);"${clickAttr}>
+        <div style="display: flex; align-items: center; gap: 0.4rem;">
+          <span style="font-weight: 500; color: var(--text-primary);${navAttrCol ? ' cursor: pointer;' : ''}">${p.name}</span>
+          ${type === 'all' ? `<span style="font-size: 0.6rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; padding: 0.1rem 0.35rem; border-radius: 4px; background: ${p.type === 'rent' ? 'rgba(34,197,94,0.15)' : 'rgba(59,130,246,0.15)'}; color: ${p.type === 'rent' ? 'var(--color-success)' : 'var(--color-accent)'};">${p.type === 'rent' ? 'RENT' : 'INTEREST'}</span>` : ''}
+          <span style="font-size: 0.8em;">✅</span>
+        </div>
+        <span style="color: var(--text-primary); font-weight: 600;">${formatCurrency(p.amount)}</span>
+      </div>`;
+    }).join('');
+    const collTotal = collected.reduce((s, p) => s + p.amount, 0);
+    html += `<div style="display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 0; border-top: 2px solid rgba(255, 255, 255, 0.5);">
+      <span style="font-weight: 700; color: var(--text-primary);">Total</span>
+      <span style="font-weight: 800; color: var(--text-primary); font-size: 1.1rem;">${formatCurrency(collTotal)}</span>
+    </div>`;
+  }
+
+  const pendTotal = pending.reduce((s, p) => s + p.owe, 0);
+  const overallTotal = collected.reduce((s, p) => s + p.amount, 0) + pendTotal;
+  if (pending.length > 0 || collected.length > 0) {
+    html += `<div style="border-top: 2px solid rgba(255,255,255,0.4); margin: 0.1rem 0 0.1rem;"></div>
+    <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0;">
+      <span style="font-weight: 800; color: var(--color-success); font-size: 0.95rem;">Overall Total</span>
+      <span style="font-weight: 800; color: var(--color-success); font-size: 1.2rem;">${formatCurrency(overallTotal)}</span>
+    </div>`;
+  }
+  
+  if (collected.length === 0 && pending.length === 0) {
+    html = '<div style="text-align: center; color: var(--text-muted); padding: 1rem;">No collections found for this period.</div>';
+  }
+  
+  listContainer.innerHTML = html;
+  openModal('modal-collection-details');
+};
+
 // ==========================================
 window.addEventListener('DOMContentLoaded', () => {
   initApp();
+  setTheme(state.theme || 'black-and-colored');
   
   const datePickerInput = document.getElementById('date-picker-input');
   if (datePickerInput) {
