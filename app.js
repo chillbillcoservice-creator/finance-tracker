@@ -402,9 +402,15 @@ function loadState() {
       state.renewals = state.renewals || [];
       state.files = state.files || [];
       state.showPendingNames = state.showPendingNames !== false;
+      state.showPayMethod = state.showPayMethod !== false;
+      state.showExpenseDetails = state.showExpenseDetails !== false;
       
       const t = document.getElementById('toggle-pending-names');
       if(t) t.checked = state.showPendingNames;
+      const pm = document.getElementById('toggle-pay-method');
+      if(pm) pm.checked = state.showPayMethod;
+      const ed = document.getElementById('toggle-expense-details');
+      if(ed) ed.checked = state.showExpenseDetails;
     } catch (e) {
       console.error('Failed to parse local storage data, resetting to default.', e);
       saveState();
@@ -955,33 +961,6 @@ function getNextRenewal(startDateStr) {
   };
 }
 
-function quickMarkPaidInModal(pType, id, amount, modalType) {
-  loadState();
-  if (pType === 'rent') {
-    state.rentPayments.push({
-      id: 'rp' + Math.random().toString(36).substr(2, 9),
-      rentalId: id,
-      amount: Number(amount),
-      monthYear: selectedMonthStr,
-      datePaid: new Date().toISOString().split('T')[0],
-      note: 'Marked from Collections'
-    });
-  } else {
-    state.interestPayments.push({
-      id: 'p' + Math.random().toString(36).substr(2, 9),
-      loanId: id,
-      type: 'received',
-      category: 'interest',
-      amount: Number(amount),
-      date: new Date().toISOString().split('T')[0],
-      note: 'Recorded from Collections'
-    });
-  }
-  saveState();
-  renderDashboard();
-  openCollectionDetails(modalType);
-}
-
 function quickMarkRentalPaid(rentalId, amount, monthYear) {
   loadState();
   const rental = state.rentals.find(r => r.id === rentalId);
@@ -1509,6 +1488,30 @@ function renderDashboard() {
   const monthlyExpensesNode = document.getElementById('dash-monthly-expenses');
   if (monthlyExpensesNode) {
     monthlyExpensesNode.innerHTML = `This Month: <span style="color: var(--color-danger); font-weight: 800;">${formatCurrency(selectedMonthExpenses)}</span>`;
+  }
+  
+  // Individual expense items in Today's Expenses card
+  const expenseCardDetails = document.getElementById('expense-card-details');
+  if (expenseCardDetails) {
+    if (state.showExpenseDetails !== false) {
+      const todayExps = state.expenses.filter(function(e) { return e.date === selectedDateStr; }).slice(0, 5);
+      if (todayExps.length > 0) {
+        var expHtml = '';
+        todayExps.forEach(function(exp) {
+          expHtml += '<div style="display: flex; justify-content: space-between; align-items: center; padding: 0.2rem 0.4rem; background: var(--input-bg); border-radius: 4px; font-size: 0.7rem;">' +
+            '<span style="font-weight: 600; color: var(--text-primary);">' + (exp.note || exp.category) + '</span>' +
+            (exp.paymentMethod ? '<span style="font-size:0.6rem; color:var(--text-secondary); font-weight:400;">[' + (exp.paymentMethod === 'upi' ? 'UPI' : 'Cash') + ']</span>' : '<span></span>') +
+            '<span style="font-weight: 700; color: var(--color-danger);">' + formatCurrency(exp.amount) + '</span>' +
+          '</div>';
+        });
+        expenseCardDetails.innerHTML = expHtml;
+        expenseCardDetails.style.display = 'flex';
+      } else {
+        expenseCardDetails.style.display = 'none';
+      }
+    } else {
+      expenseCardDetails.style.display = 'none';
+    }
   }
   document.getElementById('dash-interest-received').textContent = formatCurrency(totalInterestReceived);
   document.getElementById('dash-interest-paid').textContent = formatCurrency(totalInterestPaid);
@@ -3739,41 +3742,57 @@ window.deleteConstruction = function(id) {
   }
 };
 
-window._selectedConstCats = window._selectedConstCats || {};
+window._selectedConstCat = null;
+window._selectedConstPayMethod = 'cash';
+window._selectedConstProject = window._selectedConstProject || '23/48 Ground Floor';
 
-window.selectConstCategory = function(projIdx, cat) {
-  if (window._selectedConstCats[projIdx] === cat) {
-    window._selectedConstCats[projIdx] = null;
+window.selectConstCategory = function(cat) {
+  if (window._selectedConstCat === cat) {
+    window._selectedConstCat = null;
   } else {
-    window._selectedConstCats[projIdx] = cat;
+    window._selectedConstCat = cat;
   }
   renderConstruction();
-  if (window._selectedConstCats[projIdx]) {
-    setTimeout(() => {
-      const amtInput = document.getElementById(`const-amount-${projIdx}`);
+  if (window._selectedConstCat) {
+    setTimeout(function() {
+      var amtInput = document.getElementById('const-amount');
       if (amtInput) amtInput.focus();
     }, 50);
   }
 };
 
-window.submitQuickConst = function(projIdx, project) {
-  const amtInput = document.getElementById(`const-amount-${projIdx}`);
-  const notesInput = document.getElementById(`const-notes-${projIdx}`);
+window.selectConstProject = function(el) {
+  window._selectedConstProject = el.getAttribute('data-project');
+  renderConstruction();
+};
+
+window.selectConstPayMethod = function(method) {
+  window._selectedConstPayMethod = method;
+  renderConstruction();
+};
+
+window.submitQuickConst = function() {
+  var project = window._selectedConstProject;
+  if (!project) { alert('Please select a property.'); return; }
+  var amtInput = document.getElementById('const-amount');
+  var notesInput = document.getElementById('const-notes');
   if (!amtInput || !notesInput) return;
   
-  const amt = Number(amtInput.value);
+  var amt = Number(amtInput.value);
   if (!amt || amt <= 0) {
     alert('Please enter a valid amount.');
     return;
   }
   
-  const cat = window._selectedConstCats[projIdx] || 'Labour';
+  var cat = window._selectedConstCat || 'Mistri';
+  var method = window._selectedConstPayMethod || 'cash';
   
-  const newExp = {
+  var newExp = {
     id: 'exp_' + Date.now(),
     category: 'construction',
     project: project,
     laborType: cat,
+    paymentMethod: method,
     amount: amt,
     date: new Date().toISOString().slice(0, 10),
     note: notesInput.value.trim()
@@ -3784,91 +3803,97 @@ window.submitQuickConst = function(projIdx, project) {
   
   amtInput.value = '';
   notesInput.value = '';
-  window._selectedConstCats[projIdx] = null;
+  window._selectedConstCat = null;
   
   refreshActiveTab();
 };
 
 function renderConstruction() {
-  const container = document.getElementById('construction-list-container');
+  var container = document.getElementById('construction-list-container');
   if (!container) return;
   
   try {
-    const constructionExpenses = (state.expenses || []).filter(e => e && e.category === 'construction');
+    var projects = ['23/48 Ground Floor', '23/48 3rd Floor', '1/104'];
+    var constructionExpenses = (state.expenses || []).filter(function(e) { return e && e.category === 'construction'; });
+    var categories = ['Carpenter', 'Painter', 'Welding', 'Mistri', 'Electrician', 'Plumber', 'Malba', 'Hardware', 'Furniture', 'Ghisai', 'Glass Work', 'AC Service', 'Others'];
     
-    const projectsList = ['23/48 Ground Floor', '23/48 3rd Floor', '1/104'];
-    const categories = ['Carpenter', 'Painter', 'Welding', 'Labour', 'Electrician', 'Plumber', 'Malba', 'Hardware'];
+    var selectedProject = window._selectedConstProject || projects[0];
+    var payMethod = window._selectedConstPayMethod || 'cash';
     
-    let html = '';
+    var exps = constructionExpenses.filter(function(e) { return e && e.project === selectedProject; }).sort(function(a, b) { return new Date(b.date || 0) - new Date(a.date || 0); });
+    var total = exps.reduce(function(sum, e) { return sum + (Number(e.amount) || 0); }, 0);
     
-    projectsList.forEach((project, idx) => {
-      const exps = constructionExpenses.filter(e => e && e.project === project).sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0));
-      const total = exps.reduce((sum, e) => sum + (Number(e.amount) || 0), 0);
-      const selectedCat = window._selectedConstCats ? window._selectedConstCats[idx] : null;
-      
-      let expensesListHtml = '';
-      if (exps.length > 0) {
-        exps.slice(0, 5).forEach(exp => {
-          expensesListHtml += `
-            <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.5rem; background: var(--input-bg); border-radius: 6px;">
-              <div style="display: flex; flex-direction: column; gap: 0.15rem;">
-                <span style="font-weight: 600; font-size: 0.85rem; color: var(--text-primary);">${exp.laborType || 'General'}</span>
-                <span style="font-size: 0.7rem; color: var(--text-muted);">${formatDate(exp.date)} - ${exp.note || ''}</span>
-              </div>
-              <div style="display: flex; align-items: center; gap: 0.75rem;">
-                <span style="font-weight: 700; color: var(--color-danger); font-size: 0.85rem;">- ${formatCurrency(exp.amount)}</span>
-                <button class="btn btn-secondary btn-sm" onclick="event.stopPropagation(); deleteConstruction('${exp.id}')" style="padding: 0.2rem; min-width: auto; border: none; background: transparent; color: var(--text-secondary);">
-                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
-                </button>
-              </div>
-            </div>
-          `;
-        });
-      }
-      
-      const catButtonsHtml = categories.map(cat => {
-        const isSelected = selectedCat === cat;
-        const bg = isSelected ? 'var(--color-accent)' : 'var(--bg-primary)';
-        const color = isSelected ? '#fff' : 'var(--text-secondary)';
-        const border = isSelected ? '1px solid var(--color-accent)' : '1px solid var(--border-color)';
-        return `<button type="button" class="const-cat-btn-${idx}" data-cat="${cat}" onclick="selectConstCategory('${idx}', '${cat}')" style="padding: 0.35rem 0.5rem; font-size: 0.75rem; border-radius: 4px; background: ${bg}; color: ${color}; border: ${border}; cursor: pointer; transition: all 0.2s;">${cat}</button>`;
-      }).join('');
-      
-      html += `
-        <div class="card" style="margin-bottom: 1.5rem; padding: 1rem; border: 1px solid var(--border-color); background: var(--bg-card);">
-          <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 0.75rem; margin-bottom: 1rem;">
-            <h3 style="margin: 0; color: var(--color-accent); font-size: 1.1rem;">${project}</h3>
-            <span style="font-weight: 700; color: var(--text-primary);">Total: ${formatCurrency(total)}</span>
-          </div>
-          
-          <!-- Quick Entry Form -->
-          <div style="background: var(--bg-secondary); padding: 0.85rem; border-radius: 8px; margin-bottom: 1rem; border: 1px solid var(--border-color);">
-            <div style="display: flex; flex-wrap: wrap; gap: 0.35rem; margin-bottom: 0.85rem;">
-              ${catButtonsHtml}
-            </div>
-            
-            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: stretch;">
-              <input type="number" id="const-amount-${idx}" class="form-input" placeholder="Amount (Rs)" style="flex: 1; min-width: 120px; background: var(--input-bg); margin: 0;">
-              <input type="text" id="const-notes-${idx}" class="form-input" placeholder="Notes (What for)" style="flex: 2; min-width: 150px; background: var(--input-bg); margin: 0;">
-              <button class="btn btn-primary" onclick="submitQuickConst('${idx}', '${project}')" style="min-width: 80px; margin: 0; display: flex; align-items: center; justify-content: center;">
-                <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" style="margin-right: 4px;"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
-                Save
-              </button>
-            </div>
-          </div>
-          
-          <!-- Expenses List -->
-          <div style="font-size: 0.75rem; font-weight: 700; margin-bottom: 0.5rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px;">Recent Payments</div>
-          <div style="display: flex; flex-direction: column; gap: 0.5rem;">
-            ${expensesListHtml || '<div style="font-size: 0.8rem; color: var(--text-muted); text-align: center; padding: 1rem; background: var(--input-bg); border-radius: 6px;">No payments logged for this property.</div>'}
-          </div>
-        </div>
-      `;
-    });
+    var catButtonsHtml = categories.map(function(cat) {
+      var isSelected = window._selectedConstCat === cat;
+      var bg = isSelected ? 'var(--color-accent)' : 'var(--bg-primary)';
+      var color = isSelected ? '#fff' : 'var(--text-secondary)';
+      var border = isSelected ? '1px solid var(--color-accent)' : '1px solid var(--border-color)';
+      return '<button type="button" class="const-cat-btn" data-cat="' + cat + '" onclick="selectConstCategory(\'' + cat + '\')" style="padding: 0.3rem 0.45rem; font-size: 0.7rem; border-radius: 4px; background: ' + bg + '; color: ' + color + '; border: ' + border + '; cursor: pointer; transition: all 0.2s;">' + cat + '</button>';
+    }).join('');
+    
+    var expensesHtml = '';
+    if (exps.length > 0) {
+      exps.slice(0, 10).forEach(function(exp) {
+        expensesHtml += '<div style="display: flex; justify-content: space-between; align-items: center; padding: 0.35rem 0.5rem; background: var(--input-bg); border-radius: 6px;">' +
+          '<div style="display: flex; flex-direction: column; gap: 0.1rem;">' +
+            '<span style="font-weight: 600; font-size: 0.8rem; color: var(--text-primary);">' + (exp.laborType || 'General') + '</span>' +
+            '<span style="font-weight: 600; font-size: 0.65rem; color: var(--text-primary);">' + formatDate(exp.date) + (exp.note ? ' - ' + exp.note : '') + ' <span style="font-size:0.6rem; color:var(--text-secondary);">[' + (exp.paymentMethod === 'upi' ? '📱UPI' : '💰Cash') + ']</span></span>' +
+          '</div>' +
+          '<div style="display: flex; align-items: center; gap: 0.5rem;">' +
+            '<span style="font-weight: 700; color: var(--color-danger); font-size: 0.8rem;">- ' + formatCurrency(exp.amount) + '</span>' +
+            '<button class="btn btn-secondary btn-sm" onclick="event.stopPropagation(); deleteConstruction(\'' + exp.id + '\')" style="padding: 0.15rem; min-width: auto; border: none; background: transparent; color: var(--text-secondary);">' +
+              '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>' +
+            '</button>' +
+          '</div>' +
+        '</div>';
+      });
+    }
+    
+    var projectBtnsHtml = '';
+    for (var i = 0; i < projects.length; i++) {
+      var p = projects[i];
+      var isSel = p === selectedProject;
+      projectBtnsHtml += '<button class="btn btn-sm" data-project="' + p + '" onclick="selectConstProject(this)" style="flex:1; min-width:80px; padding:0.3rem; font-size:0.7rem; background:' + (isSel ? 'var(--color-accent)' : 'var(--bg-secondary)') + '; color:' + (isSel ? '#fff' : 'var(--text-primary)') + '; border:1px solid ' + (isSel ? 'var(--color-accent)' : 'var(--border-color)') + '; cursor:pointer;">' + p + '</button>';
+    }
+    
+    var html = '<div style="display: flex; gap: 0.5rem; margin-bottom: 0.75rem; flex-wrap: wrap;">' + projectBtnsHtml + '</div>' +
+      '<div class="card" style="margin-bottom: 0; padding: 0.75rem; border: 1px solid var(--border-color); background: var(--bg-card);">' +
+        '<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">' +
+          '<strong style="font-size: 0.9rem; color: var(--color-accent);">' + selectedProject + '</strong>' +
+          '<span style="font-weight: 700; color: var(--text-primary); font-size: 0.85rem;">Total: ' + formatCurrency(total) + '</span>' +
+        '</div>' +
+        '<div style="display: flex; flex-wrap: wrap; gap: 0.35rem; margin-bottom: 0.5rem;">' + catButtonsHtml + '</div>' +
+        (state.showPayMethod !== false ? '<div style="display: flex; gap: 0.5rem; align-items: center; margin-bottom: 0.5rem;">' +
+          '<span style="font-size: 0.7rem; color: var(--text-secondary); font-weight: 600;">Pay via:</span>' +
+          '<button type="button" class="btn btn-sm" onclick="selectConstPayMethod(\'cash\')" style="padding:0.15rem 0.5rem; font-size:0.65rem; background:' + (payMethod === 'cash' ? 'var(--color-success)' : 'var(--bg-secondary)') + '; color:' + (payMethod === 'cash' ? '#fff' : 'var(--text-primary)') + '; border:1px solid ' + (payMethod === 'cash' ? 'var(--color-success)' : 'var(--border-color)') + '; cursor:pointer;">💰 Cash</button>' +
+          '<button type="button" class="btn btn-sm" onclick="selectConstPayMethod(\'upi\')" style="padding:0.15rem 0.5rem; font-size:0.65rem; background:' + (payMethod === 'upi' ? 'var(--color-accent)' : 'var(--bg-secondary)') + '; color:' + (payMethod === 'upi' ? '#fff' : 'var(--text-primary)') + '; border:1px solid ' + (payMethod === 'upi' ? 'var(--color-accent)' : 'var(--border-color)') + '; cursor:pointer;">📱 UPI</button>' +
+        '</div>' : '') +
+        '<div style="display: flex; gap: 0.4rem; flex-wrap: wrap; align-items: stretch; margin-bottom: 0.35rem;">' +
+          '<input type="number" id="const-amount" class="form-input" placeholder="Amount" style="flex: 1; min-width: 100px; background: var(--input-bg); margin: 0; padding: 0.35rem 0.5rem; font-size: 0.8rem;">' +
+          '<input type="text" id="const-notes" class="form-input" placeholder="Note" style="flex: 1; min-width: 120px; background: var(--input-bg); margin: 0; padding: 0.35rem 0.5rem; font-size: 0.8rem;">' +
+          '<button class="btn btn-primary" onclick="submitQuickConst()" style="margin: 0; padding: 0.35rem 0.75rem; font-size: 0.75rem;">' +
+            '<svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none" style="margin-right: 2px;"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>' +
+            'Save' +
+          '</button>' +
+        '</div>' +
+        '<div style="display: flex; gap: 0.3rem; flex-wrap: wrap; margin-bottom: 0.5rem;">' +
+          '<button type="button" class="btn btn-sm" onclick="var i=document.getElementById(\'const-amount\'); i.value=(Number(i.value)||0)+100" style="padding:0.15rem 0.4rem; font-size:0.65rem; background:var(--bg-secondary); border:1px solid var(--border-color); cursor:pointer;">+100</button>' +
+          '<button type="button" class="btn btn-sm" onclick="var i=document.getElementById(\'const-amount\'); i.value=(Number(i.value)||0)+500" style="padding:0.15rem 0.4rem; font-size:0.65rem; background:var(--bg-secondary); border:1px solid var(--border-color); cursor:pointer;">+500</button>' +
+          '<button type="button" class="btn btn-sm" onclick="var i=document.getElementById(\'const-amount\'); i.value=(Number(i.value)||0)+1000" style="padding:0.15rem 0.4rem; font-size:0.65rem; background:var(--bg-secondary); border:1px solid var(--border-color); cursor:pointer;">+1000</button>' +
+          '<button type="button" class="btn btn-sm" onclick="var i=document.getElementById(\'const-amount\'); i.value=(Number(i.value)||0)+1500" style="padding:0.15rem 0.4rem; font-size:0.65rem; background:var(--bg-secondary); border:1px solid var(--border-color); cursor:pointer;">+1500</button>' +
+          '<button type="button" class="btn btn-sm" onclick="var i=document.getElementById(\'const-amount\'); i.value=(Number(i.value)||0)+2000" style="padding:0.15rem 0.4rem; font-size:0.65rem; background:var(--bg-secondary); border:1px solid var(--border-color); cursor:pointer;">+2000</button>' +
+          '<button type="button" class="btn btn-sm" onclick="var i=document.getElementById(\'const-amount\'); i.value=(Number(i.value)||0)+2500" style="padding:0.15rem 0.4rem; font-size:0.65rem; background:var(--bg-secondary); border:1px solid var(--border-color); cursor:pointer;">+2500</button>' +
+          '<button type="button" class="btn btn-sm" onclick="var i=document.getElementById(\'const-amount\'); i.value=(Number(i.value)||0)+5000" style="padding:0.15rem 0.4rem; font-size:0.65rem; background:var(--bg-secondary); border:1px solid var(--border-color); cursor:pointer;">+5000</button>' +
+        '</div>' +
+        '<div style="font-size: 0.7rem; font-weight: 700; margin-bottom: 0.4rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px;">Recent Payments</div>' +
+        '<div style="display: flex; flex-direction: column; gap: 0.35rem;">' +
+          (expensesHtml || '<div style="font-size: 0.75rem; color: var(--text-muted); text-align: center; padding: 0.75rem; background: var(--input-bg); border-radius: 6px;">No payments.</div>') +
+        '</div>' +
+      '</div>';
     
     container.innerHTML = html;
   } catch (err) {
-    container.innerHTML = `<div style="color:var(--color-danger); padding: 1rem; background: var(--bg-card); border-radius: 8px;">Error loading construction data: ${err.message}. Please clear your cache or check data integrity.</div>`;
+    container.innerHTML = '<div style="color:var(--color-danger); padding: 1rem; background: var(--bg-card); border-radius: 8px;">Error loading construction data: ' + err.message + '. Please clear your cache or check data integrity.</div>';
     console.error('Construction render error:', err);
   }
 }
@@ -4235,7 +4260,9 @@ function openExpenseModal(expenseId = null) {
 
   const inlineForm = document.getElementById('inline-expense-form');
   if (inlineForm) {
-    switchTab('expenses');
+    switchTab('dashboard');
+    currentReminderFilter = 'expenses';
+    renderDashboard();
     inlineForm.scrollIntoView({ behavior: 'smooth', block: 'start' });
     setTimeout(() => {
       document.getElementById('expense-amount').focus();
@@ -4659,6 +4686,17 @@ window.togglePendingNames = function() {
   renderDashboard();
 };
 
+window.togglePayMethod = function() {
+  state.showPayMethod = document.getElementById('toggle-pay-method').checked;
+  saveState();
+};
+
+window.toggleExpenseDetails = function() {
+  state.showExpenseDetails = document.getElementById('toggle-expense-details').checked;
+  saveState();
+  renderDashboard();
+};
+
 window.openExpenseDetails = function(mode, event) {
   if (event) event.stopPropagation();
   if (typeof mode !== 'string') { event = mode; mode = undefined; }
@@ -4890,6 +4928,28 @@ window.navigateToCard = function(filterType, id, type) {
   closeModal('modal-collection-details');
 };
 
+window.markPendingCollected = function(collectionType, itemType, id, amount, monthStr) {
+  loadState();
+  const today = new Date().toISOString().split('T')[0];
+  if (itemType === 'rent') {
+    const paymentId = 'rp' + Math.random().toString(36).substr(2, 9);
+    state.rentPayments.push({ id: paymentId, rentalId: id, amount: Number(amount), monthYear: monthStr, datePaid: today, note: 'Marked Paid from Collection' });
+  } else {
+    const paymentId = 'p' + Math.random().toString(36).substr(2, 9);
+    const isCurrentMonth = today.slice(0, 7) === monthStr;
+    let paymentDate = today;
+    if (!isCurrentMonth) {
+      const [y, m] = monthStr.split('-').map(Number);
+      paymentDate = monthStr + '-' + String(new Date(y, m, 0).getDate()).padStart(2, '0');
+    }
+    state.interestPayments.push({ id: paymentId, loanId: id, type: 'received', amount: Number(amount), date: paymentDate, note: 'Marked Received from Collection' });
+  }
+  saveState();
+  renderDashboard();
+  renderRentals();
+  openCollectionDetails(collectionType, null);
+};
+
 window.openCollectionDetails = function(type, event) {
   if (event) event.stopPropagation();
   let collected = [];
@@ -4963,7 +5023,7 @@ window.openCollectionDetails = function(type, event) {
           if (pOwe > 0) {
             const normName = (l.borrowerName || '').toLowerCase().trim();
             const groupId = 'group-' + btoa(encodeURIComponent(normName)).replace(/[^a-zA-Z0-9]/g, '');
-            pending.push({name: l.borrowerName, phone: l.phone, owe: pOwe, id: l.id, navId: groupId, type: 'interest'});
+            pending.push({name: l.borrowerName, phone: l.phone, owe: pOwe, id: groupId, type: 'interest'});
           }
         }
       });
@@ -4988,7 +5048,7 @@ window.openCollectionDetails = function(type, event) {
           if (pOwe > 0) {
             const normName = (l.borrowerName || '').toLowerCase().trim();
             const groupId = 'group-' + btoa(encodeURIComponent(normName)).replace(/[^a-zA-Z0-9]/g, '');
-            pending.push({name: l.borrowerName, type: 'interest', phone: l.phone, owe: pOwe, id: l.id, navId: groupId});
+            pending.push({name: l.borrowerName, type: 'interest', phone: l.phone, owe: pOwe, id: groupId});
           }
         }
       });
@@ -5006,12 +5066,13 @@ window.openCollectionDetails = function(type, event) {
       const cleanPhone = p.phone ? p.phone.replace(/\D/g, '') : '';
       const waLink = p.phone ? `<a href="https://wa.me/91${cleanPhone}" target="_blank" class="btn-contact btn-whatsapp"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg></a>` : '';
       const callLink = p.phone ? `<a href="tel:${cleanPhone}" class="btn-contact btn-call"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg></a>` : '';
-      const navAttr = p.navId ? `navigateToCard('${p.type}', '${p.navId}', '${p.type}')` : (p.id ? `navigateToCard('${p.type}', '${p.id}', '${p.type}')` : '');
+      const navAttr = p.id ? `navigateToCard('${p.type}', '${p.id}', '${p.type}')` : '';
       return `
       <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 0; border-bottom: 1px solid var(--border-color);">
         <div style="display: flex; align-items: center; gap: 0.5rem;">
           <span style="font-weight: 500; color: var(--text-primary); cursor: pointer;" ${navAttr ? `onclick="${navAttr}"` : ''}>${p.name}</span>
           <div class="contact-btn-group" style="display: inline-flex;">${callLink}${waLink}</div>
+          <input type="checkbox" onclick="markPendingCollected('${type}', '${p.type}', '${p.id}', ${p.owe}, '${selectedMonthStr}'); event.stopPropagation();" style="margin-left: 0.5rem; accent-color: var(--color-success); cursor: pointer;">
           ${type === 'all' ? `<span style="font-size: 0.6rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; padding: 0.1rem 0.35rem; border-radius: 4px; background: ${p.type === 'rent' ? 'rgba(34,197,94,0.15)' : 'rgba(59,130,246,0.15)'}; color: ${p.type === 'rent' ? 'var(--color-success)' : 'var(--color-accent)'};">${p.type === 'rent' ? 'RENT' : 'INTEREST'}</span>` : ''}
         </div>
         <span style="color: var(--color-success); font-weight: 600;">${formatCurrency(p.owe)}</span>
@@ -5032,14 +5093,13 @@ window.openCollectionDetails = function(type, event) {
       const navAttrCol = p.ids && p.ids.length === 1 ? `navigateToCard('${p.type}', '${p.ids[0]}', '${p.type}')` : '';
       if (navAttrCol) clickAttr = ` style="cursor: pointer;" onclick="${navAttrCol}"`;
       return `
-      <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 0; border-bottom: 1px solid var(--border-color);">
-        <div style="display: flex; align-items: center; gap: 0.5rem;">
-          <span style="font-weight: 500; color: var(--text-primary); cursor: pointer;" ${navAttr ? `onclick="${navAttr}"` : ''}>${p.name}</span>
-          <div class="contact-btn-group" style="display: inline-flex;">${callLink}${waLink}</div>
+      <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 0; border-bottom: 1px solid var(--border-color);"${clickAttr}>
+        <div style="display: flex; align-items: center; gap: 0.4rem;">
+          <span style="font-weight: 500; color: var(--text-primary);${navAttrCol ? ' cursor: pointer;' : ''}">${p.name}</span>
           ${type === 'all' ? `<span style="font-size: 0.6rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; padding: 0.1rem 0.35rem; border-radius: 4px; background: ${p.type === 'rent' ? 'rgba(34,197,94,0.15)' : 'rgba(59,130,246,0.15)'}; color: ${p.type === 'rent' ? 'var(--color-success)' : 'var(--color-accent)'};">${p.type === 'rent' ? 'RENT' : 'INTEREST'}</span>` : ''}
-          <input type="checkbox" style="width: 16px; height: 16px; cursor: pointer; accent-color: var(--color-success); margin: 0;" onchange="quickMarkPaidInModal('${p.type}', '${p.id}', ${p.owe}, '${type}')">
+          <span style="font-size: 0.8em;">✅</span>
         </div>
-        <span style="color: var(--color-success); font-weight: 600;">${formatCurrency(p.owe)}</span>
+        <span style="color: var(--text-primary); font-weight: 600;">${formatCurrency(p.amount)}</span>
       </div>`;
     }).join('');
     const collTotal = collected.reduce((s, p) => s + p.amount, 0);

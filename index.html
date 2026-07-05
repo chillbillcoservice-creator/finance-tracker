@@ -145,71 +145,72 @@
           <div class="card summary-card" id="card-rent" onclick="toggleReminderFilter('rent')" style="border-left: 4px solid var(--color-success); cursor: pointer;">
             <div class="summary-card-header">
               <span style="font-weight: 600; font-size: 0.75rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.3px;">Rent To Receive</span>
-              <div class="summary-card-icon">
-                <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+              <div style="display: flex; align-items: center; gap: 0.3rem;">
+                <div class="summary-card-icon">
+                  <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                </div>
+                <button class="btn btn-sm" style="font-size: 0.6rem; padding: 0.15rem 0.25rem; display: flex; align-items: center; justify-content: center; background: rgba(var(--color-success-rgb), 0.15); border-color: rgba(var(--color-success-rgb), 0.3); color: var(--color-success);" onclick="event.stopPropagation(); openCollectionDetails('rent', event)"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
               </div>
             </div>
-            <div class="summary-value" id="dash-monthly-rent" style="color: var(--color-success); cursor: pointer;" onclick="openCollectionDetails('rent', event)">Rs. 0.00</div>
+            <div class="summary-value" id="dash-monthly-rent" style="color: var(--color-success);">Rs. 0.00</div>
             <div class="summary-sub-value" id="dash-rental-balance" style="font-size: 0.72rem; margin-top: 0.3rem; font-weight: 500; color: var(--text-primary); display: flex; flex-direction: column; align-items: flex-start; gap: 0.1rem;">Balance to Receive: Rs. 0.00</div>
             <div style="display: flex; gap: 0.3rem; margin-top: 0.4rem;">
-              <button class="btn btn-sm" style="flex: 1; font-size: 0.65rem; padding: 0.2rem 0.4rem;" onclick="event.stopPropagation(); document.getElementById('btn-add-rental').click()">+ Tenant</button>
-              <button class="btn btn-sm" style="flex: 1; font-size: 0.65rem; padding: 0.2rem 0.4rem;" onclick="event.stopPropagation(); openCollectionDetails('rent', event)">View</button>
+              <button class="btn btn-sm" style="flex: 1; font-size: 0.65rem; padding: 0.2rem 0.4rem; background: var(--color-accent); color: #fff; border: none;" onclick="event.stopPropagation(); document.getElementById('btn-add-rental').click()">+ Tenant</button>
             </div>
           </div>
           <div class="card summary-card success" id="card-interest" onclick="toggleReminderFilter('interest')" style="border-left: 4px solid var(--color-success); cursor: pointer;">
             <div class="summary-card-header">
               <span style="font-weight: 600; font-size: 0.75rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.3px;">Interest To Collect</span>
-              <div class="summary-card-icon" style="background: rgba(16, 185, 129, 0.1); color: var(--color-success);">
-                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+              <div style="display: flex; align-items: center; gap: 0.3rem;">
+                <div class="summary-card-icon" style="background: rgba(16, 185, 129, 0.1); color: var(--color-success);">
+                  <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                </div>
+                <button class="btn btn-sm" style="font-size: 0.6rem; padding: 0.15rem 0.25rem; display: flex; align-items: center; justify-content: center; background: rgba(var(--color-success-rgb), 0.15); border-color: rgba(var(--color-success-rgb), 0.3); color: var(--color-success);" onclick="event.stopPropagation(); openCollectionDetails('interest', event)"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
               </div>
             </div>
-            <div class="summary-value" id="dash-total-interest-received" style="color: var(--color-success); cursor: pointer;" onclick="openCollectionDetails('interest', event)">Rs. 0.00</div>
+            <div class="summary-value" id="dash-total-interest-received" style="color: var(--color-success);">Rs. 0.00</div>
             <div class="summary-sub-value" id="dash-interest-received-balance" style="font-size: 0.72rem; margin-top: 0.3rem; font-weight: 500; color: var(--text-primary); display: flex; flex-direction: column; align-items: flex-start; gap: 0.1rem;">Balance to Receive: Rs. 0.00</div>
             <div style="display: flex; gap: 0.3rem; margin-top: 0.4rem;">
-              <button class="btn btn-sm" style="flex: 1; font-size: 0.65rem; padding: 0.2rem 0.4rem;" onclick="event.stopPropagation(); document.getElementById('btn-add-loan-lent').click()">+ Lend</button>
-              <button class="btn btn-sm" style="flex: 1; font-size: 0.65rem; padding: 0.2rem 0.4rem;" onclick="event.stopPropagation(); document.getElementById('btn-add-loan-borrowed').click()">+ Borrow</button>
+              <button class="btn btn-sm" style="flex: 1; font-size: 0.65rem; padding: 0.2rem 0.4rem; background: var(--color-success); color: #fff; border: none;" onclick="event.stopPropagation(); document.getElementById('btn-add-loan-lent').click()">+ Lend</button>
+              <button class="btn btn-sm" style="flex: 1; font-size: 0.65rem; padding: 0.2rem 0.4rem; background: var(--color-danger); color: #fff; border: none;" onclick="event.stopPropagation(); document.getElementById('btn-add-loan-borrowed').click()">+ Borrow</button>
             </div>
           </div>
 
           <div class="card summary-card success" id="card-reports" onclick="toggleReminderFilter('reports')" style="border-left: 4px solid var(--color-success); cursor: pointer;">
             <div class="summary-card-header">
               <span style="font-weight: 600; font-size: 0.75rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.3px;">Total Balance To Receive</span>
-              <div class="summary-card-icon">
-                <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              <div style="display: flex; align-items: center; gap: 0.3rem;">
+                <div class="summary-card-icon">
+                  <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                </div>
+                <button class="btn btn-sm" style="font-size: 0.6rem; padding: 0.15rem 0.25rem; display: flex; align-items: center; justify-content: center; background: rgba(var(--color-success-rgb), 0.15); border-color: rgba(var(--color-success-rgb), 0.3); color: var(--color-success);" onclick="event.stopPropagation(); openCollectionDetails('all', event)"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
               </div>
             </div>
-            <div class="summary-value" id="dash-net-balance" style="color: var(--color-success); cursor: pointer;" onclick="openCollectionDetails('all', event)">Rs. 0.00</div>
+            <div class="summary-value" id="dash-net-balance" style="color: var(--color-success);">Rs. 0.00</div>
             <div class="summary-sub-value" id="dash-net-collected" style="font-size: 0.72rem; margin-top: 0.3rem; font-weight: 500; color: var(--text-primary);">Total Collected: Rs. 0.00</div>
             <div class="summary-sub-value" id="dash-net-income" style="font-size: 0.72rem; margin-top: 0.1rem; font-weight: 500; color: var(--text-primary);">Total Income: Rs. 0.00</div>
           </div>
-          <div class="card summary-card danger" id="card-expenses" onclick="toggleReminderFilter('expenses')" style="border-left: 4px solid var(--color-danger); cursor: pointer;">
+          <div class="card summary-card danger" id="card-expenses" style="border-left: 4px solid var(--color-danger);">
             <div class="summary-card-header">
               <span style="font-weight: 600; font-size: 0.75rem; color: var(--color-danger); text-transform: uppercase; letter-spacing: 0.3px;">Today's Expenses</span>
-              <div class="summary-card-icon" style="background: rgba(239, 68, 68, 0.1); color: var(--color-danger);">
-                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+              <div style="display: flex; align-items: center; gap: 0.3rem;">
+                <div class="summary-card-icon" style="background: rgba(239, 68, 68, 0.1); color: var(--color-danger);">
+                  <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+                </div>
+                <button class="btn btn-sm" style="font-size: 0.6rem; padding: 0.15rem 0.25rem; display: flex; align-items: center; justify-content: center; background: rgba(var(--color-danger-rgb), 0.15); border-color: rgba(var(--color-danger-rgb), 0.3); color: var(--color-danger);" onclick="event.stopPropagation(); openExpenseDetails(event)"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
               </div>
             </div>
-            <div class="summary-value" id="dash-total-expenses" style="color: var(--color-danger); cursor: pointer;" onclick="openExpenseDetails(event)">Rs. 0.00</div>
+            <div class="summary-value" id="dash-total-expenses" style="color: var(--color-danger);">Rs. 0.00</div>
             <div class="summary-sub-value" style="font-size: 0.72rem; margin-top: 0.3rem; font-weight: 500; color: var(--text-primary); display: flex; flex-direction: column; gap: 0.1rem;">
               <span id="dash-weekly-expenses">This Week: Rs. 0.00</span>
               <span id="dash-monthly-expenses">This Month: Rs. 0.00</span>
             </div>
+            <div id="expense-card-details" style="margin-top: 0.5rem; display: none; flex-direction: column; gap: 0.25rem;"></div>
+            <div style="margin-top: 0.4rem; display: flex; gap: 0.3rem;">
+              <button class="btn btn-sm" style="flex: 1; font-size: 0.65rem; padding: 0.2rem 0.4rem; background: var(--color-danger); color: #fff; border: none;" onclick="event.stopPropagation(); openExpenseModal()">Record Expense</button>
+              <button class="btn btn-sm" style="flex: 1; font-size: 0.65rem; padding: 0.2rem 0.4rem; background: var(--color-accent); color: #fff; border: none;" onclick="event.stopPropagation(); switchTab('records'); setTimeout(function(){ selectRecordsTab('construction'); }, 100);">Construction</button>
+            </div>
           </div>
-        </div>
-
-        <div style="display: flex; gap: 0.5rem; margin-bottom: 1.25rem;">
-          <button class="btn btn-primary btn-sm" style="flex: 1;" onclick="document.getElementById('btn-add-rental').click()">
-            <svg viewBox="0 0 24 24" width="14" height="14"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-            Add Tenant
-          </button>
-          <button class="btn btn-primary btn-sm" style="flex: 1;" onclick="document.getElementById('btn-add-loan-lent').click()">
-            <svg viewBox="0 0 24 24" width="14" height="14"><path d="M7 17L17 7M17 7H7M17 7V17"/></svg>
-            Lend Money
-          </button>
-          <button class="btn btn-primary btn-sm" style="flex: 1; background: linear-gradient(135deg, var(--color-danger), #b91c1c);" onclick="document.getElementById('btn-add-loan-borrowed').click()">
-            <svg viewBox="0 0 24 24" width="14" height="14"><path d="M17 17L7 7M7 7H17M7 7V17"/></svg>
-            Record Borrowing
-          </button>
         </div>
 
         <!-- Upcoming Payment Reminders (Moved below grid) -->
@@ -719,6 +720,24 @@
               <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
               <span>Preferences & Data</span>
             </h2>
+          </div>
+
+          <!-- Pay Method Toggle -->
+          <div style="border-bottom: 1px solid var(--border-color); padding: 0 0 1.25rem 0; margin-bottom: 1.25rem; display: flex; justify-content: space-between; align-items: center;">
+            <div>
+              <h3 style="margin: 0 0 0.25rem 0;">Show Pay Method</h3>
+              <p style="color: var(--text-secondary); margin: 0; font-size: 0.85rem;">Show Cash/UPI toggle in construction expenses</p>
+            </div>
+            <input type="checkbox" id="toggle-pay-method" onchange="window.togglePayMethod()" style="width: 20px; height: 20px; cursor: pointer;">
+          </div>
+
+          <!-- Expense Details Toggle -->
+          <div style="border-bottom: 1px solid var(--border-color); padding: 0 0 1.25rem 0; margin-bottom: 1.25rem; display: flex; justify-content: space-between; align-items: center;">
+            <div>
+              <h3 style="margin: 0 0 0.25rem 0;">Show Today's Expenses List</h3>
+              <p style="color: var(--text-secondary); margin: 0; font-size: 0.85rem;">Display individual expenses inside Today's Expenses card</p>
+            </div>
+            <input type="checkbox" id="toggle-expense-details" onchange="window.toggleExpenseDetails()" style="width: 20px; height: 20px; cursor: pointer;">
           </div>
 
           <!-- Preferences Toggle -->
