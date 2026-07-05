@@ -392,7 +392,7 @@ function loadState() {
         const themeMap = { 'dark-blue': 'black-and-colored', 'light-elegant': 'white-and-black', 'midnight-purple': 'soft-sage' };
         state.theme = themeMap[state.theme];
       }
-      state.theme = state.theme || 'black-and-colored';
+      state.theme = state.theme || 'black-and-colored-plain';
       state.lent = state.lent || [];
       state.borrowed = state.borrowed || [];
       state.rentals = state.rentals || [];
@@ -5042,7 +5042,7 @@ window.openCollectionDetails = function(type, event) {
 // ==========================================
 window.addEventListener('DOMContentLoaded', () => {
   initApp();
-  setTheme(state.theme || 'black-and-colored');
+  setTheme(state.theme || 'black-and-colored-plain');
   
   const datePickerInput = document.getElementById('date-picker-input');
   if (datePickerInput) {
