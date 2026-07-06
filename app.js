@@ -1524,7 +1524,7 @@ function renderDashboard() {
     if (isDayMode || isYearMode) {
       rentalBalanceNode.innerHTML = `<span style="color: var(--text-primary);">Collected: <span style="color: var(--color-warning); font-weight: 800; margin-left: 2px;">${formatCurrency(totalRentCollected)}</span></span> <span style="color: var(--text-primary); font-weight: 600; margin-left: 10px;">${isYearMode ? '(Year view)' : '(Day view)'}</span>`;
     } else {
-      rentalBalanceNode.innerHTML = `<span style="color: var(--text-primary);">Collected: <span style="color: var(--color-warning); font-weight: 800; margin-left: 2px;">${formatCurrency(totalRentCollected)}</span></span> <span style="color: var(--text-primary);">Monthly Total: <span style="color: var(--text-primary); font-weight: 800; margin-left: 2px;">${formatCurrency(monthlyRent)}</span></span>`;
+      rentalBalanceNode.innerHTML = `<span style="color: var(--text-primary);">Collected: <span style="color: var(--color-warning); font-weight: 800; margin-left: 2px;">${formatCurrency(totalRentCollected)}</span></span> <span style="color: var(--text-primary);">Total Monthly Income: <span style="color: var(--text-primary); font-weight: 800; margin-left: 2px;">${formatCurrency(monthlyRent)}</span></span>`;
     }
   }
   
@@ -1612,7 +1612,7 @@ function renderDashboard() {
     if (isDayMode || isYearMode) {
       interestReceivedBalanceNode.innerHTML = `<span style="color: var(--text-primary);">Collected: <span style="color: var(--color-warning); font-weight: 800; margin-left: 2px;">${formatCurrency(totalInterestReceived)}</span></span> <span style="color: var(--text-primary); font-weight: 600; margin-left: 10px;">${isYearMode ? '(Year view)' : '(Day view)'}</span>`;
     } else {
-      interestReceivedBalanceNode.innerHTML = `<span style="color: var(--text-primary);">Collected: <span style="color: var(--color-warning); font-weight: 800; margin-left: 2px;">${formatCurrency(totalInterestReceived)}</span></span> <span style="color: var(--text-primary);">Total: <span style="color: var(--text-primary); font-weight: 800; margin-left: 2px;">${formatCurrency(expectedInterestReceived)}</span></span>`;
+      interestReceivedBalanceNode.innerHTML = `<span style="color: var(--text-primary);">Collected: <span style="color: var(--color-warning); font-weight: 800; margin-left: 2px;">${formatCurrency(totalInterestReceived)}</span></span> <span style="color: var(--text-primary);">Monthly Total: <span style="color: var(--text-primary); font-weight: 800; margin-left: 2px;">${formatCurrency(expectedInterestReceived)}</span></span>`;
     }
   }
 
