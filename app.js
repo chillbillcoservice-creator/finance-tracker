@@ -2789,10 +2789,10 @@ function renderRentals() {
     
     let stampHtml = '';
     if (isRentPaidThisMonth) {
-      stampHtml = `<div class="card-stamp stamp-received" style="margin-left: 0; margin-bottom: 0.25rem;">RENT RECEIVED</div>`;
+      stampHtml = `<div class="card-stamp stamp-received" style="margin-left: 0; margin-top: 0.2rem; font-size: 0.6rem; font-weight: 600;">✓ Received</div>`;
     } else {
       if (rentPayments.length > 0) {
-        stampHtml = `<div class="card-stamp stamp-received" style="margin-left: 0; margin-bottom: 0.25rem;">RENT RECEIVED</div>`;
+        stampHtml = `<div class="card-stamp stamp-received" style="margin-left: 0; margin-top: 0.2rem; font-size: 0.6rem; font-weight: 600;">✓ Received</div>`;
       }
     }
 
@@ -2834,9 +2834,9 @@ function renderRentals() {
           </div>
         </div>
         <div class="amount-display" style="text-align: right; display: flex; flex-direction: column; align-items: flex-end;">
-          ${stampHtml}
           <div class="amount-value" style="color: var(--color-success);">${formatCurrency(rental.monthlyRent)}</div>
           <div class="amount-label" style="margin-top: 0.15rem;">Monthly Rent</div>
+          ${stampHtml}
         </div>
       </div>
 
@@ -4984,9 +4984,6 @@ window.openTenantDetails = function(rentalId) {
   const dotColor = renewData && renewData.daysLeft <= 7 ? 'var(--color-danger)' : renewData && renewData.daysLeft <= 30 ? 'var(--color-warning)' : 'var(--color-success)';
   const sinceDate = formatDate(rental.startDate);
   const renewedDate = rental.lastRenewed ? formatDate(rental.lastRenewed) : null;
-  const now = new Date();
-  const currentMonthStr = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0');
-  const isRentPaidThisMonth = state.rentPayments.some(p => p.rentalId === rentalId && p.monthYear === currentMonthStr);
   
   const btnBg = renewData && renewData.daysLeft <= 7 ? 'var(--color-danger)' : 'var(--color-warning)';
   const btnColor = renewData && renewData.daysLeft <= 7 ? '#fff' : '#000';
