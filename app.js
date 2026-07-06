@@ -1631,8 +1631,10 @@ function renderDashboard() {
       state.rentals.forEach(function(r) {
         if (r.status === 'active') {
           var renewData = getNextRenewal(r.startDate);
-          if (renewData) {
-            renewalItems.push({tenantName: r.tenantName, propertyName: r.propertyName, renewDate: renewData.dateStr, daysLeft: renewData.daysLeft});
+          if (renewData && renewData.daysLeft <= 30) {
+            var d = renewData.date;
+            var fmtDate = ('0' + d.getDate()).slice(-2) + '/' + ('0' + (d.getMonth() + 1)).slice(-2) + '/' + d.getFullYear();
+            renewalItems.push({tenantName: r.tenantName, propertyName: r.propertyName, renewDate: fmtDate, daysLeft: renewData.daysLeft});
           }
         }
       });
@@ -1640,9 +1642,7 @@ function renderDashboard() {
       if (renewalItems.length > 0) {
         var pendingRenewalsHTML = '<div class="pending-names-list">';
         renewalItems.forEach(function(item) {
-          var label = item.daysLeft <= 0 ? (Math.abs(item.daysLeft) + 'd ago') : (item.daysLeft + 'd left');
-          var itemClass = 'pending-name-item' + (item.daysLeft <= 15 ? ' selected' : '');
-          pendingRenewalsHTML += '<div class="' + itemClass + '"><span>' + item.tenantName + '</span> <span style="font-size:0.65rem;color:var(--text-secondary)">' + item.propertyName + '</span> <span style="font-size:0.6rem;color:' + (item.daysLeft <= 15 ? 'var(--color-danger)' : 'var(--color-success)') + ';font-weight:600;">' + label + '</span></div>';
+          pendingRenewalsHTML += '<div class="pending-name-item"><span>' + item.tenantName + '</span> <span style="font-size:0.65rem;color:var(--text-secondary)">' + item.propertyName + ' ' + item.renewDate + '</span></div>';
         });
         pendingRenewalsHTML += '</div>';
         document.getElementById('card-rent').insertAdjacentHTML('beforeend', pendingRenewalsHTML);
