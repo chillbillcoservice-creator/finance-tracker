@@ -5007,9 +5007,9 @@ window.openTenantDetails = function(rentalId) {
     </div>
     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 0.75rem;">
         <div class="card" style="padding: 0.75rem; text-align: center; background: var(--bg-secondary);">
-          <div style="font-size: 0.6rem; text-transform: uppercase; color: #fff; font-weight: 700; letter-spacing: 0.5px; margin-bottom: 0.15rem;">Monthly Rent</div>
-          ${isRentPaidThisMonth ? `<div style="font-size: 0.55rem; color: var(--color-success); font-weight: 700; letter-spacing: 0.5px;">✓ Received</div>` : ''}
+          <div style="font-size: 0.6rem; text-transform: uppercase; color: #fff; font-weight: 700; letter-spacing: 0.5px;">Monthly Rent</div>
           <div style="font-size: 1.3rem; font-weight: 800; color: var(--color-accent); margin-top: 0.25rem;">${formatCurrency(rental.monthlyRent)}</div>
+          ${isRentPaidThisMonth ? `<div style="font-size: 0.55rem; color: var(--color-success); font-weight: 700; margin-top: 0.3rem; letter-spacing: 0.5px;">✓ Received</div>` : ''}
         </div>
         <div class="card" style="padding: 0.75rem; text-align: center; background: var(--bg-secondary);">
           <div style="font-size: 0.6rem; text-transform: uppercase; color: #fff; font-weight: 700; letter-spacing: 0.5px;">Security Deposit</div>
