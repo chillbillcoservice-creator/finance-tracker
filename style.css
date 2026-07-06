@@ -662,9 +662,10 @@ body::before {
 }
 
 .pending-name-item {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem;
   max-width: 100%;
   color: var(--text-primary);
   cursor: pointer;
