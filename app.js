@@ -4966,6 +4966,9 @@ window.openTenantDetails = function(rentalId) {
   const renewData = getNextRenewal(rental.startDate);
   const dotColor = renewData && renewData.daysLeft <= 30 ? 'var(--color-warning)' : 'var(--color-success)';
   const sinceDate = formatDate(rental.startDate);
+  const now = new Date();
+  const currentMonthStr = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0');
+  const isRentPaidThisMonth = state.rentPayments.some(p => p.rentalId === rentalId && p.monthYear === currentMonthStr);
   
   titleEl.innerHTML = `<span style="display:flex;align-items:center;gap:1rem;">${rental.tenantName}<span class="contact-btn-group" style="display:inline-flex;align-items:center;gap:0.3rem;">${callLink}${waLink}</span></span>`;
   
@@ -4980,6 +4983,7 @@ window.openTenantDetails = function(rentalId) {
         <div class="card" style="padding: 0.75rem; text-align: center; background: var(--bg-secondary);">
           <div style="font-size: 0.6rem; text-transform: uppercase; color: #fff; font-weight: 700; letter-spacing: 0.5px;">Monthly Rent</div>
           <div style="font-size: 1.3rem; font-weight: 800; color: var(--color-accent); margin-top: 0.25rem;">${formatCurrency(rental.monthlyRent)}</div>
+          ${isRentPaidThisMonth ? `<div style="font-size: 0.55rem; color: var(--color-success); font-weight: 700; margin-top: 0.3rem; letter-spacing: 0.5px;">✓ Received</div>` : ''}
         </div>
         <div class="card" style="padding: 0.75rem; text-align: center; background: var(--bg-secondary);">
           <div style="font-size: 0.6rem; text-transform: uppercase; color: #fff; font-weight: 700; letter-spacing: 0.5px;">Security Deposit</div>
