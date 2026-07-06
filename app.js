@@ -4981,22 +4981,22 @@ window.openTenantDetails = function(rentalId) {
       </div>
       <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 0.75rem;">
         <div class="card" style="padding: 0.75rem; text-align: center; background: var(--bg-secondary);">
-          <div style="font-size: 0.6rem; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.5px;">Monthly Rent</div>
+          <div style="font-size: 0.6rem; text-transform: uppercase; color: #fff; font-weight: 700; letter-spacing: 0.5px;">Monthly Rent</div>
           <div style="font-size: 1.3rem; font-weight: 800; color: var(--color-accent); margin-top: 0.25rem;">${formatCurrency(rental.monthlyRent)}</div>
         </div>
         <div class="card" style="padding: 0.75rem; text-align: center; background: var(--bg-secondary);">
-          <div style="font-size: 0.6rem; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.5px;">Security Deposit</div>
+          <div style="font-size: 0.6rem; text-transform: uppercase; color: #fff; font-weight: 700; letter-spacing: 0.5px;">Security Deposit</div>
           <div style="font-size: 1.3rem; font-weight: 800; color: var(--color-purple); margin-top: 0.25rem;">${formatCurrency(rental.securityDeposit || 0)}</div>
         </div>
       </div>
       <div style="display: flex; gap: 0.75rem;">
         <div class="card" style="flex: 1; padding: 0.5rem; text-align: center;">
-          <div style="font-size: 0.65rem; text-transform: uppercase; color: var(--text-secondary); display: flex; align-items: center; justify-content: center; gap: 0.3rem;">Status <span style="display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: ${dotColor};"></span></div>
+          <div style="font-size: 0.65rem; text-transform: uppercase; color: #fff; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 0.3rem;">Status <span style="display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: ${dotColor};"></span></div>
           <div style="font-size: 0.65rem; color: var(--text-secondary); margin-top: 0.2rem;">Since ${sinceDate}</div>
           ${renewData ? `<div style="font-size: 0.65rem; color: ${dotColor};">Renews: ${renewData.dateStr}</div>` : ''}
         </div>
         <div class="card" style="flex: 1; padding: 0.5rem; text-align: center;">
-          <div style="font-size: 0.65rem; text-transform: uppercase; color: var(--text-secondary);">Total Paid</div>
+          <div style="font-size: 0.65rem; text-transform: uppercase; color: #fff; font-weight: 700;">Total Paid</div>
           <div style="font-weight: 700; color: var(--color-success);">${formatCurrency(totalPaid)}</div>
         </div>
       </div>
