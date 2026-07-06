@@ -2016,7 +2016,9 @@ body::before {
 .stamp-received {
   color: var(--color-success);
   background: rgba(var(--color-success-rgb), 0.1);
-  border-color: rgba(var(--color-success-rgb), 0.5);
+}
+.stamp-received::before {
+  content: none;
 }
 
 .stamp-paid {

@@ -2789,10 +2789,10 @@ function renderRentals() {
     
     let stampHtml = '';
     if (isRentPaidThisMonth) {
-      stampHtml = `<div class="card-stamp stamp-received" style="margin-left: 0; margin-top: 0.2rem; font-size: 0.6rem; font-weight: 600;">✓ Received</div>`;
+      stampHtml = `<div class="card-stamp stamp-received" style="margin-left: 0; margin-top: 0.2rem; font-size: 0.6rem; font-weight: 600; pointer-events: none;">Received ✓</div>`;
     } else {
       if (rentPayments.length > 0) {
-        stampHtml = `<div class="card-stamp stamp-received" style="margin-left: 0; margin-top: 0.2rem; font-size: 0.6rem; font-weight: 600;">✓ Received</div>`;
+        stampHtml = `<div class="card-stamp stamp-received" style="margin-left: 0; margin-top: 0.2rem; font-size: 0.6rem; font-weight: 600; pointer-events: none;">Received ✓</div>`;
       }
     }
 
