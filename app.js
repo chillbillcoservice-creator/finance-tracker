@@ -1141,6 +1141,7 @@ function renewRentalAgreement(rentalId) {
   if (!rental) return;
   const today = new Date();
   rental.startDate = today.toISOString().split('T')[0];
+  rental.lastRenewed = today.toISOString().split('T')[0];
   saveState();
   openTenantDetails(rentalId);
 }
@@ -4978,6 +4979,7 @@ window.openTenantDetails = function(rentalId) {
   const renewData = getNextRenewal(rental.startDate);
   const dotColor = renewData && renewData.daysLeft <= 0 ? 'var(--color-danger)' : renewData && renewData.daysLeft <= 30 ? 'var(--color-warning)' : 'var(--color-success)';
   const sinceDate = formatDate(rental.startDate);
+  const renewedDate = rental.lastRenewed ? formatDate(rental.lastRenewed) : null;
   
   const btnBg = renewData && renewData.daysLeft <= 0 ? 'var(--color-danger)' : 'var(--color-warning)';
   const btnColor = renewData && renewData.daysLeft <= 0 ? '#fff' : '#000';
@@ -5020,6 +5022,7 @@ window.openTenantDetails = function(rentalId) {
     </div>
     <div style="border-top: 1px solid var(--border-color); padding-top: 0.75rem;">
       <h4 style="margin: 0 0 0.5rem 0; font-size: 0.9rem;">Payment History</h4>
+      ${renewedDate ? `<div style="display: flex; justify-content: space-between; padding: 0.4rem 0; border-bottom: 1px solid var(--border-color); font-size: 0.85rem;"><span style="color: var(--color-success); font-weight: 600;">Renewed on</span><span style="color: var(--text-secondary);">${renewedDate}</span></div>` : ''}
       ${payments.length > 0 ? payments.map(p => `
         <div style="display: flex; justify-content: space-between; padding: 0.4rem 0; border-bottom: 1px solid var(--border-color); font-size: 0.85rem;">
           <span style="color: var(--text-secondary);">${formatDisplayDate(p.monthYear || p.datePaid)}</span>
