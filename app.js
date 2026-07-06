@@ -1134,6 +1134,18 @@ function viewDocumentImage(rentalId, type) {
   openModal('modal-image-viewer');
 }
 
+function renewRentalAgreement(rentalId) {
+  if (!confirm('Do you want to renew the rent agreement?\nIt will be renewed for the next 11 months.')) return;
+  loadState();
+  const rental = state.rentals.find(r => r.id === rentalId);
+  if (!rental) return;
+  const current = new Date(rental.startDate);
+  current.setMonth(current.getMonth() + 11);
+  rental.startDate = current.toISOString().split('T')[0];
+  saveState();
+  openTenantDetails(rentalId);
+}
+
 // Export modals to global scope for inline onclicks
 // Lend More: Opens Quick Lend modal pre-filled with the borrower's name
 function lendMore(loanId) {
@@ -4967,7 +4979,7 @@ window.openTenantDetails = function(rentalId) {
   const dotColor = renewData && renewData.daysLeft <= 30 ? 'var(--color-warning)' : 'var(--color-success)';
   const sinceDate = formatDate(rental.startDate);
   
-  titleEl.innerHTML = `<span style="display:flex;align-items:center;gap:1rem;">${rental.tenantName}<span class="contact-btn-group" style="display:inline-flex;align-items:center;gap:0.3rem;">${callLink}${waLink}</span></span>`;
+  titleEl.innerHTML = `<span style="display:flex;align-items:center;gap:1rem;">${rental.tenantName}<span class="contact-btn-group" style="display:inline-flex;align-items:center;gap:0.3rem;">${callLink}${waLink}<button onclick="closeModal('modal-group-details'); renewRentalAgreement('${rental.id}')" style="padding:0.2rem 0.4rem;font-size:0.6rem;background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:var(--border-radius-sm);cursor:pointer;color:var(--text-primary);font-weight:600;white-space:nowrap;">Renew Agreement</button></span></span>`;
   
   let html = `
     <div style="margin-bottom: 1rem;">
@@ -4993,7 +5005,7 @@ window.openTenantDetails = function(rentalId) {
         </div>
       </div>
       <div style="display: flex; gap: 0.75rem;">
-        <div class="card" style="flex: 1; padding: 0.5rem; text-align: center;">
+        <div class="card" style="flex: 1; padding: 0.5rem; text-align: center; border: 1px solid ${dotColor};">
           <div style="font-size: 0.65rem; text-transform: uppercase; color: #fff; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 0.3rem;">Status <span style="display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: ${dotColor};"></span></div>
           <div style="font-size: 0.65rem; color: var(--text-secondary); margin-top: 0.2rem;">Since ${sinceDate}</div>
           ${renewData ? `<div style="font-size: 0.65rem; color: ${dotColor};">Renews: ${renewData.dateStr}</div>` : ''}
