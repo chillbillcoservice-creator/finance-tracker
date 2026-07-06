@@ -1627,23 +1627,25 @@ function renderDashboard() {
 
   // Inject Pending Names if enabled
   if (state.showPendingNames !== false && !isDayMode && !isYearMode) {
-    const pTenants = [];
-    state.rentals.forEach(r => {
-      if (r.startDate <= endDateOfSelectedMonth && r.status === 'active') {
-        const pPaid = state.rentPayments.filter(p => p.rentalId === r.id && p.monthYear === selectedMonthStr).reduce((sum, p) => sum + Number(p.amount), 0);
-        const pOwe = Number(r.monthlyRent) - pPaid;
-        if (pOwe > 0) pTenants.push({name: r.tenantName, owe: pOwe});
-      }
-    });
-    
-      if (pTenants.length > 0) {
-        const pendingTenantsHTML = '<div class="pending-names-list">' + state.rentals.filter(r => r.startDate <= endDateOfSelectedMonth && r.status === 'active').map(r => {
-          const pPaid = state.rentPayments.filter(p => p.rentalId === r.id && p.monthYear === selectedMonthStr).reduce((sum, p) => sum + Number(p.amount), 0);
-          const pOwe = Number(r.monthlyRent) - pPaid;
-          if (pOwe <= 0) return '';
-          return `<div class="pending-name-item"><span>${r.tenantName}</span> (${formatCurrency(pOwe)})</div>`;
-        }).filter(Boolean).join('') + '</div>';
-        document.getElementById('card-rent').insertAdjacentHTML('beforeend', pendingTenantsHTML);
+      var renewalItems = [];
+      state.rentals.forEach(function(r) {
+        if (r.status === 'active') {
+          var renewData = getNextRenewal(r.startDate);
+          if (renewData) {
+            renewalItems.push({tenantName: r.tenantName, propertyName: r.propertyName, renewDate: renewData.dateStr, daysLeft: renewData.daysLeft});
+          }
+        }
+      });
+      renewalItems.sort(function(a, b) { return a.daysLeft - b.daysLeft; });
+      if (renewalItems.length > 0) {
+        var pendingRenewalsHTML = '<div class="pending-names-list">';
+        renewalItems.forEach(function(item) {
+          var label = item.daysLeft <= 0 ? (Math.abs(item.daysLeft) + 'd ago') : (item.daysLeft + 'd left');
+          var itemClass = 'pending-name-item' + (item.daysLeft <= 15 ? ' selected' : '');
+          pendingRenewalsHTML += '<div class="' + itemClass + '"><span>' + item.tenantName + '</span> <span style="font-size:0.65rem;color:var(--text-secondary)">' + item.propertyName + '</span> <span style="font-size:0.6rem;color:' + (item.daysLeft <= 15 ? 'var(--color-danger)' : 'var(--color-success)') + ';font-weight:600;">' + label + '</span></div>';
+        });
+        pendingRenewalsHTML += '</div>';
+        document.getElementById('card-rent').insertAdjacentHTML('beforeend', pendingRenewalsHTML);
       }
 
     const pBorrowers = [];
