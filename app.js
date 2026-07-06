@@ -2857,12 +2857,12 @@ function renderRentals() {
     const itemRow = card.querySelector('.item-row');
     const cardClick = (e) => {
       if (e.target.closest('.contact-action-btn, button, .btn, input')) return;
-      editRental(rental.id);
+      window.openTenantDetails(rental.id);
     };
     itemRow.addEventListener('click', cardClick);
     card.addEventListener('click', (e) => {
       if (e.target.closest('.contact-action-btn, button, .btn, input')) return;
-      editRental(rental.id);
+      window.openTenantDetails(rental.id);
     });
 
     listContainer.appendChild(card);
