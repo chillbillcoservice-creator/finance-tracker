@@ -5139,14 +5139,14 @@ window.window.openCollectionDetails = function(type, event) {
       groupedCol[name] += Number(p.amount);
       if (r && !groupedIds[name].includes(r.id)) groupedIds[name].push(r.id);
     });
-    collected = Object.keys(groupedCol).map(name => {var r = state.rentals.find(x => x.id === groupedIds[name][0]); return {name, amount: groupedCol[name], ids: groupedIds[name], type: 'rent', propertyName: r ? r.propertyName : ''};});
+    collected = Object.keys(groupedCol).map(name => {var r = state.rentals.find(x => x.id === groupedIds[name][0]); var rd = r ? getNextRenewal(r.startDate) : null; var d = rd && rd.date; return {name, amount: groupedCol[name], ids: groupedIds[name], type: 'rent', propertyName: r ? r.propertyName : '', renewalDate: d ? ('0' + d.getDate()).slice(-2) + '/' + ('0' + (d.getMonth() + 1)).slice(-2) + '/' + d.getFullYear() : '', renewalDue: rd ? rd.daysLeft <= 30 : false};});
     
     if (!isDayMode && !isYearMode) {
       state.rentals.forEach(r => {
         if (r.startDate <= endDateOfSelectedMonth && r.status === 'active') {
           const pPaid = state.rentPayments.filter(p => p.rentalId === r.id && p.monthYear === selectedMonthStr).reduce((sum, p) => sum + Number(p.amount), 0);
           const pOwe = Number(r.monthlyRent) - pPaid;
-          if (pOwe > 0) pending.push({name: r.tenantName, phone: r.contactInfo, owe: pOwe, id: r.id, type: 'rent', propertyName: r.propertyName});
+          if (pOwe > 0) {var rd = getNextRenewal(r.startDate); var d = rd && rd.date; pending.push({name: r.tenantName, phone: r.contactInfo, owe: pOwe, id: r.id, type: 'rent', propertyName: r.propertyName, renewalDate: d ? ('0' + d.getDate()).slice(-2) + '/' + ('0' + (d.getMonth() + 1)).slice(-2) + '/' + d.getFullYear() : '', renewalDue: rd ? rd.daysLeft <= 30 : false});}
         }
       });
     }
@@ -5227,7 +5227,7 @@ window.window.openCollectionDetails = function(type, event) {
       <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 0; border-bottom: 1px solid var(--border-color);">
         <div style="display: flex; align-items: center; gap: 0.5rem;">
           <input type="checkbox" onclick="event.stopPropagation(); markPendingCollected('${type}', '${p.type}', '${p.id}', ${p.owe}, '${selectedMonthStr}');" style="accent-color: var(--color-success); cursor: pointer;">
-          <span style="font-weight: 500; color: var(--text-primary); cursor: pointer;" ${navAttr ? `onclick="${navAttr}"` : ''}>${p.name}</span>${p.propertyName ? ` <span style="font-size:0.65rem;color:var(--text-secondary)">${p.propertyName}</span>` : ''}
+          <span style="font-weight: 500; color: ${p.renewalDue ? 'var(--color-danger)' : 'var(--text-primary)'}; cursor: pointer;" ${navAttr ? `onclick="${navAttr}"` : ''}>${p.name}</span>${p.propertyName ? ` <span style="font-size:0.65rem;color:var(--text-secondary)">${p.propertyName} ${p.renewalDate ? p.renewalDate : ''}</span>` : ''}
           <div class="contact-btn-group" style="display: inline-flex;">${callLink}${waLink}</div>
           ${type === 'all' ? `<span style="font-size: 0.6rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; padding: 0.1rem 0.35rem; border-radius: 4px; background: ${p.type === 'rent' ? 'rgba(34,197,94,0.15)' : 'rgba(59,130,246,0.15)'}; color: ${p.type === 'rent' ? 'var(--color-success)' : 'var(--color-accent)'};">${p.type === 'rent' ? 'RENT' : 'INTEREST'}</span>` : ''}
         </div>
@@ -5251,7 +5251,7 @@ window.window.openCollectionDetails = function(type, event) {
       return `
       <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 0; border-bottom: 1px solid var(--border-color);"${clickAttr}>
         <div style="display: flex; align-items: center; gap: 0.4rem;">
-          <span style="font-weight: 500; color: var(--text-primary);${navAttrCol ? ' cursor: pointer;' : ''}">${p.name}</span>${p.propertyName ? ` <span style="font-size:0.65rem;color:var(--text-secondary)">${p.propertyName}</span>` : ''}
+          <span style="font-weight: 500; color: ${p.renewalDue ? 'var(--color-danger)' : 'var(--text-primary)'};${navAttrCol ? ' cursor: pointer;' : ''}">${p.name}</span>${p.propertyName ? ` <span style="font-size:0.65rem;color:var(--text-secondary)">${p.propertyName} ${p.renewalDate ? p.renewalDate : ''}</span>` : ''}
           ${type === 'all' ? `<span style="font-size: 0.6rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; padding: 0.1rem 0.35rem; border-radius: 4px; background: ${p.type === 'rent' ? 'rgba(34,197,94,0.15)' : 'rgba(59,130,246,0.15)'}; color: ${p.type === 'rent' ? 'var(--color-success)' : 'var(--color-accent)'};">${p.type === 'rent' ? 'RENT' : 'INTEREST'}</span>` : ''}
           <span style="font-size: 0.8em;">✅</span>
         </div>
