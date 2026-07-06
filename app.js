@@ -4998,6 +4998,10 @@ window.openTenantDetails = function(rentalId) {
         </div>
       </div>
     </div>
+    <div style="display: flex; gap: 0.5rem; margin-bottom: 0.75rem;">
+      <button onclick="viewDocumentImage('${rentalId}', 'aadhaar')" style="flex: 1; padding: 0.45rem; font-size: 0.7rem; background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: var(--border-radius-sm); cursor: pointer; color: var(--text-primary); font-weight: 600;">📄 Aadhaar</button>
+      <button onclick="viewDocumentImage('${rentalId}', 'agreement')" style="flex: 1; padding: 0.45rem; font-size: 0.7rem; background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: var(--border-radius-sm); cursor: pointer; color: var(--text-primary); font-weight: 600;">📄 Rent Agreement</button>
+    </div>
     <div style="border-top: 1px solid var(--border-color); padding-top: 0.75rem;">
       <h4 style="margin: 0 0 0.5rem 0; font-size: 0.9rem;">Payment History</h4>
       ${payments.length > 0 ? payments.map(p => `
