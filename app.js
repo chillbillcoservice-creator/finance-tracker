@@ -4967,7 +4967,7 @@ window.openTenantDetails = function(rentalId) {
   const dotColor = renewData && renewData.daysLeft <= 30 ? 'var(--color-warning)' : 'var(--color-success)';
   const sinceDate = formatDate(rental.startDate);
   
-  titleEl.innerHTML = `<span style="display:flex;align-items:center;gap:0.5rem;">${rental.tenantName}<span class="contact-btn-group" style="display:inline-flex;align-items:center;gap:0.3rem;">${callLink}${waLink}</span></span>`;
+  titleEl.innerHTML = `<span style="display:flex;align-items:center;gap:1rem;">${rental.tenantName}<span class="contact-btn-group" style="display:inline-flex;align-items:center;gap:0.3rem;">${callLink}${waLink}</span></span>`;
   
   let html = `
     <div style="margin-bottom: 1rem;">
