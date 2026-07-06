@@ -4967,7 +4967,7 @@ window.openTenantDetails = function(rentalId) {
   const dotColor = renewData && renewData.daysLeft <= 30 ? 'var(--color-warning)' : 'var(--color-success)';
   const sinceDate = formatDate(rental.startDate);
   
-  titleEl.innerHTML = `<div style="display:flex;flex-direction:column;gap:0.4rem;"><span style="display:flex;align-items:center;gap:1rem;">${rental.tenantName}<span class="contact-btn-group" style="display:inline-flex;align-items:center;gap:0.3rem;">${callLink}${waLink}</span></span><div style="display:flex;gap:0.4rem;"><button onclick="viewDocumentImage('${rentalId}', 'aadhaar')" style="padding:0.25rem 0.5rem;font-size:0.6rem;background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:var(--border-radius-sm);cursor:pointer;color:var(--text-primary);font-weight:600;">📄 Aadhaar</button><button onclick="viewDocumentImage('${rentalId}', 'agreement')" style="padding:0.25rem 0.5rem;font-size:0.6rem;background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:var(--border-radius-sm);cursor:pointer;color:var(--text-primary);font-weight:600;">📄 Rent Agreement</button></div></div>`;
+  titleEl.innerHTML = `<span style="display:flex;align-items:center;gap:1rem;">${rental.tenantName}<span class="contact-btn-group" style="display:inline-flex;align-items:center;gap:0.3rem;">${callLink}${waLink}</span></span>`;
   
   let html = `
     <div style="margin-bottom: 1rem;">
@@ -4975,8 +4975,14 @@ window.openTenantDetails = function(rentalId) {
         <div style="font-weight: 600; font-size: 1rem;">${rental.propertyName || 'Property'}</div>
         <button onclick="closeModal('modal-group-details'); editRental('${rental.id}')" style="padding: 0.2rem; font-size: 0.7rem; background: transparent; border: none; cursor: pointer; color: var(--text-secondary);" title="Edit">✏️</button>
       </div>
+    </div>
+    <div style="border-top: 1px solid var(--border-color); margin-bottom: 0.6rem; padding-top: 0.5rem;">
+      <div style="display: flex; gap: 0.5rem;">
+        <button onclick="viewDocumentImage('${rentalId}', 'aadhaar')" style="flex: 1; padding: 0.35rem; font-size: 0.65rem; background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: var(--border-radius-sm); cursor: pointer; color: var(--text-primary); font-weight: 600;">📄 Aadhaar</button>
+        <button onclick="viewDocumentImage('${rentalId}', 'agreement')" style="flex: 1; padding: 0.35rem; font-size: 0.65rem; background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: var(--border-radius-sm); cursor: pointer; color: var(--text-primary); font-weight: 600;">📄 Rent Agreement</button>
       </div>
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 0.75rem;">
+    </div>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 0.75rem;">
         <div class="card" style="padding: 0.75rem; text-align: center; background: var(--bg-secondary);">
           <div style="font-size: 0.6rem; text-transform: uppercase; color: #fff; font-weight: 700; letter-spacing: 0.5px;">Monthly Rent</div>
           <div style="font-size: 1.3rem; font-weight: 800; color: var(--color-accent); margin-top: 0.25rem;">${formatCurrency(rental.monthlyRent)}</div>
