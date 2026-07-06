@@ -21,6 +21,7 @@ let _expandedCards = new Set();
 // Dashboard active reporting month (YYYY-MM)
 let selectedMonthStr = new Date().toISOString().slice(0, 7);
 let currentReminderFilter = 'all'; // 'all', 'rent', 'interest'
+let currentActivityFilter = 'today'; // 'today', 'week', 'month'
 
 // View mode: 'month' shows full month data, 'day' shows single day data, 'year' shows full year data
 let viewMode = 'month';
@@ -1763,7 +1764,8 @@ function renderDashboard() {
       notifExpenses.style.display = 'none';
       notifReports.style.display = 'none';
       if (notifMainHeader) notifMainHeader.style.display = 'flex';
-      if (notifTitle) notifTitle.textContent = 'Notifications';
+      if (notifTitle) notifTitle.textContent = 'Recent Activity';
+      renderRecentActivity();
     }
   }
   
@@ -2264,6 +2266,166 @@ function renderDashboard() {
     }
   }
 }
+
+function getActivityPeriod(dateStr) {
+  const d = new Date(dateStr);
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const diffDays = Math.floor((today - d) / (1000 * 60 * 60 * 24));
+  if (diffDays < 0) return 'today';
+  if (diffDays === 0) return 'today';
+  if (diffDays <= 6) return 'week';
+  return 'month';
+}
+
+function renderRecentActivity() {
+  loadState();
+  const container = document.getElementById('dashboard-activity-feed');
+  if (!container) return;
+  
+  document.querySelectorAll('[data-activity]').forEach(btn => {
+    btn.style.background = btn.getAttribute('data-activity') === currentActivityFilter ? 'var(--color-accent)' : 'var(--bg-secondary)';
+    btn.style.color = btn.getAttribute('data-activity') === currentActivityFilter ? '#fff' : 'var(--text-primary)';
+  });
+  
+  const now = new Date();
+  const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const weekStart = new Date(todayStart);
+  weekStart.setDate(weekStart.getDate() - weekStart.getDay());
+  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+  
+  const activities = [];
+  
+  state.rentPayments.forEach(p => {
+    const date = p.datePaid || p.date;
+    if (!date) return;
+    const d = new Date(date);
+    if (currentActivityFilter === 'today' && d < todayStart) return;
+    if (currentActivityFilter === 'week' && d < weekStart) return;
+    if (currentActivityFilter === 'month' && d < monthStart) return;
+    const rental = state.rentals.find(r => r.id === p.rentalId);
+    activities.push({
+      date: date,
+      type: 'rent-paid',
+      label: 'Rent Paid',
+      detail: `${rental ? rental.tenantName : 'Unknown'} — ${formatCurrency(p.amount)}`,
+      icon: '🏠'
+    });
+  });
+  
+  state.interestPayments.forEach(p => {
+    const date = p.date;
+    if (!date) return;
+    const d = new Date(date);
+    if (currentActivityFilter === 'today' && d < todayStart) return;
+    if (currentActivityFilter === 'week' && d < weekStart) return;
+    if (currentActivityFilter === 'month' && d < monthStart) return;
+    const isReceived = p.type === 'received';
+    const name = isReceived ? state.lent.find(l => l.id === p.loanId) : state.borrowed.find(l => l.id === p.loanId);
+    activities.push({
+      date: date,
+      type: 'interest-paid',
+      label: isReceived ? 'Interest Received' : 'Interest Paid',
+      detail: `${name ? name.borrowerName || name.financierName : 'Unknown'} — ${formatCurrency(p.amount)}`,
+      icon: '💰'
+    });
+  });
+  
+  state.expenses.forEach(e => {
+    const date = e.date;
+    if (!date) return;
+    const d = new Date(date);
+    if (currentActivityFilter === 'today' && d < todayStart) return;
+    if (currentActivityFilter === 'week' && d < weekStart) return;
+    if (currentActivityFilter === 'month' && d < monthStart) return;
+    activities.push({
+      date: date,
+      type: 'expense',
+      label: 'Expense Added',
+      detail: `${e.category || 'General'} — ${formatCurrency(e.amount)}${e.note ? ' (' + e.note + ')' : ''}`,
+      icon: '💸'
+    });
+  });
+  
+  state.lent.forEach(l => {
+    const date = l.startDate;
+    if (!date) return;
+    const d = new Date(date);
+    if (currentActivityFilter === 'today' && d < todayStart) return;
+    if (currentActivityFilter === 'week' && d < weekStart) return;
+    if (currentActivityFilter === 'month' && d < monthStart) return;
+    activities.push({
+      date: date,
+      type: 'lent',
+      label: 'Loan Given',
+      detail: `${l.borrowerName || 'Unknown'} — ${formatCurrency(l.principal)}`,
+      icon: '📤'
+    });
+  });
+  
+  state.borrowed.forEach(b => {
+    const date = b.startDate;
+    if (!date) return;
+    const d = new Date(date);
+    if (currentActivityFilter === 'today' && d < todayStart) return;
+    if (currentActivityFilter === 'week' && d < weekStart) return;
+    if (currentActivityFilter === 'month' && d < monthStart) return;
+    activities.push({
+      date: date,
+      type: 'borrowed',
+      label: 'Loan Taken',
+      detail: `${b.financierName || 'Unknown'} — ${formatCurrency(b.principal)}`,
+      icon: '📥'
+    });
+  });
+  
+  state.rentals.forEach(r => {
+    const date = r.startDate;
+    if (!date) return;
+    const d = new Date(date);
+    if (currentActivityFilter === 'today' && d < todayStart) return;
+    if (currentActivityFilter === 'week' && d < weekStart) return;
+    if (currentActivityFilter === 'month' && d < monthStart) return;
+    const sinceDays = Math.floor((todayStart - d) / (1000 * 60 * 60 * 24));
+    if (sinceDays > 90) return;
+    activities.push({
+      date: date,
+      type: 'tenant-added',
+      label: 'Tenant Added',
+      detail: `${r.tenantName} — ${r.propertyName || ''}`,
+      icon: '👤'
+    });
+  });
+
+  activities.sort((a, b) => new Date(b.date) - new Date(a.date));
+  
+  if (activities.length === 0) {
+    container.innerHTML = `<div class="empty-state"><div class="empty-state-icon"><svg viewBox="0 0 24 24" width="48" height="48"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div><p>No recent activity.</p></div>`;
+    return;
+  }
+  
+  container.innerHTML = activities.map(a => {
+    const dateObj = new Date(a.date);
+    const timeStr = dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    return `<div class="reminder-item" style="display:flex;align-items:center;gap:0.75rem;padding:0.6rem 0.75rem;border-bottom:1px solid var(--border-color);">
+      <span style="font-size:1.1rem;">${a.icon}</span>
+      <div style="flex:1;min-width:0;">
+        <div style="font-weight:600;font-size:0.85rem;color:var(--text-primary);">${a.label}</div>
+        <div style="font-size:0.75rem;color:var(--text-secondary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${a.detail}</div>
+      </div>
+      <span style="font-size:0.65rem;color:var(--text-muted);white-space:nowrap;">${timeStr}</span>
+    </div>`;
+  }).join('');
+}
+
+window.setActivityFilter = function(filter) {
+  currentActivityFilter = filter;
+  document.querySelectorAll('[data-activity]').forEach(btn => {
+    btn.style.background = btn.getAttribute('data-activity') === filter ? 'var(--color-accent)' : 'var(--bg-secondary)';
+    btn.style.color = btn.getAttribute('data-activity') === filter ? '#fff' : 'var(--text-primary)';
+  });
+  renderRecentActivity();
+};
 
 // 7. LENDING TAB LOGIC
 function renderLending() {

@@ -214,19 +214,24 @@
           <div class="section-header" id="notifications-main-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
             <h2 style="margin-bottom: 0;">
               <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-              <span id="notifications-title">Notifications</span>
+              <span id="notifications-title">Recent Activity</span>
             </h2>
           </div>
 
 
-          <!-- DEFAULT REMINDERS VIEW -->
+          <!-- DEFAULT RECENT ACTIVITY VIEW -->
           <div id="notifications-reminders-view">
-            <div class="reminders-list" id="dashboard-rent-reminders">
+            <div style="display: flex; gap: 0.5rem; margin-bottom: 0.75rem;">
+              <button class="btn btn-sm btn-filter active" data-activity="today" onclick="setActivityFilter('today')" style="flex:1;padding:0.35rem;font-size:0.75rem;border-radius:var(--border-radius-sm);border:1px solid var(--border-color);background:var(--bg-secondary);cursor:pointer;color:var(--text-primary);font-weight:600;">Today</button>
+              <button class="btn btn-sm btn-filter" data-activity="week" onclick="setActivityFilter('week')" style="flex:1;padding:0.35rem;font-size:0.75rem;border-radius:var(--border-radius-sm);border:1px solid var(--border-color);background:var(--bg-secondary);cursor:pointer;color:var(--text-primary);font-weight:600;">This Week</button>
+              <button class="btn btn-sm btn-filter" data-activity="month" onclick="setActivityFilter('month')" style="flex:1;padding:0.35rem;font-size:0.75rem;border-radius:var(--border-radius-sm);border:1px solid var(--border-color);background:var(--bg-secondary);cursor:pointer;color:var(--text-primary);font-weight:600;">This Month</button>
+            </div>
+            <div class="reminders-list" id="dashboard-activity-feed">
               <div class="empty-state">
                 <div class="empty-state-icon">
                   <svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
                 </div>
-                <p>No upcoming payments due this month.</p>
+                <p>No recent activity.</p>
               </div>
             </div>
           </div>
