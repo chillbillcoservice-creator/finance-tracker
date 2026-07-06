@@ -1706,9 +1706,9 @@ function renderDashboard() {
     // Removed pending names from balance to receive card per user request
   }
 
-  // F. Reminders Logic (for the selected month)
-  const rentRemindersNode = document.getElementById('dashboard-rent-reminders');
-  if (rentRemindersNode) rentRemindersNode.innerHTML = '';
+  // F. Recent Activity
+  const activityFeedNode = document.getElementById('dashboard-activity-feed');
+  if (activityFeedNode) activityFeedNode.innerHTML = '';
   
   const notifReminders = document.getElementById('notifications-reminders-view');
   const notifRent = document.getElementById('notifications-rent-view');
