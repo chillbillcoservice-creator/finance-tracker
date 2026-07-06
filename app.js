@@ -5026,7 +5026,7 @@ window.openTenantDetails = function(rentalId) {
     </div>
     <div style="border-top: 1px solid var(--border-color); padding-top: 0.75rem;">
       <h4 style="margin: 0 0 0.5rem 0; font-size: 0.9rem;">Payment History</h4>
-      ${renewedDate ? `<div style="display: flex; justify-content: space-between; padding: 0.4rem 0; border-bottom: 1px solid var(--border-color); font-size: 0.85rem;"><span style="color: var(--color-success); font-weight: 600;">Renewed on</span><span style="color: var(--text-secondary);">${renewedDate}</span></div>` : ''}
+      ${renewedDate ? `<div style="display: flex; justify-content: space-between; padding: 0.4rem 0; border-bottom: 1px solid var(--border-color); font-size: 0.85rem;"><span style="color: var(--color-success); font-weight: 600;">Renewed on</span><span style="color: #fff;">${renewedDate}</span></div>` : ''}
       ${payments.length > 0 ? payments.map(p => `
         <div style="display: flex; justify-content: space-between; padding: 0.4rem 0; border-bottom: 1px solid var(--border-color); font-size: 0.85rem;">
           <span style="color: var(--text-secondary);">${formatDisplayDate(p.monthYear || p.datePaid)}</span>
