@@ -1135,13 +1135,12 @@ function viewDocumentImage(rentalId, type) {
 }
 
 function renewRentalAgreement(rentalId) {
-  if (!confirm('Do you want to renew the rent agreement?\nIt will be renewed for the next 11 months.')) return;
+  if (!confirm('Renew rent agreement for next 11 months?')) return;
   loadState();
   const rental = state.rentals.find(r => r.id === rentalId);
   if (!rental) return;
-  const current = new Date(rental.startDate);
-  current.setMonth(current.getMonth() + 11);
-  rental.startDate = current.toISOString().split('T')[0];
+  const today = new Date();
+  rental.startDate = today.toISOString().split('T')[0];
   saveState();
   openTenantDetails(rentalId);
 }
@@ -1200,6 +1199,7 @@ window.getNextRenewal = getNextRenewal;
 window.lendMore = lendMore;
 window.quickMarkRentalPaid = quickMarkRentalPaid;
 window.navigateAndHighlightCard = navigateAndHighlightCard;
+window.renewRentalAgreement = renewRentalAgreement;
 
 window.populateReportingMonthSelect = function() {};
 window.adjustSelectedMonth = function() {};
@@ -4979,7 +4979,7 @@ window.openTenantDetails = function(rentalId) {
   const dotColor = renewData && renewData.daysLeft <= 30 ? 'var(--color-warning)' : 'var(--color-success)';
   const sinceDate = formatDate(rental.startDate);
   
-  titleEl.innerHTML = `<span style="display:flex;align-items:center;gap:1rem;">${rental.tenantName}<span class="contact-btn-group" style="display:inline-flex;align-items:center;gap:0.3rem;">${callLink}${waLink}<button onclick="closeModal('modal-group-details'); renewRentalAgreement('${rental.id}')" style="padding:0.2rem 0.4rem;font-size:0.6rem;background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:var(--border-radius-sm);cursor:pointer;color:var(--text-primary);font-weight:600;white-space:nowrap;">Renew Agreement</button></span></span>`;
+  titleEl.innerHTML = `<span style="display:flex;align-items:center;gap:1rem;">${rental.tenantName}<span class="contact-btn-group" style="display:inline-flex;align-items:center;gap:0.3rem;">${callLink}${waLink}${renewData && renewData.daysLeft <= 30 ? `<button onclick="renewRentalAgreement('${rental.id}')" style="padding:0.2rem 0.4rem;font-size:0.6rem;background:var(--color-warning);border:none;border-radius:var(--border-radius-sm);cursor:pointer;color:#000;font-weight:700;white-space:nowrap;">Renew Agreement</button>` : ''}</span></span>`;
   
   let html = `
     <div style="margin-bottom: 1rem;">
