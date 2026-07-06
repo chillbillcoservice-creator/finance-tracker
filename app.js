@@ -5029,7 +5029,7 @@ window.openTenantDetails = function(rentalId) {
       ${renewedDate ? `<div style="display: flex; justify-content: space-between; padding: 0.4rem 0; border-bottom: 1px solid var(--border-color); font-size: 0.85rem;"><span style="color: var(--color-success); font-weight: 600;">Renewed on</span><span style="color: #fff;">${renewedDate}</span></div>` : ''}
       ${payments.length > 0 ? payments.map(p => `
         <div style="display: flex; justify-content: space-between; padding: 0.4rem 0; border-bottom: 1px solid var(--border-color); font-size: 0.85rem;">
-          <span style="color: var(--text-secondary);">${formatDisplayDate(p.monthYear || p.datePaid)}</span>
+          <span style="color: #fff;">${formatDisplayDate(p.monthYear || p.datePaid)}</span>
           <span style="font-weight: 600; color: var(--color-success);">${formatCurrency(p.amount)}</span>
         </div>
       `).join('') : '<div style="color: var(--text-muted); font-size: 0.85rem;">No payments recorded yet.</div>'}
