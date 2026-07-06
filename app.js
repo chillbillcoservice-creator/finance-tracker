@@ -4992,11 +4992,11 @@ window.openTenantDetails = function(rentalId) {
       <div style="display: flex; gap: 0.75rem;">
         <div class="card" style="flex: 1; padding: 0.5rem; text-align: center;">
           <div style="font-size: 0.65rem; text-transform: uppercase; color: var(--text-secondary);">Status</div>
-          <div style="display: flex; align-items: center; justify-content: center; gap: 0.3rem; margin-top: 0.15rem;">
-            <span style="font-weight: 700; color: ${dotColor};">Active <span style="display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: ${dotColor}; vertical-align: middle;"></span></span>
+          <div style="display: flex; align-items: center; justify-content: center; margin-top: 0.25rem;">
+            <span style="display: inline-block; width: 12px; height: 12px; border-radius: 50%; background: ${dotColor};"></span>
           </div>
-          <div style="font-size: 0.65rem; color: var(--text-secondary); margin-top: 0.1rem;">Since ${sinceDate}</div>
-          ${renewData ? `<div style="font-size: 0.65rem; color: var(--text-secondary);">Renews: ${renewData.dateStr}</div>` : ''}
+          <div style="font-size: 0.65rem; color: var(--text-secondary); margin-top: 0.2rem;">Since ${sinceDate}</div>
+          ${renewData ? `<div style="font-size: 0.65rem; color: ${dotColor};">Renews: ${renewData.dateStr}</div>` : ''}
         </div>
         <div class="card" style="flex: 1; padding: 0.5rem; text-align: center;">
           <div style="font-size: 0.65rem; text-transform: uppercase; color: var(--text-secondary);">Total Paid</div>
