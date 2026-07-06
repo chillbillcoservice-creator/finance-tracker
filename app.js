@@ -4993,10 +4993,10 @@ window.openTenantDetails = function(rentalId) {
         <div class="card" style="flex: 1; padding: 0.5rem; text-align: center;">
           <div style="font-size: 0.65rem; text-transform: uppercase; color: var(--text-secondary);">Status</div>
           <div style="display: flex; align-items: center; justify-content: center; gap: 0.3rem; margin-top: 0.15rem;">
-            <span style="display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: ${dotColor};"></span>
-            <span style="font-weight: 600; font-size: 0.7rem; color: var(--text-secondary);">Since ${sinceDate}</span>
+            <span style="font-weight: 700; color: ${dotColor};">Active <span style="display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: ${dotColor}; vertical-align: middle;"></span></span>
           </div>
-          ${renewData ? `<div style="font-size: 0.65rem; color: var(--text-secondary); margin-top: 0.15rem;">Renews: ${renewData.dateStr}</div>` : ''}
+          <div style="font-size: 0.65rem; color: var(--text-secondary); margin-top: 0.1rem;">Since ${sinceDate}</div>
+          ${renewData ? `<div style="font-size: 0.65rem; color: var(--text-secondary);">Renews: ${renewData.dateStr}</div>` : ''}
         </div>
         <div class="card" style="flex: 1; padding: 0.5rem; text-align: center;">
           <div style="font-size: 0.65rem; text-transform: uppercase; color: var(--text-secondary);">Total Paid</div>
