@@ -4972,7 +4972,7 @@ window.openTenantDetails = function(rentalId) {
         <div style="font-weight: 600; font-size: 1rem;">${rental.propertyName || 'Property'}</div>
         <div style="display: flex; align-items: center; gap: 0.3rem;">
           <div class="contact-btn-group">${callLink}${waLink}</div>
-          <button class="btn btn-secondary btn-sm" onclick="closeModal('modal-group-details'); editRental('${rental.id}')" style="padding: 0.2rem 0.4rem; font-size: 0.65rem; background: transparent; border: none; cursor: pointer; color: var(--text-secondary);" title="Edit">✏️</button>
+          <button onclick="closeModal('modal-group-details'); editRental('${rental.id}')" style="padding: 0.2rem; font-size: 0.7rem; background: transparent; border: none; cursor: pointer; color: var(--text-secondary);" title="Edit">✏️</button>
         </div>
       </div>
       </div>
