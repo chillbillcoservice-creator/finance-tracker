@@ -1508,7 +1508,7 @@ function renderDashboard() {
   const netIncomeNode = document.getElementById('dash-net-income');
   if (netIncomeNode) {
     const totalIncome = monthlyRent + expectedInterestReceived;
-    netIncomeNode.innerHTML = `Total Income: <span style="color: var(--text-primary); font-weight: 800;">${formatCurrency(totalIncome)}</span>`;
+    netIncomeNode.innerHTML = `Total Monthly Income: <span style="color: var(--text-primary); font-weight: 800;">${formatCurrency(totalIncome)}</span>`;
   }
   
   // Dynamic header for the Rental Income card
