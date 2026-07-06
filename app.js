@@ -4967,16 +4967,13 @@ window.openTenantDetails = function(rentalId) {
   const dotColor = renewData && renewData.daysLeft <= 30 ? 'var(--color-warning)' : 'var(--color-success)';
   const sinceDate = formatDate(rental.startDate);
   
-  titleEl.textContent = rental.tenantName;
+  titleEl.innerHTML = `<span style="display:flex;align-items:center;gap:0.5rem;">${rental.tenantName}<span class="contact-btn-group" style="display:inline-flex;align-items:center;gap:0.3rem;">${callLink}${waLink}</span></span>`;
   
   let html = `
     <div style="margin-bottom: 1rem;">
       <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 0.75rem;">
         <div style="font-weight: 600; font-size: 1rem;">${rental.propertyName || 'Property'}</div>
-        <div style="display: flex; align-items: center; gap: 0.3rem;">
-          <div class="contact-btn-group">${callLink}${waLink}</div>
-          <button onclick="closeModal('modal-group-details'); editRental('${rental.id}')" style="padding: 0.2rem; font-size: 0.7rem; background: transparent; border: none; cursor: pointer; color: var(--text-secondary);" title="Edit">✏️</button>
-        </div>
+        <button onclick="closeModal('modal-group-details'); editRental('${rental.id}')" style="padding: 0.2rem; font-size: 0.7rem; background: transparent; border: none; cursor: pointer; color: var(--text-secondary);" title="Edit">✏️</button>
       </div>
       </div>
       <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 0.75rem;">
