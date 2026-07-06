@@ -4967,7 +4967,7 @@ window.openTenantDetails = function(rentalId) {
   const dotColor = renewData && renewData.daysLeft <= 30 ? 'var(--color-warning)' : 'var(--color-success)';
   const sinceDate = formatDate(rental.startDate);
   
-  titleEl.innerHTML = `<span style="display:flex;align-items:center;gap:1rem;">${rental.tenantName}<span class="contact-btn-group" style="display:inline-flex;align-items:center;gap:0.3rem;">${callLink}${waLink}</span></span>`;
+  titleEl.innerHTML = `<div style="display:flex;flex-direction:column;gap:0.4rem;"><span style="display:flex;align-items:center;gap:1rem;">${rental.tenantName}<span class="contact-btn-group" style="display:inline-flex;align-items:center;gap:0.3rem;">${callLink}${waLink}</span></span><div style="display:flex;gap:0.4rem;"><button onclick="viewDocumentImage('${rentalId}', 'aadhaar')" style="padding:0.25rem 0.5rem;font-size:0.6rem;background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:var(--border-radius-sm);cursor:pointer;color:var(--text-primary);font-weight:600;">📄 Aadhaar</button><button onclick="viewDocumentImage('${rentalId}', 'agreement')" style="padding:0.25rem 0.5rem;font-size:0.6rem;background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:var(--border-radius-sm);cursor:pointer;color:var(--text-primary);font-weight:600;">📄 Rent Agreement</button></div></div>`;
   
   let html = `
     <div style="margin-bottom: 1rem;">
@@ -4997,10 +4997,6 @@ window.openTenantDetails = function(rentalId) {
           <div style="font-weight: 700; color: var(--color-success);">${formatCurrency(totalPaid)}</div>
         </div>
       </div>
-    </div>
-    <div style="display: flex; gap: 0.5rem; margin-bottom: 0.75rem;">
-      <button onclick="viewDocumentImage('${rentalId}', 'aadhaar')" style="flex: 1; padding: 0.45rem; font-size: 0.7rem; background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: var(--border-radius-sm); cursor: pointer; color: var(--text-primary); font-weight: 600;">📄 Aadhaar</button>
-      <button onclick="viewDocumentImage('${rentalId}', 'agreement')" style="flex: 1; padding: 0.45rem; font-size: 0.7rem; background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: var(--border-radius-sm); cursor: pointer; color: var(--text-primary); font-weight: 600;">📄 Rent Agreement</button>
     </div>
     <div style="border-top: 1px solid var(--border-color); padding-top: 0.75rem;">
       <h4 style="margin: 0 0 0.5rem 0; font-size: 0.9rem;">Payment History</h4>
