@@ -4969,11 +4969,12 @@ window.openTenantDetails = function(rentalId) {
   let html = `
     <div style="margin-bottom: 1rem;">
       <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 0.75rem;">
-        <div style="display: flex; align-items: center; gap: 0.5rem;">
-          <div style="font-weight: 600; font-size: 1rem;">${rental.propertyName || 'Property'}</div>
-          <button class="btn btn-secondary btn-sm" onclick="closeModal('modal-group-details'); editRental('${rental.id}')" style="padding: 0.2rem 0.5rem; font-size: 0.7rem;">Edit</button>
+        <div style="font-weight: 600; font-size: 1rem;">${rental.propertyName || 'Property'}</div>
+        <div style="display: flex; align-items: center; gap: 0.3rem;">
+          <div class="contact-btn-group">${callLink}${waLink}</div>
+          <button class="btn btn-secondary btn-sm" onclick="closeModal('modal-group-details'); editRental('${rental.id}')" style="padding: 0.2rem 0.4rem; font-size: 0.65rem; background: transparent; border: none; cursor: pointer; color: var(--text-secondary);" title="Edit">✏️</button>
         </div>
-        <div class="contact-btn-group">${callLink}${waLink}</div>
+      </div>
       </div>
       <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 0.75rem;">
         <div class="card" style="padding: 0.75rem; text-align: center; background: var(--bg-secondary);">
