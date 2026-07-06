@@ -1144,11 +1144,10 @@ function renewRentalAgreement(rentalId) {
     const nextDate = new Date(currentRenewal.date);
     nextDate.setMonth(nextDate.getMonth() + 11);
     rental.nextRenewalDate = nextDate.toISOString().split('T')[0];
+    rental.lastRenewed = new Date().toISOString().split('T')[0];
+    saveState();
   }
-  const today = new Date();
-  rental.lastRenewed = today.toISOString().split('T')[0];
-  saveState();
-  openTenantDetails(rentalId);
+  setTimeout(function() { openTenantDetails(rentalId); }, 100);
 }
 
 // Export modals to global scope for inline onclicks
