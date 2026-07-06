@@ -1706,9 +1706,7 @@ function renderDashboard() {
     // Removed pending names from balance to receive card per user request
   }
 
-  // F. Recent Activity
-  const activityFeedNode = document.getElementById('dashboard-activity-feed');
-  if (activityFeedNode) activityFeedNode.innerHTML = '';
+  // F. Recent Activity (rendered below via renderRecentActivity)
   
   const notifReminders = document.getElementById('notifications-reminders-view');
   const notifRent = document.getElementById('notifications-rent-view');
@@ -1769,6 +1767,9 @@ function renderDashboard() {
     }
   }
   
+  if (currentReminderFilter === 'all') {
+  const rentRemindersNode = document.getElementById('dashboard-rent-reminders');
+  if (!rentRemindersNode) { /* reminders replaced by activity feed */ } else {
   const dashboardRemindersList = [];
 
   // 1. Rent payment reminders & Agreement renewals
@@ -2175,6 +2176,8 @@ function renderDashboard() {
       }
       rentRemindersNode.appendChild(div);
     });
+  }
+  }
   }
 
   // G. General Alerts Dashboard Panel (Loans Overdue, High interest borrow notifications)
