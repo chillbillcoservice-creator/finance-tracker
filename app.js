@@ -4984,6 +4984,9 @@ window.openTenantDetails = function(rentalId) {
   const dotColor = renewData && renewData.daysLeft <= 7 ? 'var(--color-danger)' : renewData && renewData.daysLeft <= 30 ? 'var(--color-warning)' : 'var(--color-success)';
   const sinceDate = formatDate(rental.startDate);
   const renewedDate = rental.lastRenewed ? formatDate(rental.lastRenewed) : null;
+  const now = new Date();
+  const currentMonthStr = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0');
+  const isRentPaidThisMonth = state.rentPayments.some(p => p.rentalId === rentalId && p.monthYear === currentMonthStr);
   
   const btnBg = renewData && renewData.daysLeft <= 7 ? 'var(--color-danger)' : 'var(--color-warning)';
   const btnColor = renewData && renewData.daysLeft <= 7 ? '#fff' : '#000';
@@ -5006,6 +5009,7 @@ window.openTenantDetails = function(rentalId) {
         <div class="card" style="padding: 0.75rem; text-align: center; background: var(--bg-secondary);">
           <div style="font-size: 0.6rem; text-transform: uppercase; color: #fff; font-weight: 700; letter-spacing: 0.5px;">Monthly Rent</div>
           <div style="font-size: 1.3rem; font-weight: 800; color: var(--color-accent); margin-top: 0.25rem;">${formatCurrency(rental.monthlyRent)}</div>
+          ${isRentPaidThisMonth ? `<div style="font-size: 0.55rem; color: var(--color-success); font-weight: 700; margin-top: 0.3rem; letter-spacing: 0.5px;">✓ Received</div>` : ''}
         </div>
         <div class="card" style="padding: 0.75rem; text-align: center; background: var(--bg-secondary);">
           <div style="font-size: 0.6rem; text-transform: uppercase; color: #fff; font-weight: 700; letter-spacing: 0.5px;">Security Deposit</div>
