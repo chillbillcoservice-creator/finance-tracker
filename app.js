@@ -2789,11 +2789,7 @@ function renderRentals() {
     
     let stampHtml = '';
     if (isRentPaidThisMonth) {
-      stampHtml = `<div class="card-stamp stamp-received" style="margin-left: 0; margin-top: 0.2rem; font-size: 0.6rem; font-weight: 600; pointer-events: none;">Received ✓</div>`;
-    } else {
-      if (rentPayments.length > 0) {
-        stampHtml = `<div class="card-stamp stamp-received" style="margin-left: 0; margin-top: 0.2rem; font-size: 0.6rem; font-weight: 600; pointer-events: none;">Received ✓</div>`;
-      }
+      stampHtml = `<div class="card-stamp stamp-received" style="margin-left: 0; margin-top: 0.2rem; font-size: 0.6rem; font-weight: 600;">Received</div>`;
     }
 
     const card = document.createElement('div');
@@ -2872,12 +2868,7 @@ function renderRentals() {
     `;
 
     const itemRow = card.querySelector('.item-row');
-    const cardClick = (e) => {
-      if (e.target.closest('.contact-action-btn, button, .btn, input')) return;
-      window.openTenantDetails(rental.id);
-    };
-    itemRow.addEventListener('click', cardClick);
-    card.addEventListener('click', (e) => {
+    itemRow.addEventListener('click', (e) => {
       if (e.target.closest('.contact-action-btn, button, .btn, input')) return;
       window.openTenantDetails(rental.id);
     });
@@ -5006,7 +4997,6 @@ window.openTenantDetails = function(rentalId) {
         <div class="card" style="padding: 0.75rem; text-align: center; background: var(--bg-secondary);">
           <div style="font-size: 0.6rem; text-transform: uppercase; color: #fff; font-weight: 700; letter-spacing: 0.5px;">Monthly Rent</div>
           <div style="font-size: 1.3rem; font-weight: 800; color: var(--color-accent); margin-top: 0.25rem;">${formatCurrency(rental.monthlyRent)}</div>
-          ${isRentPaidThisMonth ? `<div style="font-size: 0.55rem; color: var(--color-success); font-weight: 700; margin-top: 0.3rem; letter-spacing: 0.5px;">✓ Received</div>` : ''}
         </div>
         <div class="card" style="padding: 0.75rem; text-align: center; background: var(--bg-secondary);">
           <div style="font-size: 0.6rem; text-transform: uppercase; color: #fff; font-weight: 700; letter-spacing: 0.5px;">Security Deposit</div>
