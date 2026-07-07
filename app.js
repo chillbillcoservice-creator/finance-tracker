@@ -377,6 +377,81 @@ function updateCardHighlights() {
 }
 window.toggleReminderFilter = toggleReminderFilter;
 
+// IndexedDB for file data (supports much larger storage than localStorage)
+var _fileDataCache = {};
+
+function initFileDB(callback) {
+  try {
+    var request = indexedDB.open('CapitalFlowFiles', 1);
+    request.onupgradeneeded = function(e) {
+      var db = e.target.result;
+      if (!db.objectStoreNames.contains('files')) {
+        db.createObjectStore('files', { keyPath: 'id' });
+      }
+    };
+    request.onsuccess = function(e) {
+      var db = e.target.result;
+      var tx = db.transaction('files', 'readonly');
+      var store = tx.objectStore('files');
+      var all = store.getAll();
+      all.onsuccess = function() {
+        (all.result || []).forEach(function(rec) {
+          _fileDataCache[rec.id] = rec.data;
+        });
+        if (callback) callback();
+      };
+      all.onerror = function() { if (callback) callback(); };
+    };
+    request.onerror = function() { if (callback) callback(); };
+  } catch(e) {
+    console.error('IndexedDB init error:', e);
+    if (callback) callback();
+  }
+}
+
+function syncFilesToDB(files) {
+  try {
+    var request = indexedDB.open('CapitalFlowFiles', 1);
+    request.onsuccess = function(e) {
+      var db = e.target.result;
+      var tx = db.transaction('files', 'readwrite');
+      var store = tx.objectStore('files');
+      (files || []).forEach(function(f) {
+        if (f.data) {
+          store.put({ id: f.id, data: f.data });
+          _fileDataCache[f.id] = f.data;
+        }
+      });
+    };
+  } catch(e) { console.error('IndexedDB sync error:', e); }
+}
+
+function removeFileFromDB(id) {
+  try {
+    var request = indexedDB.open('CapitalFlowFiles', 1);
+    request.onsuccess = function(e) {
+      var db = e.target.result;
+      var tx = db.transaction('files', 'readwrite');
+      var store = tx.objectStore('files');
+      store.delete(id);
+    };
+  } catch(e) { console.error('IndexedDB delete error:', e); }
+  delete _fileDataCache[id];
+}
+
+function clearFileDB() {
+  try {
+    var request = indexedDB.open('CapitalFlowFiles', 1);
+    request.onsuccess = function(e) {
+      var db = e.target.result;
+      var tx = db.transaction('files', 'readwrite');
+      var store = tx.objectStore('files');
+      store.clear();
+    };
+  } catch(e) { console.error('IndexedDB clear error:', e); }
+  _fileDataCache = {};
+}
+
 // Load Data from LocalStorage
 const SEED_VERSION = 2;
 function loadState() {
@@ -388,9 +463,9 @@ function loadState() {
       state = JSON.parse(data);
       // Ensure all arrays are initialized
       // Migrate removed themes to valid ones
-      const removedThemes = ['dark-blue', 'light-elegant', 'midnight-purple'];
+      const removedThemes = ['dark-blue', 'midnight-purple', 'black-and-white', 'newspaper', 'neon-pulse'];
       if (removedThemes.includes(state.theme)) {
-        const themeMap = { 'dark-blue': 'black-and-colored', 'light-elegant': 'white-and-black', 'midnight-purple': 'soft-sage' };
+        const themeMap = { 'dark-blue': 'black-and-colored', 'midnight-purple': 'light-elegant', 'black-and-white': 'black-and-colored-plain', 'newspaper': 'light-elegant', 'neon-pulse': 'ocean-deep' };
         state.theme = themeMap[state.theme];
       }
       state.theme = state.theme || 'black-and-colored-plain';
@@ -405,6 +480,9 @@ function loadState() {
       state.showPendingNames = state.showPendingNames !== false;
       state.showPayMethod = state.showPayMethod !== false;
       state.showExpenseDetails = state.showExpenseDetails !== false;
+      state.properties = state.properties || [];
+      var defaults = ['23/48 ground floor', '23/48 3rd floor', '1/104'];
+      defaults.forEach(function(d) { if (state.properties.indexOf(d) === -1) state.properties.push(d); });
       
       const t = document.getElementById('toggle-pending-names');
       if(t) t.checked = state.showPendingNames;
@@ -416,55 +494,60 @@ function loadState() {
       console.error('Failed to parse local storage data, resetting to default.', e);
       saveState();
     }
+    // Merge file data from IndexedDB cache
+    if (state.files) {
+      var hasFileData = false;
+      state.files.forEach(function(f) { if (f.data) hasFileData = true; });
+      // One-time migration: move file data from localStorage to IndexedDB
+      if (hasFileData) {
+        syncFilesToDB(state.files);
+        state.files.forEach(function(f) { if (f.data) _fileDataCache[f.id] = f.data; });
+        var filesMeta = state.files.map(function(f) {
+          return { id: f.id, type: f.type, title: f.title, fileNumber: f.fileNumber, data: '', date: f.date };
+        });
+        var strippedState = JSON.parse(JSON.stringify(state));
+        strippedState.files = filesMeta;
+        try { localStorage.setItem(STORAGE_KEY, JSON.stringify(strippedState)); } catch(e) {}
+      }
+      state.files.forEach(function(f) {
+        if (_fileDataCache[f.id]) f.data = _fileDataCache[f.id];
+      });
+    }
   } else {
-    // Seed with dummy sample data if empty or outdated
+    // Fresh start with empty data
     localStorage.removeItem(STORAGE_KEY);
-    seedInitialData();
+    state = { lent: [], borrowed: [], rentals: [], interestPayments: [], rentPayments: [], expenses: [], renewals: [], files: [], theme: 'black-and-colored-plain', properties: ['23/48 ground floor', '23/48 3rd floor', '1/104'] };
+    saveState();
     localStorage.setItem(STORAGE_KEY + '_v', SEED_VERSION);
   }
 }
 
 // Save Data to LocalStorage
 function saveState() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  try {
+    var files = state.files || [];
+    // Store file data in IndexedDB
+    syncFilesToDB(files);
+    
+    // Save metadata (without bulky base64 data) to localStorage
+    var filesMeta = files.map(function(f) {
+      return { id: f.id, type: f.type, title: f.title, fileNumber: f.fileNumber, data: '', date: f.date };
+    });
+    var cleanState = JSON.parse(JSON.stringify(state));
+    cleanState.files = filesMeta;
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(cleanState));
+  } catch(e) {
+    if (e.name === 'QuotaExceededError' || e.code === 22) {
+      alert('Storage full! Try deleting old files or photos to free up space.');
+    } else {
+      throw e;
+    }
+  }
 }
 
-// Seed initial values if empty (gives a premium impression out of the box)
 function seedInitialData() {
-  state.lent = [
-    { id: 'loan_1', borrowerName: 'Rahul Sharma', phone: '9876543210', principal: '100000', interestRate: '2', startDate: '2026-01-15', notes: 'Business loan', status: 'active' },
-    { id: 'loan_2', borrowerName: 'Priya Patel', phone: '9876543211', principal: '50000', interestRate: '1.5', startDate: '2026-03-01', notes: 'Personal loan', status: 'active' }
-  ];
-  state.borrowed = [
-    { id: 'borrow_1', lenderName: 'SBI Bank', phone: '', principal: '500000', interestRate: '1', startDate: '2025-06-01', notes: 'Home renovation loan', status: 'active' }
-  ];
-  state.rentals = [
-    { id: 'rent_1', propertyName: '23/48 Ground Floor', tenantName: 'Amit Verma', contactInfo: '9876543212', monthlyRent: '23000', securityDeposit: '46000', startDate: '2025-11-01', dueDay: '5', status: 'active' },
-    { id: 'rent_2', propertyName: '23/48 3rd Floor', tenantName: 'Sunita Yadav', contactInfo: '9876543213', monthlyRent: '32000', securityDeposit: '64000', startDate: '2026-02-01', dueDay: '7', status: 'active' },
-    { id: 'rent_3', propertyName: '1/104', tenantName: 'Vikram Singh', contactInfo: '9876543214', monthlyRent: '18000', securityDeposit: '36000', startDate: '2026-04-01', dueDay: '10', status: 'active' }
-  ];
-  state.rentPayments = [
-    { id: 'rp_1', rentalId: 'rent_1', monthYear: '2026-07', amount: '23000', datePaid: '2026-07-05', note: 'Full payment' },
-    { id: 'rp_2', rentalId: 'rent_2', monthYear: '2026-07', amount: '15000', datePaid: '2026-07-07', note: 'Partial' },
-    { id: 'rp_3', rentalId: 'rent_3', monthYear: '2026-06', amount: '18000', datePaid: '2026-06-10', note: 'June cleared' },
-    { id: 'rp_4', rentalId: 'rent_1', monthYear: '2026-06', amount: '23000', datePaid: '2026-06-05', note: '' },
-    { id: 'rp_5', rentalId: 'rent_2', monthYear: '2026-06', amount: '32000', datePaid: '2026-06-07', note: '' }
-  ];
-  state.interestPayments = [
-    { id: 'ip_1', type: 'received', loanId: 'loan_1', amount: '2000', date: '2026-07-01', category: 'interest', note: 'July interest' },
-    { id: 'ip_2', type: 'received', loanId: 'loan_2', amount: '500', date: '2026-06-15', category: 'interest', note: 'June interest' },
-    { id: 'ip_3', type: 'paid', loanId: 'borrow_1', amount: '5000', date: '2026-07-01', category: 'interest', note: 'July interest to bank' },
-    { id: 'ip_4', type: 'received', loanId: 'loan_1', amount: '2000', date: '2026-06-01', category: 'interest', note: 'June interest' }
-  ];
-  state.expenses = [
-    { id: 'exp_1', amount: '1500', date: '2026-07-03', category: 'Utilities', note: 'Electricity bill', propertyId: '' },
-    { id: 'exp_2', amount: '500', date: '2026-07-03', category: 'Travel', note: 'Fuel', propertyId: '' },
-    { id: 'exp_3', amount: '3000', date: '2026-07-01', category: 'Maintenance', note: 'Plumber repair', propertyId: 'rent_1' },
-    { id: 'exp_4', amount: '250', date: '2026-06-28', category: 'Food', note: 'Office snacks', propertyId: '' },
-    { id: 'exp_5', amount: '12000', date: '2026-06-25', category: 'Insurance', note: 'Car Insurance', propertyId: '' }
-  ];
-  state.renewals = [];
-  state.files = [];
+  state = { lent: [], borrowed: [], rentals: [], interestPayments: [], rentPayments: [], expenses: [], renewals: [], files: [], theme: 'black-and-colored-plain' };
+  clearFileDB();
   saveState();
 }
 
@@ -474,6 +557,10 @@ const formatCurrency = (val) => {
     maximumFractionDigits: 0,
     minimumFractionDigits: 0
   });
+};
+
+const escHtml = (str) => {
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 };
 
 function numberToIndianWords(num) {
@@ -755,6 +842,7 @@ function openQuickLend() {
 
   // Set defaults
   document.getElementById('quick-lend-principal').value = '';
+  updateQuickLendWords();
   document.getElementById('quick-lend-rate').value = '4.00';
   document.getElementById('quick-lend-start-date').value = new Date().toISOString().split('T')[0];
   document.getElementById('quick-lend-new-name').value = '';
@@ -792,6 +880,7 @@ function setQuickLendPrincipal(val) {
   var current = Number(input.value) || 0;
   input.value = current + val;
   input.focus();
+  updateQuickLendWords();
   document.querySelectorAll('.quick-lend-preset-btn').forEach(function(b) {
     b.style.borderColor = '';
     b.style.background = '';
@@ -802,11 +891,20 @@ function setQuickLendPrincipal(val) {
   }
 }
 
+function updateQuickLendWords() {
+  var input = document.getElementById('quick-lend-principal');
+  var wordsEl = document.getElementById('quick-lend-principal-words');
+  if (!input || !wordsEl) return;
+  var val = Number(input.value) || 0;
+  wordsEl.textContent = val > 0 ? numberToIndianWords(val) : '';
+}
+
 function setPrincipalPreset(val) {
   var input = document.getElementById('loan-principal');
   var current = Number(input.value) || 0;
   input.value = current + val;
   input.focus();
+  updatePrincipalWords();
   // highlight active button
   document.querySelectorAll('#principal-presets-lending .btn, #principal-presets-borrowing .btn').forEach(function(b) {
     b.style.borderColor = '';
@@ -816,6 +914,14 @@ function setPrincipalPreset(val) {
     event.target.style.borderColor = 'var(--color-accent)';
     event.target.style.background = 'rgba(var(--color-accent-rgb), 0.1)';
   }
+}
+
+function updatePrincipalWords() {
+  var input = document.getElementById('loan-principal');
+  var wordsEl = document.getElementById('principal-words');
+  if (!input || !wordsEl) return;
+  var val = Number(input.value) || 0;
+  wordsEl.textContent = val > 0 ? numberToIndianWords(val) : '';
 }
 
 function setPaymentAmountPreset(val) {
@@ -833,6 +939,9 @@ function updatePrincipalPresets(direction) {
     lendingPresets.style.display = 'none';
     borrowingPresets.style.display = 'flex';
   }
+  var input = document.getElementById('loan-principal');
+  if (input) input.value = '';
+  updatePrincipalWords();
 }
 
 let _isSubmittingQuickLend = false;
@@ -940,10 +1049,10 @@ function submitQuickLend(event) {
     id: 'iss_' + newId,
     loanId: newId,
     type: 'received',
-    category: 'issuance',
+    category: 'interest',
     amount: principal,
     date: startDate,
-    note: 'Original Principal (Quick Lent)'
+    note: 'Principal Disbursed (Quick Lent)'
   });
 
   saveState();
@@ -993,7 +1102,9 @@ function getContactActionsHTML(phoneStr) {
 
 function getNextRenewal(startDateStr, overrideDateStr) {
   if (!startDateStr) return null;
-  const start = new Date(overrideDateStr || startDateStr);
+  const dateStr = overrideDateStr || startDateStr;
+  const parts = dateStr.split('-');
+  const start = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
   const now = new Date();
   now.setHours(0,0,0,0);
   
@@ -1068,6 +1179,116 @@ function quickMarkInterestPaid(loanId, type, amount, monthStr) {
 }
 
 window.quickMarkInterestPaid = quickMarkInterestPaid;
+
+function quickReceiveInterest(loanId, direction) {
+  loadState();
+  var list = direction === 'lent' ? state.lent : state.borrowed;
+  var loan = list.find(function(l) { return l.id === loanId; });
+  if (!loan) return;
+
+  var outstandingPrincipal = getOutstandingPrincipal(loan.id, loan.principal);
+  if (outstandingPrincipal <= 0) return;
+
+  var monthlyYield = outstandingPrincipal * (Number(loan.interestRate) / 100);
+  var payments = state.interestPayments.filter(function(p) { return p.loanId === loanId && p.category === 'interest'; });
+  var currentMonthPayments = payments.filter(function(p) { return p.date && p.date.startsWith(selectedMonthStr); });
+  var currentMonthSum = currentMonthPayments.reduce(function(sum, p) { return sum + Number(p.amount); }, 0);
+  var isPaidThisMonth = monthlyYield > 0 && currentMonthSum >= (monthlyYield - 0.01);
+
+  var isAdvance = false;
+  if (isPaidThisMonth) {
+    if (!confirm('This month interest already collected.\nDo you wish to receive advance interest?')) return;
+    isAdvance = true;
+  }
+
+  var today = new Date();
+  var isCurrentMonth = today.toISOString().slice(0, 7) === selectedMonthStr;
+  var paymentDate = today.toISOString().split('T')[0];
+  if (!isCurrentMonth) {
+    var parts = selectedMonthStr.split('-').map(Number);
+    paymentDate = selectedMonthStr + '-' + String(new Date(parts[0], parts[1], 0).getDate()).padStart(2, '0');
+  }
+
+  var amount = monthlyYield;
+  var advanceTag = isAdvance ? ' [Advance]' : '';
+  state.interestPayments.push({
+    id: 'p' + Math.random().toString(36).substr(2, 9),
+    loanId: loanId,
+    type: direction === 'lent' ? 'received' : 'paid',
+    category: 'interest',
+    amount: Number(amount),
+    date: paymentDate,
+    note: 'Received from Quick Collect (' + selectedMonthStr.toUpperCase() + ')' + advanceTag
+  });
+  saveState();
+  refreshActiveTab();
+  renderDashboard();
+}
+window.quickReceiveInterest = quickReceiveInterest;
+
+function quickGroupPayment(groupId, direction) {
+  loadState();
+  var input = document.getElementById('quick-pay-' + groupId);
+  if (!input) return;
+  var amount = Number(input.value);
+  if (!amount || amount <= 0) { alert('Enter an amount'); return; }
+  input.value = '';
+
+  var card = document.querySelector('[data-group-id="' + groupId + '"]');
+  var loanIds = card ? card.getAttribute('data-loan-ids').split(',') : [];
+  if (loanIds.length === 0) return;
+
+  var listName = direction === 'lent' ? 'lent' : 'borrowed';
+  var today = new Date().toISOString().split('T')[0];
+
+  // Check if all loans already paid this month
+  var allPaid = true;
+  loanIds.forEach(function(lid) {
+    var loan = state[listName].find(function(l) { return l.id === lid; });
+    if (!loan) return;
+    var outstanding = getOutstandingPrincipal(loan.id, loan.principal);
+    if (outstanding <= 0) return;
+    var monthlyYield = outstanding * (Number(loan.interestRate) / 100);
+    var payms = state.interestPayments.filter(function(p) { return p.loanId === lid && p.category === 'interest'; });
+    var monthPayms = payms.filter(function(p) { return p.date && p.date.startsWith(selectedMonthStr); });
+    var sumPayms = monthPayms.reduce(function(s, p) { return s + Number(p.amount); }, 0);
+    if (sumPayms < monthlyYield - 0.01) allPaid = false;
+  });
+
+  var isAdvance = false;
+  if (allPaid) {
+    if (!confirm('Already fully received this month.\nDo you wish to receive advance interest?')) return;
+    isAdvance = true;
+  }
+
+  var advanceTag = isAdvance ? ' [Advance]' : '';
+  var recordCount = 0;
+  loanIds.forEach(function(lid) {
+    var loan = state[listName].find(function(l) { return l.id === lid; });
+    if (!loan) return;
+    var outstanding = getOutstandingPrincipal(loan.id, loan.principal);
+    if (outstanding <= 0) return;
+    var monthlyYield = outstanding * (Number(loan.interestRate) / 100);
+    var payAmount = Math.min(amount, monthlyYield);
+    if (payAmount <= 0) return;
+    state.interestPayments.push({
+      id: 'p' + Math.random().toString(36).substr(2, 9),
+      loanId: loan.id,
+      type: direction === 'lent' ? 'received' : 'paid',
+      category: 'interest',
+      amount: Number(payAmount.toFixed(2)),
+      date: today,
+      note: 'Quick Group Collect' + advanceTag
+    });
+    amount -= payAmount;
+    recordCount++;
+  });
+  if (recordCount === 0) { alert('All loans are settled.'); return; }
+  saveState();
+  refreshActiveTab();
+  renderDashboard();
+}
+window.quickGroupPayment = quickGroupPayment;
 
 function el(id) {
   return document.getElementById(id);
@@ -1261,8 +1482,30 @@ function setTheme(themeId) {
 window.setTheme = setTheme;
 
 // 5. Navigation & Routing Handler
+var _recordsFilter = null;
+
+function applyRecordsFilter() {
+  var types = ['bills', 'documents', 'policies', 'construction'];
+  types.forEach(function(t) {
+    var el = document.getElementById('section-' + t);
+    if (el) {
+      el.style.display = (_recordsFilter === null || _recordsFilter === t) ? '' : 'none';
+    }
+  });
+  // Highlight the active file-type button (bills / documents / policies)
+  ['bills', 'documents', 'policies'].forEach(function(t) {
+    var btn = document.getElementById('btn-' + t);
+    if (!btn) return;
+    var isActive = _recordsFilter === t;
+    var colorMap = {bills: 'var(--color-warning)', documents: 'var(--color-success)', policies: 'var(--color-purple)'};
+    var color = colorMap[t] || 'var(--text-secondary)';
+    btn.style.background = isActive ? color : 'var(--bg-card)';
+    btn.style.color = isActive ? '#fff' : color;
+  });
+}
+
 function renderRecords() {
-  // Records dashboard
+  _recordsFilter = 'construction';
   renderConstruction();
   if (typeof renderFiles === 'function') renderFiles();
 }
@@ -1272,56 +1515,36 @@ const VIEWS = {
   records: { title: 'Records', subtitle: 'Bills, documents, construction, and settings.', render: renderRecords }
 };
 
-let activeRecordsTab = 'bills';
-
-function selectRecordsTab(tab, projectName) {
-  if (projectName) {
-    window._selectedConstProject = projectName;
+function selectRecordsTab(event, tab, projectName) {
+  if (typeof event === 'string' || event == null) {
+    projectName = tab;
+    tab = event;
+    event = null;
   }
-  activeRecordsTab = tab;
-  
-  renderConstruction();
-  
-  // Update UI highlights
-  // Update UI highlights
-  const cards = { bills: 'card-records-bills', documents: 'card-records-documents', policies: 'card-records-policies', construction: 'card-records-construction' };
-  Object.entries(cards).forEach(([key, id]) => {
-    const el = document.getElementById(id);
-    if (el) {
-      if (key === tab) {
-        el.classList.add('active');
-        el.style.opacity = '1';
-        el.style.transform = 'scale(1.02)';
-      } else {
-        el.classList.remove('active');
-        el.style.opacity = '0.9';
-        el.style.transform = 'scale(1)';
-      }
+  if (!tab) return;
+  if (tab === 'construction') {
+    if (projectName) {
+      window._selectedConstProject = projectName;
     }
-  });
-
-  // Toggle sections
-  const billsEl = document.getElementById('section-records-bills');
-  const docsEl = document.getElementById('section-records-documents');
-  const polEl = document.getElementById('section-records-policies');
-  const constrEl = document.getElementById('section-records-construction');
-  
-  if(billsEl) billsEl.style.display = tab === 'bills' ? 'block' : 'none';
-  if(docsEl) docsEl.style.display = tab === 'documents' ? 'block' : 'none';
-  if(polEl) polEl.style.display = tab === 'policies' ? 'block' : 'none';
-  if(constrEl) constrEl.style.display = tab === 'construction' ? 'block' : 'none';
-  
-  // Auto-scroll to the activated section
-  setTimeout(() => {
-    let scrollTargetId = 'section-records-bills';
-    if (tab === 'documents') scrollTargetId = 'section-records-documents';
-    if (tab === 'policies') scrollTargetId = 'section-records-policies';
-    if (tab === 'construction') scrollTargetId = 'section-records-construction';
-    
-    const el = document.getElementById(scrollTargetId);
-    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  }, 50);
+    _recordsFilter = 'construction';
+    renderConstruction();
+    setTimeout(function() {
+      var el = document.getElementById('section-construction');
+      if (el) el.scrollIntoView({behavior:'smooth',block:'start'});
+    }, 100);
+  } else {
+    _recordsFilter = tab;
+    renderFiles();
+    var sectionId = tab === 'bills' ? 'section-bills' : tab === 'documents' ? 'section-documents' : tab === 'policies' ? 'section-policies' : null;
+    if (sectionId) {
+      setTimeout(function() {
+        var el = document.getElementById(sectionId);
+        if (el) el.scrollIntoView({behavior:'smooth',block:'start'});
+      }, 100);
+    }
+  }
 }
+window.selectRecordsTab = selectRecordsTab;
 window.selectRecordsTab = selectRecordsTab;
 
 let currentTab = 'dashboard';
@@ -1346,6 +1569,32 @@ function switchTab(tabId) {
   const viewContent = document.getElementById(`view-${tabId}`);
   if (viewContent) {
     viewContent.classList.add('active');
+  }
+
+  // Show/hide inline calendar based on tab
+  var inlineCal = document.getElementById('inline-calendar');
+  if (inlineCal) {
+    inlineCal.style.display = tabId === 'dashboard' ? 'block' : 'none';
+  }
+
+  // Toggle header elements per tab
+  var headerActions = document.querySelector('.header-actions');
+  var dateBadge = document.getElementById('current-date-badge');
+  if (headerActions) {
+    if (tabId === 'records') {
+      headerActions.style.display = '';
+      document.getElementById('dashboard-search').style.display = 'none';
+      document.getElementById('records-search-header').style.display = '';
+      if (dateBadge) dateBadge.style.display = 'flex';
+    } else if (tabId === 'settings') {
+      headerActions.style.display = 'none';
+      if (dateBadge) dateBadge.style.display = 'none';
+    } else {
+      headerActions.style.display = '';
+      document.getElementById('dashboard-search').style.display = '';
+      document.getElementById('records-search-header').style.display = 'none';
+      if (dateBadge) dateBadge.style.display = 'flex';
+    }
   }
 
   // Update Header text
@@ -1534,9 +1783,9 @@ function renderDashboard() {
   const rentalBalanceNode = document.getElementById('dash-rental-balance');
   if (rentalBalanceNode) {
     if (isDayMode || isYearMode) {
-      rentalBalanceNode.innerHTML = `<span style="color: var(--text-primary);">Collected: <span style="color: var(--color-warning); font-weight: 800; margin-left: 2px;">${formatCurrency(totalRentCollected)}</span></span> <span style="color: var(--text-primary); font-weight: 600; margin-left: 10px;">${isYearMode ? '(Year view)' : '(Day view)'}</span>`;
+      rentalBalanceNode.innerHTML = `<div style="color: var(--text-primary);">Collected: <span style="color: var(--color-warning); font-weight: 800; margin-left: 2px;">${formatCurrency(totalRentCollected)}</span></div><div style="color: var(--text-primary); font-weight: 600; margin-top: 2px;">${isYearMode ? '(Year view)' : '(Day view)'}</div>`;
     } else {
-      rentalBalanceNode.innerHTML = `<span style="color: var(--text-primary);">Collected: <span style="color: var(--color-warning); font-weight: 800; margin-left: 2px;">${formatCurrency(totalRentCollected)}</span></span> <span style="color: var(--text-primary);">Monthly Total: <span style="color: var(--text-primary); font-weight: 800; margin-left: 2px;">${formatCurrency(monthlyRent)}</span></span>`;
+      rentalBalanceNode.innerHTML = `<div style="color: var(--text-primary);">Collected: <span style="color: var(--color-warning); font-weight: 800; margin-left: 2px;">${formatCurrency(totalRentCollected)}</span></div><div style="color: var(--text-primary); margin-top: 2px;">Monthly Total: <span style="color: var(--text-primary); font-weight: 800; margin-left: 2px;">${formatCurrency(monthlyRent)}</span></div>`;
     }
   }
   
@@ -1563,10 +1812,14 @@ function renderDashboard() {
       if (todayExps.length > 0) {
         var expHtml = '';
         todayExps.forEach(function(exp) {
-          expHtml += '<div style="display: flex; justify-content: space-between; align-items: center; padding: 0.2rem 0.4rem; background: var(--input-bg); border-radius: 4px; font-size: 0.7rem;">' +
-            '<span style="font-weight: 600; color: var(--text-primary);">' + (exp.note || exp.category) + '</span>' +
-            (exp.paymentMethod ? '<span style="font-size:0.6rem; color:var(--text-secondary); font-weight:400;">[' + (exp.paymentMethod === 'upi' ? 'UPI' : 'Cash') + ']</span>' : '<span></span>') +
-            '<span style="font-weight: 700; color: var(--color-danger);">' + formatCurrency(exp.amount) + '</span>' +
+          var leftText = exp.note || exp.category;
+          if (exp.category === 'construction') {
+            leftText = 'Construction - ' + (exp.laborType || 'General') + ' - ' + (exp.project || '');
+          }
+          expHtml += '<div style="display: flex; align-items: center; padding: 0.2rem 0.4rem; background: var(--input-bg); border-radius: 4px; font-size: 0.7rem;">' +
+            '<span style="flex: 1; font-weight: 600; color: var(--text-primary);">' + leftText + '</span>' +
+            (exp.paymentMethod ? '<span style="flex: 1; text-align: center; font-size:0.65rem; color:var(--text-secondary); font-weight:600;">' + (exp.paymentMethod === 'upi' ? 'UPI' : 'Cash') + '</span>' : '<span style="flex: 1;"></span>') +
+            '<span style="flex: 1; text-align: right; font-weight: 700; color: var(--color-danger);">' + formatCurrency(exp.amount) + '</span>' +
           '</div>';
         });
         expenseCardDetails.innerHTML = expHtml;
@@ -1622,9 +1875,9 @@ function renderDashboard() {
   const interestReceivedBalanceNode = document.getElementById('dash-interest-received-balance');
   if (interestReceivedBalanceNode) {
     if (isDayMode || isYearMode) {
-      interestReceivedBalanceNode.innerHTML = `<span style="color: var(--text-primary);">Collected: <span style="color: var(--color-warning); font-weight: 800; margin-left: 2px;">${formatCurrency(totalInterestReceived)}</span></span> <span style="color: var(--text-primary); font-weight: 600; margin-left: 10px;">${isYearMode ? '(Year view)' : '(Day view)'}</span>`;
+      interestReceivedBalanceNode.innerHTML = `<div style="color: var(--text-primary);">Collected: <span style="color: var(--color-warning); font-weight: 800; margin-left: 2px;">${formatCurrency(totalInterestReceived)}</span></div><div style="color: var(--text-primary); font-weight: 600; margin-top: 2px;">${isYearMode ? '(Year view)' : '(Day view)'}</div>`;
     } else {
-      interestReceivedBalanceNode.innerHTML = `<span style="color: var(--text-primary);">Collected: <span style="color: var(--color-warning); font-weight: 800; margin-left: 2px;">${formatCurrency(totalInterestReceived)}</span></span> <span style="color: var(--text-primary);">Monthly Total: <span style="color: var(--text-primary); font-weight: 800; margin-left: 2px;">${formatCurrency(expectedInterestReceived)}</span></span>`;
+      interestReceivedBalanceNode.innerHTML = `<div style="color: var(--text-primary);">Collected: <span style="color: var(--color-warning); font-weight: 800; margin-left: 2px;">${formatCurrency(totalInterestReceived)}</span></div><div style="color: var(--text-primary); margin-top: 2px;">Monthly Total: <span style="color: var(--text-primary); font-weight: 800; margin-left: 2px;">${formatCurrency(expectedInterestReceived)}</span></div>`;
     }
   }
 
@@ -1646,7 +1899,7 @@ function renderDashboard() {
           var pOwe = Number(r.monthlyRent) - pPaid;
           if (pOwe > 0) {
             var renewData = getNextRenewal(r.startDate);
-            pTenants.push({name: r.tenantName, owe: pOwe, renewalDue: renewData && renewData.daysLeft <= 30});
+            pTenants.push({name: r.tenantName, owe: pOwe, renewalDue: renewData && renewData.daysLeft <= 7});
           }
         }
       });
@@ -1665,7 +1918,7 @@ function renderDashboard() {
       const outstanding = getOutstandingPrincipalAtMonth(l.id, l.principal, selectedMonthStr);
       if (outstanding > 0) {
         const expected = outstanding * (Number(l.interestRate) / 100);
-        const pPaid = state.interestPayments.filter(p => p.type === 'received' && p.loanId === l.id && p.date.startsWith(selectedMonthStr)).reduce((sum, p) => sum + Number(p.amount), 0);
+        const pPaid = state.interestPayments.filter(p => p.type === 'received' && p.category !== 'issuance' && p.loanId === l.id && p.date.startsWith(selectedMonthStr)).reduce((sum, p) => sum + Number(p.amount), 0);
         const pOwe = expected - pPaid;
         if (pOwe > 0) pBorrowers.push({name: l.borrowerName, owe: pOwe});
       }
@@ -1676,7 +1929,7 @@ function renderDashboard() {
         const outstanding = getOutstandingPrincipalAtMonth(l.id, l.principal, selectedMonthStr);
         if (outstanding <= 0) return '';
         const expected = outstanding * (Number(l.interestRate) / 100);
-        const pPaid = state.interestPayments.filter(p => p.type === 'received' && p.loanId === l.id && p.date.startsWith(selectedMonthStr)).reduce((sum, p) => sum + Number(p.amount), 0);
+        const pPaid = state.interestPayments.filter(p => p.type === 'received' && p.category !== 'issuance' && p.loanId === l.id && p.date.startsWith(selectedMonthStr)).reduce((sum, p) => sum + Number(p.amount), 0);
         const pOwe = expected - pPaid;
         if (pOwe <= 0) return '';
         return `<div class="pending-name-item"><span>${l.borrowerName}</span> (${formatCurrency(pOwe)})</div>`;
@@ -1699,6 +1952,9 @@ function renderDashboard() {
     
     // Removed pending names from balance to receive card per user request
   }
+
+  // Glance Widget
+  renderGlanceWidget();
 
   // F. Recent Activity (rendered below via renderRecentActivity)
   
@@ -2291,6 +2547,7 @@ function renderRecentActivity() {
   const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
   
   const activities = [];
+  var actOrder = 0;
   
   state.rentPayments.forEach(p => {
     const date = p.datePaid || p.date;
@@ -2301,6 +2558,7 @@ function renderRecentActivity() {
     if (currentActivityFilter === 'month' && d < monthStart) return;
     const rental = state.rentals.find(r => r.id === p.rentalId);
     activities.push({
+      _order: actOrder++,
       date: date,
       type: 'rent-paid',
       label: 'Rent Paid',
@@ -2310,6 +2568,7 @@ function renderRecentActivity() {
   });
   
   state.interestPayments.forEach(p => {
+    if (p.category === 'issuance') return;
     const date = p.date;
     if (!date) return;
     const d = new Date(date);
@@ -2319,6 +2578,7 @@ function renderRecentActivity() {
     const isReceived = p.type === 'received';
     const name = isReceived ? state.lent.find(l => l.id === p.loanId) : state.borrowed.find(l => l.id === p.loanId);
     activities.push({
+      _order: actOrder++,
       date: date,
       type: 'interest-paid',
       label: isReceived ? 'Interest Received' : 'Interest Paid',
@@ -2334,11 +2594,16 @@ function renderRecentActivity() {
     if (currentActivityFilter === 'today' && d < todayStart) return;
     if (currentActivityFilter === 'week' && d < weekStart) return;
     if (currentActivityFilter === 'month' && d < monthStart) return;
+    var expDetail = (e.category || 'General') + ' — ' + formatCurrency(e.amount);
+    if (e.category === 'construction') {
+      expDetail = 'Construction — ' + (e.laborType || 'General') + ' — ' + (e.project || '') + ' — ' + formatCurrency(e.amount);
+    }
     activities.push({
+      _order: actOrder++,
       date: date,
       type: 'expense',
       label: 'Expense Added',
-      detail: `${e.category || 'General'} — ${formatCurrency(e.amount)}${e.note ? ' (' + e.note + ')' : ''}`,
+      detail: expDetail,
       icon: '💸'
     });
   });
@@ -2351,6 +2616,7 @@ function renderRecentActivity() {
     if (currentActivityFilter === 'week' && d < weekStart) return;
     if (currentActivityFilter === 'month' && d < monthStart) return;
     activities.push({
+      _order: actOrder++,
       date: date,
       type: 'lent',
       label: 'Loan Given',
@@ -2367,6 +2633,7 @@ function renderRecentActivity() {
     if (currentActivityFilter === 'week' && d < weekStart) return;
     if (currentActivityFilter === 'month' && d < monthStart) return;
     activities.push({
+      _order: actOrder++,
       date: date,
       type: 'borrowed',
       label: 'Loan Taken',
@@ -2385,6 +2652,7 @@ function renderRecentActivity() {
     const sinceDays = Math.floor((todayStart - d) / (1000 * 60 * 60 * 24));
     if (sinceDays > 90) return;
     activities.push({
+      _order: actOrder++,
       date: date,
       type: 'tenant-added',
       label: 'Tenant Added',
@@ -2393,7 +2661,11 @@ function renderRecentActivity() {
     });
   });
 
-  activities.sort((a, b) => new Date(b.date) - new Date(a.date));
+  activities.sort((a, b) => {
+    var d = new Date(b.date) - new Date(a.date);
+    if (d !== 0) return d;
+    return b._order - a._order;
+  });
   
   if (activities.length === 0) {
     container.innerHTML = `<div class="empty-state"><div class="empty-state-icon"><svg viewBox="0 0 24 24" width="48" height="48"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div><p>No recent activity.</p></div>`;
@@ -2407,7 +2679,7 @@ function renderRecentActivity() {
       <span style="font-size:1.1rem;">${a.icon}</span>
       <div style="flex:1;min-width:0;">
         <div style="font-weight:600;font-size:0.85rem;color:var(--text-primary);">${a.label}</div>
-        <div style="font-size:0.75rem;color:var(--text-secondary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${a.detail}</div>
+        <div style="font-size:0.75rem;color:var(--text-secondary);">${a.detail}</div>
       </div>
       <span style="font-size:0.65rem;color:var(--text-muted);white-space:nowrap;">${timeStr}</span>
     </div>`;
@@ -2425,6 +2697,7 @@ window.setActivityFilter = function(filter) {
 
 // 7. LENDING TAB LOGIC
 function renderLending() {
+
   const [selYear, selMonth] = selectedMonthStr.split('-').map(Number);
   const endDateOfSelectedMonth = `${selectedMonthStr}-${String(new Date(selYear, selMonth, 0).getDate()).padStart(2, '0')}`;
 
@@ -2502,17 +2775,21 @@ function renderLending() {
       const currentMonthPayments = interestPayments.filter(p => p.date.startsWith(selectedMonthStr));
       const currentMonthSum = currentMonthPayments.reduce((sum, p) => sum + Number(p.amount), 0);
       const isInterestFullyPaidThisMonth = monthlyYield > 0 && currentMonthSum >= (monthlyYield - 0.01);
+      const hasAdvance = interestPayments.some(function(p) { return p.note && p.note.indexOf('[Advance]') !== -1; });
       const statusInMonth = outstandingPrincipal > 0 ? 'active' : 'paid';
 
       loan._stats = {
-        outstandingPrincipal, totalReceived, totalRepaid, monthlyYield,
-        isInterestFullyPaidThisMonth, statusInMonth, lastPaymentDate
+        outstandingPrincipal, totalReceived, totalRepaid, monthlyYield, currentMonthSum,
+        isInterestFullyPaidThisMonth, statusInMonth, lastPaymentDate, hasAdvance
       };
 
       group.totalPrincipal += Number(loan.principal);
       group.totalOutstanding += outstandingPrincipal;
       group.totalRepaid += totalRepaid;
       group.totalReceived += totalReceived;
+      group.monthlyYieldSum = (group.monthlyYieldSum || 0) + monthlyYield;
+      group.currentMonthSum = (group.currentMonthSum || 0) + (currentMonthSum || 0);
+      if (hasAdvance) group.hasAdvance = true;
 
       if (statusInMonth === 'active') {
         group.statusInMonth = 'active';
@@ -2533,11 +2810,9 @@ function renderLending() {
     const card = document.createElement('div');
     card.className = `card loan-card ${_expandedCards.has(group.id) ? 'expanded' : ''}`;
     card.setAttribute('data-group-id', group.id);
+    card.setAttribute('data-loan-ids', group.loans.map(l => l.id).join(','));
 
     let stampHtml = '';
-    if (group.hasActiveLoans && group.allActiveInterestPaid) {
-      stampHtml = `<div class="card-stamp stamp-received">INTEREST RECEIVED</div>`;
-    }
 
     const principalHtml = `<div class="amount-value" style="color: var(--color-warning);">${formatCurrency(group.totalOutstanding)}</div>
        <div class="amount-in-words" style="font-size: 0.68rem; color: var(--text-secondary); max-width: 180px; line-height: 1.25; margin-top: 0.15rem; font-style: italic; text-align: right; word-wrap: break-word;">(${numberToIndianWords(group.totalOutstanding)})</div>
@@ -2552,7 +2827,7 @@ function renderLending() {
       <div style="background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1rem; margin-top: 1rem;">
         <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 0.75rem;">
           <div>
-            <h4 style="margin: 0 0 0.25rem 0; font-size: 0.95rem;">${loan.borrowerName}${loanIdxStr} ${stats.statusInMonth !== 'active' ? '<span class="badge badge-muted">Settled</span>' : ''}</h4>
+            <h4 style="margin: 0 0 0.25rem 0; font-size: 0.95rem;">${loan.borrowerName}${loanIdxStr} ${stats.statusInMonth !== 'active' ? '<span class="badge badge-muted">Settled</span>' : ''} ${stats.hasAdvance ? '<span class="badge" style="background: rgba(168,85,247,0.15); color: var(--color-purple); border:1px solid rgba(168,85,247,0.25); font-size:0.6rem; padding:0.1rem 0.35rem; margin-left:0.25rem;">Advance</span>' : ''}</h4>
             <div style="font-size: 0.8rem; color: var(--text-secondary);">Issued: ${formatDate(loan.startDate)} ${loan.dueDate ? `• Due: ${formatDate(loan.dueDate)}` : ''}</div>
           </div>
           <div class="contact-btn-group">${loan.phone ? getContactActionsHTML(loan.phone) : ''}</div>
@@ -2576,9 +2851,10 @@ function renderLending() {
             <div style="font-size: 1rem; font-weight: 700; color: var(--text-primary); margin-top: 0.2rem;">${loan.isEMI ? formatCurrency(loan.emiAmount) : loan.interestRate + '%'}</div>
             <div style="font-size: 0.65rem; color: var(--text-muted); margin-top: 0.15rem;">/ month</div>
           </div>
-          <div class="card" style="padding: 0.5rem; text-align: center;">
+          <div class="card" style="padding: 0.5rem; text-align: center; cursor: pointer;" onclick="showLedger('${loan.id}', 'lent')">
             <div style="font-size: 0.6rem; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.5px;">${loan.isEMI ? 'Tenure' : 'Total Received'}</div>
             <div style="font-size: 1rem; font-weight: 700; color: var(--color-success); margin-top: 0.2rem;">${loan.isEMI ? loan.tenureMonths + 'm' : formatCurrency(stats.totalReceived)}</div>
+            ${stats.hasAdvance ? '<div style="font-size: 0.6rem; color: var(--color-purple); font-weight: 600; margin-top: 0.15rem;">Includes Advance</div>' : ''}
           </div>
           <div class="card" style="padding: 0.5rem; text-align: center;">
             <div style="font-size: 0.6rem; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.5px;">Last Payment</div>
@@ -2586,8 +2862,12 @@ function renderLending() {
           </div>
         </div>
         
-        <div style="display: flex; align-items: center; gap: 0.35rem; margin-bottom: 0.5rem;" onclick="event.stopPropagation();">
-          ${stats.isInterestFullyPaidThisMonth || stats.statusInMonth !== 'active' ? '' : `<label for="chk-interest-received-${loan.id}" style="cursor: pointer; font-size: 0.85rem; color: var(--text-primary); margin: 0;">Interest Received</label><input type="checkbox" id="chk-interest-received-${loan.id}" onchange="if(this.checked) { quickMarkInterestPaid('${loan.id}', 'received', ${stats.monthlyYield}, '${selectedMonthStr}'); }" style="width: 15px; height: 15px; cursor: pointer; accent-color: var(--color-success); margin: 0; flex-shrink: 0;">`}
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.5rem; padding: 0.3rem 0.5rem; background: var(--input-bg); border-radius: 4px; font-size: 0.75rem;">
+          <span style="font-weight:600; color:var(--text-primary);">This Month:</span>
+          ${stats.isInterestFullyPaidThisMonth
+            ? '<span style="color:var(--color-success);font-weight:700;">Received ✓</span>'
+            : `<span><span style="color:var(--color-success);font-weight:600;">${formatCurrency(stats.currentMonthSum)}</span> received / Balance <span style="color:var(--color-warning);font-weight:600;">${formatCurrency(Math.max(0, stats.monthlyYield - stats.currentMonthSum))}</span></span>`
+          }
         </div>
 
         ${loan.notes ? `<div style="font-size: 0.8rem; color: var(--text-secondary); font-style: italic; margin-bottom: 0.5rem;">Notes: ${loan.notes}</div>` : ''}
@@ -2597,13 +2877,12 @@ function renderLending() {
             ? (loan.isEMI
                ? `<button class="btn btn-primary btn-sm" onclick="promptRecordEMI('${loan.id}', 'received')">Record EMI</button>
                   <button class="btn btn-sm" style="background: linear-gradient(135deg, var(--color-accent), #0369a1); color: #fff; box-shadow: 0 4px 14px rgba(14,165,233,0.3);" onclick="lendMore('${loan.id}')">Lend More</button>`
-               : `<button class="btn btn-primary btn-sm" onclick="promptPayment('${loan.id}', 'received', 'interest')">Record interest</button>
-                  <button class="btn btn-success btn-sm" onclick="promptPayment('${loan.id}', 'received', 'principal')">Repay principal</button>
+               : `<button class="btn btn-primary btn-sm" onclick="quickReceiveInterest('${loan.id}', 'lent')">Receive interest</button>
+                   <button class="btn btn-success btn-sm" onclick="promptPayment('${loan.id}', 'received', 'principal')">Repay principal</button>
                   <button class="btn btn-sm" style="background: linear-gradient(135deg, var(--color-accent), #0369a1); color: #fff; box-shadow: 0 4px 14px rgba(14,165,233,0.3);" onclick="lendMore('${loan.id}')">Lend More</button>
                   <button class="btn btn-secondary btn-sm" onclick="promptConvertEMI('${loan.id}', 'lent')">Convert to EMI</button>`)
             : `<button class="btn btn-secondary btn-sm" onclick="toggleLoanStatus('${loan.id}', 'lent')">Reopen</button>`
           }
-          <button class="btn btn-secondary btn-sm" onclick="showLedger('${loan.id}', 'lent')">History</button>
           <button class="btn btn-secondary btn-sm" onclick="editLoan('${loan.id}', 'lent')">Edit</button>
           <button class="btn btn-danger btn-sm" onclick="deleteLoan('${loan.id}', 'lent')">Del</button>
         </div>
@@ -2621,9 +2900,11 @@ function renderLending() {
           ${group.phone ? `<div style="margin-top: 0.25rem; font-size: 0.85rem; color: var(--text-secondary);">${getContactActionsHTML(group.phone)}</div>` : ''}
           <div class="item-meta" style="margin-top: 0.25rem; display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;">
             <span>${group.loans.length} Loan${group.loans.length > 1 ? 's' : ''}</span>
+            <span style="font-size:0.7rem;color:var(--text-muted);${group.allActiveInterestPaid ? 'color:var(--color-success);font-weight:700;' : ''}">${group.allActiveInterestPaid ? 'Received ✓' : 'Recd: ' + formatCurrency(group.currentMonthSum || 0) + ' / Bal ' + formatCurrency(Math.max(0, (group.monthlyYieldSum || 0) - (group.currentMonthSum || 0)))}</span>
+            ${group.hasAdvance ? `<span style="font-size:0.65rem;color:var(--color-purple);font-weight:600;">Adv: ${formatCurrency(group.currentMonthSum - group.monthlyYieldSum)}</span>` : ''}
             <div style="display: flex; gap: 0.4rem; align-items: center;" onclick="event.stopPropagation()">
-              <input type="number" id="quick-pay-${group.id}" class="form-input" placeholder="₹ Amount" style="width: 90px; padding: 0.2rem 0.5rem; min-height: auto; font-size: 0.75rem;">
-              <button class="btn btn-primary" style="padding: 0.2rem 0.6rem; font-size: 0.75rem; min-height: auto;" onclick="quickGroupPayment('${group.id}', 'lent')">Recv</button>
+              <input type="number" id="quick-pay-${group.id}" class="form-input" placeholder="₹ Amount" style="width: 80px; padding: 0.2rem 0.4rem; min-height: auto; font-size: 0.75rem;">
+              <button class="btn btn-primary" style="padding: 0.2rem 0.5rem; font-size: 0.7rem; min-height: auto;" onclick="quickGroupPayment('${group.id}', 'lent')">Recv</button>
             </div>
           </div>
         </div>
@@ -2657,6 +2938,7 @@ function renderLending() {
 
 // 8. BORROWING TAB LOGIC
 function renderBorrowing() {
+
   const [selYear, selMonth] = selectedMonthStr.split('-').map(Number);
   const endDateOfSelectedMonth = `${selectedMonthStr}-${String(new Date(selYear, selMonth, 0).getDate()).padStart(2, '0')}`;
 
@@ -2766,6 +3048,7 @@ function renderBorrowing() {
     const card = document.createElement('div');
     card.className = `card loan-card ${_expandedCards.has(group.id) ? 'expanded' : ''}`;
     card.setAttribute('data-group-id', group.id);
+    card.setAttribute('data-loan-ids', group.loans.map(l => l.id).join(','));
 
     let stampHtml = '';
     if (group.hasActiveLoans && group.allActiveInterestPaid) {
@@ -2819,7 +3102,6 @@ function renderBorrowing() {
         </div>
 
         <div class="loan-actions" style="margin-top: 0.5rem;">
-          <button class="btn btn-secondary btn-sm" onclick="showLedger('${loan.id}', 'borrowed')">History</button>
           <button class="btn btn-secondary btn-sm" onclick="editLoan('${loan.id}', 'borrowed')">Edit</button>
           ${stats.statusInMonth === 'active' 
             ? (loan.isEMI
@@ -2879,6 +3161,7 @@ function renderBorrowing() {
 
 // 9. RENTAL TAB LOGIC
 function renderRentals() {
+
   const [selYear, selMonth] = selectedMonthStr.split('-').map(Number);
   const currentMonthName = MONTH_UPPER_NAMES[selMonth - 1];
   const activeMonthStr = `${currentMonthName} ${selYear}`;
@@ -3095,7 +3378,7 @@ document.getElementById('form-loan').addEventListener('submit', (e) => {
       category: 'issuance',
       amount: principal,
       date: startDate,
-      note: 'Original Principal'
+      note: 'Principal Disbursed'
     });
   }
 
@@ -3151,6 +3434,7 @@ function editLoan(id, direction) {
   document.getElementById('loan-party').value = direction === 'lent' ? loan.borrowerName : loan.financierName;
   document.getElementById('loan-phone').value = loan.phone || '';
   document.getElementById('loan-principal').value = loan.principal;
+  updatePrincipalWords();
   document.getElementById('loan-rate').value = loan.interestRate;
   document.getElementById('loan-start-date').value = loan.startDate;
   document.getElementById('loan-due-date').value = loan.dueDate || '';
@@ -3434,8 +3718,13 @@ document.getElementById('form-payment').addEventListener('submit', (e) => {
 
   closeModal('modal-payment');
   
-  if (type === 'received') renderLending();
-  else renderBorrowing();
+  if (category === 'principal') {
+    var direction = type === 'received' ? 'lent' : 'borrowed';
+    showLedger(loanId, direction);
+  } else {
+    if (type === 'received') renderLending();
+    else renderBorrowing();
+  }
 
 });
 
@@ -3537,7 +3826,7 @@ function showLedger(loanId, direction) {
             ${categoryBadge}
           </div>
           <span class="ledger-date">${formatDate(item.date)}</span>
-          ${item.note ? `<span class="ledger-note">${item.note}</span>` : ''}
+          ${item.note ? `<span class="ledger-note">${item.note.replace('[Advance]', '<span style="color:var(--color-purple);font-weight:600;">[Advance]</span>')}</span>` : ''}
         </div>
         ${deleteBtnHtml}
       `;
@@ -3859,6 +4148,7 @@ window.deleteRentPayment = deleteRentPayment;
 document.getElementById('btn-reset-data').addEventListener('click', () => {
   if (confirm('CRITICAL WARNING: This will completely delete all your loans, properties, tenants, and logged history. Are you absolutely sure?')) {
     if (confirm('Confirm one last time. This cannot be undone.')) {
+      clearFileDB();
       localStorage.removeItem(STORAGE_KEY);
       localStorage.removeItem(STORAGE_KEY + '_v');
       state = {
@@ -3872,9 +4162,8 @@ document.getElementById('btn-reset-data').addEventListener('click', () => {
         files: [],
         theme: 'black-and-colored'
       };
-      seedInitialData();
-      localStorage.setItem(STORAGE_KEY + '_v', SEED_VERSION);
-      alert('Local database wiped and reseeded successfully.');
+      saveState();
+      alert('Local database wiped successfully.');
       switchTab('dashboard');
     }
   }
@@ -3902,20 +4191,22 @@ function initSearch() {
 
     // Search Lent
     const matchedLent = state.lent.filter(l => 
-      l.borrowerName.toLowerCase().includes(query) || 
+      (l.borrowerName && l.borrowerName.toLowerCase().includes(query)) || 
+      (l.phone && l.phone.includes(query)) ||
       (l.notes && l.notes.toLowerCase().includes(query))
     );
 
     // Search Borrowed
     const matchedBorrowed = state.borrowed.filter(b => 
-      b.financierName.toLowerCase().includes(query) || 
+      (b.financierName && b.financierName.toLowerCase().includes(query)) || 
+      (b.phone && b.phone.includes(query)) ||
       (b.notes && b.notes.toLowerCase().includes(query))
     );
 
     // Search Rentals
     const matchedRentals = state.rentals.filter(r => 
-      r.tenantName.toLowerCase().includes(query) || 
-      r.propertyName.toLowerCase().includes(query) ||
+      (r.tenantName && r.tenantName.toLowerCase().includes(query)) || 
+      (r.propertyName && r.propertyName.toLowerCase().includes(query)) ||
       (r.contactInfo && r.contactInfo.toLowerCase().includes(query))
     );
 
@@ -3951,9 +4242,20 @@ function initSearch() {
         </div>
       `;
       item.addEventListener('click', () => {
-        switchTab('interest');
+        switchTab('dashboard');
+        currentReminderFilter = 'interest';
+        renderDashboard();
         searchInput.value = '';
-        performSearch();
+        resultsSection.style.display = 'none';
+        resultsList.innerHTML = '';
+        setTimeout(() => {
+          const el = document.querySelector(`[data-loan-ids*="${loan.id}"]`);
+          if (el) {
+            el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            el.classList.add('card-highlight-active');
+            setTimeout(() => el.classList.remove('card-highlight-active'), 5000);
+          }
+        }, 300);
       });
       resultsList.appendChild(item);
     });
@@ -3979,9 +4281,20 @@ function initSearch() {
         </div>
       `;
       item.addEventListener('click', () => {
-        switchTab('interest');
+        switchTab('dashboard');
+        currentReminderFilter = 'interest';
+        renderDashboard();
         searchInput.value = '';
-        performSearch();
+        resultsSection.style.display = 'none';
+        resultsList.innerHTML = '';
+        setTimeout(() => {
+          const el = document.querySelector(`[data-loan-ids*="${loan.id}"]`);
+          if (el) {
+            el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            el.classList.add('card-highlight-active');
+            setTimeout(() => el.classList.remove('card-highlight-active'), 5000);
+          }
+        }, 300);
       });
       resultsList.appendChild(item);
     });
@@ -4005,9 +4318,20 @@ function initSearch() {
         </div>
       `;
       item.addEventListener('click', () => {
-        switchTab('rental');
+        switchTab('dashboard');
+        currentReminderFilter = 'rent';
+        renderDashboard();
         searchInput.value = '';
-        performSearch();
+        resultsSection.style.display = 'none';
+        resultsList.innerHTML = '';
+        setTimeout(() => {
+          const el = document.querySelector(`[data-id="${rental.id}"]`);
+          if (el) {
+            el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            el.classList.add('card-highlight-active');
+            setTimeout(() => el.classList.remove('card-highlight-active'), 2000);
+          }
+        }, 300);
       });
       resultsList.appendChild(item);
     });
@@ -4017,6 +4341,61 @@ function initSearch() {
   clearBtn.addEventListener('click', () => {
     searchInput.value = '';
     performSearch();
+  });
+}
+
+// Records search
+function initRecordsSearch() {
+  var input = document.getElementById('records-search-header');
+  if (!input) return;
+  var resultsContainer = document.createElement('div');
+  resultsContainer.id = 'records-search-results';
+  resultsContainer.style.cssText = 'display: none;';
+  var recordsView = document.getElementById('view-records');
+  if (recordsView) {
+    recordsView.insertBefore(resultsContainer, recordsView.firstChild);
+  }
+  
+  input.addEventListener('input', function() {
+    var q = this.value.trim().toLowerCase();
+    if (!q) { resultsContainer.style.display = 'none'; resultsContainer.innerHTML = ''; return; }
+    
+    var matchedFiles = state.files.filter(function(f) { return f.title && f.title.toLowerCase().includes(q); });
+    var matchedConst = (state.expenses || []).filter(function(e) {
+      if (!e || e.category !== 'construction') return false;
+      return (e.laborType && e.laborType.toLowerCase().includes(q)) ||
+             (e.project && e.project.toLowerCase().includes(q)) ||
+             (e.workerName && e.workerName.toLowerCase().includes(q)) ||
+             (e.note && e.note.toLowerCase().includes(q));
+    });
+    
+    if (matchedFiles.length === 0 && matchedConst.length === 0) {
+      resultsContainer.innerHTML = '<div class="card" style="padding: 1rem; text-align: center; color: var(--text-muted); font-size: 0.85rem;">No records found.</div>';
+      resultsContainer.style.display = 'block';
+      return;
+    }
+    
+    var html = '<div class="card" style="padding: 0.75rem;">';
+    matchedFiles.forEach(function(f) {
+      var typeLabel = f.type.charAt(0).toUpperCase() + f.type.slice(1);
+      var colorMap = {bills: 'var(--color-warning)', documents: 'var(--color-success)', policies: 'var(--color-purple)'};
+      var color = colorMap[f.type] || 'var(--text-primary)';
+      html += '<div onclick="selectRecordsTab(\'' + f.type + '\'); setTimeout(function(){ var el=document.querySelector(\'[data-file-id=&quot;' + f.id + '&quot;]\'); if(el){ el.scrollIntoView({behavior:\'smooth\',block:\'center\'}); el.classList.add(\'card-highlight-active\'); setTimeout(function(){ el.classList.remove(\'card-highlight-active\') },5000); } },200); document.getElementById(\'records-search-header\').value=\'\'; document.getElementById(\'records-search-results\').style.display=\'none\';" style="cursor:pointer; padding:0.5rem; border-bottom:1px solid var(--border-color); display:flex; align-items:center; gap:0.5rem;">' +
+        '<span style="font-size:0.6rem; font-weight:700; text-transform:uppercase; color:' + color + ';">' + typeLabel + '</span>' +
+        '<span style="flex:1; font-weight:600; color:var(--text-primary); font-size:0.85rem;">' + f.title + '</span>' +
+        '<span style="font-size:0.7rem; color:var(--text-muted);">' + f.date + '</span>' +
+      '</div>';
+    });
+    matchedConst.forEach(function(e) {
+      html += '<div onclick="selectRecordsTab(\'construction\', \'' + (e.project || '').replace(/'/g, "\\'") + '\'); setTimeout(function(){ document.getElementById(\'records-search-header\').value=\'\'; document.getElementById(\'records-search-results\').style.display=\'none\'; },200);" style="cursor:pointer; padding:0.5rem; border-bottom:1px solid var(--border-color); display:flex; align-items:center; gap:0.5rem;">' +
+        '<span style="font-size:0.6rem; font-weight:700; text-transform:uppercase; color:var(--color-accent);">Const</span>' +
+        '<span style="flex:1; font-weight:600; color:var(--text-primary); font-size:0.85rem;">' + (e.laborType || 'General') + ' - ' + (e.project || '') + '</span>' +
+        '<span style="font-weight:700; color:var(--color-danger); font-size:0.8rem;">' + formatCurrency(e.amount) + '</span>' +
+      '</div>';
+    });
+    html += '</div>';
+    resultsContainer.innerHTML = html;
+    resultsContainer.style.display = 'block';
   });
 }
 
@@ -4129,11 +4508,16 @@ function renderConstruction() {
   if (!container) return;
   
   try {
-    var projects = ['23/48 Ground Floor', '23/48 3rd Floor', '1/104'];
+    var projects = (state.properties || []).slice();
+    if (projects.length === 0) projects = ['23/48 Ground Floor', '23/48 3rd Floor', '1/104'];
     var constructionExpenses = (state.expenses || []).filter(function(e) { return e && e.category === 'construction'; });
     var categories = ['Carpenter', 'Painter', 'Welding', 'Mistri', 'Electrician', 'Plumber', 'Malba', 'Hardware', 'Furniture', 'Ghisai', 'Glass Work', 'AC Service', 'Others'];
     
-    var selectedProject = window._selectedConstProject || projects[0];
+    var selectedProject = window._selectedConstProject;
+    if (!selectedProject || projects.indexOf(selectedProject) === -1) {
+      selectedProject = projects[0];
+      window._selectedConstProject = selectedProject;
+    }
     var payMethod = window._selectedConstPayMethod || 'cash';
     
     var exps = constructionExpenses.filter(function(e) { return e && e.project === selectedProject; }).sort(function(a, b) { return new Date(b.date || 0) - new Date(a.date || 0); });
@@ -4144,7 +4528,7 @@ function renderConstruction() {
       var bg = isSelected ? 'var(--color-accent)' : 'var(--bg-primary)';
       var color = isSelected ? '#fff' : 'var(--text-secondary)';
       var border = isSelected ? '1px solid var(--color-accent)' : '1px solid var(--border-color)';
-      return '<button type="button" class="const-cat-btn" data-cat="' + cat + '" onclick="selectConstCategory(\'' + cat + '\')" style="padding: 0.3rem 0.45rem; font-size: 0.7rem; border-radius: 4px; background: ' + bg + '; color: ' + color + '; border: ' + border + '; cursor: pointer; transition: all 0.2s;">' + cat + '</button>';
+      return '<button type="button" class="const-cat-btn" data-cat="' + cat + '" onclick="selectConstCategory(\'' + cat + '\')" style="padding: 0.4rem 0.65rem; font-size: 0.78rem; border-radius: 5px; background: ' + bg + '; color: ' + color + '; border: ' + border + '; cursor: pointer; transition: all 0.2s;">' + cat + '</button>';
     }).join('');
     
     var expensesHtml = '';
@@ -4179,20 +4563,16 @@ function renderConstruction() {
           '<span style="font-weight: 700; color: var(--text-primary); font-size: 0.85rem;">Total: ' + formatCurrency(total) + '</span>' +
         '</div>' +
         '<div style="display: flex; flex-wrap: wrap; gap: 0.35rem; margin-bottom: 0.5rem;">' + catButtonsHtml + '</div>' +
-        (state.showPayMethod !== false ? '<div style="display: flex; gap: 0.5rem; align-items: center; margin-bottom: 0.5rem;">' +
-          '<span style="font-size: 0.7rem; color: var(--text-secondary); font-weight: 600;">Pay via:</span>' +
-          '<button type="button" class="btn btn-sm" onclick="selectConstPayMethod(\'cash\')" style="padding:0.15rem 0.5rem; font-size:0.65rem; background:' + (payMethod === 'cash' ? 'var(--color-success)' : 'var(--bg-secondary)') + '; color:' + (payMethod === 'cash' ? '#fff' : 'var(--text-primary)') + '; border:1px solid ' + (payMethod === 'cash' ? 'var(--color-success)' : 'var(--border-color)') + '; cursor:pointer;">💰 Cash</button>' +
-          '<button type="button" class="btn btn-sm" onclick="selectConstPayMethod(\'upi\')" style="padding:0.15rem 0.5rem; font-size:0.65rem; background:' + (payMethod === 'upi' ? 'var(--color-accent)' : 'var(--bg-secondary)') + '; color:' + (payMethod === 'upi' ? '#fff' : 'var(--text-primary)') + '; border:1px solid ' + (payMethod === 'upi' ? 'var(--color-accent)' : 'var(--border-color)') + '; cursor:pointer;">📱 UPI</button>' +
+        (state.showPayMethod !== false ? '<div style="display: flex; gap: 0.4rem; align-items: center; margin-bottom: 0.5rem;">' +
+          '<span style="font-size: 0.65rem; color: var(--text-secondary); font-weight: 600;">Pay via:</span>' +
+          '<button type="button" class="btn btn-sm" onclick="selectConstPayMethod(\'cash\')" style="padding:0.1rem 0.4rem; font-size:0.6rem; background:' + (payMethod === 'cash' ? 'var(--color-success)' : 'var(--bg-secondary)') + '; color:' + (payMethod === 'cash' ? '#fff' : 'var(--text-primary)') + '; border:1px solid ' + (payMethod === 'cash' ? 'var(--color-success)' : 'var(--border-color)') + '; cursor:pointer;">💰 Cash</button>' +
+          '<button type="button" class="btn btn-sm" onclick="selectConstPayMethod(\'upi\')" style="padding:0.1rem 0.4rem; font-size:0.6rem; background:' + (payMethod === 'upi' ? 'var(--color-accent)' : 'var(--bg-secondary)') + '; color:' + (payMethod === 'upi' ? '#fff' : 'var(--text-primary)') + '; border:1px solid ' + (payMethod === 'upi' ? 'var(--color-accent)' : 'var(--border-color)') + '; cursor:pointer;">📱 UPI</button>' +
         '</div>' : '') +
-        '<div style="display: flex; gap: 0.4rem; flex-wrap: wrap; align-items: stretch; margin-bottom: 0.35rem;">' +
-          '<input type="number" id="const-amount" class="form-input" placeholder="Amount" style="flex: 1; min-width: 100px; background: var(--input-bg); margin: 0; padding: 0.35rem 0.5rem; font-size: 0.8rem;">' +
-          '<input type="text" id="const-notes" class="form-input" placeholder="Note" style="flex: 1; min-width: 120px; background: var(--input-bg); margin: 0; padding: 0.35rem 0.5rem; font-size: 0.8rem;">' +
-          '<button class="btn btn-primary" onclick="submitQuickConst()" style="margin: 0; padding: 0.35rem 0.75rem; font-size: 0.75rem;">' +
-            '<svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none" style="margin-right: 2px;"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>' +
-            'Save' +
-          '</button>' +
+        '<div style="display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: stretch; margin-bottom: 0.5rem;">' +
+          '<input type="number" id="const-amount" class="form-input" placeholder="Amount" style="flex: 1; min-width: 120px; background: var(--input-bg); margin: 0; padding: 0.55rem 0.65rem; font-size: 1rem;">' +
+          '<input type="text" id="const-notes" class="form-input" placeholder="Note" style="flex: 1; min-width: 140px; background: var(--input-bg); margin: 0; padding: 0.55rem 0.65rem; font-size: 1rem;">' +
         '</div>' +
-        '<div style="display: flex; gap: 0.3rem; flex-wrap: wrap; margin-bottom: 0.5rem;">' +
+        '<div style="display: flex; gap: 0.3rem; flex-wrap: wrap; align-items: center; margin-bottom: 0.5rem;">' +
           '<button type="button" class="btn btn-sm" onclick="var i=document.getElementById(\'const-amount\'); i.value=(Number(i.value)||0)+100" style="padding:0.15rem 0.4rem; font-size:0.65rem; background:var(--bg-secondary); border:1px solid var(--border-color); cursor:pointer;">+100</button>' +
           '<button type="button" class="btn btn-sm" onclick="var i=document.getElementById(\'const-amount\'); i.value=(Number(i.value)||0)+500" style="padding:0.15rem 0.4rem; font-size:0.65rem; background:var(--bg-secondary); border:1px solid var(--border-color); cursor:pointer;">+500</button>' +
           '<button type="button" class="btn btn-sm" onclick="var i=document.getElementById(\'const-amount\'); i.value=(Number(i.value)||0)+1000" style="padding:0.15rem 0.4rem; font-size:0.65rem; background:var(--bg-secondary); border:1px solid var(--border-color); cursor:pointer;">+1000</button>' +
@@ -4200,6 +4580,12 @@ function renderConstruction() {
           '<button type="button" class="btn btn-sm" onclick="var i=document.getElementById(\'const-amount\'); i.value=(Number(i.value)||0)+2000" style="padding:0.15rem 0.4rem; font-size:0.65rem; background:var(--bg-secondary); border:1px solid var(--border-color); cursor:pointer;">+2000</button>' +
           '<button type="button" class="btn btn-sm" onclick="var i=document.getElementById(\'const-amount\'); i.value=(Number(i.value)||0)+2500" style="padding:0.15rem 0.4rem; font-size:0.65rem; background:var(--bg-secondary); border:1px solid var(--border-color); cursor:pointer;">+2500</button>' +
           '<button type="button" class="btn btn-sm" onclick="var i=document.getElementById(\'const-amount\'); i.value=(Number(i.value)||0)+5000" style="padding:0.15rem 0.4rem; font-size:0.65rem; background:var(--bg-secondary); border:1px solid var(--border-color); cursor:pointer;">+5000</button>' +
+          '<button type="button" class="btn btn-sm" onclick="var i=document.getElementById(\'const-amount\'); i.value=(Number(i.value)||0)+10000" style="padding:0.15rem 0.4rem; font-size:0.65rem; background:var(--bg-secondary); border:1px solid var(--border-color); cursor:pointer;">+10000</button>' +
+          '<span style="margin-left: auto;"></span>' +
+          '<button class="btn btn-primary" onclick="submitQuickConst()" style="margin: 0; padding: 0.55rem 0.9rem; font-size: 0.9rem;">' +
+            '<svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" style="margin-right: 2px;"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>' +
+            'Save' +
+          '</button>' +
         '</div>' +
         '<div style="font-size: 0.7rem; font-weight: 700; margin-bottom: 0.4rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px;">Recent Payments</div>' +
         '<div style="display: flex; flex-direction: column; gap: 0.35rem;">' +
@@ -4208,97 +4594,239 @@ function renderConstruction() {
       '</div>';
     
     container.innerHTML = html;
+    
+    var totalConstExps = projects.length;
+    var countEl = document.getElementById('count-construction');
+    if (countEl) countEl.textContent = totalConstExps;
   } catch (err) {
     container.innerHTML = '<div style="color:var(--color-danger); padding: 1rem; background: var(--bg-card); border-radius: 8px;">Error loading construction data: ' + err.message + '. Please clear your cache or check data integrity.</div>';
     console.error('Construction render error:', err);
   }
+  applyRecordsFilter();
 }
 
 // FILE UPLOAD LOGIC
-window.openUploadModal = function(type, method) {
-  const form = document.getElementById('form-upload');
-  if(form) form.reset();
-  
+
+
+window.triggerUpload = function(type, method) {
   document.getElementById('upload-type').value = type;
-  const img = document.getElementById('upload-preview-img');
-  const txt = document.getElementById('upload-preview-text');
-  if(img) { img.style.display = 'none'; img.src = ''; }
-  if(txt) txt.style.display = 'block';
-  if(txt) txt.textContent = 'No file selected';
-  
-  const fileInput = document.getElementById('upload-file-input');
-  if (fileInput) {
-    if (method === 'camera') {
-      fileInput.setAttribute('accept', 'image/*');
-      fileInput.setAttribute('capture', 'environment');
+  if (method === 'camera') {
+    const fileInput = document.getElementById('upload-file-input');
+    if (!fileInput) return;
+    fileInput.setAttribute('accept', 'image/*');
+    fileInput.setAttribute('capture', 'environment');
+    fileInput.click();
+  } else {
+    // Use File System Access API on supported browsers (skips Android chooser)
+    if ('showOpenFilePicker' in window) {
+      window.showOpenFilePicker({ multiple: false }).then(function(handles) {
+        return handles[0].getFile();
+      }).then(function(file) {
+        handleUploadedFile(file);
+      }).catch(function(err) {
+        if (err.name !== 'AbortError') console.error('File picker error:', err);
+      });
     } else {
-      fileInput.setAttribute('accept', 'image/*,application/pdf');
+      const fileInput = document.getElementById('upload-file-pick');
+      if (!fileInput) return;
+      fileInput.removeAttribute('accept');
       fileInput.removeAttribute('capture');
+      fileInput.value = '';
+      fileInput.click();
     }
   }
-  
-  document.getElementById('upload-modal-title').textContent = 'Upload ' + type.charAt(0).toUpperCase() + type.slice(1);
-  openModal('modal-upload');
-  
-  if (method === 'camera' && fileInput) {
-    fileInput.click();
+};
+
+function handleUploadedFile(file) {
+  if (!file) return;
+  if (file.type.startsWith('image/')) {
+    compressImage(file, 800, 0.7, function(compressed) {
+      window._pendingFileData = compressed;
+      window._openUploadModalWithFile(document.getElementById('upload-type').value);
+    });
+  } else {
+    const reader = new FileReader();
+    reader.onload = function(ev) {
+      window._pendingFileData = ev.target.result;
+      window._openUploadModalWithFile(document.getElementById('upload-type').value);
+    };
+    reader.readAsDataURL(file);
   }
+}
+
+window._pendingFileData = null;
+window._openUploadModalWithFile = function(type) {
+  document.getElementById('upload-modal-title').textContent = 'Upload ' + type.charAt(0).toUpperCase() + type.slice(1);
+  document.getElementById('upload-type').value = type;
+  document.getElementById('upload-title').value = '';
+  document.getElementById('upload-number').value = '';
+  const img = document.getElementById('upload-preview-img');
+  const txt = document.getElementById('upload-preview-text');
+  if (window._pendingFileData) {
+    img.src = window._pendingFileData;
+    img.style.display = 'block';
+    txt.style.display = 'none';
+  } else {
+    img.style.display = 'none';
+    img.src = '';
+    txt.style.display = 'block';
+    txt.textContent = 'No file selected';
+  }
+  openModal('modal-upload');
 };
 
 window.deleteFile = function(id) {
   if(!confirm('Are you sure you want to delete this file?')) return;
   loadState();
   state.files = state.files.filter(f => f.id !== id);
+  removeFileFromDB(id);
   saveState();
   renderFiles();
 };
 
 window.viewFile = function(id) {
   const file = state.files.find(f => f.id === id);
-  if(file && file.data) {
+  if (!file) return;
+  if (file.data) {
     const w = window.open('');
     w.document.write(`<img src="${file.data}" style="max-width:100%; height:auto;">`);
+  } else {
+    alert(file.title);
+  }
+};
+
+window.shareFileWhatsApp = function(id) {
+  const file = state.files.find(f => f.id === id);
+  if (!file) return;
+  var text = file.title;
+  if (file.fileNumber) text += ' - ' + file.fileNumber;
+  text += ' (' + file.date + ')';
+  if (file.data && file.data.indexOf('image/') !== -1 && navigator.canShare) {
+    fetch(file.data).then(function(r) { return r.blob(); }).then(function(blob) {
+      var f = new File([blob], file.title + '.jpg', { type: blob.type });
+      if (navigator.canShare({ files: [f] })) {
+        navigator.share({ text: text, files: [f] }).catch(function(){});
+      } else {
+        var url = 'https://wa.me/?text=' + encodeURIComponent(text);
+        window.open(url, '_blank');
+      }
+    }).catch(function() {
+      var url = 'https://wa.me/?text=' + encodeURIComponent(text);
+      window.open(url, '_blank');
+    });
+  } else {
+    var url = 'https://wa.me/?text=' + encodeURIComponent(text);
+    window.open(url, '_blank');
   }
 };
 
 function renderFiles() {
-  const container = document.getElementById('policies-list-container');
-  if (!container) return;
-  const policies = state.files.filter(f => f.type === 'policies').sort((a,b) => new Date(b.date) - new Date(a.date));
-  
-  if (policies.length === 0) {
-    container.innerHTML = `
-      <div class="empty-state">
-        <div class="empty-state-icon">
-          <svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-        </div>
-        <p>No documents uploaded yet.</p>
-      </div>`;
-    return;
-  }
-  
-  let html = '';
-  policies.forEach(p => {
-    html += `
-      <div class="card" style="margin-bottom: 0.75rem; display: flex; align-items: center; gap: 1rem; padding: 0.75rem;">
-        <div style="width: 48px; height: 48px; background: var(--input-bg); border-radius: 8px; overflow: hidden; flex-shrink: 0; display:flex; align-items:center; justify-content:center;">
-          ${p.data ? `<img src="${p.data}" style="width:100%; height:100%; object-fit:cover;">` : '<svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>'}
-        </div>
-        <div style="flex: 1;">
-          <div style="font-weight: 600; color: var(--text-primary); font-size: 0.95rem;">${p.title}</div>
-          <div style="font-size: 0.75rem; color: var(--text-muted);">Uploaded: ${p.date}</div>
-        </div>
-        <div style="display: flex; gap: 0.5rem;">
-          <button class="btn btn-secondary btn-sm" onclick="viewFile('${p.id}')">View</button>
-          <button class="btn btn-danger btn-sm" onclick="deleteFile('${p.id}')">Delete</button>
-        </div>
-      </div>
-    `;
+  ['bills', 'documents', 'policies'].forEach(function(fileType) {
+    var containerId = fileType + '-list-container';
+    var container = document.getElementById(containerId);
+    if (!container) return;
+    var files = state.files.filter(function(f) { return f.type === fileType; }).sort(function(a,b) { return new Date(b.date) - new Date(a.date); });
+    
+    var html = '';
+    
+    // Render file uploads
+    files.forEach(function(p) {
+      var hasNumber = p.fileNumber ? true : false;
+      html += '<div class="card" style="margin-bottom: 0.75rem; display: flex; align-items: center; gap: 1rem; padding: 0.75rem;" data-file-id="' + p.id + '">';
+      html += '<div style="width: 48px; height: 48px; background: var(--input-bg); border-radius: 8px; overflow: hidden; flex-shrink: 0; display:flex; align-items:center; justify-content:center;">';
+      html += p.data ? '<img src="' + p.data + '" style="width:100%; height:100%; object-fit:cover;">' : '<svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>';
+      html += '</div>';
+      html += '<div style="flex: 1; min-width: 0;">';
+      html += '<div style="font-weight: 600; color: var(--text-primary); font-size: 0.95rem;">' + p.title + '</div>';
+      if (hasNumber) {
+        html += '<div style="display: flex; align-items: center; gap: 0.35rem; margin-top: 0.3rem;">';
+        html += '<span style="font-size: 0.82rem; color: var(--color-accent); font-weight: 600; word-break: break-all;">' + escHtml(p.fileNumber) + '</span>';
+        html += '<button onclick="copyFileNumber(\'' + p.id + '\')" style="background: none; border: none; cursor: pointer; padding: 0; color: var(--text-secondary); display: inline-flex; align-items: center;">';
+        html += '<svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
+        html += '</button></div>';
+      }
+      html += '</div>';
+      html += '<button onclick="shareFileWhatsApp(\'' + p.id + '\')" title="Share on WhatsApp" style="background: none; border: none; cursor: pointer; padding: 0.2rem 0; color: #25D366; display: flex; align-items: center;">';
+      html += '<svg viewBox="0 0 24 24" width="22" height="22" fill="#25D366"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>';
+      html += '</button>';
+      html += '<div style="display: flex; gap: 0.5rem; align-items: center;">';
+      html += '<button class="btn btn-secondary btn-sm" onclick="viewFile(\'' + p.id + '\')">View</button>';
+      html += '<button class="btn btn-danger btn-sm" onclick="deleteFile(\'' + p.id + '\')">Delete</button>';
+      html += '</div>';
+      html += '</div>';
+    });
+    
+    // Catch if there are no notes and no files
+    if (html === '') {
+      html = '\
+        <div class="empty-state">\
+          <div class="empty-state-icon">\
+            <svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>\
+          </div>\
+          <p>No ' + fileType + ' uploaded yet.</p>\
+        </div>';
+    }
+    
+    container.innerHTML = html;
   });
-  container.innerHTML = html;
+  updateFileSummaryCards();
+  applyRecordsFilter();
 }
 
+function updateFileSummaryCards() {
+  ['bills', 'documents', 'policies', 'construction'].forEach(function(fileType) {
+    var files = state.files.filter(function(f) { return f.type === fileType; });
+    var countEl = document.getElementById('count-' + fileType);
+    if (countEl) countEl.textContent = files.length;
+  });
+  var constCount = state.expenses.filter(function(e) { return e.category === 'construction'; }).length;
+  var constCountEl = document.getElementById('count-construction');
+  if (constCountEl) constCountEl.textContent = constCount;
+}
+
+window.copyFileNumber = function(id) {
+  loadState();
+  var file = state.files.find(function(f) { return f.id === id; });
+  if (file && file.fileNumber) {
+    navigator.clipboard.writeText(file.fileNumber).then(function() {
+      alert('Copied!');
+    }).catch(function() {
+      prompt('Copy:', file.fileNumber);
+    });
+  }
+};
+
+window.copyText = function(text) {
+  navigator.clipboard.writeText(text).then(function() {
+    alert('Copied to clipboard!');
+  }).catch(function() {
+    prompt('Copy this text:', text);
+  });
+};
+
 // 13. BOOTSTRAP INITIALIZATION
+function compressImage(file, maxDimension, quality, callback) {
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    var img = new Image();
+    img.onload = function() {
+      var canvas = document.createElement('canvas');
+      var w = img.width, h = img.height;
+      if (w > maxDimension || h > maxDimension) {
+        if (w > h) { h = h * maxDimension / w; w = maxDimension; }
+        else { w = w * maxDimension / h; h = maxDimension; }
+      }
+      canvas.width = w;
+      canvas.height = h;
+      var ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, w, h);
+      callback(canvas.toDataURL('image/jpeg', quality));
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
 function initApp() {
   loadState();
   initNavigation();
@@ -4311,39 +4839,46 @@ function initApp() {
   const fileInput = document.getElementById('upload-file-input');
   if (fileInput) {
     fileInput.addEventListener('change', (e) => {
-      const file = e.target.files[0];
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = (ev) => {
-          document.getElementById('upload-preview-img').src = ev.target.result;
-          document.getElementById('upload-preview-img').style.display = 'block';
-          document.getElementById('upload-preview-text').style.display = 'none';
-        };
-        reader.readAsDataURL(file);
-      }
+      handleUploadedFile(e.target.files[0]);
+    });
+  }
+  const filePick = document.getElementById('upload-file-pick');
+  if (filePick) {
+    filePick.addEventListener('change', (e) => {
+      handleUploadedFile(e.target.files[0]);
     });
   }
   if (formUpload) {
     formUpload.addEventListener('submit', (e) => {
-      e.preventDefault();
-      loadState();
-      const type = document.getElementById('upload-type').value;
-      const title = document.getElementById('upload-title').value;
-      const data = document.getElementById('upload-preview-img').src;
-      if (!data || data === window.location.href || data === '') {
-        alert('Please select a file or take a photo.');
-        return;
+      try {
+        e.preventDefault();
+        var typeEl = document.getElementById('upload-type');
+        var titleEl = document.getElementById('upload-title');
+        var numberEl = document.getElementById('upload-number');
+        const type = typeEl ? typeEl.value : '';
+        const title = titleEl ? titleEl.value : '';
+        const data = window._pendingFileData;
+        if (!data && !title) {
+          alert('Please enter a title or select a file.');
+          return;
+        }
+        const number = numberEl ? numberEl.value.trim() : '';
+        state.files.push({
+          id: 'file_' + Date.now(),
+          type: type,
+          title: title || '(note)',
+          fileNumber: number,
+          data: data || '',
+          date: new Date().toISOString().slice(0, 10)
+        });
+        saveState();
+        window._pendingFileData = null;
+        closeModal('modal-upload');
+        renderFiles();
+      } catch(err) {
+        alert('Save error: ' + err.message + ' (check console)');
+        console.error('Upload save error:', err);
       }
-      state.files.push({
-        id: 'file_' + Date.now(),
-        type: type,
-        title: title,
-        data: data,
-        date: new Date().toISOString().slice(0, 10)
-      });
-      saveState();
-      closeModal('modal-upload');
-      renderFiles();
     });
   }
   
@@ -4352,10 +4887,15 @@ function initApp() {
     document.getElementById('form-loan').reset();
     document.getElementById('loan-id').value = '';
     document.getElementById('loan-direction').value = 'lent';
-    document.getElementById('loan-rate').value = '4.00'; // Default interest rate
-    document.getElementById('loan-start-date').value = new Date().toISOString().split('T')[0];
+    document.getElementById('loan-rate').value = '4.00';
+    var today = new Date();
+    var dueDate = new Date(today);
+    dueDate.setMonth(dueDate.getMonth() + 1);
+    var todayStr = today.toISOString().split('T')[0];
+    var dueDateStr = dueDate.toISOString().split('T')[0];
+    document.getElementById('loan-start-date').value = todayStr;
+    document.getElementById('loan-due-date').value = dueDateStr;
     
-    // Label updates
     document.getElementById('loan-modal-title').textContent = 'Lend Money';
     document.getElementById('loan-party-label').textContent = 'Borrower Name';
     document.getElementById('loan-party').placeholder = 'e.g. John Doe';
@@ -4364,15 +4904,19 @@ function initApp() {
     openModal('modal-loan');
   });
 
-  // Add borrowing loan trigger
   document.getElementById('btn-add-loan-borrowed').addEventListener('click', () => {
     document.getElementById('form-loan').reset();
     document.getElementById('loan-id').value = '';
     document.getElementById('loan-direction').value = 'borrowed';
-    document.getElementById('loan-rate').value = '3.00'; // Default interest rate
-    document.getElementById('loan-start-date').value = new Date().toISOString().split('T')[0];
+    document.getElementById('loan-rate').value = '3.00';
+    var today = new Date();
+    var dueDate = new Date(today);
+    dueDate.setMonth(dueDate.getMonth() + 1);
+    var todayStr = today.toISOString().split('T')[0];
+    var dueDateStr = dueDate.toISOString().split('T')[0];
+    document.getElementById('loan-start-date').value = todayStr;
+    document.getElementById('loan-due-date').value = dueDateStr;
     
-    // Label updates
     document.getElementById('loan-modal-title').textContent = 'Record Borrowed Money';
     document.getElementById('loan-party-label').textContent = 'Financier / Lender Name';
     document.getElementById('loan-party').placeholder = 'e.g. Apex Bank';
@@ -4380,6 +4924,10 @@ function initApp() {
     updatePrincipalPresets('borrowed');
     openModal('modal-loan');
   });
+
+  // Principal amount words listener
+  document.getElementById('loan-principal').addEventListener('input', updatePrincipalWords);
+  document.getElementById('quick-lend-principal').addEventListener('input', updateQuickLendWords);
 
   // Add rentals trigger
   document.getElementById('btn-add-rental').addEventListener('click', () => {
@@ -4474,10 +5022,6 @@ function initApp() {
     }
     
     openExpenseModal();
-    
-    // Switch to expenses tab if we logged it from dashboard to see it immediately
-    switchTab('expenses');
-    renderDashboard();
   });
 
   // Renewal Form Submit
@@ -4485,9 +5029,15 @@ function initApp() {
 
   // Initialize search logic
   initSearch();
+  initRecordsSearch();
 
   // Initialize header date display
   updateHeaderDateDisplay();
+
+  // Render property presets and settings list
+  renderPropertiesList();
+  renderRentalPropertyPresets();
+  renderExpensePropertyShortcuts();
 
   // Render initial dashboard view
   renderDashboard();
@@ -4596,6 +5146,7 @@ function deleteExpense(expenseId) {
 }
 
 function renderExpenses() {
+
   const dateInput = document.getElementById('expense-date');
   if (dateInput && !dateInput.value) {
     const d = new Date();
@@ -4641,7 +5192,11 @@ function renderExpenses() {
   }
 
   // Sort: newest first
-  const sortedExpenses = [...visibleExpenses].sort((a,b) => new Date(b.date) - new Date(a.date));
+  const sortedExpenses = [...visibleExpenses].sort((a,b) => {
+    var d = new Date(b.date) - new Date(a.date);
+    if (d !== 0) return d;
+    return state.expenses.indexOf(b) - state.expenses.indexOf(a);
+  });
 
   sortedExpenses.forEach(exp => {
     // Look up associated property name if any
@@ -4979,6 +5534,42 @@ function renderReportsChart() {
 }
 
 // Bind to window for global templates
+window.exportData = function() {
+  try {
+    var data = localStorage.getItem(STORAGE_KEY);
+    if (!data) { alert('No data to export.'); return; }
+    var blob = new Blob([data], { type: 'application/json' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = 'capitalflow-backup-' + new Date().toISOString().slice(0, 10) + '.json';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  } catch(e) { alert('Export error: ' + e.message); }
+};
+
+window.importData = function(event) {
+  try {
+    var file = event.target.files[0];
+    if (!file) return;
+    var reader = new FileReader();
+    reader.onload = function(e) {
+      try {
+        var data = JSON.parse(e.target.result);
+        if (!data || typeof data !== 'object') { alert('Invalid backup file.'); return; }
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+        localStorage.setItem(STORAGE_KEY + '_v', localStorage.getItem(STORAGE_KEY + '_v') || '0');
+        alert('Data imported! Refreshing...');
+        location.reload();
+      } catch(err) { alert('Invalid backup file: ' + err.message); }
+    };
+    reader.readAsText(file);
+  } catch(err) { alert('Import error: ' + err.message); }
+  event.target.value = '';
+};
+
 window.openExpenseModal = openExpenseModal;
 window.deleteExpense = deleteExpense;
 window.renderExpenses = renderExpenses;
@@ -4994,6 +5585,7 @@ window.promptRecordEMI = promptRecordEMI;
 window.togglePendingNames = function() {
   state.showPendingNames = document.getElementById('toggle-pending-names').checked;
   saveState();
+  document.querySelectorAll('.pending-names-list').forEach(function(el) { el.remove(); });
   renderDashboard();
 };
 
@@ -5006,6 +5598,67 @@ window.toggleExpenseDetails = function() {
   state.showExpenseDetails = document.getElementById('toggle-expense-details').checked;
   saveState();
   renderDashboard();
+};
+
+window.renderPropertiesList = function() {
+  var container = document.getElementById('properties-list');
+  if (!container) return;
+  if (!state.properties || state.properties.length === 0) {
+    container.innerHTML = '<span style="font-size:0.8rem;color:var(--text-muted)">No properties added yet.</span>';
+    return;
+  }
+  container.innerHTML = state.properties.map(function(p) {
+    return '<span style="display:inline-flex;align-items:center;gap:0.35rem;padding:0.35rem 0.6rem;font-size:0.78rem;font-weight:600;background:var(--bg-tertiary);border:1px solid var(--border-color);border-radius:8px;color:var(--text-primary)">' +
+      p +
+      '<button onclick="window.removeProperty(\'' + p.replace(/'/g, "\\'") + '\')" style="background:none;border:none;color:var(--color-danger);cursor:pointer;padding:0;font-size:1rem;line-height:1;">&times;</button>' +
+    '</span>';
+  }).join('');
+};
+
+window.addProperty = function() {
+  var input = document.getElementById('new-property-input');
+  var val = input.value.trim();
+  if (!val) return;
+  if (!state.properties) state.properties = [];
+  if (state.properties.indexOf(val) === -1) {
+    state.properties.push(val);
+    saveState();
+    renderPropertiesList();
+    renderRentalPropertyPresets();
+    renderExpensePropertyShortcuts();
+    renderConstruction();
+  }
+  input.value = '';
+};
+
+window.removeProperty = function(name) {
+  if (!state.properties) return;
+  state.properties = state.properties.filter(function(p) { return p !== name; });
+  saveState();
+  renderPropertiesList();
+  renderRentalPropertyPresets();
+  renderExpensePropertyShortcuts();
+  renderConstruction();
+};
+
+window.renderRentalPropertyPresets = function() {
+  var container = document.getElementById('rental-property-presets');
+  if (!container) return;
+  var props = state.properties || [];
+  container.innerHTML = props.map(function(p) {
+    var escaped = p.replace(/'/g, "\\'");
+    return '<button type="button" onclick="setRentalPropertyPreset(\'' + escaped + '\')" style="flex:1;padding:0.45rem 0.5rem;font-size:0.78rem;font-weight:600;border:1.5px solid var(--border-color);border-radius:10px;background:var(--bg-tertiary);color:var(--text-primary);cursor:pointer;transition:all 0.15s ease;text-align:center;" onmouseenter="this.style.borderColor=\'var(--color-accent)\';this.style.background=\'var(--bg-card-hover)\'" onmouseleave="this.style.borderColor=\'var(--border-color)\';this.style.background=\'var(--bg-tertiary)\'">' + p + '</button>';
+  }).join('');
+};
+
+window.renderExpensePropertyShortcuts = function() {
+  var container = document.getElementById('expense-property-shortcuts');
+  if (!container) return;
+  var props = state.properties || [];
+  container.innerHTML = props.map(function(p) {
+    var escaped = p.replace(/'/g, "\\'");
+    return '<button type="button" class="btn btn-secondary btn-sm preset-btn" onclick="autoSelectProperty(\'' + escaped + '\')">' + p + '</button>';
+  }).join('');
 };
 
 window.openExpenseDetails = function(mode, event) {
@@ -5142,32 +5795,32 @@ window.openTenantDetails = function(rentalId) {
     </div>
     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 0.75rem;">
         <div class="card" style="padding: 0.75rem; text-align: center; background: var(--bg-secondary);">
-          <div style="font-size: 0.6rem; text-transform: uppercase; color: #fff; font-weight: 700; letter-spacing: 0.5px;">Monthly Rent</div>
+          <div style="font-size: 0.6rem; text-transform: uppercase; color: var(--text-primary); font-weight: 700; letter-spacing: 0.5px;">Monthly Rent</div>
           <div style="font-size: 1.3rem; font-weight: 800; color: var(--color-accent); margin-top: 0.25rem;">${formatCurrency(rental.monthlyRent)}</div>
         </div>
         <div class="card" style="padding: 0.75rem; text-align: center; background: var(--bg-secondary);">
-          <div style="font-size: 0.6rem; text-transform: uppercase; color: #fff; font-weight: 700; letter-spacing: 0.5px;">Security Deposit</div>
+          <div style="font-size: 0.6rem; text-transform: uppercase; color: var(--text-primary); font-weight: 700; letter-spacing: 0.5px;">Security Deposit</div>
           <div style="font-size: 1.3rem; font-weight: 800; color: var(--color-purple); margin-top: 0.25rem;">${formatCurrency(rental.securityDeposit || 0)}</div>
         </div>
       </div>
       <div style="display: flex; gap: 0.75rem;">
         <div class="card" style="flex: 1; padding: 0.5rem; text-align: center; border: 1px solid ${dotColor};">
-          <div style="font-size: 0.65rem; text-transform: uppercase; color: #fff; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 0.3rem;">Status <span style="display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: ${dotColor};"></span></div>
+          <div style="font-size: 0.65rem; text-transform: uppercase; color: var(--text-primary); font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 0.3rem;">Status <span style="display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: ${dotColor};"></span></div>
           <div style="font-size: 0.65rem; color: var(--text-secondary); margin-top: 0.2rem;">Since ${sinceDate}</div>
           ${renewData ? `<div style="font-size: 0.65rem; color: ${dotColor};">Renews: ${renewData.dateStr}</div>` : ''}
         </div>
         <div class="card" style="flex: 1; padding: 0.5rem; text-align: center;">
-          <div style="font-size: 0.65rem; text-transform: uppercase; color: #fff; font-weight: 700;">Total Paid</div>
+          <div style="font-size: 0.65rem; text-transform: uppercase; color: var(--text-primary); font-weight: 700;">Total Paid</div>
           <div style="font-weight: 700; color: var(--color-success);">${formatCurrency(totalPaid)}</div>
         </div>
       </div>
     </div>
     <div style="border-top: 1px solid var(--border-color); padding-top: 0.75rem;">
       <h4 style="margin: 0 0 0.5rem 0; font-size: 0.9rem;">Payment History</h4>
-      ${renewedDate ? `<div style="display: flex; justify-content: space-between; padding: 0.4rem 0; border-bottom: 1px solid var(--border-color); font-size: 0.85rem;"><span style="color: var(--color-success); font-weight: 600;">Renewed on</span><span style="color: #fff;">${renewedDate}</span></div>` : ''}
+      ${renewedDate ? `<div style="display: flex; justify-content: space-between; padding: 0.4rem 0; border-bottom: 1px solid var(--border-color); font-size: 0.85rem;"><span style="color: var(--color-success); font-weight: 600;">Renewed on</span><span style="color: var(--text-primary);">${renewedDate}</span></div>` : ''}
       ${payments.length > 0 ? payments.map(p => `
         <div style="display: flex; justify-content: space-between; padding: 0.4rem 0; border-bottom: 1px solid var(--border-color); font-size: 0.85rem;">
-          <span style="color: #fff;">${formatDisplayDate(p.monthYear || p.datePaid)}</span>
+          <span style="color: var(--text-primary);">${formatDisplayDate(p.monthYear || p.datePaid)}</span>
           <span style="font-weight: 600; color: var(--color-success);">${formatCurrency(p.amount)}</span>
         </div>
       `).join('') : '<div style="color: var(--text-muted); font-size: 0.85rem;">No payments recorded yet.</div>'}
@@ -5322,7 +5975,7 @@ window.window.openCollectionDetails = function(type, event) {
     }
   } else if (type === 'interest') {
     title = 'Interest Collections';
-    const rawPayments = state.interestPayments.filter(p => p.type === 'received' && filterPayment(p));
+    const rawPayments = state.interestPayments.filter(p => p.type === 'received' && p.category !== 'issuance' && filterPayment(p));
     const groupedCol = {};
     const groupedIds = {};
     rawPayments.forEach(p => {
@@ -5344,12 +5997,17 @@ window.window.openCollectionDetails = function(type, event) {
         const outstanding = getOutstandingPrincipalAtMonth(l.id, l.principal, selectedMonthStr);
         if (outstanding > 0) {
           const expected = outstanding * (Number(l.interestRate) / 100);
-          const pPaid = state.interestPayments.filter(p => p.type === 'received' && p.loanId === l.id && p.date.startsWith(selectedMonthStr)).reduce((sum, p) => sum + Number(p.amount), 0);
+          const pPaid = state.interestPayments.filter(p => p.type === 'received' && p.category !== 'issuance' && p.loanId === l.id && p.date.startsWith(selectedMonthStr)).reduce((sum, p) => sum + Number(p.amount), 0);
           const pOwe = expected - pPaid;
           if (pOwe > 0) {
             const normName = (l.borrowerName || '').toLowerCase().trim();
             const groupId = 'group-' + btoa(encodeURIComponent(normName)).replace(/[^a-zA-Z0-9]/g, '');
-            pending.push({name: l.borrowerName, phone: l.phone, owe: pOwe, id: groupId, type: 'interest'});
+            const startDay = parseInt(l.startDate.split('-')[2], 10);
+            const daysInMonth = new Date(selYear, selMonth, 0).getDate();
+            const dueDay = Math.min(startDay, daysInMonth);
+            const dueDateStr = selectedMonthStr + '-' + String(dueDay).padStart(2, '0');
+            const isOverdue = dueDateStr < new Date().toISOString().split('T')[0];
+            pending.push({name: l.borrowerName, phone: l.phone, owe: pOwe, id: l.id, type: 'interest', dueDate: dueDateStr, isOverdue});
           }
         }
       });
@@ -5369,12 +6027,17 @@ window.window.openCollectionDetails = function(type, event) {
         const outstanding = getOutstandingPrincipalAtMonth(l.id, l.principal, selectedMonthStr);
         if (outstanding > 0) {
           const expected = outstanding * (Number(l.interestRate) / 100);
-          const pPaid = state.interestPayments.filter(p => p.type === 'received' && p.loanId === l.id && p.date.startsWith(selectedMonthStr)).reduce((sum, p) => sum + Number(p.amount), 0);
+          const pPaid = state.interestPayments.filter(p => p.type === 'received' && p.category !== 'issuance' && p.loanId === l.id && p.date.startsWith(selectedMonthStr)).reduce((sum, p) => sum + Number(p.amount), 0);
           const pOwe = expected - pPaid;
           if (pOwe > 0) {
             const normName = (l.borrowerName || '').toLowerCase().trim();
             const groupId = 'group-' + btoa(encodeURIComponent(normName)).replace(/[^a-zA-Z0-9]/g, '');
-            pending.push({name: l.borrowerName, type: 'interest', phone: l.phone, owe: pOwe, id: groupId});
+            const startDay = parseInt(l.startDate.split('-')[2], 10);
+            const daysInMonth = new Date(selYear, selMonth, 0).getDate();
+            const dueDay = Math.min(startDay, daysInMonth);
+            const dueDateStr = selectedMonthStr + '-' + String(dueDay).padStart(2, '0');
+            const isOverdue = dueDateStr < new Date().toISOString().split('T')[0];
+            pending.push({name: l.borrowerName, type: 'interest', phone: l.phone, owe: pOwe, id: l.id, dueDate: dueDateStr, isOverdue});
           }
         }
       });
@@ -5397,7 +6060,7 @@ window.window.openCollectionDetails = function(type, event) {
       <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 0; border-bottom: 1px solid var(--border-color);">
         <div style="display: flex; align-items: center; gap: 0.5rem;">
           <input type="checkbox" onclick="event.stopPropagation(); markPendingCollected('${type}', '${p.type}', '${p.id}', ${p.owe}, '${selectedMonthStr}');" style="accent-color: var(--color-success); cursor: pointer;">
-          <span style="font-weight: 500; color: ${p.renewalDue ? 'var(--color-warning)' : 'var(--text-primary)'}; cursor: pointer;" ${navAttr ? `onclick="${navAttr}"` : ''}>${p.name}</span>${p.propertyName ? ' <span style="font-size:0.65rem;color:var(--text-secondary)">' + p.propertyName + (p.renewalDue && p.renewalDate ? ' <span style="color:var(--color-danger);font-weight:700">' + p.renewalDate + '</span>' : '') + '</span>' : ''}
+          <span style="font-weight: 500; color: ${p.renewalDue ? 'var(--color-warning)' : 'var(--text-primary)'}; cursor: pointer;" ${navAttr ? `onclick="${navAttr}"` : ''}>${p.name}</span>${p.propertyName ? ' <span style="font-size:0.65rem;color:var(--text-secondary)">' + p.propertyName + (p.renewalDue && p.renewalDate ? ' <span style="color:var(--color-danger);font-weight:700">' + p.renewalDate + '</span>' : '') + '</span>' : ''}${p.dueDate ? ' <span style="font-size:0.65rem;' + (p.isOverdue ? 'color:var(--color-danger);font-weight:700' : 'color:var(--text-muted)') + '">Due: ' + p.dueDate.split('-').reverse().join('/') + '</span>' : ''}
           <div class="contact-btn-group" style="display: inline-flex;">${callLink}${waLink}</div>
           ${type === 'all' ? `<span style="font-size: 0.6rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; padding: 0.1rem 0.35rem; border-radius: 4px; background: ${p.type === 'rent' ? 'rgba(34,197,94,0.15)' : 'rgba(59,130,246,0.15)'}; color: ${p.type === 'rent' ? 'var(--color-success)' : 'var(--color-accent)'};">${p.type === 'rent' ? 'RENT' : 'INTEREST'}</span>` : ''}
         </div>
@@ -5455,8 +6118,9 @@ window.window.openCollectionDetails = function(type, event) {
 
 // ==========================================
 window.addEventListener('DOMContentLoaded', () => {
-  initApp();
-  setTheme(state.theme || 'black-and-colored-plain');
+  initFileDB(function() {
+    initApp();
+    setTheme(state.theme || 'black-and-colored-plain');
   
   const datePickerInput = document.getElementById('date-picker-input');
   if (datePickerInput) {
@@ -5575,4 +6239,535 @@ window.addEventListener('DOMContentLoaded', () => {
       }
     });
   }
+  });
 });
+
+// FEATURE 1: At a Glance Widget
+function renderGlanceWidget() {
+  var widget = document.getElementById('at-a-glance-widget');
+  if (!widget) return;
+  var today = new Date();
+  var todayStr = today.toISOString().slice(0, 10);
+  var hour = today.getHours();
+  var greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
+  var icon = hour < 12 ? '\u2600\uFE0F' : hour < 17 ? '\u26C5' : '\uD83C\uDF19';
+
+  // Today's total collected
+  var todayRentCollected = state.rentPayments
+    .filter(function(p) { return p.datePaid === todayStr; })
+    .reduce(function(s, p) { return s + Number(p.amount); }, 0);
+  var todayInterestCollected = state.interestPayments
+    .filter(function(p) { return p.type === 'received' && p.date === todayStr; })
+    .reduce(function(s, p) { return s + Number(p.amount); }, 0);
+  var totalCollected = todayRentCollected + todayInterestCollected;
+
+  // People who owe today (rent due today + active interest not yet paid this month)
+  var currentMonth = todayStr.slice(0, 7);
+  var rentDueDay = today.getDate();
+  var pendingPeople = [];
+
+  state.rentals.forEach(function(r) {
+    if (r.status === 'active' && r.startDate <= todayStr) {
+      var isPaid = state.rentPayments.some(function(p) { return p.rentalId === r.id && p.monthYear === currentMonth; });
+      if (!isPaid && Number(r.rentDueDay) === rentDueDay) {
+        pendingPeople.push({ name: r.tenantName, amount: Number(r.monthlyRent), type: 'rent' });
+      }
+    }
+  });
+
+  state.lent.forEach(function(l) {
+    if (l.status === 'active' && l.startDate <= todayStr) {
+      var outstanding = getOutstandingPrincipalAtMonth(l.id, l.principal, currentMonth);
+      if (outstanding > 0) {
+        var expected = outstanding * (Number(l.interestRate) / 100);
+        var paid = state.interestPayments
+          .filter(function(p) { return p.type === 'received' && p.loanId === l.id && p.date.startsWith(currentMonth); })
+          .reduce(function(s, p) { return s + Number(p.amount); }, 0);
+        var owe = expected - paid;
+        if (owe > 0) {
+          pendingPeople.push({ name: l.borrowerName, amount: owe, type: 'interest' });
+        }
+      }
+    }
+  });
+
+  var totalPending = pendingPeople.reduce(function(s, p) { return s + p.amount; }, 0);
+  var uniqueCount = pendingPeople.length;
+
+  document.getElementById('glance-icon').textContent = icon;
+  document.getElementById('glance-greeting').textContent = greeting + '!';
+
+  var summaryEl = document.getElementById('glance-summary');
+  var detailsEl = document.getElementById('glance-details');
+
+  if (totalCollected > 0) {
+    summaryEl.innerHTML = 'Collected <strong>' + formatCurrency(totalCollected) + '</strong> today';
+  } else {
+    summaryEl.innerHTML = '';
+  }
+
+  if (uniqueCount > 0) {
+    detailsEl.innerHTML = 'Collect <strong>' + formatCurrency(totalPending) + '</strong> from <strong>' + uniqueCount + '</strong> ' + (uniqueCount === 1 ? 'person' : 'people');
+  } else {
+    detailsEl.innerHTML = 'Nothing due today. All caught up!';
+  }
+
+  widget.style.display = 'block';
+}
+
+window.renderGlanceWidget = renderGlanceWidget;
+
+// Notes Diary
+window.openNotesDiary = function() {
+  openModal('modal-notes-diary');
+  renderDiaryEntries();
+};
+
+var _editingDiaryIdx = -1;
+
+function renderDiaryEntries() {
+  var container = document.getElementById('notes-diary-entries');
+  if (!container) return;
+  var notes = JSON.parse(localStorage.getItem('ft_diary_notes') || '[]');
+  if (notes.length === 0) {
+    container.innerHTML = '<div style="text-align: center; padding: 1rem; color: var(--text-muted); font-size: 0.82rem;">No diary entries yet. Write your first note below!</div>';
+    _editingDiaryIdx = -1;
+    return;
+  }
+  container.innerHTML = notes.slice().reverse().map(function(n, i) {
+    var idx = notes.length - 1 - i;
+    var isEditing = _editingDiaryIdx === idx;
+    var html = '<div style="padding: 0.5rem; margin-bottom: 0.4rem; background: var(--bg-tertiary); border-radius: var(--radius-sm); border-left: 3px solid var(--color-accent); position: relative;" data-notes-idx="' + idx + '">' +
+      '<div style="font-size: 0.65rem; color: var(--text-muted); margin-bottom: 0.25rem; padding-right: 1.5rem;">' + n.date + '</div>' +
+      '<div style="font-size: 0.82rem; color: var(--text-primary); white-space: pre-wrap; padding-right: 1.5rem;">' + escHtml(n.text) + '</div>' +
+      '<button onclick="shareDiaryNote(' + idx + ')" title="Share on WhatsApp" style="position: absolute; top: 50%; right: 0.4rem; transform: translateY(-50%); background: none; border: none; cursor: pointer; padding: 0; color: #25D366; font-size: 1.1rem; line-height: 1;">' +
+        '<svg viewBox="0 0 24 24" width="18" height="18" fill="#25D366"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>' +
+      '</button>' +
+      '<div style="margin-top: 0.25rem; display: flex; gap: 0.5rem; align-items: center;">' +
+        '<button onclick="editDiaryNote(' + idx + ')" style="background: none; border: none; color: var(--color-accent); cursor: pointer; font-size: 0.8rem; padding: 0; font-weight: 600;">Edit</button>' +
+        '<button onclick="deleteDiaryNote(' + idx + ')" style="background: none; border: none; color: var(--color-danger); cursor: pointer; font-size: 0.8rem; padding: 0; font-weight: 600;">Delete</button>' +
+      '</div>' +
+    '</div>';
+    if (isEditing) {
+      html += '<div id="notes-edit-inline-' + idx + '" style="margin-bottom: 0.5rem; padding: 0.5rem; background: var(--bg-secondary); border-radius: var(--radius-sm); border: 1px solid var(--color-accent);">' +
+        '<textarea id="notes-edit-text-' + idx + '" style="width: 100%; min-height: 80px; padding: 0.4rem; border: 1px solid var(--border-color); border-radius: var(--radius-sm); background: var(--bg-primary); color: var(--text-primary); font-size: 0.82rem; resize: vertical; box-sizing: border-box;">' + escHtml(n.text) + '</textarea>' +
+        '<div style="display: flex; gap: 0.4rem; margin-top: 0.4rem;">' +
+          '<button class="btn btn-primary" onclick="saveDiaryNoteEdit(' + idx + ')" style="padding: 0.3rem 0.6rem; font-size: 0.78rem;">Save</button>' +
+          '<button class="btn btn-secondary" onclick="cancelDiaryNoteEdit()" style="padding: 0.3rem 0.6rem; font-size: 0.78rem;">Cancel</button>' +
+        '</div>' +
+      '</div>';
+    }
+    return html;
+  }).join('');
+  attachDiaryGestures(container);
+}
+
+function attachDiaryGestures(container) {
+  var cards = container.querySelectorAll('[data-notes-idx]');
+  cards.forEach(function(card) {
+    var holdTimer = null, isHolding = false, startX = 0;
+    function clearHold() { clearTimeout(holdTimer); card.style.outline = ''; isHolding = false; }
+    function onDown(x) {
+      if (holdTimer !== null) return;
+      if (event.target && event.target.closest('button')) return;
+      startX = x;
+      isHolding = false;
+      holdTimer = setTimeout(function() {
+        isHolding = true;
+        card.style.outline = '2px solid var(--color-accent)';
+      }, 500);
+    }
+    function onMove(x) {
+      if (!isHolding) { clearHold(); return; }
+      if (x - startX < -50) {
+        var idx = parseInt(card.getAttribute('data-notes-idx'));
+        editDiaryNote(idx);
+        clearHold();
+      }
+    }
+    card.addEventListener('touchstart', function(e) { onDown(e.touches[0].clientX); });
+    card.addEventListener('touchmove', function(e) { onMove(e.touches[0].clientX); });
+    card.addEventListener('touchend', clearHold);
+    card.addEventListener('touchcancel', clearHold);
+    card.addEventListener('mousedown', function(e) { onDown(e.clientX); });
+    card.addEventListener('mousemove', function(e) { if (isHolding) onMove(e.clientX); });
+    card.addEventListener('mouseup', clearHold);
+    card.addEventListener('mouseleave', clearHold);
+  });
+}
+
+window.saveDiaryNote = function() {
+  var input = document.getElementById('notes-diary-input');
+  var text = input.value.trim();
+  if (!text) return;
+  var notes = JSON.parse(localStorage.getItem('ft_diary_notes') || '[]');
+  notes.push({ date: new Date().toLocaleString(), text: text });
+  localStorage.setItem('ft_diary_notes', JSON.stringify(notes));
+  input.value = '';
+  renderDiaryEntries();
+};
+
+window.shareDiaryNote = function(index) {
+  var notes = JSON.parse(localStorage.getItem('ft_diary_notes') || '[]');
+  var note = notes[index];
+  if (!note) return;
+  var text = note.text;
+  var url = 'https://wa.me/?text=' + encodeURIComponent(text);
+  window.open(url, '_blank');
+};
+
+window.deleteDiaryNote = function(index) {
+  var notes = JSON.parse(localStorage.getItem('ft_diary_notes') || '[]');
+  notes.splice(index, 1);
+  localStorage.setItem('ft_diary_notes', JSON.stringify(notes));
+  renderDiaryEntries();
+};
+
+window.editDiaryNote = function(index) {
+  _editingDiaryIdx = index;
+  renderDiaryEntries();
+  setTimeout(function() {
+    var el = document.getElementById('notes-edit-inline-' + index);
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    var ta = document.getElementById('notes-edit-text-' + index);
+    if (ta) ta.focus();
+  }, 50);
+};
+
+window.saveDiaryNoteEdit = function(index) {
+  var ta = document.getElementById('notes-edit-text-' + index);
+  if (!ta) return;
+  var text = ta.value.trim();
+  if (!text) return;
+  var notes = JSON.parse(localStorage.getItem('ft_diary_notes') || '[]');
+  if (notes[index]) {
+    notes[index].text = text;
+    notes[index].date = 'Edited ' + new Date().toLocaleString();
+  }
+  localStorage.setItem('ft_diary_notes', JSON.stringify(notes));
+  _editingDiaryIdx = -1;
+  renderDiaryEntries();
+};
+
+window.cancelDiaryNoteEdit = function() {
+  _editingDiaryIdx = -1;
+  renderDiaryEntries();
+};
+
+// Calculator
+var calcTokens = [{v: '0', label: ''}];
+var _editingCalcToken = -1;
+var calcHistory = JSON.parse(localStorage.getItem('ft_calc_history') || '[]');
+var _calcHistoryVisible = false;
+var _calcShowExpr = true;
+var _calcSavedExpr = '';
+var _calcSavedResult = 0;
+
+function calcExprFromTokens() {
+  return calcTokens.map(function(t) { return t.v; }).join('');
+}
+
+window.openCalculator = function() {
+  calcTokens = [{v: '0', label: ''}];
+  _editingCalcToken = -1;
+  _calcHistoryVisible = false;
+  _calcShowExpr = true;
+  _calcSavedExpr = '';
+  _calcSavedResult = 0;
+  var btn = document.getElementById('calc-history-btn');
+  if (btn) btn.textContent = 'Show History';
+  document.getElementById('calc-display').textContent = '0';
+  openModal('modal-calculator');
+  renderCalcButtons();
+  calcUpdateDisplay();
+  renderCalcHistory();
+};
+
+function renderCalcButtons() {
+  var grid = document.getElementById('calc-buttons');
+  if (!grid) return;
+  var buttons = [
+    '±', 'C', '%', '×',
+    '7', '8', '9', '÷',
+    '4', '5', '6', '-',
+    '1', '2', '3', '+',
+    '.', '0', '⌫', '='
+  ];
+  grid.innerHTML = buttons.map(function(label) {
+    var isEq = label === '=';
+    var isOp = ['÷','×','-','+','C','±','%','⌫'].indexOf(label) !== -1;
+    var bg = isEq ? 'var(--color-accent)' : isOp ? 'var(--bg-tertiary)' : 'var(--bg-primary)';
+    var color = isEq ? '#fff' : 'var(--text-primary)';
+    var action = label === 'C' ? "calcClear()" : label === '⌫' ? "calcBackspace()" : label === '±' ? "calcNegate()" : label === '=' ? "calcEqual()" : "calcInput('" + label.replace(/'/g, "\\'") + "')";
+    return '<button onclick="' + action + '" style="padding:1rem;border:1px solid var(--border-color);border-radius:var(--radius-sm);background:' + bg + ';color:' + color + ';font-size:1.1rem;font-weight:600;cursor:pointer;text-align:center;">' + label + '</button>';
+  }).join('');
+}
+
+function calcUpdateDisplay() {
+  var display = document.getElementById('calc-display');
+  var expr = document.getElementById('calc-expression');
+  if (!display) return;
+  if (!_calcShowExpr) {
+    if (expr) expr.innerHTML = '';
+    try {
+      var live = eval(calcExprFromTokens());
+      if (isFinite(live)) display.textContent = live;
+    } catch(e) {}
+    renderCalcLabelEditor();
+    return;
+  }
+  var str = calcExprFromTokens();
+  var parts = [];
+  calcTokens.forEach(function(t, i) {
+    if (['+','-','*','/'].indexOf(t.v) !== -1) {
+      parts.push('<span style="margin:0 0.15rem;">' + escHtml(t.v) + '</span>');
+    } else {
+      var showLabel = t.label ? ' <span style="color:var(--color-accent);font-size:0.75em;">(' + escHtml(t.label) + ')</span>' : '';
+      parts.push('<span onclick="editCalcTokenLabel(' + i + ')" style="cursor:pointer;font-weight:600;text-decoration:underline dotted var(--color-accent);">' + escHtml(t.v) + '</span>' + showLabel);
+    }
+  });
+  if (expr) expr.innerHTML = parts.join('');
+  try {
+    var live = eval(str);
+    if (isFinite(live)) {
+      display.textContent = live;
+    }
+  } catch(e) {}
+  renderCalcLabelEditor();
+}
+
+function renderCalcLabelEditor() {
+  var container = document.getElementById('calc-label-editor');
+  if (!container) return;
+  if (_editingCalcToken === -1 || !calcTokens[_editingCalcToken] || ['+','-','*','/'].indexOf(calcTokens[_editingCalcToken].v) !== -1) {
+    container.innerHTML = '';
+    return;
+  }
+  var tok = calcTokens[_editingCalcToken];
+  container.innerHTML = '<div style="display:flex;gap:0.3rem;align-items:center;padding:0.25rem 0;">' +
+    '<span style="font-size:0.75rem;color:var(--text-muted);white-space:nowrap;">Label for <strong>' + escHtml(tok.v) + '</strong>:</span>' +
+    '<input id="calc-label-input" type="text" value="' + escHtml(tok.label) + '" placeholder="..." style="flex:1;padding:0.3rem;border:1px solid var(--border-color);border-radius:var(--radius-sm);background:var(--bg-primary);color:var(--text-primary);font-size:0.78rem;min-width:60px;">' +
+    '<button onclick="saveCalcTokenLabel()" style="padding:0.3rem 0.5rem;background:var(--color-accent);color:#fff;border:none;border-radius:var(--radius-sm);cursor:pointer;font-size:0.75rem;">OK</button>' +
+    '<button onclick="cancelCalcTokenLabel()" style="padding:0.3rem 0.5rem;background:var(--bg-tertiary);color:var(--text-primary);border:1px solid var(--border-color);border-radius:var(--radius-sm);cursor:pointer;font-size:0.75rem;">✕</button>' +
+  '</div>';
+  setTimeout(function() {
+    var inp = document.getElementById('calc-label-input');
+    if (inp) inp.focus();
+  }, 50);
+}
+
+window.editCalcTokenLabel = function(index) {
+  _editingCalcToken = _editingCalcToken === index ? -1 : index;
+  calcUpdateDisplay();
+};
+
+window.saveCalcTokenLabel = function() {
+  var inp = document.getElementById('calc-label-input');
+  if (!inp || _editingCalcToken === -1) return;
+  if (calcTokens[_editingCalcToken]) {
+    calcTokens[_editingCalcToken].label = inp.value.trim();
+  }
+  _editingCalcToken = -1;
+  calcUpdateDisplay();
+};
+
+window.cancelCalcTokenLabel = function() {
+  _editingCalcToken = -1;
+  calcUpdateDisplay();
+};
+
+window.calcClear = function() {
+  if (_calcSavedExpr && _calcSavedExpr !== '0') {
+    calcHistory.push({ expression: _calcSavedExpr, result: _calcSavedResult, date: new Date().toLocaleString() });
+    localStorage.setItem('ft_calc_history', JSON.stringify(calcHistory));
+    renderCalcHistory();
+    _calcSavedExpr = '';
+  } else {
+    var str = calcExprFromTokens();
+    if (str !== '0') {
+      try {
+        var result = eval(str);
+        if (isFinite(result)) {
+          var displayStr = calcTokens.map(function(t) {
+            if (['+','-','*','/'].indexOf(t.v) !== -1) return ' ' + t.v + ' ';
+            return t.label ? t.v + '(' + t.label + ')' : t.v;
+          }).join('').replace(/\*/g, '×').replace(/\//g, '÷');
+          calcHistory.push({ expression: displayStr, result: result, date: new Date().toLocaleString() });
+          localStorage.setItem('ft_calc_history', JSON.stringify(calcHistory));
+          renderCalcHistory();
+        }
+      } catch(e) {}
+    }
+  }
+  calcTokens = [{v: '0', label: ''}];
+  _editingCalcToken = -1;
+  _calcShowExpr = true;
+  calcUpdateDisplay();
+};
+
+window.calcBackspace = function() {
+  if (!_calcShowExpr) {
+    calcTokens = [{v: '0', label: ''}];
+    _calcShowExpr = true;
+    _calcSavedExpr = '';
+    calcUpdateDisplay();
+    return;
+  }
+  var last = calcTokens[calcTokens.length - 1];
+  if (!last) return;
+  if (last.v.length > 1) {
+    last.v = last.v.slice(0, -1);
+  } else {
+    calcTokens.pop();
+    if (calcTokens.length === 0) calcTokens = [{v: '0', label: ''}];
+  }
+  calcUpdateDisplay();
+};
+
+window.calcNegate = function() {
+  if (!_calcShowExpr) {
+    calcTokens = [{v: '0', label: ''}];
+    _calcShowExpr = true;
+    _calcSavedExpr = '';
+    calcUpdateDisplay();
+    return;
+  }
+  var last = calcTokens[calcTokens.length - 1];
+  if (!last || ['+','-','*','/'].indexOf(last.v) !== -1) return;
+  if (last.v.charAt(0) === '-') last.v = last.v.slice(1);
+  else last.v = '-' + last.v;
+  calcUpdateDisplay();
+};
+
+window.calcInput = function(val) {
+  if (!_calcShowExpr) {
+    calcTokens = [{v: '0', label: ''}];
+    _calcShowExpr = true;
+    _calcSavedExpr = '';
+  }
+  var map = { '×': '*', '÷': '/' };
+  var mapped = map[val] || val;
+  var last = calcTokens[calcTokens.length - 1];
+  if (val === '%') {
+    if (last && ['+','-','*','/'].indexOf(last.v) === -1) {
+      try {
+        var n = parseFloat(last.v) / 100;
+        last.v = String(n);
+        _editingCalcToken = -1;
+        calcUpdateDisplay();
+      } catch(e) {}
+    }
+    return;
+  }
+  if (['+','-','*','/'].indexOf(mapped) !== -1) {
+    if (last && ['+','-','*','/'].indexOf(last.v) !== -1) {
+      last.v = mapped;
+    } else {
+      calcTokens.push({v: mapped, label: ''});
+    }
+  } else {
+    if (last && ['+','-','*','/'].indexOf(last.v) === -1) {
+      if (last.v === '0' && mapped !== '.') {
+        last.v = mapped;
+      } else {
+        last.v += mapped;
+      }
+    } else {
+      calcTokens.push({v: mapped, label: ''});
+    }
+  }
+  _editingCalcToken = -1;
+  calcUpdateDisplay();
+};
+
+window.calcEqual = function() {
+  try {
+    var str = calcExprFromTokens();
+    var result = eval(str);
+    if (!isFinite(result)) return;
+    _calcSavedExpr = calcTokens.map(function(t) {
+      if (['+','-','*','/'].indexOf(t.v) !== -1) return ' ' + t.v + ' ';
+      return t.label ? t.v + '(' + t.label + ')' : t.v;
+    }).join('').replace(/\*/g, '×').replace(/\//g, '÷');
+    _calcSavedResult = result;
+    calcTokens = [{v: String(result), label: ''}];
+    _editingCalcToken = -1;
+    _calcShowExpr = false;
+    calcUpdateDisplay();
+  } catch(e) {}
+};
+
+function renderCalcHistory() {
+  var container = document.getElementById('calc-history');
+  if (!container) return;
+  container.style.display = _calcHistoryVisible ? 'block' : 'none';
+  if (calcHistory.length === 0) {
+    container.innerHTML = '<div style="text-align:center;padding:0.5rem;color:var(--text-muted);font-size:0.78rem;">No calculations yet</div>';
+    return;
+  }
+  var html = calcHistory.slice().reverse().map(function(h, i) {
+    return '<div style="padding:0.35rem 0.5rem;margin-bottom:0.25rem;background:var(--bg-tertiary);border-radius:var(--radius-sm);border-left:2px solid var(--color-accent);font-size:0.82rem;">' +
+      '<div style="color:var(--text-primary);">' + escHtml(h.expression) + ' = <strong>' + h.result + '</strong></div>' +
+      '<div style="font-size:0.6rem;color:var(--text-muted);margin-top:0.15rem;">' + h.date + '</div>' +
+    '</div>';
+  }).join('');
+  html += '<div style="margin-top:0.4rem;"><button class="btn btn-secondary" onclick="clearCalcHistory()" style="padding:0.3rem 0.6rem;font-size:0.72rem;">Clear History</button></div>';
+  container.innerHTML = html;
+}
+
+window.toggleCalcHistory = function() {
+  _calcHistoryVisible = !_calcHistoryVisible;
+  var btn = document.getElementById('calc-history-btn');
+  if (btn) btn.textContent = _calcHistoryVisible ? 'Hide History' : 'Show History';
+  renderCalcHistory();
+};
+
+window.clearCalcHistory = function() {
+  calcHistory = [];
+  localStorage.setItem('ft_calc_history', JSON.stringify(calcHistory));
+  renderCalcHistory();
+};
+
+window.shareCalcExpression = function() {
+  var lines = [];
+  var currentLine = '';
+  for (var i = 0; i < calcTokens.length; i++) {
+    var t = calcTokens[i];
+    if (['+', '-', '*', '/'].indexOf(t.v) !== -1) {
+      if (t.v === '+') {
+        if (currentLine) lines.push(currentLine);
+        currentLine = '';
+      } else {
+        var sym = t.v === '*' ? '×' : t.v === '/' ? '÷' : t.v;
+        currentLine += ' ' + sym + ' ';
+      }
+      continue;
+    }
+    currentLine += t.label ? t.v + '(' + t.label + ')' : t.v;
+  }
+  if (currentLine) lines.push(currentLine);
+  var str = lines[0] || '0';
+  for (var j = 1; j < lines.length; j++) {
+    str += '\n+ ' + lines[j];
+  }
+  try {
+    var live = eval(calcExprFromTokens());
+    if (isFinite(live)) str += '\n= ' + live;
+  } catch(e) {}
+  if (!str || str === '0') return;
+  var url = 'https://wa.me/?text=' + encodeURIComponent(str);
+  window.open(url, '_blank');
+};
+
+window.scrollToRecentActivity = function() {
+  currentReminderFilter = 'all';
+  renderDashboard();
+  var el = document.getElementById('notifications-wrapper-card');
+  if (el) {
+    el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+};
+
+
+
+
