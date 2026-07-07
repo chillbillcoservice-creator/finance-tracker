@@ -547,6 +547,7 @@ function saveState() {
 
 function seedInitialData() {
   state = { lent: [], borrowed: [], rentals: [], interestPayments: [], rentPayments: [], expenses: [], renewals: [], files: [], theme: 'black-and-colored-plain' };
+  state.properties = ['23/48 ground floor', '23/48 3rd floor', '1/104'];
   clearFileDB();
   saveState();
 }
