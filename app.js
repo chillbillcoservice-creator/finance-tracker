@@ -4775,14 +4775,11 @@ function renderFiles() {
 }
 
 function updateFileSummaryCards() {
-  ['bills', 'documents', 'policies', 'construction'].forEach(function(fileType) {
+  ['bills', 'documents', 'policies'].forEach(function(fileType) {
     var files = state.files.filter(function(f) { return f.type === fileType; });
     var countEl = document.getElementById('count-' + fileType);
     if (countEl) countEl.textContent = files.length;
   });
-  var constCount = state.expenses.filter(function(e) { return e.category === 'construction'; }).length;
-  var constCountEl = document.getElementById('count-construction');
-  if (constCountEl) constCountEl.textContent = constCount;
 }
 
 window.copyFileNumber = function(id) {
