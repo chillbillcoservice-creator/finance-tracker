@@ -1221,11 +1221,6 @@ function refreshActiveTab() {
   if (activeTabId && activeTabId !== 'settings' && VIEWS[activeTabId]) {
     VIEWS[activeTabId].render();
   }
-  
-  // Always update dashboard background state
-  if (activeTabId !== 'dashboard') {
-    renderDashboard();
-  }
 }
 
 window.populateReportingMonthSelect = function() {};
@@ -1386,7 +1381,6 @@ function renderInterest() {
 
 // 7. DASHBOARD TAB LOGIC
 function renderDashboard() {
-  loadState();
   updateCardHighlights();
 
   // A. Determine reporting date boundaries
@@ -2282,7 +2276,6 @@ function getActivityPeriod(dateStr) {
 }
 
 function renderRecentActivity() {
-  loadState();
   const container = document.getElementById('dashboard-activity-feed');
   if (!container) return;
   
@@ -2432,8 +2425,6 @@ window.setActivityFilter = function(filter) {
 
 // 7. LENDING TAB LOGIC
 function renderLending() {
-  loadState();
-
   const [selYear, selMonth] = selectedMonthStr.split('-').map(Number);
   const endDateOfSelectedMonth = `${selectedMonthStr}-${String(new Date(selYear, selMonth, 0).getDate()).padStart(2, '0')}`;
 
@@ -2666,8 +2657,6 @@ function renderLending() {
 
 // 8. BORROWING TAB LOGIC
 function renderBorrowing() {
-  loadState();
-
   const [selYear, selMonth] = selectedMonthStr.split('-').map(Number);
   const endDateOfSelectedMonth = `${selectedMonthStr}-${String(new Date(selYear, selMonth, 0).getDate()).padStart(2, '0')}`;
 
@@ -2890,8 +2879,6 @@ function renderBorrowing() {
 
 // 9. RENTAL TAB LOGIC
 function renderRentals() {
-  loadState();
-
   const [selYear, selMonth] = selectedMonthStr.split('-').map(Number);
   const currentMonthName = MONTH_UPPER_NAMES[selMonth - 1];
   const activeMonthStr = `${currentMonthName} ${selYear}`;
@@ -4609,8 +4596,6 @@ function deleteExpense(expenseId) {
 }
 
 function renderExpenses() {
-  loadState();
-
   const dateInput = document.getElementById('expense-date');
   if (dateInput && !dateInput.value) {
     const d = new Date();
@@ -4861,7 +4846,6 @@ function formatMonth(monthStr) {
 }
 
 function renderReports() {
-  loadState();
   
   // Set default month selector
   const selectorBar = document.getElementById('reports-selector-bar');
@@ -4878,7 +4862,6 @@ function renderReports() {
 }
 
 function renderYearlySummaryTable() {
-  loadState();
   const tbody = document.querySelector('#yearly-reports-table tbody');
   if (!tbody) return;
   tbody.innerHTML = '';
@@ -4917,7 +4900,6 @@ function renderYearlySummaryTable() {
 }
 
 function renderReportsChart() {
-  loadState();
   const [selYear, selMonth] = reportsSelectedMonth.split('-').map(Number);
   const endDate = `${reportsSelectedMonth}-${String(new Date(selYear, selMonth, 0).getDate()).padStart(2, '0')}`;
   
