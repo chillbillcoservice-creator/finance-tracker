@@ -4196,7 +4196,8 @@ window.loadMockData = function() {
     state.interestPayments.push(
       { id: 'ip_demo_1', loanId: 'l_demo_1', type: 'received', category: 'interest', amount: 3000, date: daysAgo(2), note: 'Monthly interest' },
       { id: 'ip_demo_2', loanId: 'l_demo_1', type: 'received', category: 'interest', amount: 3000, date: daysAgo(32), note: 'Monthly interest' },
-      { id: 'ip_demo_3', loanId: 'l_demo_2', type: 'received', category: 'interest', amount: 1250, date: daysAgo(5), note: 'Monthly interest' }
+      { id: 'ip_demo_3', loanId: 'l_demo_2', type: 'received', category: 'interest', amount: 1250, date: daysAgo(5), note: 'Monthly interest' },
+      { id: 'ip_demo_6', loanId: 'l_demo_3', type: 'received', category: 'interest', amount: 4000, date: daysAgo(4), note: 'Monthly interest' }
     );
   }
 
