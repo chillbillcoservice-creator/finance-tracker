@@ -274,16 +274,14 @@
           
           <!-- INJECTED INTEREST DASHBOARD -->
           <div id="notifications-interest-view" style="display: none;">
-            <div class="section-header" style="display: flex; gap: 0.75rem; margin-top: 1rem;">
-              <button class="btn btn-primary" id="btn-add-loan-lent" style="flex: 1;">
-                <svg viewBox="0 0 24 24" width="16" height="16"><path d="M7 17L17 7M17 7H7M17 7V17"/></svg>
-                Lend Money
-              </button>
-              <button class="btn btn-primary" id="btn-add-loan-borrowed" style="flex: 1; background: linear-gradient(135deg, var(--color-danger), #b91c1c); box-shadow: 0 4px 14px rgba(239,68,68,0.3);">
-                <svg viewBox="0 0 24 24" width="16" height="16"><path d="M17 17L7 7M7 7H17M7 7V17"/></svg>
-                Record Borrowing
-              </button>
-            </div>
+            <button class="btn btn-primary" id="btn-add-loan-lent" style="display: none;">
+              <svg viewBox="0 0 24 24" width="16" height="16"><path d="M7 17L17 7M17 7H7M17 7V17"/></svg>
+              Lend Money
+            </button>
+            <button class="btn btn-primary" id="btn-add-loan-borrowed" style="display: none;">
+              <svg viewBox="0 0 24 24" width="16" height="16"><path d="M17 17L7 7M7 7H17M7 7V17"/></svg>
+              Record Borrowing
+            </button>
 
             <div id="lent-funds-heading" style="margin-top: 1rem; margin-bottom: 0.5rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 0.5rem; display: flex; justify-content: space-between; align-items: center;">
               <span style="color: var(--color-success); font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; gap: 0.5rem;">

@@ -2736,7 +2736,6 @@ function renderLending() {
           <svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
         </div>
         <p>No active lending records for this period.</p>
-        <button class="btn btn-primary" onclick="openModal('modal-add-lent')" style="margin-top: 1rem;">Add First Loan</button>
       </div>`;
     return;
   }
@@ -2978,7 +2977,6 @@ function renderBorrowing() {
           <svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
         </div>
         <p>No active borrowing records for this period.</p>
-        <button class="btn btn-primary" onclick="openModal('modal-add-borrowed')" style="margin-top: 1rem;">Add First Borrowing</button>
       </div>`;
     return;
   }
@@ -3207,7 +3205,7 @@ function renderRentals() {
         <div class="empty-state-icon">
           <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
         </div>
-        <p>No tenant agreements logged yet for this period. Tap "Add Tenant" to record a rental.</p>
+        <p>No tenant agreements logged yet for this period.</p>
       </div>
     `;
     return;
