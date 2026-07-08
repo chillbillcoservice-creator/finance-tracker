@@ -5501,12 +5501,13 @@ function renderReportsChart() {
     }
   }
   
-  const totalIncome = rentData.reduce((a, b) => a + b, 0) + interestData.reduce((a, b) => a + b, 0);
-  const totalExpenses = expenseData.reduce((a, b) => a + b, 0);
+  const rentTotal = rentData.reduce((a, b) => a + b, 0);
+  const interestTotal = interestData.reduce((a, b) => a + b, 0);
+  const expenseTotal = expenseData.reduce((a, b) => a + b, 0);
   
-  document.getElementById('reports-total-income').textContent = formatCurrency(totalIncome);
-  document.getElementById('reports-total-expenses').textContent = formatCurrency(totalExpenses);
-  document.getElementById('reports-net-balance').textContent = formatCurrency(totalIncome - totalExpenses);
+  document.getElementById('reports-total-income').textContent = formatCurrency(rentTotal + interestTotal);
+  document.getElementById('reports-total-expenses').textContent = formatCurrency(expenseTotal);
+  document.getElementById('reports-net-balance').textContent = formatCurrency(rentTotal + interestTotal - expenseTotal);
   
   const canvas = document.getElementById('reports-chart');
   if (!canvas) return;
@@ -5519,9 +5520,9 @@ function renderReportsChart() {
     data: {
       labels,
       datasets: [
-        { label: 'Rent', data: rentData, backgroundColor: 'rgba(234, 179, 8, 0.8)', borderRadius: 4 },
-        { label: 'Interest', data: interestData, backgroundColor: 'rgba(16, 185, 129, 0.8)', borderRadius: 4 },
-        { label: 'Expenses', data: expenseData, backgroundColor: 'rgba(239, 68, 68, 0.8)', borderRadius: 4 }
+        { label: 'Rent: ' + formatCurrency(rentTotal), data: rentData, backgroundColor: 'rgba(234, 179, 8, 0.8)', borderRadius: 4 },
+        { label: 'Interest: ' + formatCurrency(interestTotal), data: interestData, backgroundColor: 'rgba(16, 185, 129, 0.8)', borderRadius: 4 },
+        { label: 'Expenses: ' + formatCurrency(expenseTotal), data: expenseData, backgroundColor: 'rgba(239, 68, 68, 0.8)', borderRadius: 4 }
       ]
     },
     options: {
