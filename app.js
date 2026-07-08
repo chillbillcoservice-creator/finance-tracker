@@ -6433,6 +6433,8 @@ window.addEventListener('DOMContentLoaded', () => {
 });
 
 // FEATURE 1: At a Glance Widget
+var _glanceRenewalTimer = null;
+
 function renderGlanceWidget() {
   var widget = document.getElementById('at-a-glance-widget');
   if (!widget) return;
@@ -6521,10 +6523,16 @@ function renderGlanceWidget() {
 
     renewalItems.sort(function(a, b) { return a.daysLeft - b.daysLeft; });
 
+    if (_glanceRenewalTimer) clearTimeout(_glanceRenewalTimer);
+
     if (typeof _glanceRenewalDismissIdx === 'undefined') _glanceRenewalDismissIdx = 0;
     if (_glanceRenewalDismissIdx < renewalItems.length) {
       var item = renewalItems[_glanceRenewalDismissIdx];
       detailsEl.innerHTML = item.text + ' <span onclick="event.stopPropagation();dismissGlanceRenewal()" style="cursor:pointer;margin-left:0.5rem;opacity:0.5;font-size:0.82rem;">\u2715</span>';
+      _glanceRenewalTimer = setTimeout(function() {
+        _glanceRenewalDismissIdx++;
+        renderGlanceWidget();
+      }, 5000);
     } else {
       detailsEl.innerHTML = 'Nothing due today. All caught up!';
     }
@@ -6536,6 +6544,7 @@ function renderGlanceWidget() {
 window.renderGlanceWidget = renderGlanceWidget;
 
 window.dismissGlanceRenewal = function() {
+  if (_glanceRenewalTimer) clearTimeout(_glanceRenewalTimer);
   if (typeof _glanceRenewalDismissIdx === 'undefined') _glanceRenewalDismissIdx = 0;
   _glanceRenewalDismissIdx++;
   renderGlanceWidget();
