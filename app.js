@@ -6601,12 +6601,7 @@ window.cancelCalcTokenLabel = function() {
 };
 
 window.calcClear = function() {
-  if (_calcSavedExpr && _calcSavedExpr !== '0') {
-    calcHistory.push({ expression: _calcSavedExpr, result: _calcSavedResult, date: new Date().toLocaleString() });
-    localStorage.setItem('ft_calc_history', JSON.stringify(calcHistory));
-    renderCalcHistory();
-    _calcSavedExpr = '';
-  } else {
+  if (!_calcSavedExpr || _calcSavedExpr === '0') {
     var str = calcExprFromTokens();
     if (str !== '0') {
       try {
@@ -6623,6 +6618,7 @@ window.calcClear = function() {
       } catch(e) {}
     }
   }
+  _calcSavedExpr = '';
   calcTokens = [{v: '0', label: ''}];
   _editingCalcToken = -1;
   _calcShowExpr = true;
@@ -6716,11 +6712,15 @@ window.calcEqual = function() {
     var str = calcExprFromTokens();
     var result = eval(str);
     if (!isFinite(result)) return;
-    _calcSavedExpr = calcTokens.map(function(t) {
+    var displayStr = calcTokens.map(function(t) {
       if (['+','-','*','/'].indexOf(t.v) !== -1) return ' ' + t.v + ' ';
       return t.label ? t.v + '(' + t.label + ')' : t.v;
     }).join('').replace(/\*/g, '×').replace(/\//g, '÷');
+    _calcSavedExpr = displayStr;
     _calcSavedResult = result;
+    calcHistory.push({ expression: displayStr, result: result, date: new Date().toLocaleString() });
+    localStorage.setItem('ft_calc_history', JSON.stringify(calcHistory));
+    renderCalcHistory();
     calcTokens = [{v: String(result), label: ''}];
     _editingCalcToken = -1;
     _calcShowExpr = false;
