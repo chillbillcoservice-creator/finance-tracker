@@ -6705,6 +6705,13 @@ window.calcInput = function(val) {
 };
 
 window.calcEqual = function() {
+  if (!_calcShowExpr) {
+    calcTokens = [{v: '0', label: ''}];
+    _calcShowExpr = true;
+    _calcSavedExpr = '';
+    calcUpdateDisplay();
+    return;
+  }
   try {
     var str = calcExprFromTokens();
     var result = eval(str);
