@@ -6335,6 +6335,9 @@ function renderGlanceWidget() {
 
 window.renderGlanceWidget = renderGlanceWidget;
 
+// Quick Actions modal
+window.openQuickActions = function() { openModal('modal-quick-actions'); };
+
 // Notes Diary
 window.openNotesDiary = function() {
   openModal('modal-notes-diary');

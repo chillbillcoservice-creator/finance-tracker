@@ -149,6 +149,9 @@
               <div id="glance-summary" style="font-size: 0.82rem; color: var(--text-secondary); margin-top: 0.15rem;"></div>
               <div id="glance-details" style="font-size: 0.78rem; color: var(--text-muted); margin-top: 0.1rem;"></div>
             </div>
+            <div onclick="event.stopPropagation(); openQuickActions()" style="display: flex; align-items: center; cursor: pointer; padding: 0 0.25rem; color: var(--text-secondary);" title="Quick Actions">
+              <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+            </div>
           </div>
           <div style="display: flex; gap: 0.5rem; margin-top: 0.6rem;">
             <button onclick="event.stopPropagation(); openNotesDiary()" title="Notes / Diary" style="flex:1;background:#f59e0b;border:none;color:#fff;padding:0.6rem 0.5rem;border-radius:var(--radius-sm);cursor:pointer;font-size:0.85rem;font-weight:700;display:flex;align-items:center;justify-content:center;gap:0.4rem;">
@@ -1465,6 +1468,33 @@
         </div>
         <div id="calc-history" style="margin-top:0.5rem;max-height:200px;overflow-y:auto;display:none;"></div>
       </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="modal-quick-actions">
+    <div class="modal-container" style="max-width: 400px;">
+      <div class="modal-header">
+        <h3 class="modal-title">Quick Actions</h3>
+        <button class="modal-close" onclick="closeModal('modal-quick-actions')">
+          <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="modal-body" style="max-height:80vh;overflow-y:auto;">
+        <div style="display: flex; flex-direction: column; gap: 0.75rem; padding: 0.5rem 0;">
+          <button onclick="closeModal('modal-quick-actions'); document.getElementById('btn-add-loan-lent').click()" style="display: flex; align-items: center; gap: 0.75rem; padding: 1rem 1.25rem; background: linear-gradient(135deg, var(--color-success), #059669); color: #fff; border: none; border-radius: 12px; cursor: pointer; font-size: 1rem; font-weight: 700; text-align: left;">
+            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="18 15 12 9 6 15"/></svg>
+            Lend Money
+          </button>
+          <button onclick="closeModal('modal-quick-actions'); document.getElementById('btn-add-loan-borrowed').click()" style="display: flex; align-items: center; gap: 0.75rem; padding: 1rem 1.25rem; background: linear-gradient(135deg, var(--color-danger), #b91c1c); color: #fff; border: none; border-radius: 12px; cursor: pointer; font-size: 1rem; font-weight: 700; text-align: left;">
+            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+            Borrow Money
+          </button>
+          <button onclick="closeModal('modal-quick-actions'); document.getElementById('btn-add-rental').click()" style="display: flex; align-items: center; gap: 0.75rem; padding: 1rem 1.25rem; background: linear-gradient(135deg, var(--color-accent), #0284c7); color: #fff; border: none; border-radius: 12px; cursor: pointer; font-size: 1rem; font-weight: 700; text-align: left;">
+            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            Add Tenant
+          </button>
+        </div>
       </div>
     </div>
   </div>
