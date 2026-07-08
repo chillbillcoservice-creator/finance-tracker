@@ -6329,13 +6329,47 @@ function renderGlanceWidget() {
   if (uniqueCount > 0) {
     detailsEl.innerHTML = 'Collect <strong>' + formatCurrency(totalPending) + '</strong> from <strong>' + uniqueCount + '</strong> ' + (uniqueCount === 1 ? 'person' : 'people');
   } else {
-    detailsEl.innerHTML = 'Nothing due today. All caught up!';
+    // Build upcoming renewals pool
+    var renewalItems = [];
+    today.setHours(0,0,0,0);
+
+    getUpcomingRenewals().forEach(function(r) {
+      var due = new Date(r.dueDate);
+      var diff = Math.ceil((due - today) / (1000 * 60 * 60 * 24));
+      var emoji = r.category === 'Insurance' ? '\uD83D\uDE97' : r.category === 'Tax' ? '\uD83D\uDCCB' : r.category === 'Certificate' ? '\uD83D\uDCC4' : r.category === 'Subscription' ? '\uD83D\uDD04' : '\uD83D\uDCCC';
+      renewalItems.push({ text: emoji + ' <strong>' + r.title + '</strong> renewal due in <strong>' + diff + '</strong> ' + (diff === 1 ? 'day' : 'days'), daysLeft: diff });
+    });
+
+    state.rentals.forEach(function(r) {
+      if (r.status === 'active') {
+        var info = getNextRenewal(r.startDate);
+        if (info && info.daysLeft <= 30) {
+          renewalItems.push({ text: '\uD83D\uDCCB <strong>' + r.tenantName + '\'s</strong> rent agreement renewal in <strong>' + info.daysLeft + '</strong> ' + (info.daysLeft === 1 ? 'day' : 'days'), daysLeft: info.daysLeft });
+        }
+      }
+    });
+
+    renewalItems.sort(function(a, b) { return a.daysLeft - b.daysLeft; });
+
+    var dismissIdx = parseInt(sessionStorage.getItem('glance-renewal-dismiss-idx') || '0');
+    if (dismissIdx < renewalItems.length) {
+      var item = renewalItems[dismissIdx];
+      detailsEl.innerHTML = item.text + ' <span onclick="event.stopPropagation();dismissGlanceRenewal()" style="cursor:pointer;margin-left:0.5rem;opacity:0.5;font-size:0.82rem;">\u2715</span>';
+    } else {
+      detailsEl.innerHTML = 'Nothing due today. All caught up!';
+    }
   }
 
   widget.style.display = 'block';
 }
 
 window.renderGlanceWidget = renderGlanceWidget;
+
+window.dismissGlanceRenewal = function() {
+  var idx = parseInt(sessionStorage.getItem('glance-renewal-dismiss-idx') || '0');
+  sessionStorage.setItem('glance-renewal-dismiss-idx', String(idx + 1));
+  renderGlanceWidget();
+};
 
 // Quick Actions modal
 window.openQuickActions = function() { openModal('modal-quick-actions'); };
