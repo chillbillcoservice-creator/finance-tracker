@@ -4153,6 +4153,106 @@ window.deleteRentPayment = deleteRentPayment;
 
 // 12. SYSTEM SETTINGS HANDLERS
 
+// Load mock demo data
+window.loadMockData = function() {
+  if (!confirm('Load demo data? This will add sample entries while keeping your existing data.')) return;
+  loadState();
+  var today = new Date();
+  var y = today.getFullYear();
+  var m = String(today.getMonth() + 1).padStart(2, '0');
+  var d = String(today.getDate()).padStart(2, '0');
+  var todayStr = y + '-' + m + '-' + d;
+  var currMonth = y + '-' + m;
+
+  // Generate a date relative to today
+  function daysAgo(n) { var dt = new Date(today); dt.setDate(dt.getDate() - n); return dt.toISOString().slice(0,10); }
+  function daysFromNow(n) { var dt = new Date(today); dt.setDate(dt.getDate() + n); return dt.toISOString().slice(0,10); }
+
+  // Rentals
+  if (state.rentals.length === 0) {
+    state.rentals.push(
+      { id: 'r_demo_1', propertyName: '23/48 ground floor', tenantName: 'Rahul Sharma', contactInfo: '9876543210', monthlyRent: 18000, securityDeposit: 54000, startDate: '2024-01-01', rentDueDay: 5, aadhaarImg: '', agreementImg: '', status: 'active' },
+      { id: 'r_demo_2', propertyName: '23/48 3rd floor', tenantName: 'Amit Verma', contactInfo: '9876543211', monthlyRent: 22000, securityDeposit: 66000, startDate: '2024-06-01', rentDueDay: 7, aadhaarImg: '', agreementImg: '', status: 'active' },
+      { id: 'r_demo_3', propertyName: '1/104', tenantName: 'Priya Singh', contactInfo: '9876543212', monthlyRent: 15000, securityDeposit: 30000, startDate: '2025-03-01', rentDueDay: 10, aadhaarImg: '', agreementImg: '', status: 'active' }
+    );
+    // Rent payments for past 3 months for 2 of the 3 tenants
+    state.rentPayments.push(
+      { id: 'rp_demo_1', rentalId: 'r_demo_1', amount: 18000, monthYear: getPreviousMonthStr(1), datePaid: daysAgo(30), note: 'Mar rent' },
+      { id: 'rp_demo_2', rentalId: 'r_demo_1', amount: 18000, monthYear: getPreviousMonthStr(2), datePaid: daysAgo(60), note: 'Feb rent' },
+      { id: 'rp_demo_3', rentalId: 'r_demo_2', amount: 22000, monthYear: getPreviousMonthStr(1), datePaid: daysAgo(28), note: 'Mar rent' },
+      { id: 'rp_demo_4', rentalId: 'r_demo_2', amount: 22000, monthYear: getPreviousMonthStr(2), datePaid: daysAgo(58), note: 'Feb rent' },
+      { id: 'rp_demo_5', rentalId: 'r_demo_3', amount: 15000, monthYear: getPreviousMonthStr(2), datePaid: daysAgo(55), note: 'Feb rent' }
+    );
+  }
+
+  // Lent loans
+  if (state.lent.length === 0) {
+    state.lent.push(
+      { id: 'l_demo_1', borrowerName: 'Vikram Patel', phone: '9988776655', principal: 100000, interestRate: 3, startDate: '2025-01-15', dueDate: null, status: 'active', notes: 'Business loan' },
+      { id: 'l_demo_2', borrowerName: 'Sunil Kumar', phone: '9988776644', principal: 50000, interestRate: 2.5, startDate: '2025-03-01', dueDate: null, status: 'active', notes: 'Personal loan' },
+      { id: 'l_demo_3', borrowerName: 'Deepak Joshi', phone: '9988776633', principal: 200000, interestRate: 2, startDate: '2025-06-01', dueDate: null, status: 'active', notes: 'Emergency loan' }
+    );
+    // Interest received for 2 of 3 loans for recent months
+    state.interestPayments.push(
+      { id: 'ip_demo_1', loanId: 'l_demo_1', type: 'received', category: 'interest', amount: 3000, date: daysAgo(2), note: 'Monthly interest' },
+      { id: 'ip_demo_2', loanId: 'l_demo_1', type: 'received', category: 'interest', amount: 3000, date: daysAgo(32), note: 'Monthly interest' },
+      { id: 'ip_demo_3', loanId: 'l_demo_2', type: 'received', category: 'interest', amount: 1250, date: daysAgo(5), note: 'Monthly interest' }
+    );
+  }
+
+  // Borrowed loans
+  if (state.borrowed.length === 0) {
+    state.borrowed.push(
+      { id: 'b_demo_1', financierName: 'HDFC Bank', phone: '18002586161', principal: 500000, interestRate: 1.5, startDate: '2024-08-01', dueDate: null, status: 'active', notes: 'Home loan' },
+      { id: 'b_demo_2', financierName: 'Anil Gupta', phone: '9876501234', principal: 150000, interestRate: 2, startDate: '2025-05-01', dueDate: null, status: 'active', notes: 'Personal loan' }
+    );
+    state.interestPayments.push(
+      { id: 'ip_demo_4', loanId: 'b_demo_1', type: 'paid', category: 'interest', amount: 7500, date: daysAgo(3), note: 'Monthly interest' },
+      { id: 'ip_demo_5', loanId: 'b_demo_2', type: 'paid', category: 'interest', amount: 3000, date: daysAgo(10), note: 'Monthly interest' }
+    );
+  }
+
+  // Expenses
+  if (state.expenses.length === 0) {
+    state.expenses.push(
+      { id: 'exp_demo_1', amount: 3500, date: daysAgo(1), category: 'Utilities', note: 'Electricity bill' },
+      { id: 'exp_demo_2', amount: 1200, date: daysAgo(3), category: 'Travel / Fuel', note: 'Petrol' },
+      { id: 'exp_demo_3', amount: 8500, date: daysAgo(7), category: 'Maintenance', note: 'Plumber repair' },
+      { id: 'exp_demo_4', amount: 2000, date: daysAgo(10), category: 'Others', note: 'Groceries' },
+      { id: 'exp_demo_5', amount: 15000, date: daysAgo(14), category: 'Insurance', note: 'Car insurance premium' },
+      { id: 'exp_demo_6', amount: 45000, date: daysAgo(20), category: 'Construction', project: '23/48 3rd floor', laborType: 'Mistri', workerName: 'Rajesh', paymentMethod: 'cash', note: 'Bathroom renovation' }
+    );
+  }
+
+  // Renewals
+  if (state.renewals.length === 0) {
+    state.renewals.push(
+      { id: 'rn_demo_1', title: 'Car Insurance', category: 'Insurance', amount: 12000, dueDate: daysFromNow(15), frequency: 'yearly', note: 'Maruti Suzuki', lastRenewed: null, createdAt: new Date().toISOString() },
+      { id: 'rn_demo_2', title: 'Health Insurance', category: 'Insurance', amount: 25000, dueDate: daysFromNow(22), frequency: 'yearly', note: 'Family floater', lastRenewed: null, createdAt: new Date().toISOString() },
+      { id: 'rn_demo_3', title: 'Pollution Certificate', category: 'Certificate', amount: 800, dueDate: daysFromNow(10), frequency: 'yearly', note: 'Vehicle number KA-01-1234', lastRenewed: null, createdAt: new Date().toISOString() },
+      { id: 'rn_demo_4', title: 'I.T.R Filing', category: 'Tax', amount: 0, dueDate: daysFromNow(45), frequency: 'yearly', note: 'FY 2025-26', lastRenewed: null, createdAt: new Date().toISOString() },
+      { id: 'rn_demo_5', title: 'House Tax', category: 'Tax', amount: 8500, dueDate: daysFromNow(60), frequency: 'yearly', note: 'Property tax', lastRenewed: null, createdAt: new Date().toISOString() }
+    );
+  }
+
+  if (!state.properties || state.properties.length === 0) {
+    state.properties = ['23/48 ground floor', '23/48 3rd floor', '1/104'];
+  }
+
+  saveState();
+  switchTab('dashboard');
+  renderDashboard();
+  showToast('Demo data loaded!', 'success');
+};
+
+// Helper
+function getPreviousMonthStr(monthsAgo) {
+  var dt = new Date();
+  dt.setDate(1);
+  dt.setMonth(dt.getMonth() - monthsAgo);
+  return dt.getFullYear() + '-' + String(dt.getMonth() + 1).padStart(2, '0');
+}
+
 // Hard system reset
 document.getElementById('btn-reset-data').addEventListener('click', () => {
   if (confirm('CRITICAL WARNING: This will completely delete all your loans, properties, tenants, and logged history. Are you absolutely sure?')) {
