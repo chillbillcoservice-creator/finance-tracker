@@ -6730,14 +6730,45 @@ function renderCalcHistory() {
     return;
   }
   var html = calcHistory.slice().reverse().map(function(h, i) {
-    return '<div style="padding:0.35rem 0.5rem;margin-bottom:0.25rem;background:var(--bg-tertiary);border-radius:var(--radius-sm);border-left:2px solid var(--color-accent);font-size:0.82rem;">' +
-      '<div style="color:var(--text-primary);">' + escHtml(h.expression) + ' = <strong>' + h.result + '</strong></div>' +
+    var origIdx = calcHistory.length - 1 - i;
+    var escExpr = escHtml(h.expression);
+    return '<div onclick="loadCalcEntry(' + origIdx + ')" style="padding:0.35rem 0.5rem;margin-bottom:0.25rem;background:var(--bg-tertiary);border-radius:var(--radius-sm);border-left:2px solid var(--color-accent);font-size:0.82rem;cursor:pointer;">' +
+      '<div style="color:var(--text-primary);">' + escExpr + ' = <strong>' + h.result + '</strong></div>' +
       '<div style="font-size:0.6rem;color:var(--text-muted);margin-top:0.15rem;">' + h.date + '</div>' +
     '</div>';
   }).join('');
   html += '<div style="margin-top:0.4rem;"><button class="btn btn-secondary" onclick="clearCalcHistory()" style="padding:0.3rem 0.6rem;font-size:0.72rem;">Clear History</button></div>';
   container.innerHTML = html;
 }
+
+window.loadCalcEntry = function(idx) {
+  var h = calcHistory[idx];
+  if (!h) return;
+  var raw = h.expression.replace(/×/g, '*').replace(/÷/g, '/');
+  var parts = raw.split(/\s*([+\-*/])\s*/);
+  calcTokens = [];
+  for (var i = 0; i < parts.length; i++) {
+    var p = parts[i].trim();
+    if (!p) continue;
+    if (['+','-','*','/'].indexOf(p) !== -1) {
+      calcTokens.push({v: p, label: ''});
+    } else {
+      var labelMatch = p.match(/^([\d.]+)\((.+)\)$/);
+      if (labelMatch) {
+        calcTokens.push({v: labelMatch[1], label: labelMatch[2]});
+      } else {
+        calcTokens.push({v: p, label: ''});
+      }
+    }
+  }
+  _calcShowExpr = true;
+  _calcHistoryVisible = false;
+  calcUpdateDisplay();
+  var btn = document.getElementById('calc-history-btn');
+  if (btn) btn.textContent = 'Show History';
+  var container = document.getElementById('calc-history');
+  if (container) container.style.display = 'none';
+};
 
 window.toggleCalcHistory = function() {
   _calcHistoryVisible = !_calcHistoryVisible;
