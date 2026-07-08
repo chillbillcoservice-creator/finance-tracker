@@ -3948,6 +3948,18 @@ document.getElementById('form-rental').addEventListener('submit', (e) => {
   }
 });
 
+function populateRentCycleSelect() {
+  const sel = document.getElementById('rental-due-day');
+  if (!sel || sel.options.length > 0) return;
+  for (let i = 1; i <= 31; i++) {
+    const suf = i === 1 ? 'st' : i === 2 ? 'nd' : i === 3 ? 'rd' : 'th';
+    const opt = document.createElement('option');
+    opt.value = i;
+    opt.textContent = i + suf;
+    sel.appendChild(opt);
+  }
+}
+
 function updateRentalRenewalDate() {
   const startDateStr = document.getElementById('rental-start-date').value;
   const displayEl = document.getElementById('rental-renewal-date-display');
@@ -3958,6 +3970,10 @@ function updateRentalRenewalDate() {
   }
   const startDate = new Date(startDateStr);
   if (isNaN(startDate.getTime())) return;
+
+  // Auto-set rent cycle to start date's day
+  const dueSel = document.getElementById('rental-due-day');
+  if (dueSel) dueSel.value = startDate.getDate();
   
   const renewalDate = new Date(startDate);
   renewalDate.setMonth(renewalDate.getMonth() + 11);
@@ -3972,6 +3988,7 @@ function editRental(id) {
   const rental = state.rentals.find(r => r.id === id);
   if (!rental) return;
 
+  populateRentCycleSelect();
   document.getElementById('rental-id').value = rental.id;
   document.getElementById('rental-property').value = rental.propertyName;
   document.getElementById('rental-tenant').value = rental.tenantName;
@@ -4935,10 +4952,10 @@ function initApp() {
 
   // Add rentals trigger
   document.getElementById('btn-add-rental').addEventListener('click', () => {
+    populateRentCycleSelect();
     document.getElementById('form-rental').reset();
     document.getElementById('rental-id').value = '';
     document.getElementById('rental-start-date').value = new Date().toISOString().split('T')[0];
-    document.getElementById('rental-due-day').value = '1'; // Default to first of month
     
     // Clear images
     document.getElementById('rental-aadhaar-base64').value = '';
