@@ -6007,10 +6007,17 @@ window.window.openCollectionDetails = function(type, event) {
           if (pOwe > 0) {
             const normName = (l.borrowerName || '').toLowerCase().trim();
             const groupId = 'group-' + btoa(encodeURIComponent(normName)).replace(/[^a-zA-Z0-9]/g, '');
+            var dueYear = selYear;
+            var dueMonth = selMonth;
+            var startMonth2 = l.startDate.slice(0, 7);
+            if (startMonth2 === selectedMonthStr) {
+              dueMonth++;
+              if (dueMonth > 12) { dueMonth = 1; dueYear++; }
+            }
             const startDay = parseInt(l.startDate.split('-')[2], 10);
-            const daysInMonth = new Date(selYear, selMonth, 0).getDate();
+            const daysInMonth = new Date(dueYear, dueMonth, 0).getDate();
             const dueDay = Math.min(startDay, daysInMonth);
-            const dueDateStr = selectedMonthStr + '-' + String(dueDay).padStart(2, '0');
+            const dueDateStr = dueYear + '-' + String(dueMonth).padStart(2, '0') + '-' + String(dueDay).padStart(2, '0');
             const isOverdue = dueDateStr < new Date().toISOString().split('T')[0];
             pending.push({name: l.borrowerName, phone: l.phone, owe: pOwe, id: l.id, type: 'interest', dueDate: dueDateStr, isOverdue});
           }
@@ -6037,10 +6044,17 @@ window.window.openCollectionDetails = function(type, event) {
           if (pOwe > 0) {
             const normName = (l.borrowerName || '').toLowerCase().trim();
             const groupId = 'group-' + btoa(encodeURIComponent(normName)).replace(/[^a-zA-Z0-9]/g, '');
+            var dueYear = selYear;
+            var dueMonth = selMonth;
+            var startMonth3 = l.startDate.slice(0, 7);
+            if (startMonth3 === selectedMonthStr) {
+              dueMonth++;
+              if (dueMonth > 12) { dueMonth = 1; dueYear++; }
+            }
             const startDay = parseInt(l.startDate.split('-')[2], 10);
-            const daysInMonth = new Date(selYear, selMonth, 0).getDate();
+            const daysInMonth = new Date(dueYear, dueMonth, 0).getDate();
             const dueDay = Math.min(startDay, daysInMonth);
-            const dueDateStr = selectedMonthStr + '-' + String(dueDay).padStart(2, '0');
+            const dueDateStr = dueYear + '-' + String(dueMonth).padStart(2, '0') + '-' + String(dueDay).padStart(2, '0');
             const isOverdue = dueDateStr < new Date().toISOString().split('T')[0];
             pending.push({name: l.borrowerName, type: 'interest', phone: l.phone, owe: pOwe, id: l.id, dueDate: dueDateStr, isOverdue});
           }
