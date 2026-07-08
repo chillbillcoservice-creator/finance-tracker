@@ -5434,8 +5434,8 @@ function renderYearlySummaryTable() {
   
   sortedYears.forEach(year => {
     const yearRent = state.rentPayments.filter(p => p.date && p.date.startsWith(year)).reduce((s, p) => s + Number(p.amount), 0);
-    const yearInterestIn = state.interestPayments.filter(p => p.date && p.date.startsWith(year) && p.type === 'received').reduce((s, p) => s + Number(p.amount), 0);
-    const yearInterestOut = state.interestPayments.filter(p => p.date && p.date.startsWith(year) && p.type === 'paid').reduce((s, p) => s + Number(p.amount), 0);
+    const yearInterestIn = state.interestPayments.filter(p => p.date && p.date.startsWith(year) && p.type === 'received' && p.category === 'interest').reduce((s, p) => s + Number(p.amount), 0);
+    const yearInterestOut = state.interestPayments.filter(p => p.date && p.date.startsWith(year) && p.type === 'paid' && p.category === 'interest').reduce((s, p) => s + Number(p.amount), 0);
     const yearExpense = state.expenses.filter(e => e.date && e.date.startsWith(year)).reduce((s, e) => s + Number(e.amount), 0);
     const netEarnings = yearRent + yearInterestIn - yearInterestOut - yearExpense;
     
@@ -6255,7 +6255,7 @@ function renderGlanceWidget() {
     .filter(function(p) { return p.datePaid === todayStr; })
     .reduce(function(s, p) { return s + Number(p.amount); }, 0);
   var todayInterestCollected = state.interestPayments
-    .filter(function(p) { return p.type === 'received' && p.date === todayStr; })
+    .filter(function(p) { return p.type === 'received' && p.category !== 'issuance' && p.date === todayStr; })
     .reduce(function(s, p) { return s + Number(p.amount); }, 0);
   var totalCollected = todayRentCollected + todayInterestCollected;
 
@@ -6279,7 +6279,7 @@ function renderGlanceWidget() {
       if (outstanding > 0) {
         var expected = outstanding * (Number(l.interestRate) / 100);
         var paid = state.interestPayments
-          .filter(function(p) { return p.type === 'received' && p.loanId === l.id && p.date.startsWith(currentMonth); })
+          .filter(function(p) { return p.type === 'received' && p.category !== 'issuance' && p.loanId === l.id && p.date.startsWith(currentMonth); })
           .reduce(function(s, p) { return s + Number(p.amount); }, 0);
         var owe = expected - paid;
         if (owe > 0) {
