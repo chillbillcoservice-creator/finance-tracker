@@ -1911,7 +1911,7 @@ function renderDashboard() {
           pendingTenantsHTML += '<div class="pending-name-item"><span style="color:' + nameColor + ';font-weight:' + (t.renewalDue ? '800' : '600') + '">' + t.name + '</span> (' + formatCurrency(t.owe) + ')</div>';
         });
         pendingTenantsHTML += '</div>';
-        document.getElementById('card-rent').insertAdjacentHTML('beforeend', pendingTenantsHTML);
+        document.getElementById('card-rent').insertAdjacentHTML('afterbegin', pendingTenantsHTML);
       }
 
     const pBorrowers = [];
@@ -1935,7 +1935,7 @@ function renderDashboard() {
         if (pOwe <= 0) return '';
         return `<div class="pending-name-item"><span>${l.borrowerName}</span> (${formatCurrency(pOwe)})</div>`;
       }).filter(Boolean).join('') + '</div>';
-      document.getElementById('card-interest').insertAdjacentHTML('beforeend', pendingBorrowersHTML);
+      document.getElementById('card-interest').insertAdjacentHTML('afterbegin', pendingBorrowersHTML);
     }
     
     // Attach click-selection to all pending-name-items
