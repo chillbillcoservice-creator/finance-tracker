@@ -768,7 +768,7 @@
             </div>
           </div>
           
-          <div class="form-group-row">
+          <div class="form-group-row" style="grid-template-columns: 4fr 1fr;">
             <div class="form-group">
               <label class="form-label" for="loan-principal">Principal Amount (Rs.)</label>
               <input type="number" id="loan-principal" class="form-input" min="1" step="any" placeholder="0.00" required>
@@ -786,8 +786,11 @@
               </div>
             </div>
             <div class="form-group">
-              <label class="form-label" for="loan-rate">Monthly Interest Rate (%)</label>
-              <input type="number" id="loan-rate" class="form-input" min="0" max="100" step="0.01" placeholder="4.00" required>
+              <label class="form-label" for="loan-rate">Monthly Interest Rate</label>
+              <div style="display: flex; align-items: center; gap: 0.25rem;">
+                <input type="number" id="loan-rate" class="form-input" style="flex: 1;" min="0" max="100" step="0.01" placeholder="4" required>
+                <span style="font-weight: 700; color: var(--text-primary); font-size: 0.9rem;">%</span>
+              </div>
             </div>
           </div>
           
@@ -1283,8 +1286,11 @@
           </div>
           <!-- Monthly Interest Rate -->
           <div class="form-group" style="margin-bottom: 1rem;">
-            <label class="form-label" for="quick-lend-rate">Monthly Interest Rate (%)</label>
-            <input type="number" id="quick-lend-rate" class="form-input" min="0" max="100" step="0.01" value="4.00" required>
+            <label class="form-label" for="quick-lend-rate">Monthly Interest Rate</label>
+            <div style="display: flex; align-items: center; gap: 0.25rem;">
+              <input type="number" id="quick-lend-rate" class="form-input" style="flex: 1;" min="0" max="100" step="0.01" value="4" required>
+              <span style="font-weight: 700; color: var(--text-primary); font-size: 0.9rem;">%</span>
+            </div>
           </div>
           <!-- Date Issued -->
           <div class="form-group" style="margin-bottom: 1rem;">
