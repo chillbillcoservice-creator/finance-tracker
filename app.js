@@ -319,7 +319,7 @@ function updateHeaderDateDisplay() {
   
   const [yearStr, monthStr, dayStr] = selectedDateStr.split('-');
   const selected = new Date(yearStr, monthStr - 1, dayStr);
-  const dayName = selected.toLocaleDateString('en-US', { weekday: 'long' });
+  const dayName = selected.toLocaleDateString('en-US', { weekday: 'short' }).toUpperCase();
   const monthName = selected.toLocaleDateString('en-US', { month: 'long' });
   const dayNum = selected.getDate();
   const year = selected.getFullYear();
