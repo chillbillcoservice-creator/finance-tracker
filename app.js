@@ -1631,7 +1631,6 @@ function renderInterest() {
 
 // 7. DASHBOARD TAB LOGIC
 function renderDashboard() {
-  loadState();
   updateCardHighlights();
 
   // A. Determine reporting date boundaries
