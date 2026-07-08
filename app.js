@@ -1631,6 +1631,7 @@ function renderInterest() {
 
 // 7. DASHBOARD TAB LOGIC
 function renderDashboard() {
+  loadState();
   updateCardHighlights();
 
   // A. Determine reporting date boundaries
@@ -2104,9 +2105,12 @@ function renderDashboard() {
     const isPaid = interestReceived >= (monthlyYield - 0.01);
 
     // Compute due date based on startDate anniversary day
+    var startMonth = loan.startDate.slice(0, 7);
+    var isFirstMonth = startMonth === selectedMonthStr;
     const anniversaryDay = new Date(loan.startDate).getDate();
     const year = reportingToday.getFullYear();
-    const month = reportingToday.getMonth();
+    var month = reportingToday.getMonth();
+    if (isFirstMonth) month += 1; // first interest due next month
     const lastDay = new Date(year, month + 1, 0).getDate();
     const dueDate = new Date(year, month, Math.min(anniversaryDay, lastDay));
     dueDate.setHours(0,0,0,0);
@@ -2153,9 +2157,12 @@ function renderDashboard() {
     const isPaid = interestPaid >= (monthlyCost - 0.01);
 
     // Compute due date based on startDate anniversary day
+    var startMonth = loan.startDate.slice(0, 7);
+    var isFirstMonth = startMonth === selectedMonthStr;
     const anniversaryDay = new Date(loan.startDate).getDate();
     const year = reportingToday.getFullYear();
-    const month = reportingToday.getMonth();
+    var month = reportingToday.getMonth();
+    if (isFirstMonth) month += 1; // first interest due next month
     const lastDay = new Date(year, month + 1, 0).getDate();
     const dueDate = new Date(year, month, Math.min(anniversaryDay, lastDay));
     dueDate.setHours(0,0,0,0);
@@ -5919,7 +5926,7 @@ window.markPendingCollected = function(collectionType, itemType, id, amount, mon
       const [y, m] = monthStr.split('-').map(Number);
       paymentDate = monthStr + '-' + String(new Date(y, m, 0).getDate()).padStart(2, '0');
     }
-    state.interestPayments.push({ id: paymentId, loanId: id, type: 'received', amount: Number(amount), date: paymentDate, note: 'Marked Received from Collection' });
+    state.interestPayments.push({ id: paymentId, loanId: id, type: 'received', category: 'interest', amount: Number(amount), date: paymentDate, note: 'Marked Received from Collection' });
   }
   saveState();
   renderDashboard();
