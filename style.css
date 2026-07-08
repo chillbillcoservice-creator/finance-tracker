@@ -2140,6 +2140,15 @@ body::before {
   }
 }
 
+/* Slide-in animation for glance details */
+@keyframes slideInLeft {
+  from { opacity: 0; transform: translateX(-18px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+.glance-slide-in {
+  animation: slideInLeft 0.35s ease-out;
+}
+
 /* At a Glance Widget */
 #at-a-glance-widget {
   background: linear-gradient(135deg, rgba(var(--color-accent-rgb), 0.08), rgba(var(--color-purple-rgb), 0.08));

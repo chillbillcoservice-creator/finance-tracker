@@ -6498,8 +6498,15 @@ function renderGlanceWidget() {
     summaryEl.innerHTML = '';
   }
 
+  function setGlanceDetails(html) {
+    detailsEl.innerHTML = html;
+    detailsEl.classList.remove('glance-slide-in');
+    void detailsEl.offsetWidth;
+    detailsEl.classList.add('glance-slide-in');
+  }
+
   if (uniqueCount > 0) {
-    detailsEl.innerHTML = 'Collect <strong>' + formatCurrency(totalPending) + '</strong> from <strong>' + uniqueCount + '</strong> ' + (uniqueCount === 1 ? 'person' : 'people');
+    setGlanceDetails('Collect <strong>' + formatCurrency(totalPending) + '</strong> from <strong>' + uniqueCount + '</strong> ' + (uniqueCount === 1 ? 'person' : 'people'));
   } else {
     // Build upcoming renewals pool
     var renewalItems = [];
@@ -6528,13 +6535,17 @@ function renderGlanceWidget() {
     if (typeof _glanceRenewalDismissIdx === 'undefined') _glanceRenewalDismissIdx = 0;
     if (_glanceRenewalDismissIdx < renewalItems.length) {
       var item = renewalItems[_glanceRenewalDismissIdx];
-      detailsEl.innerHTML = item.text + ' <span onclick="event.stopPropagation();dismissGlanceRenewal()" style="cursor:pointer;margin-left:0.5rem;opacity:0.5;font-size:0.82rem;">\u2715</span>';
+      setGlanceDetails(item.text + ' <span onclick="event.stopPropagation();dismissGlanceRenewal()" style="cursor:pointer;margin-left:0.5rem;opacity:0.5;font-size:0.82rem;">\u2715</span>');
       _glanceRenewalTimer = setTimeout(function() {
         _glanceRenewalDismissIdx++;
         renderGlanceWidget();
       }, 5000);
     } else {
-      detailsEl.innerHTML = 'Nothing due today. All caught up!';
+      setGlanceDetails('Nothing due today. All caught up!');
+      _glanceRenewalTimer = setTimeout(function() {
+        _glanceRenewalDismissIdx = 0;
+        renderGlanceWidget();
+      }, 5000);
     }
   }
 
