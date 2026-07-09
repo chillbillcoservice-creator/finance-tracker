@@ -5750,7 +5750,7 @@ window.openTenantDetails = function(rentalId) {
   const sinceDate = formatDate(rental.startDate);
   const renewedDate = rental.lastRenewed ? formatDate(rental.lastRenewed) : null;
   
-  titleEl.innerHTML = `<span style="display:flex;align-items:center;gap:1rem;">${rental.tenantName}<span class="contact-btn-group" style="display:inline-flex;align-items:center;gap:0.3rem;">${callLink}${waLink}<button onclick="renewRentalAgreement('${rental.id}')" style="padding:0.2rem 0.4rem;font-size:0.6rem;background:var(--color-warning);border:none;border-radius:var(--border-radius-sm);cursor:pointer;color:#000;font-weight:700;white-space:nowrap;">Renew Agreement</button></span></span>`;
+  titleEl.innerHTML = `<span style="display:flex;align-items:center;gap:1rem;">${rental.tenantName}<span class="contact-btn-group" style="display:inline-flex;align-items:center;gap:0.3rem;">${callLink}${waLink}</span><button onclick="renewRentalAgreement('${rental.id}')" style="padding:0.2rem 0.4rem;font-size:0.6rem;background:var(--color-warning);border:none;border-radius:var(--border-radius-sm);cursor:pointer;color:#000;font-weight:700;white-space:nowrap;">Renew Agreement</button></span>`;
   
   let html = `
     <div style="margin-bottom: 1rem;">
