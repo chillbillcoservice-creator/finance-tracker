@@ -3836,6 +3836,7 @@ function quickRentPayment(rentalId) {
   });
   saveState();
   renderRentals();
+  renderDashboard();
 }
 window.quickRentPayment = quickRentPayment;
 
