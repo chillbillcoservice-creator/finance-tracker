@@ -1815,17 +1815,17 @@ body::before {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 26px;
-  height: 26px;
-  border-radius: 7px;
+  width: 34px;
+  height: 34px;
+  border-radius: 9px;
   transition: all var(--transition-fast);
   text-decoration: none;
   cursor: pointer;
 }
 
 .contact-action-btn svg {
-  width: 13px !important;
-  height: 13px !important;
+  width: 18px !important;
+  height: 18px !important;
 }
 
 .contact-action-btn.call-btn {
