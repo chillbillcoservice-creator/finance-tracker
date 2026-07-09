@@ -3044,14 +3044,14 @@ function renderRentals() {
           ? `Due: ${rental.rentDueDay}<sup>th</sup> · Since ${formatDate(rental.startDate)}${renewData ? ` · Renews: ${renewData.dateStr}` : ''}${!isRentPaidThisMonth ? '<span style="color:var(--color-warning);font-weight:600;float:right;">Due</span>' : ''}`
           : `Since ${formatDate(rental.startDate)} · Ended ${rental.endDate ? formatDate(rental.endDate) : '-'}`
         }
-      </div>
+</div>
 
-${!isRentFullyPaid && rental.status === 'active'
-        ? `<div style="display:flex; gap:0.35rem; align-items:center; margin-bottom:0.1rem;">
+      <div id="quick-rent-row-${rental.id}" style="display:none; margin-bottom:0.1rem;">
+        <div style="display:flex; gap:0.35rem; align-items:center;">
           <input type="number" id="quick-rent-${rental.id}" class="form-input" placeholder="₹ Amount" style="flex:1; min-height:40px; font-size:1rem; padding:0.3rem 0.5rem; font-weight:600;">
           <button class="btn btn-primary" style="min-height:40px; font-weight:700; font-size:0.9rem; padding:0.3rem 1rem;" onclick="quickRentPayment('${rental.id}')">Pay</button>
-        </div>`
-        : ''}
+        </div>
+      </div>
       ${isRentPaidThisMonth && isRentFullyPaid ? '' : (isRentPaidThisMonth ? `<div style="font-size:0.7rem;color:#fff;font-style:italic;margin-bottom:0.15rem;">Rcvd ${formatCurrency(currentMonthRentSum)} · Bal ${formatCurrency(rentBalance)}</div>` : '')}
 
       <div class="icon-strip">
@@ -3060,7 +3060,7 @@ ${!isRentFullyPaid && rental.status === 'active'
           <span onclick="showRentalLedger('${rental.id}')" title="Ledger">📋</span>
           <span onclick="openTenantDetails('${rental.id}')" title="Details">📝</span>
           ${rental.status === 'active'
-            ? `<span onclick="toggleRentalStatus('${rental.id}')" title="End Lease">🔒</span>`
+            ? `<span onclick="var r=document.getElementById('quick-rent-row-${rental.id}');if(r)r.style.display=r.style.display==='none'?'':'none';" title="Pay">💰</span><span onclick="toggleRentalStatus('${rental.id}')" title="End Lease">🔒</span>`
             : `<span onclick="toggleRentalStatus('${rental.id}')" title="Activate">🔓</span>`
           }
           ${rental.aadhaarImg ? `<span onclick="viewDocumentImage('${rental.id}', 'aadhaar')" title="Aadhaar">🪪</span>` : ''}
