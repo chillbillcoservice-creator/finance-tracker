@@ -3058,17 +3058,17 @@ ${!isRentFullyPaid && rental.status === 'active'
         <div class="icon-strip-left">
           ${rental.contactInfo ? `<span onclick="window.open('tel:${rental.contactInfo.replace(/\D/g, '')}','_self')" title="Call">📞</span><span onclick="window.open('https://wa.me/91${rental.contactInfo.replace(/\D/g, '')}','_blank')" title="WhatsApp">💬</span>` : ''}
           <span onclick="showRentalLedger('${rental.id}')" title="Ledger">📋</span>
+          <span onclick="openTenantDetails('${rental.id}')" title="Details">📝</span>
           ${rental.status === 'active'
-            ? `<span onclick="editRental('${rental.id}')" title="Edit">✏️</span><span onclick="deleteRental('${rental.id}')" title="Delete">🗑️</span>
-               <span onclick="toggleRentalStatus('${rental.id}')" title="End Lease">🔒</span><span onclick="openTenantDetails('${rental.id}')" title="Details & Renew">📝</span>`
-            : `<span onclick="editRental('${rental.id}')" title="Edit">✏️</span><span onclick="deleteRental('${rental.id}')" title="Delete">🗑️</span>
-               <span onclick="toggleRentalStatus('${rental.id}')" title="Activate">🔓</span>`
+            ? `<span onclick="toggleRentalStatus('${rental.id}')" title="End Lease">🔒</span>`
+            : `<span onclick="toggleRentalStatus('${rental.id}')" title="Activate">🔓</span>`
           }
           ${rental.aadhaarImg ? `<span onclick="viewDocumentImage('${rental.id}', 'aadhaar')" title="Aadhaar">🪪</span>` : ''}
           ${rental.agreementImg ? `<span onclick="viewDocumentImage('${rental.id}', 'agreement')" title="Agreement">📄</span>` : ''}
         </div>
         <div class="icon-strip-right">
-          <!-- edit/delete moved to left for rental, keep right empty or add future -->
+          <span onclick="editRental('${rental.id}')" title="Edit">✏️</span>
+          <span onclick="deleteRental('${rental.id}')" title="Delete">🗑️</span>
         </div>
       </div>
     `;
