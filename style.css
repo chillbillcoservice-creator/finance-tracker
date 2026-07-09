@@ -1071,8 +1071,9 @@ body::before {
   transition: all var(--transition-normal);
 }
 
-.summary-card.has-pending-names {
-  padding-right: 2.5rem;
+.summary-card.has-pending-names .summary-value,
+.summary-card.has-pending-names .summary-sub-value-pending {
+  padding-right: 1.2rem;
 }
 
 /* ── Records Sections ── */
