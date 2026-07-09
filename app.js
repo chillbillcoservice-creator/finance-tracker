@@ -2765,7 +2765,10 @@ function renderLending() {
     card.innerHTML = `
       <div style="display:flex; justify-content:space-between; align-items:center;">
         <div style="font-weight:700; font-size:0.9rem;">${loan.borrowerName}${settledBadge}${advBadge}</div>
-        <div style="font-size:1.15rem; font-weight:800; color:var(--color-warning); line-height:1.2;">${formattedPrincipal}</div>
+        <div style="text-align:right;">
+          <div style="font-size:1.15rem; font-weight:800; color:var(--color-warning); line-height:1.2;">${formattedPrincipal}</div>
+          <div style="font-size:0.72rem; color:var(--text-secondary); line-height:1.3;">+${formattedYield}/mo</div>
+        </div>
       </div>
 
       <div style="font-size:0.68rem; color:var(--text-secondary); margin:0.2rem 0 0.35rem; line-height:1.5;">
