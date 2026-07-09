@@ -3040,7 +3040,7 @@ function renderRentals() {
         </div>
       </div>
 
-      <div style="font-size:0.68rem;color:var(--text-secondary);margin:0.15rem 0 0.25rem;">
+      <div style="font-size:0.68rem;color:#fff;margin:0.15rem 0 0.25rem;">
         Due: ${rental.rentDueDay}<sup>th</sup> · Since ${formatDate(rental.startDate)}
         ${renewData ? `· Renews: ${renewData.dateStr}` : ''}
         ${!isRentPaidThisMonth && rental.status === 'active' ? '<span style="color:var(--color-warning);font-weight:600;float:right;">Due</span>' : ''}
