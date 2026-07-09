@@ -2845,17 +2845,17 @@ function renderLending() {
       const loanIdxStr = group.loans.length > 1 ? ` <span style="font-size: 0.8em; color: var(--text-secondary); font-weight: normal;">(Loan No ${String(idx + 1).padStart(2, '0')})</span>` : '';
       
       loansHtml += `
-      <div style="background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1rem; margin-top: 1rem;">
+      <div style="position:relative; background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1rem; margin-top: 1rem;">
         <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 0.75rem;">
           <div>
             <h4 style="margin: 0 0 0.25rem 0; font-size: 0.95rem;">${loan.borrowerName}${loanIdxStr} ${stats.statusInMonth !== 'active' ? '<span class="badge badge-muted">Settled</span>' : ''} ${stats.hasAdvance ? '<span class="badge" style="background: rgba(168,85,247,0.15); color: var(--color-purple); border:1px solid rgba(168,85,247,0.25); font-size:0.6rem; padding:0.1rem 0.35rem; margin-left:0.25rem;">Advance</span>' : ''}</h4>
             <div style="font-size: 0.8rem; color: var(--text-secondary);">Issued: ${formatDate(loan.startDate)} ${loan.dueDate ? `• Due: ${formatDate(loan.dueDate)}` : ''}</div>
           </div>
-          <div style="display: flex; align-items: center; gap: 0.3rem;">
-            ${loan.phone ? getContactActionsHTML(loan.phone) : ''}
-            <button class="btn btn-secondary btn-sm" onclick="editLoan('${loan.id}', 'lent')" style="padding:0.15rem 0.35rem;font-size:0.7rem;line-height:1;" title="Edit">✏️</button>
-            <button class="btn btn-danger btn-sm" onclick="deleteLoan('${loan.id}', 'lent')" style="padding:0.15rem 0.35rem;font-size:0.7rem;line-height:1;" title="Delete">🗑️</button>
-          </div>
+          ${loan.phone ? `<div class="contact-btn-group">${getContactActionsHTML(loan.phone)}</div>` : ''}
+        </div>
+        <div style="position:absolute; top:0.5rem; right:0.5rem; display:flex; gap:0.25rem; z-index:2;">
+          <button class="btn btn-secondary btn-sm" onclick="editLoan('${loan.id}', 'lent')" style="padding:0.15rem 0.35rem;font-size:0.7rem;line-height:1;" title="Edit">✏️</button>
+          <button class="btn btn-danger btn-sm" onclick="deleteLoan('${loan.id}', 'lent')" style="padding:0.15rem 0.35rem;font-size:0.7rem;line-height:1;" title="Delete">🗑️</button>
         </div>
 
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 0.75rem;">
@@ -3105,20 +3105,20 @@ function renderBorrowing() {
       const loanIdxStr = group.loans.length > 1 ? ` <span style="font-size: 0.8em; color: var(--text-secondary); font-weight: normal;">(Loan No ${String(idx + 1).padStart(2, '0')})</span>` : '';
       
       loansHtml += `
-      <div style="background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1rem; margin-top: 1rem;">
+      <div style="position:relative; background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1rem; margin-top: 1rem;">
         <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.75rem;">
           <div>
             <h4 style="margin: 0 0 0.25rem 0; font-size: 0.95rem;">${loan.financierName}${loanIdxStr} ${stats.statusInMonth !== 'active' ? '<span class="badge badge-muted">Loan Closed</span>' : ''}</h4>
             <div style="font-size: 0.8rem; color: var(--text-secondary);">Issued: ${formatDate(loan.startDate)} ${loan.dueDate ? `• Due: ${formatDate(loan.dueDate)}` : ''}</div>
           </div>
-          <div style="display: flex; align-items: center; gap: 0.5rem;">
-            <div style="text-align: right;">
-              <div style="color: var(--color-danger); font-weight: bold;">${formatCurrency(stats.outstandingPrincipal)}</div>
-              <div style="font-size: 0.75rem; color: var(--text-muted);">Principal</div>
-            </div>
-            <button class="btn btn-secondary btn-sm" onclick="editLoan('${loan.id}', 'borrowed')" style="padding:0.15rem 0.35rem;font-size:0.7rem;line-height:1;" title="Edit">✏️</button>
-            <button class="btn btn-danger btn-sm" onclick="deleteLoan('${loan.id}', 'borrowed')" style="padding:0.15rem 0.35rem;font-size:0.7rem;line-height:1;" title="Delete">🗑️</button>
+          <div style="text-align: right;">
+            <div style="color: var(--color-danger); font-weight: bold;">${formatCurrency(stats.outstandingPrincipal)}</div>
+            <div style="font-size: 0.75rem; color: var(--text-muted);">Principal</div>
           </div>
+        </div>
+        <div style="position:absolute; top:0.5rem; right:0.5rem; display:flex; gap:0.25rem; z-index:2;">
+          <button class="btn btn-secondary btn-sm" onclick="editLoan('${loan.id}', 'borrowed')" style="padding:0.15rem 0.35rem;font-size:0.7rem;line-height:1;" title="Edit">✏️</button>
+          <button class="btn btn-danger btn-sm" onclick="deleteLoan('${loan.id}', 'borrowed')" style="padding:0.15rem 0.35rem;font-size:0.7rem;line-height:1;" title="Delete">🗑️</button>
         </div>
         
         <div style="display: flex; align-items: center; gap: 0.35rem; margin-bottom: 0.75rem;" onclick="event.stopPropagation();">
