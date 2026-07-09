@@ -1377,25 +1377,45 @@ function renewRentalAgreement(rentalId) {
 // Lend More: Opens Quick Lend modal pre-filled with the borrower's name
 function lendMore(loanId) {
   loadState();
-  const loan = state.lent.find(l => l.id === loanId);
+  let loan = state.lent.find(l => l.id === loanId);
+  if (loan) {
+    openQuickLend();
+    setTimeout(() => {
+      const select = document.getElementById('quick-lend-borrower-select');
+      if (select) {
+        for (let i = 0; i < select.options.length; i++) {
+          if (select.options[i].value === loan.borrowerName) {
+            select.value = loan.borrowerName;
+            break;
+          }
+        }
+        toggleQuickLendNewName();
+      }
+    }, 100);
+    return;
+  }
+
+  loan = state.borrowed.find(l => l.id === loanId);
   if (!loan) return;
 
-  openQuickLend();
-
-  // Wait for the modal to render, then select the borrower
-  setTimeout(() => {
-    const select = document.getElementById('quick-lend-borrower-select');
-    if (select) {
-      // Find matching option by borrower name
-      for (let i = 0; i < select.options.length; i++) {
-        if (select.options[i].value === loan.borrowerName) {
-          select.value = loan.borrowerName;
-          break;
-        }
-      }
-      toggleQuickLendNewName();
-    }
-  }, 100);
+  document.getElementById('form-loan').reset();
+  document.getElementById('loan-id').value = '';
+  document.getElementById('loan-direction').value = 'borrowed';
+  document.getElementById('loan-rate').value = loan.interestRate || '3.00';
+  var today = new Date();
+  var dueDate = new Date(today);
+  dueDate.setMonth(dueDate.getMonth() + 1);
+  var todayStr = today.toISOString().split('T')[0];
+  var dueDateStr = dueDate.toISOString().split('T')[0];
+  document.getElementById('loan-start-date').value = todayStr;
+  document.getElementById('loan-due-date').value = dueDateStr;
+  document.getElementById('loan-modal-title').textContent = 'Borrow More from ' + loan.financierName;
+  document.getElementById('loan-party-label').textContent = 'Financier / Lender Name';
+  document.getElementById('loan-party').value = loan.financierName;
+  document.getElementById('loan-party').placeholder = 'e.g. Apex Bank';
+  document.getElementById('loan-phone').value = loan.phone || '';
+  updatePrincipalPresets('borrowed');
+  openModal('modal-loan');
 }
 
 window.closeModal = closeModal;
