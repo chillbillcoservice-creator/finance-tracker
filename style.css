@@ -510,7 +510,7 @@ body::before {
 .pending-names-list {
   position: absolute;
   right: 0.25rem;
-  top: 38%;
+  top: 50%;
   transform: translateY(-50%);
   max-width: 46%;
   max-height: 80%;
@@ -1074,6 +1074,13 @@ body::before {
 .summary-card.has-pending-names .summary-value,
 .summary-card.has-pending-names .summary-sub-value-pending {
   padding-right: 1.2rem;
+}
+
+.summary-card-icon-collection {
+  position: absolute;
+  top: 0.65rem;
+  right: 0.65rem;
+  z-index: 3;
 }
 
 /* ── Records Sections ── */
