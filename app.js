@@ -554,7 +554,7 @@ function seedInitialData() {
 
 // 3. UI Helpers & Formatting
 const formatCurrency = (val) => {
-  return 'Rs. ' + Number(val).toLocaleString('en-IN', {
+  return '₹ ' + Number(val).toLocaleString('en-IN', {
     maximumFractionDigits: 0,
     minimumFractionDigits: 0
   });
