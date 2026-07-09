@@ -3026,25 +3026,35 @@ function renderRentals() {
 
     card.innerHTML = `
       <div class="item-row">
-        <div class="item-title-col">
-          <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
-            <svg class="card-chevron" viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2.5" fill="none"><polyline points="6 9 12 15 18 9"/></svg>
-            <span class="item-name">${rental.tenantName}</span>
-            <span style="font-size: 0.75rem; color: var(--text-secondary); font-weight: 500;">${rental.propertyName}</span>
-            ${rental.status === 'active' ? '' : '<span class="badge badge-muted">Ended</span>'}
+        <div>
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <div style="display:flex; align-items:center; gap:0.4rem;">
+              <svg class="card-chevron" viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2.5" fill="none"><polyline points="6 9 12 15 18 9"/></svg>
+              <span style="font-weight:700; font-size:1rem;">${rental.tenantName}</span>
+              <span style="font-size:0.75rem;color:var(--text-secondary);font-weight:500;">${rental.propertyName}</span>
+              ${rental.status === 'active' ? '' : '<span class="badge badge-muted">Ended</span>'}
+            </div>
+            <div style="text-align:right;">
+              <div style="font-size:1.15rem;font-weight:800;color:var(--color-success);line-height:1.2;">${formatCurrency(rental.monthlyRent)}</div>
+              <div style="font-size:0.68rem;color:var(--text-secondary);margin-top:0.1rem;">Monthly Rent</div>
+              ${stampHtml}
+            </div>
           </div>
-          ${rental.contactInfo ? `<div style="font-size: 0.85rem; color: var(--text-secondary);">${getContactActionsHTML(rental.contactInfo)}</div>` : ''}
-          <div class="item-meta" style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; font-size: 0.68rem;">
-            <span>Due: <strong>${rental.rentDueDay}<sup>th</sup></strong></span>
-            <span class="meta-divider"></span>
-            <span>Since <strong>${formatDate(rental.startDate)}</strong></span>
-            ${renewData ? `<span class="meta-divider"></span><span>Renews: <strong>${renewData.dateStr}</strong></span>` : ''}
+          ${rental.contactInfo ? `<div style="font-size:0.82rem;color:#fff;margin-top:0.05rem;">📞 ${rental.contactInfo}</div>` : ''}
+          <div style="font-size:0.68rem;color:var(--text-secondary);margin:0.15rem 0 0.25rem;">
+            Due: ${rental.rentDueDay}<sup>th</sup> · Since ${formatDate(rental.startDate)}
+            ${renewData ? `· Renews: ${renewData.dateStr}` : ''}
+            ${!isRentPaidThisMonth && rental.status === 'active' ? '<span style="color:var(--color-warning);font-weight:600;float:right;">Due</span>' : ''}
           </div>
-        </div>
-        <div class="amount-display" style="text-align: right; display: flex; flex-direction: column; align-items: flex-end;">
-          <div class="amount-value" style="color: var(--color-success);">${formatCurrency(rental.monthlyRent)}</div>
-          <div class="amount-label" style="margin-top: 0.15rem;">Monthly Rent</div>
-          ${stampHtml}
+          <div class="icon-strip" style="margin-top:0;border-top:none;padding-top:0;">
+            <div class="icon-strip-left">
+              ${rental.contactInfo ? `<span onclick="window.open('tel:${rental.contactInfo.replace(/\D/g, '')}','_self')" title="Call">📞</span><span onclick="window.open('https://wa.me/91${rental.contactInfo.replace(/\D/g, '')}','_blank')" title="WhatsApp">💬</span>` : ''}
+              <span onclick="showRentalLedger('${rental.id}')" title="Ledger">📋</span>
+              <span onclick="editRental('${rental.id}')" title="Edit">✏️</span>
+              <span onclick="deleteRental('${rental.id}')" title="Delete">🗑️</span>
+            </div>
+            <div class="icon-strip-right"></div>
+          </div>
         </div>
       </div>
 
@@ -3081,7 +3091,7 @@ function renderRentals() {
 
     const itemRow = card.querySelector('.item-row');
     itemRow.addEventListener('click', (e) => {
-      if (e.target.closest('.contact-action-btn, button, .btn, input')) return;
+      if (e.target.closest('.icon-strip, button, .btn, input')) return;
       window.openTenantDetails(rental.id);
     });
 
