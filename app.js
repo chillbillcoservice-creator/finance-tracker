@@ -2735,11 +2735,12 @@ function renderLending() {
     const currentMonthSum = currentMonthPayments.reduce((sum, p) => sum + Number(p.amount), 0);
     const isInterestFullyPaidThisMonth = monthlyYield > 0 && currentMonthSum >= (monthlyYield - 0.01);
     const hasAdvance = interestPayments.some(function(p) { return p.note && p.note.indexOf('[Advance]') !== -1; });
+    const advTotal = hasAdvance ? interestPayments.filter(function(p) { return p.note && p.note.indexOf('[Advance]') !== -1; }).reduce(function(s, p) { return s + Number(p.amount); }, 0) : 0;
     const statusInMonth = outstandingPrincipal > 0 ? 'active' : 'paid';
 
     loan._stats = {
       outstandingPrincipal, totalReceived, totalRepaid, monthlyYield, currentMonthSum,
-      isInterestFullyPaidThisMonth, statusInMonth, lastPaymentDate, hasAdvance
+      isInterestFullyPaidThisMonth, statusInMonth, lastPaymentDate, hasAdvance, advTotal
     };
   });
 
@@ -2761,7 +2762,6 @@ function renderLending() {
     const formattedPrincipal = formatCurrency(stats.outstandingPrincipal);
     const currentRecv = formatCurrency(stats.currentMonthSum);
     const currentBal = formatCurrency(Math.max(0, stats.monthlyYield - stats.currentMonthSum));
-    const advTotal = stats.hasAdvance ? interestPayments.filter(function(p) { return p.note && p.note.indexOf('[Advance]') !== -1; }).reduce(function(s, p) { return s + Number(p.amount); }, 0) : 0;
     const recvDisplay = stats.isInterestFullyPaidThisMonth
       ? 'Rcvd ' + currentRecv + ' ✅'
       : 'Rcvd ' + currentRecv + ' · Bal ' + currentBal;
@@ -2784,7 +2784,7 @@ function renderLending() {
         <button class="btn btn-primary" style="min-height:40px; font-weight:700; font-size:0.9rem; padding:0.3rem 1rem;" onclick="quickLoanPayment('${loan.id}', 'lent')">Recv</button>
       </div>
 
-      <div style="font-size:0.68rem; color:var(--text-secondary); font-style:italic; margin-bottom:0.3rem;">${recvDisplay}${advTotal > 0 ? ' · Adv ' + formatCurrency(advTotal) : ''}${stats.lastPaymentDate ? ' · Last ' + formatDate(stats.lastPaymentDate) : ''}</div>
+      <div style="font-size:0.68rem; color:var(--text-secondary); font-style:italic; margin-bottom:0.3rem;">${recvDisplay}${stats.advTotal > 0 ? ' · Adv ' + formatCurrency(stats.advTotal) : ''}${stats.lastPaymentDate ? ' · Last ' + formatDate(stats.lastPaymentDate) : ''}</div>
 
       <div class="icon-strip">
         <div class="icon-strip-left">
