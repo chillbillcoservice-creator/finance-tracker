@@ -3458,7 +3458,7 @@ function editLoan(id, direction) {
 
   // Setup Modal labels based on Direction
   document.getElementById('loan-modal-title').textContent = direction === 'lent' ? 'Edit Lent Loan Details' : 'Edit Borrowing Details';
-  document.getElementById('loan-party-label').textContent = direction === 'lent' ? 'Borrower Name' : 'Financier / Lender Name';
+  document.getElementById('loan-party-label').textContent = direction === 'lent' ? 'Borrower Name' : 'Lender Name';
   document.getElementById('loan-party').placeholder = direction === 'lent' ? 'e.g. John Doe' : 'e.g. Acme FinCorp';
 
   updatePrincipalPresets(direction);
@@ -5140,7 +5140,7 @@ function initApp() {
     document.getElementById('loan-due-date').value = dueDateStr;
     
     document.getElementById('loan-modal-title').textContent = 'Record Borrowed Money';
-    document.getElementById('loan-party-label').textContent = 'Financier / Lender Name';
+    document.getElementById('loan-party-label').textContent = 'Lender Name';
     document.getElementById('loan-party').placeholder = 'e.g. Apex Bank';
     
     updatePrincipalPresets('borrowed');
