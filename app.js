@@ -2775,7 +2775,7 @@ function renderLending() {
       </div>
 
       <div style="font-size:0.68rem; color:var(--text-secondary); margin:0.2rem 0 0.35rem; line-height:1.5;">
-        ${loan.phone ? '<span style="color:#fff;">' + loan.phone + '</span>' : ''}${loan.phone && stats.lastPaymentDate ? ' · ' : ''}${stats.lastPaymentDate ? 'Last ' + formatDate(stats.lastPaymentDate) : ''}
+        ${loan.phone ? '<span style="color:#fff;">' + loan.phone + '</span>' : ''}
       </div>
 
       <div style="display:flex; gap:0.35rem; align-items:center; margin-bottom:0.2rem;">
@@ -2783,7 +2783,7 @@ function renderLending() {
         <button class="btn btn-primary" style="min-height:40px; font-weight:700; font-size:0.9rem; padding:0.3rem 1rem;" onclick="quickLoanPayment('${loan.id}', 'lent')">Recv</button>
       </div>
 
-      <div style="font-size:0.68rem; color:var(--text-secondary); font-style:italic; margin-bottom:0.3rem;">${recvDisplay}</div>
+      <div style="font-size:0.68rem; color:var(--text-secondary); font-style:italic; margin-bottom:0.3rem;">${recvDisplay}${stats.lastPaymentDate ? ' · ' + formatDate(stats.lastPaymentDate) : ''}</div>
 
       <div class="icon-strip">
         <div class="icon-strip-left">
