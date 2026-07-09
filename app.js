@@ -2778,12 +2778,12 @@ function renderLending() {
         </div>
       </div>
 
-      <div style="display:flex; gap:0.35rem; align-items:center; margin-bottom:0.2rem;">
+      <div style="display:flex; gap:0.35rem; align-items:center; margin-bottom:0.35rem;">
         <input type="number" id="quick-pay-${loan.id}" class="form-input" placeholder="₹ Amount" style="flex:1; min-height:40px; font-size:1rem; padding:0.3rem 0.5rem; font-weight:600;">
         <button class="btn btn-primary" style="min-height:40px; font-weight:700; font-size:0.9rem; padding:0.3rem 1rem;" onclick="quickLoanPayment('${loan.id}', 'lent')">Recv</button>
       </div>
 
-      <div style="font-size:0.7rem; color:#fff; font-style:italic; margin-bottom:0.15rem;">${recvDisplay}${stats.advTotal > 0 ? ' · Adv ' + formatCurrency(stats.advTotal) : ''}${stats.lastPaymentDate ? ' · Last ' + formatDate(stats.lastPaymentDate) : ''}</div>
+      <div style="font-size:0.7rem; color:#fff; font-style:italic; margin-bottom:0.25rem;">${recvDisplay}${stats.advTotal > 0 ? ' · Adv ' + formatCurrency(stats.advTotal) : ''}${stats.lastPaymentDate ? ' · Last ' + formatDate(stats.lastPaymentDate) : ''}</div>
 
       <div class="icon-strip">
         <div class="icon-strip-left">
