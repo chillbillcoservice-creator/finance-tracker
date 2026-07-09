@@ -3027,7 +3027,7 @@ function renderRentals() {
       <div style="display:flex; justify-content:space-between; align-items:center;">
         <div>
           <div style="font-weight:700; font-size:1rem;">${rental.tenantName}
-            <span style="font-size:0.72rem;color:var(--text-secondary);font-weight:500;margin-left:0.3rem;">${rental.propertyName}</span>
+            <span style="font-size:0.72rem;color:#fff;font-weight:500;margin-left:0.3rem;">${rental.propertyName}</span>
             ${rental.status === 'active' ? '' : '<span class="badge badge-muted">Ended</span>'}
           </div>
           ${rental.contactInfo ? `<div style="font-size:0.82rem;color:#fff;margin-top:0.05rem;">${rental.contactInfo}</div>` : ''}
