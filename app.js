@@ -2853,6 +2853,7 @@ function renderLending() {
           </div>
           <div style="display: flex; align-items: center; gap: 0.3rem;">
             ${loan.phone ? getContactActionsHTML(loan.phone) : ''}
+            <button class="btn btn-secondary btn-sm" onclick="editLoan('${loan.id}', 'lent')" style="padding:0.15rem 0.35rem;font-size:0.7rem;line-height:1;" title="Edit">✏️</button>
             <button class="btn btn-danger btn-sm" onclick="deleteLoan('${loan.id}', 'lent')" style="padding:0.15rem 0.35rem;font-size:0.7rem;line-height:1;" title="Delete">🗑️</button>
           </div>
         </div>
@@ -2906,7 +2907,6 @@ function renderLending() {
                    <button class="btn btn-sm" style="background: linear-gradient(135deg, var(--color-accent), #0369a1); color: #fff; box-shadow: 0 4px 14px rgba(14,165,233,0.3);" onclick="lendMore('${loan.id}')">Lend More</button>`)
             : `<button class="btn btn-secondary btn-sm" onclick="toggleLoanStatus('${loan.id}', 'lent')">Reopen</button>`
           }
-          <button class="btn btn-secondary btn-sm" onclick="editLoan('${loan.id}', 'lent')">Edit</button>
           ${stats.statusInMonth === 'active' && !loan.isEMI ? `<button class="btn btn-secondary btn-sm" onclick="promptConvertEMI('${loan.id}', 'lent')">Convert to EMI</button>` : ''}
         </div>
       </div>`;
@@ -3116,6 +3116,7 @@ function renderBorrowing() {
               <div style="color: var(--color-danger); font-weight: bold;">${formatCurrency(stats.outstandingPrincipal)}</div>
               <div style="font-size: 0.75rem; color: var(--text-muted);">Principal</div>
             </div>
+            <button class="btn btn-secondary btn-sm" onclick="editLoan('${loan.id}', 'borrowed')" style="padding:0.15rem 0.35rem;font-size:0.7rem;line-height:1;" title="Edit">✏️</button>
             <button class="btn btn-danger btn-sm" onclick="deleteLoan('${loan.id}', 'borrowed')" style="padding:0.15rem 0.35rem;font-size:0.7rem;line-height:1;" title="Delete">🗑️</button>
           </div>
         </div>
@@ -3145,7 +3146,6 @@ function renderBorrowing() {
         </div>
 
         <div class="loan-actions" style="margin-top: 0.5rem;">
-          <button class="btn btn-secondary btn-sm" onclick="editLoan('${loan.id}', 'borrowed')">Edit</button>
           ${stats.statusInMonth === 'active' 
             ? (loan.isEMI
                ? `<button class="btn btn-primary btn-sm" onclick="promptRecordEMI('${loan.id}', 'paid')">Record EMI</button>
