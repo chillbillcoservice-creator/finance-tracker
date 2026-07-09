@@ -1900,6 +1900,7 @@ function renderDashboard() {
     if(card) {
       const oldList = card.querySelector('.pending-names-list');
       if(oldList) oldList.remove();
+      card.classList.remove('has-pending-names');
     }
   });
 
@@ -1924,6 +1925,7 @@ function renderDashboard() {
         });
         pendingTenantsHTML += '</div>';
         document.getElementById('card-rent').insertAdjacentHTML('afterbegin', pendingTenantsHTML);
+        document.getElementById('card-rent').classList.add('has-pending-names');
       }
 
     const pBorrowers = [];
@@ -1948,6 +1950,7 @@ function renderDashboard() {
         return `<div class="pending-name-item"><span>${l.borrowerName}</span> (${formatCurrency(pOwe)})</div>`;
       }).filter(Boolean).join('') + '</div>';
       document.getElementById('card-interest').insertAdjacentHTML('afterbegin', pendingBorrowersHTML);
+      document.getElementById('card-interest').classList.add('has-pending-names');
     }
     
     // Attach click-selection to all pending-name-items
