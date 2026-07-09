@@ -2759,8 +2759,6 @@ function renderLending() {
     const formattedYield = formatCurrency(stats.monthlyYield);
     const formattedPrincipal = formatCurrency(stats.outstandingPrincipal);
     const formattedReceived = formatCurrency(stats.totalReceived);
-    const formattedSum = formatCurrency(stats.currentMonthSum);
-    const formattedBal = formatCurrency(Math.max(0, stats.monthlyYield - stats.currentMonthSum));
 
     card.innerHTML = `
       <div style="display:flex; justify-content:space-between; align-items:center;">
@@ -2771,16 +2769,14 @@ function renderLending() {
         </div>
       </div>
 
-      <div style="font-size:0.68rem; color:var(--text-secondary); margin:0.2rem 0 0.35rem; line-height:1.5;">
-        ${loan.phone ? '<span style="color:#fff;">' + loan.phone + '</span> · ' : ''}${stats.lastPaymentDate ? 'Last ' + formatDate(stats.lastPaymentDate) : 'No payments'}
+      <div style="font-size:0.68rem; color:var(--text-secondary); margin:0.1rem 0 0.25rem; line-height:1.4;">
+        ${loan.phone ? '<span style="color:#fff;">' + loan.phone + '</span> · ' : ''}${stats.lastPaymentDate ? 'Last ' + formatDate(stats.lastPaymentDate) : 'No payments'}<span style="float:right;">Recv ${formattedReceived}</span>
       </div>
 
       <div style="display:flex; gap:0.35rem; align-items:center; margin-bottom:0.2rem;">
         <input type="number" id="quick-pay-${loan.id}" class="form-input" placeholder="₹ Amount" style="flex:1; min-height:40px; font-size:1rem; padding:0.3rem 0.5rem; font-weight:600;">
         <button class="btn btn-primary" style="min-height:40px; font-weight:700; font-size:0.9rem; padding:0.3rem 1rem;" onclick="quickLoanPayment('${loan.id}', 'lent')">Recv</button>
       </div>
-
-      <div style="font-size:0.68rem; color:var(--text-secondary); font-style:italic; margin-bottom:0.3rem;">Recv ${formattedReceived}</div>
 
       <div class="icon-strip">
         <div class="icon-strip-left">
