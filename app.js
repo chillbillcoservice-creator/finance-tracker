@@ -1245,7 +1245,7 @@ function quickLoanPayment(loanId, direction) {
     category: 'interest',
     amount: Number(amount),
     date: today,
-    note: (isAdvance ? 'Advance - ' : '') + 'Quick Pay'
+    note: (isAdvance ? '[Advance] ' : '') + 'Quick Pay'
   });
   saveState();
   refreshActiveTab();
