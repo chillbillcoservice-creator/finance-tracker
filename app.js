@@ -3060,7 +3060,7 @@ function renderRentals() {
           <span onclick="showRentalLedger('${rental.id}')" title="Ledger">📋</span>
           <span onclick="openTenantDetails('${rental.id}')" title="Details">📝</span>
           ${rental.status === 'active'
-            ? `<span onclick="var r=document.getElementById('quick-rent-row-${rental.id}');if(r)r.style.display=r.style.display==='none'?'':'none';" title="Pay">💰</span><span onclick="toggleRentalStatus('${rental.id}')" title="End Lease">🔒</span>`
+            ? `<label style="display:inline-flex;align-items:center;cursor:pointer;margin:0;height:28px;"><input type="checkbox" onchange="if(this.checked){quickMarkRentPaid('${rental.id}')}" ${isRentFullyPaid ? 'checked' : ''} style="width:14px;height:14px;accent-color:var(--color-success);cursor:pointer;margin:0;"></label><span onclick="var r=document.getElementById('quick-rent-row-${rental.id}');if(r)r.style.display=r.style.display==='none'?'':'none';" title="Pay">💰</span><span onclick="toggleRentalStatus('${rental.id}')" title="End Lease">🔒</span>`
             : `<span onclick="toggleRentalStatus('${rental.id}')" title="Activate">🔓</span>`
           }
           ${rental.aadhaarImg ? `<span onclick="viewDocumentImage('${rental.id}', 'aadhaar')" title="Aadhaar">🪪</span>` : ''}
@@ -3846,6 +3846,26 @@ function quickRentPayment(rentalId) {
   renderDashboard();
 }
 window.quickRentPayment = quickRentPayment;
+
+function quickMarkRentPaid(rentalId) {
+  loadState();
+  const rental = state.rentals.find(r => r.id === rentalId);
+  if (!rental) return;
+  const today = new Date();
+  const datePaid = today.toISOString().split('T')[0];
+  state.rentPayments.push({
+    id: 'rp' + Math.random().toString(36).substr(2, 9),
+    rentalId: rentalId,
+    amount: Number(rental.monthlyRent),
+    monthYear: selectedMonthStr,
+    datePaid: datePaid,
+    note: 'Marked Paid'
+  });
+  saveState();
+  renderRentals();
+  renderDashboard();
+}
+window.quickMarkRentPaid = quickMarkRentPaid;
 
 // Rent payment submit handler
 document.getElementById('form-rent-payment').addEventListener('submit', (e) => {
