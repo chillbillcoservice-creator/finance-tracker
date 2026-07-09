@@ -3045,7 +3045,7 @@ function renderRentals() {
         ${!isRentPaidThisMonth && rental.status === 'active' ? '<span style="color:var(--color-warning);font-weight:600;float:right;">Due</span>' : ''}
       </div>
 
-      ${!isRentFullyPaid && rental.status === 'active'
+      ${!isRentPaidThisMonth && rental.status === 'active'
         ? `<div style="display:flex; gap:0.35rem; align-items:center; margin-bottom:0.1rem;">
           <input type="number" id="quick-rent-${rental.id}" class="form-input" placeholder="₹ Amount" style="flex:1; min-height:40px; font-size:1rem; padding:0.3rem 0.5rem; font-weight:600;">
           <button class="btn btn-primary" style="min-height:40px; font-weight:700; font-size:0.9rem; padding:0.3rem 1rem;" onclick="quickRentPayment('${rental.id}')">Pay</button>
@@ -3825,12 +3825,13 @@ function quickRentPayment(rentalId) {
   if (!amount || amount <= 0) { alert('Enter an amount'); return; }
   input.value = '';
   var today = new Date();
+  var monthYear = today.toISOString().slice(0, 7);
   var datePaid = today.toISOString().split('T')[0];
   state.rentPayments.push({
     id: 'rp' + Math.random().toString(36).substr(2, 9),
     rentalId: rentalId,
     amount: amount,
-    monthYear: selectedMonthStr,
+    monthYear: monthYear,
     datePaid: datePaid,
     note: 'Quick Pay'
   });
