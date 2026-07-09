@@ -3040,9 +3040,10 @@ function renderRentals() {
       </div>
 
       <div style="font-size:0.68rem;color:#fff;margin:0.15rem 0 0.25rem;">
-        Due: ${rental.rentDueDay}<sup>th</sup> · Since ${formatDate(rental.startDate)}
-        ${renewData ? `· Renews: ${renewData.dateStr}` : ''}
-        ${!isRentPaidThisMonth && rental.status === 'active' ? '<span style="color:var(--color-warning);font-weight:600;float:right;">Due</span>' : ''}
+        ${rental.status === 'active'
+          ? `Due: ${rental.rentDueDay}<sup>th</sup> · Since ${formatDate(rental.startDate)}${renewData ? ` · Renews: ${renewData.dateStr}` : ''}${!isRentPaidThisMonth ? '<span style="color:var(--color-warning);font-weight:600;float:right;">Due</span>' : ''}`
+          : `Since ${formatDate(rental.startDate)} · Ended ${rental.endDate ? formatDate(rental.endDate) : '-'}`
+        }
       </div>
 
 ${!isRentFullyPaid && rental.status === 'active'
@@ -3782,7 +3783,13 @@ function toggleRentalStatus(id) {
   const rental = state.rentals.find(r => r.id === id);
   if (!rental) return;
 
-  rental.status = rental.status === 'active' ? 'inactive' : 'active';
+  if (rental.status === 'active') {
+    rental.status = 'inactive';
+    rental.endDate = new Date().toISOString().split('T')[0];
+  } else {
+    rental.status = 'active';
+    delete rental.endDate;
+  }
   saveState();
   renderRentals();
 }
