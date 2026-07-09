@@ -2769,7 +2769,7 @@ function renderLending() {
       </div>
 
       <div style="font-size:0.68rem; color:var(--text-secondary); margin:0.2rem 0 0.35rem; line-height:1.5;">
-        ${loan.phone ? '📞 ' + loan.phone + ' · ' : ''}${loan.interestRate}%/mo · Recv ${formattedReceived} · ${stats.lastPaymentDate ? 'Last ' + formatDate(stats.lastPaymentDate) : 'No payments'}<span style="float:right;">
+        ${loan.phone ? '📞 ' + loan.phone + ' · ' : ''}${loan.interestRate}%/mo · ${stats.lastPaymentDate ? 'Last ' + formatDate(stats.lastPaymentDate) : 'No payments'}<span style="float:right;">
           ${stats.isInterestFullyPaidThisMonth
             ? '<span style="color:var(--color-success);font-weight:700;">✓</span>'
             : '<span style="color:var(--color-warning);font-weight:600;">' + formattedSum + '/' + formattedBal + '</span>'
@@ -2777,10 +2777,12 @@ function renderLending() {
         </span>
       </div>
 
-      <div style="display:flex; gap:0.35rem; align-items:center; margin-bottom:0.4rem;">
+      <div style="display:flex; gap:0.35rem; align-items:center; margin-bottom:0.2rem;">
         <input type="number" id="quick-pay-${loan.id}" class="form-input" placeholder="₹ Amount" style="flex:1; min-height:40px; font-size:1rem; padding:0.3rem 0.5rem; font-weight:600;">
         <button class="btn btn-primary" style="min-height:40px; font-weight:700; font-size:0.9rem; padding:0.3rem 1rem;" onclick="quickLoanPayment('${loan.id}', 'lent')">Recv</button>
       </div>
+
+      <div style="font-size:0.7rem; color:var(--text-secondary); text-align:right; margin-bottom:0.35rem; font-weight:500;">Recv ${formattedReceived}</div>
 
       <div class="icon-strip">
         <div class="icon-strip-left">
