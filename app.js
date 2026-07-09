@@ -2772,12 +2772,7 @@ function renderLending() {
       </div>
 
       <div style="font-size:0.68rem; color:var(--text-secondary); margin:0.2rem 0 0.35rem; line-height:1.5;">
-        ${loan.phone ? '<span style="color:#fff;">' + loan.phone + '</span> · ' : ''}${stats.lastPaymentDate ? 'Last ' + formatDate(stats.lastPaymentDate) : 'No payments'}<span style="float:right;">
-          ${stats.isInterestFullyPaidThisMonth
-            ? '<span style="color:var(--color-success);font-weight:700;">✓</span>'
-            : '<span style="color:var(--color-warning);font-weight:600;">' + formattedSum + '/' + formattedBal + '</span>'
-          }
-        </span>
+        ${loan.phone ? '<span style="color:#fff;">' + loan.phone + '</span> · ' : ''}${stats.lastPaymentDate ? 'Last ' + formatDate(stats.lastPaymentDate) : 'No payments'}
       </div>
 
       <div style="display:flex; gap:0.35rem; align-items:center; margin-bottom:0.2rem;">
