@@ -2775,7 +2775,7 @@ function renderLending() {
       </div>
 
       <div style="font-size:0.68rem; color:var(--text-secondary); margin:0.2rem 0 0.35rem; line-height:1.5;">
-        ${loan.phone ? '<span style="color:#fff;">' + loan.phone + '</span> · ' : ''}${stats.lastPaymentDate ? 'Last ' + formatDate(stats.lastPaymentDate) : 'No payments'}
+        ${loan.phone ? '<span style="color:#fff;">' + loan.phone + '</span>' : ''}${loan.phone && stats.lastPaymentDate ? ' · ' : ''}${stats.lastPaymentDate ? 'Last ' + formatDate(stats.lastPaymentDate) : ''}
       </div>
 
       <div style="display:flex; gap:0.35rem; align-items:center; margin-bottom:0.2rem;">
