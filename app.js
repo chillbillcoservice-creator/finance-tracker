@@ -2902,7 +2902,7 @@ function renderLending() {
             : `<button class="btn btn-secondary btn-sm" onclick="toggleLoanStatus('${loan.id}', 'lent')">Reopen</button>`
           }
           <button class="btn btn-secondary btn-sm" onclick="editLoan('${loan.id}', 'lent')">Edit</button>
-          <button class="btn btn-danger btn-sm" onclick="deleteLoan('${loan.id}', 'lent')">Del</button>
+          <button class="btn btn-secondary btn-sm" onclick="promptConvertEMI('${loan.id}', 'lent')">Convert to EMI</button>
         </div>
       </div>`;
     });
@@ -2912,6 +2912,7 @@ function renderLending() {
         <div class="item-title-col">
           <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
             <span class="item-name">${group.name}</span>
+            <button class="btn btn-danger btn-sm" onclick="deleteLoan('${loan.id}', 'lent')" style="padding:0.15rem 0.4rem;font-size:0.75rem;line-height:1;margin-left:auto;" title="Delete">🗑️</button>
             ${group.statusInMonth === 'active' ? '' : '<span class="badge badge-muted">Settled</span>'}
             ${stampHtml}
           </div>
@@ -3129,7 +3130,6 @@ function renderBorrowing() {
             : `<button class="btn btn-secondary btn-sm" onclick="toggleLoanStatus('${loan.id}', 'borrowed')">Reopen</button>`
           }
           ${loan.isEMI ? '' : `<button class="btn btn-secondary btn-sm" onclick="promptConvertEMI('${loan.id}', 'borrowed')">Convert to EMI</button>`}
-          <button class="btn btn-danger btn-sm" onclick="deleteLoan('${loan.id}', 'borrowed')">Del</button>
         </div>
       </div>`;
     });
@@ -3139,6 +3139,7 @@ function renderBorrowing() {
         <div class="item-title-col">
           <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
             <span class="item-name">${group.name}</span>
+            <button class="btn btn-danger btn-sm" onclick="deleteLoan('${loan.id}', 'borrowed')" style="padding:0.15rem 0.4rem;font-size:0.75rem;line-height:1;margin-left:auto;" title="Delete">🗑️</button>
             ${group.statusInMonth === 'active' ? '' : '<span class="badge badge-muted">Loan Closed</span>'}
             ${stampHtml}
           </div>
