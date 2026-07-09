@@ -2929,8 +2929,8 @@ function renderLending() {
             <span style="font-size:0.7rem;color:var(--text-muted);${group.allActiveInterestPaid ? 'color:var(--color-success);font-weight:700;' : ''}">${group.allActiveInterestPaid ? 'Received ✓' : 'Recd: ' + formatCurrency(group.currentMonthSum || 0) + ' / Bal ' + formatCurrency(Math.max(0, (group.monthlyYieldSum || 0) - (group.currentMonthSum || 0)))}</span>
             ${group.hasAdvance ? `<span style="font-size:0.65rem;color:var(--color-purple);font-weight:600;">Adv: ${formatCurrency(group.currentMonthSum - group.monthlyYieldSum)}</span>` : ''}
             <div style="display: flex; gap: 0.4rem; align-items: center;" onclick="event.stopPropagation()">
-              <input type="number" id="quick-pay-${group.id}" class="form-input" placeholder="₹ Amount" style="width: 80px; padding: 0.2rem 0.4rem; min-height: auto; font-size: 0.75rem;">
-              <button class="btn btn-primary" style="padding: 0.2rem 0.5rem; font-size: 0.7rem; min-height: auto;" onclick="quickGroupPayment('${group.id}', 'lent')">Recv</button>
+              <input type="number" id="quick-pay-${group.id}" class="form-input" placeholder="₹ Amount" style="width: 130px; padding: 0.4rem 0.6rem; min-height: 38px; font-size: 1rem;">
+              <button class="btn btn-primary" style="padding: 0.4rem 1rem; font-size: 0.95rem; min-height: 38px; font-weight: 700;" onclick="quickGroupPayment('${group.id}', 'lent')">Recv</button>
             </div>
           </div>
         </div>
