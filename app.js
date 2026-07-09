@@ -1399,24 +1399,15 @@ function lendMore(loanId) {
   if (!loan) return;
 
   closeModal('modal-group-details');
-  document.getElementById('form-loan').reset();
-  document.getElementById('loan-id').value = '';
-  document.getElementById('loan-direction').value = 'borrowed';
-  document.getElementById('loan-rate').value = loan.interestRate || '3.00';
-  var today = new Date();
-  var dueDate = new Date(today);
-  dueDate.setMonth(dueDate.getMonth() + 1);
-  var todayStr = today.toISOString().split('T')[0];
-  var dueDateStr = dueDate.toISOString().split('T')[0];
-  document.getElementById('loan-start-date').value = todayStr;
-  document.getElementById('loan-due-date').value = dueDateStr;
-  document.getElementById('loan-modal-title').textContent = 'Borrow More from ' + loan.financierName;
-  document.getElementById('loan-party-label').textContent = 'Financier / Lender Name';
-  document.getElementById('loan-party').value = loan.financierName;
-  document.getElementById('loan-party').placeholder = 'e.g. Apex Bank';
-  document.getElementById('loan-phone').value = loan.phone || '';
-  updatePrincipalPresets('borrowed');
-  openModal('modal-loan');
+  var outstanding = getOutstandingPrincipal(loan.id, loan.principal);
+  document.getElementById('add-principal-loan-id').value = loan.id;
+  document.getElementById('add-principal-direction').value = 'borrowed';
+  document.getElementById('add-principal-title').textContent = 'Borrow More from ' + loan.financierName;
+  document.getElementById('add-principal-party-name').textContent = loan.financierName;
+  document.getElementById('add-principal-party-phone').textContent = loan.phone ? '📞 ' + loan.phone : '';
+  document.getElementById('add-principal-current-amount').textContent = 'Rs. ' + Number(outstanding).toLocaleString('en-IN');
+  document.getElementById('add-principal-amount').value = '';
+  openModal('modal-add-principal');
 }
 
 window.closeModal = closeModal;
@@ -3751,6 +3742,41 @@ document.getElementById('form-payment').addEventListener('submit', (e) => {
     else renderBorrowing();
   }
 
+});
+
+document.getElementById('form-add-principal').addEventListener('submit', (e) => {
+  e.preventDefault();
+  loadState();
+
+  const loanId = document.getElementById('add-principal-loan-id').value;
+  const direction = document.getElementById('add-principal-direction').value;
+  const additional = Number(document.getElementById('add-principal-amount').value);
+  if (!additional || additional <= 0) return;
+
+  const listName = direction === 'lent' ? 'lent' : 'borrowed';
+  const loan = state[listName].find(l => l.id === loanId);
+  if (!loan) return;
+
+  const idx = state[listName].findIndex(l => l.id === loanId);
+  state[listName][idx] = {
+    ...loan,
+    principal: Number(loan.principal) + additional
+  };
+
+  state.interestPayments.push({
+    id: 'inc_' + Math.random().toString(36).substr(2, 9),
+    loanId: loanId,
+    type: direction === 'lent' ? 'received' : 'paid',
+    category: 'increase',
+    amount: additional,
+    date: new Date().toISOString().split('T')[0],
+    note: 'Borrow More (Top-up)'
+  });
+
+  saveState();
+  closeModal('modal-add-principal');
+  if (direction === 'lent') renderLending();
+  else renderBorrowing();
 });
 
 // View Ledger details (Interest & Principal Transactions)

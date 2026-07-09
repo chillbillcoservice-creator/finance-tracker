@@ -1495,6 +1495,42 @@
     </div>
   </div>
 
+  <!-- MODAL: ADD PRINCIPAL (Borrow More / Lend More) -->
+  <div class="modal-overlay" id="modal-add-principal">
+    <div class="modal-container" style="max-width: 460px;">
+      <div class="modal-header">
+        <h3 class="modal-title" id="add-principal-title">Add to Principal</h3>
+        <button class="modal-close" onclick="closeModal('modal-add-principal')">
+          <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <form id="form-add-principal">
+        <input type="hidden" id="add-principal-loan-id">
+        <input type="hidden" id="add-principal-direction">
+        <div class="modal-body">
+          <div id="add-principal-loan-info" style="background: var(--bg-secondary); border-radius: var(--radius-md); padding: 0.75rem; margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center;">
+            <div>
+              <div id="add-principal-party-name" style="font-weight: 700; font-size: 1rem;"></div>
+              <div id="add-principal-party-phone" style="font-size: 0.8rem; color: var(--text-secondary);"></div>
+            </div>
+            <div style="text-align: right;">
+              <div style="font-size: 0.65rem; text-transform: uppercase; color: var(--text-secondary);">Current Principal</div>
+              <div id="add-principal-current-amount" style="font-weight: 700; font-size: 1.2rem; color: var(--color-danger);"></div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="add-principal-amount">Additional Amount (Rs.)</label>
+            <input type="number" id="add-principal-amount" class="form-input" min="1" step="any" placeholder="Enter amount to add" required autofocus>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('modal-add-principal')">Cancel</button>
+          <button type="submit" class="btn btn-primary">Add to Principal</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <!-- JavaScript Modules -->
   <script src="app.js?v=3"></script>
 </body>
