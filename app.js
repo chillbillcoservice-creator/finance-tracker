@@ -1406,7 +1406,7 @@ function lendMore(loanId) {
   document.getElementById('add-principal-party-name').textContent = loan.financierName;
   document.getElementById('add-principal-party-phone').textContent = loan.phone ? '📞 ' + loan.phone : '';
   document.getElementById('add-principal-current-amount').textContent = 'Rs. ' + Number(outstanding).toLocaleString('en-IN');
-  document.getElementById('add-principal-amount').value = '';
+  document.getElementById('add-principal-amount').value = outstanding;
   openModal('modal-add-principal');
 }
 
