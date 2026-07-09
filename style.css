@@ -1017,12 +1017,6 @@ body::before {
   background: rgba(var(--color-success-rgb), 0.2);
 }
 
-.btn-accent {
-  background: linear-gradient(135deg, var(--color-accent), #0369a1);
-  color: #fff;
-  box-shadow: 0 4px 14px rgba(14,165,233,0.3);
-}
-
 .btn-sm {
   padding: 0.4rem 0.7rem;
   font-size: 0.78rem;
@@ -1476,6 +1470,31 @@ body::before {
   letter-spacing: 0.3px;
 }
 
+.icon-strip {
+  display: flex;
+  gap: 0.25rem;
+  margin-top: 0.35rem;
+  padding-top: 0.35rem;
+  border-top: 1px solid var(--border-color);
+}
+
+.icon-strip span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  font-size: 1rem;
+  cursor: pointer;
+  opacity: 0.55;
+  transition: opacity 0.15s;
+  user-select: none;
+}
+
+.icon-strip span:hover {
+  opacity: 1;
+}
+
 .loan-actions {
   display: flex;
   justify-content: flex-end;
@@ -1805,45 +1824,6 @@ body::before {
 .toast-notification.show {
   opacity: 1;
   transform: translateX(-50%) translateY(0);
-}
-
-/* ══════════════════════════════════════
-   CONTACT BUTTONS
-   ══════════════════════════════════════ */
-.contact-actions-wrapper {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.3rem;
-  flex-wrap: wrap;
-}
-
-.contact-action-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 26px;
-  height: 26px;
-  text-decoration: none;
-  cursor: pointer;
-  opacity: 0.6;
-  transition: opacity 0.15s;
-}
-
-.contact-action-btn:hover {
-  opacity: 1;
-}
-
-.contact-action-btn svg {
-  width: 18px !important;
-  height: 18px !important;
-}
-
-.contact-action-btn.call-btn {
-  color: var(--color-accent);
-}
-
-.contact-action-btn.wa-btn {
-  color: #25d366;
 }
 
 /* ══════════════════════════════════════
