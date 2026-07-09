@@ -2911,7 +2911,7 @@ function renderLending() {
         <div class="item-title-col">
           <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
             <span class="item-name">${group.name}</span>
-            <button class="btn btn-danger btn-sm" onclick="deleteLoan('${loan.id}', 'lent')" style="padding:0.15rem 0.4rem;font-size:0.75rem;line-height:1;margin-left:auto;" title="Delete">🗑️</button>
+            <button class="btn btn-danger btn-sm btn-delete-group" onclick="deleteLoanGroup('${group.id}', 'lent')" style="padding:0.15rem 0.4rem;font-size:0.75rem;line-height:1;margin-left:auto;" title="Delete">🗑️</button>
             ${group.statusInMonth === 'active' ? '' : '<span class="badge badge-muted">Settled</span>'}
             ${stampHtml}
           </div>
@@ -2952,6 +2952,24 @@ function renderLending() {
 
     listContainer.appendChild(card);
   });
+}
+
+function deleteLoanGroup(groupId, direction) {
+  const listName = direction === 'lent' ? 'lent' : 'borrowed';
+  const card = document.querySelector(`[data-group-id="${groupId}"]`);
+  if (!card) return;
+  const ids = (card.getAttribute('data-loan-ids') || '').split(',').filter(Boolean);
+  if (!ids.length) return;
+  const label = direction === 'lent' ? 'lent' : 'borrowed';
+  if (!confirm(`Delete all ${ids.length} loan(s) in this group? All associated payments will also be removed.`)) return;
+  loadState();
+  ids.forEach(id => {
+    state[listName] = state[listName].filter(x => x.id !== id);
+    state.interestPayments = state.interestPayments.filter(p => p.loanId !== id);
+  });
+  saveState();
+  if (direction === 'lent') renderLending();
+  else renderBorrowing();
 }
 
 // 8. BORROWING TAB LOGIC
@@ -3138,7 +3156,7 @@ function renderBorrowing() {
         <div class="item-title-col">
           <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
             <span class="item-name">${group.name}</span>
-            <button class="btn btn-danger btn-sm" onclick="deleteLoan('${loan.id}', 'borrowed')" style="padding:0.15rem 0.4rem;font-size:0.75rem;line-height:1;margin-left:auto;" title="Delete">🗑️</button>
+            <button class="btn btn-danger btn-sm btn-delete-group" onclick="deleteLoanGroup('${group.id}', 'borrowed')" style="padding:0.15rem 0.4rem;font-size:0.75rem;line-height:1;margin-left:auto;" title="Delete">🗑️</button>
             ${group.statusInMonth === 'active' ? '' : '<span class="badge badge-muted">Loan Closed</span>'}
             ${stampHtml}
           </div>
@@ -3156,7 +3174,7 @@ function renderBorrowing() {
     const itemRow = card.querySelector('.item-row');
     itemRow.addEventListener('click', (e) => {
       try {
-        if (e.target.closest('.contact-action-btn')) return;
+        if (e.target.closest('.contact-action-btn') || e.target.closest('.btn-delete-group')) return;
         const titleEl = document.getElementById('group-details-title');
         const bodyEl = document.getElementById('group-details-body');
         if (!titleEl || !bodyEl) {
