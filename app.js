@@ -2804,6 +2804,7 @@ function renderLending() {
       ${loan.notes ? '<div style="font-size:0.75rem; color:var(--text-secondary); font-style:italic; margin-bottom:0.4rem;">' + loan.notes + '</div>' : ''}
 
       <div class="loan-actions" style="margin-top:0;">
+        <button class="btn btn-secondary btn-sm" onclick="showLedger(\'' + loan.id + '\', \'lent\')">📋 Ledger</button>
         ${stats.statusInMonth === 'active' 
           ? (loan.isEMI
             ? '<button class="btn btn-primary btn-sm" onclick="promptRecordEMI(\'' + loan.id + '\', \'received\')">Record EMI</button> <button class="btn btn-sm" style="background:linear-gradient(135deg,var(--color-accent),#0369a1);color:#fff;box-shadow:0 4px 14px rgba(14,165,233,0.3);" onclick="lendMore(\'' + loan.id + '\')">Lend More</button>'
@@ -2945,6 +2946,7 @@ function renderBorrowing() {
       ${loan.notes ? '<div style="font-size:0.75rem; color:var(--text-secondary); font-style:italic; margin-bottom:0.4rem;">' + loan.notes + '</div>' : ''}
 
       <div class="loan-actions" style="margin-top:0;">
+        <button class="btn btn-secondary btn-sm" onclick="showLedger(\'' + loan.id + '\', \'borrowed\')">📋 Ledger</button>
         ${stats.statusInMonth === 'active' 
           ? (loan.isEMI
             ? '<button class="btn btn-primary btn-sm" onclick="promptRecordEMI(\'' + loan.id + '\', \'paid\')">Record EMI</button> <button class="btn btn-sm" style="background:linear-gradient(135deg,var(--color-accent),#0369a1);color:#fff;box-shadow:0 4px 14px rgba(14,165,233,0.3);" onclick="lendMore(\'' + loan.id + '\')">Borrow More</button>'
