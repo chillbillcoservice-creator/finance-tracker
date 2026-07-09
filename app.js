@@ -2782,7 +2782,7 @@ function renderLending() {
         <button class="btn btn-primary" style="min-height:40px; font-weight:700; font-size:0.9rem; padding:0.3rem 1rem;" onclick="quickLoanPayment('${loan.id}', 'lent')">Recv</button>
       </div>
 
-      <div style="font-size:0.7rem; color:var(--text-secondary); text-align:right; margin-bottom:0.35rem; font-weight:500;">Recv ${formattedReceived}</div>
+      <div style="font-size:0.68rem; color:var(--text-secondary); font-style:italic; margin-bottom:0.3rem;">Recv ${formattedReceived}</div>
 
       <div class="icon-strip">
         <div class="icon-strip-left">
