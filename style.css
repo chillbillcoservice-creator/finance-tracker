@@ -1861,7 +1861,7 @@ body::before {
 /* ══════════════════════════════════════
    COLLAPSIBLE CARDS
    ══════════════════════════════════════ */
-.loan-card .item-row, .tenant-card .item-row {
+.tenant-card .item-row {
   cursor: pointer;
   user-select: none;
   transition: all var(--transition-fast);
@@ -1879,13 +1879,11 @@ body::before {
   color: var(--color-accent);
 }
 
-.loan-card:not(.expanded) .item-row,
 .tenant-card:not(.expanded) .item-row {
   border-bottom-color: transparent !important;
   padding-bottom: 0 !important;
 }
 
-.loan-card:not(.expanded) .card-collapse-content,
 .tenant-card:not(.expanded) .card-collapse-content {
   display: none !important;
 }

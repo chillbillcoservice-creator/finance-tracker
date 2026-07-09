@@ -1006,9 +1006,6 @@ function submitQuickLend(event) {
       saveState();
       closeModal('modal-quick-lend');
       renderDashboard();
-      var normName = (borrowerName || '').toLowerCase().trim();
-    var groupId = 'group-' + btoa(encodeURIComponent(normName)).replace(/[^a-zA-Z0-9]/g, '');
-      _expandedCards.add(groupId);
       setTimeout(function() {
         switchTab('dashboard');
         if (currentReminderFilter === 'interest') currentReminderFilter = 'all';
@@ -1016,13 +1013,11 @@ function submitQuickLend(event) {
         var card = document.getElementById('card-interest');
         if (card) card.classList.add('highlight-card');
         setTimeout(function() {
-          var newCard = document.querySelector('[data-group-id="' + groupId + '"]');
+          var newCard = document.querySelector('[data-loan-id="' + existingLoan.id + '"]');
           if (newCard) newCard.classList.add('new-entry-highlight');
         }, 100);
       }, 150);
       _isSubmittingQuickLend = false;
-      alert(`✓ Added ${formatCurrency(principal)} to ${borrowerName}'s existing loan.\nNew principal: ${formatCurrency(Number(existingLoan.principal) + principal)}`);
-      return;
       alert(`✓ Added ${formatCurrency(principal)} to ${borrowerName}'s existing loan.\nNew principal: ${formatCurrency(Number(existingLoan.principal) + principal)}`);
       return;
     }
@@ -1059,9 +1054,6 @@ function submitQuickLend(event) {
   saveState();
   closeModal('modal-quick-lend');
   renderDashboard();
-  var normName = (borrowerName || '').toLowerCase().trim();
-  var groupId = 'group-' + btoa(encodeURIComponent(normName)).replace(/[^a-zA-Z0-9]/g, '');
-  _expandedCards.add(groupId);
   setTimeout(function() {
     switchTab('dashboard');
     if (currentReminderFilter === 'interest') currentReminderFilter = 'all';
@@ -1069,7 +1061,7 @@ function submitQuickLend(event) {
     var card = document.getElementById('card-interest');
     if (card) card.classList.add('highlight-card');
     setTimeout(function() {
-      var newCard = document.querySelector('[data-group-id="' + groupId + '"]');
+      var newCard = document.querySelector('[data-loan-id="' + newId + '"]');
       if (newCard) newCard.classList.add('new-entry-highlight');
     }, 100);
   }, 150);
@@ -1092,10 +1084,10 @@ function getContactActionsHTML(phoneStr) {
     <span class="contact-actions-wrapper">
       <span>${phoneStr}</span>
       <a href="tel:${cleanPhone}" class="contact-action-btn call-btn" title="Call">
-        <svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="2.5" fill="none"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+        <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" fill="none"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
       </a>
       <a href="${waUrl}" target="_blank" class="contact-action-btn wa-btn" title="WhatsApp">
-        <svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor"><path d="M12.004 2C6.48 2 2 6.48 2 12.004c0 1.73.44 3.42 1.28 4.92l-1.36 4.96c-.1.35.2.68.55.58l4.96-1.36c1.5.84 3.19 1.28 4.92 1.28 5.52 0 10-4.48 10-10C22.004 6.48 17.52 2 12.004 2zm5.79 13.91c-.24.67-1.22 1.24-1.78 1.3-1.63.16-3.71-.62-5.74-2.65-2.03-2.03-2.81-4.11-2.65-5.74.06-.56.63-1.54 1.3-1.78.36-.13.72-.11.89.24.22.46.77 1.88.84 2.03.07.15.03.34-.08.48l-.51.62c-.14.17-.18.4-.07.59.39.69.97 1.37 1.63 2.03.66.66 1.34 1.24 2.03 1.63.19.11.42.07.59-.07l.62-.51c.14-.11.33-.15.48-.08.15.07 1.57.62 2.03.84.35.17.37.53.24.89z"/></svg>
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12.004 2C6.48 2 2 6.48 2 12.004c0 1.73.44 3.42 1.28 4.92l-1.36 4.96c-.1.35.2.68.55.58l4.96-1.36c1.5.84 3.19 1.28 4.92 1.28 5.52 0 10-4.48 10-10C22.004 6.48 17.52 2 12.004 2zm5.79 13.91c-.24.67-1.22 1.24-1.78 1.3-1.63.16-3.71-.62-5.74-2.65-2.03-2.03-2.81-4.11-2.65-5.74.06-.56.63-1.54 1.3-1.78.36-.13.72-.11.89.24.22.46.77 1.88.84 2.03.07.15.03.34-.08.48l-.51.62c-.14.17-.18.4-.07.59.39.69.97 1.37 1.63 2.03.66.66 1.34 1.24 2.03 1.63.19.11.42.07.59-.07l.62-.51c.14-.11.33-.15.48-.08.15.07 1.57.62 2.03.84.35.17.37.53.24.89z"/></svg>
       </a>
     </span>
   `;
@@ -1227,69 +1219,38 @@ function quickReceiveInterest(loanId, direction) {
 }
 window.quickReceiveInterest = quickReceiveInterest;
 
-function quickGroupPayment(groupId, direction) {
+function quickLoanPayment(loanId, direction) {
   loadState();
-  var input = document.getElementById('quick-pay-' + groupId);
+  var input = document.getElementById('quick-pay-' + loanId);
   if (!input) return;
   var amount = Number(input.value);
   if (!amount || amount <= 0) { alert('Enter an amount'); return; }
   input.value = '';
-
-  var card = document.querySelector('[data-group-id="' + groupId + '"]');
-  var loanIds = card ? card.getAttribute('data-loan-ids').split(',') : [];
-  if (loanIds.length === 0) return;
-
-  var listName = direction === 'lent' ? 'lent' : 'borrowed';
+  var loan = state[direction === 'lent' ? 'lent' : 'borrowed'].find(function(l) { return l.id === loanId; });
+  if (!loan) return;
+  var outstanding = getOutstandingPrincipal(loan.id, loan.principal);
+  if (outstanding <= 0) { alert('Loan is already settled.'); return; }
+  var monthlyYield = outstanding * (Number(loan.interestRate) / 100);
+  var payms = state.interestPayments.filter(function(p) { return p.loanId === loanId && p.category === 'interest'; });
+  var monthPayms = payms.filter(function(p) { return p.date && p.date.startsWith(selectedMonthStr); });
+  var sumPayms = monthPayms.reduce(function(s, p) { return s + Number(p.amount); }, 0);
+  var isAdvance = monthlyYield > 0 && sumPayms >= (monthlyYield - 0.01);
+  if (isAdvance && !confirm('Interest already received this month. Record as advance?')) return;
   var today = new Date().toISOString().split('T')[0];
-
-  // Check if all loans already paid this month
-  var allPaid = true;
-  loanIds.forEach(function(lid) {
-    var loan = state[listName].find(function(l) { return l.id === lid; });
-    if (!loan) return;
-    var outstanding = getOutstandingPrincipal(loan.id, loan.principal);
-    if (outstanding <= 0) return;
-    var monthlyYield = outstanding * (Number(loan.interestRate) / 100);
-    var payms = state.interestPayments.filter(function(p) { return p.loanId === lid && p.category === 'interest'; });
-    var monthPayms = payms.filter(function(p) { return p.date && p.date.startsWith(selectedMonthStr); });
-    var sumPayms = monthPayms.reduce(function(s, p) { return s + Number(p.amount); }, 0);
-    if (sumPayms < monthlyYield - 0.01) allPaid = false;
+  state.interestPayments.push({
+    id: 'p' + Math.random().toString(36).substr(2, 9),
+    loanId: loanId,
+    type: direction === 'lent' ? 'received' : 'paid',
+    category: 'interest',
+    amount: Number(amount),
+    date: today,
+    note: (isAdvance ? 'Advance - ' : '') + 'Quick Pay'
   });
-
-  var isAdvance = false;
-  if (allPaid) {
-    if (!confirm('Already fully received this month.\nDo you wish to receive advance interest?')) return;
-    isAdvance = true;
-  }
-
-  var advanceTag = isAdvance ? ' [Advance]' : '';
-  var recordCount = 0;
-  loanIds.forEach(function(lid) {
-    var loan = state[listName].find(function(l) { return l.id === lid; });
-    if (!loan) return;
-    var outstanding = getOutstandingPrincipal(loan.id, loan.principal);
-    if (outstanding <= 0) return;
-    var monthlyYield = outstanding * (Number(loan.interestRate) / 100);
-    var payAmount = Math.min(amount, monthlyYield);
-    if (payAmount <= 0) return;
-    state.interestPayments.push({
-      id: 'p' + Math.random().toString(36).substr(2, 9),
-      loanId: loan.id,
-      type: direction === 'lent' ? 'received' : 'paid',
-      category: 'interest',
-      amount: Number(payAmount.toFixed(2)),
-      date: today,
-      note: 'Quick Group Collect' + advanceTag
-    });
-    amount -= payAmount;
-    recordCount++;
-  });
-  if (recordCount === 0) { alert('All loans are settled.'); return; }
   saveState();
   refreshActiveTab();
   renderDashboard();
 }
-window.quickGroupPayment = quickGroupPayment;
+window.quickLoanPayment = quickLoanPayment;
 
 function el(id) {
   return document.getElementById(id);
@@ -2755,226 +2716,106 @@ function renderLending() {
     return;
   }
 
-  const groupedLent = {};
+  // Compute per-loan stats
   visibleLoans.forEach(loan => {
-    const normName = (loan.borrowerName || '').toLowerCase().trim();
-    if (!groupedLent[normName]) {
-      groupedLent[normName] = {
-        id: 'group-' + btoa(encodeURIComponent(normName)).replace(/[^a-zA-Z0-9]/g, ''),
-        name: loan.borrowerName,
-        phone: loan.phone || '',
-        loans: [],
-        totalPrincipal: 0,
-        totalOutstanding: 0,
-        totalRepaid: 0,
-        totalReceived: 0,
-        statusInMonth: 'paid',
-        allActiveInterestPaid: true,
-        hasActiveLoans: false
-      };
-    }
-    groupedLent[normName].phone = groupedLent[normName].phone || loan.phone;
-    groupedLent[normName].loans.push(loan);
-  });
+    const loanPayments = state.interestPayments.filter(p => p.loanId === loan.id && p.type === 'received' && p.date <= endDateOfSelectedMonth);
+    const interestPayments = loanPayments.filter(p => p.category === 'interest');
+    const principalPayments = loanPayments.filter(p => p.category === 'principal');
+    const topupPayments = loanPayments.filter(p => p.category === 'increase');
 
-  Object.values(groupedLent).forEach(group => {
-    group.loans.sort((a,b) => new Date(a.startDate) - new Date(b.startDate));
+    const totalReceived = interestPayments.reduce((sum, p) => sum + Number(p.amount), 0);
+    const totalRepaid = principalPayments.reduce((sum, p) => sum + Number(p.amount), 0);
+    const totalTopups = topupPayments.reduce((sum, p) => sum + Number(p.amount), 0);
+    const outstandingPrincipal = Math.max(0, Number(loan.principal) + totalTopups - totalRepaid);
     
-    group.loans.forEach(loan => {
-      const loanPayments = state.interestPayments.filter(p => p.loanId === loan.id && p.type === 'received' && p.date <= endDateOfSelectedMonth);
-      const interestPayments = loanPayments.filter(p => p.category === 'interest');
-      const principalPayments = loanPayments.filter(p => p.category === 'principal');
-      const topupPayments = loanPayments.filter(p => p.category === 'increase');
+    const lastPaymentDate = loanPayments.length > 0 ? loanPayments.reduce((max, p) => p.date > max ? p.date : max, loanPayments[0].date) : null;
+    const monthlyYield = outstandingPrincipal * (Number(loan.interestRate) / 100);
+    const currentMonthPayments = interestPayments.filter(p => p.date.startsWith(selectedMonthStr));
+    const currentMonthSum = currentMonthPayments.reduce((sum, p) => sum + Number(p.amount), 0);
+    const isInterestFullyPaidThisMonth = monthlyYield > 0 && currentMonthSum >= (monthlyYield - 0.01);
+    const hasAdvance = interestPayments.some(function(p) { return p.note && p.note.indexOf('[Advance]') !== -1; });
+    const statusInMonth = outstandingPrincipal > 0 ? 'active' : 'paid';
 
-      const totalReceived = interestPayments.reduce((sum, p) => sum + Number(p.amount), 0);
-      const totalRepaid = principalPayments.reduce((sum, p) => sum + Number(p.amount), 0);
-      const totalTopups = topupPayments.reduce((sum, p) => sum + Number(p.amount), 0);
-      const outstandingPrincipal = Math.max(0, Number(loan.principal) + totalTopups - totalRepaid);
-      
-      const lastPaymentDate = loanPayments.length > 0 ? loanPayments.reduce((max, p) => p.date > max ? p.date : max, loanPayments[0].date) : null;
-      const monthlyYield = outstandingPrincipal * (Number(loan.interestRate) / 100);
-      const currentMonthPayments = interestPayments.filter(p => p.date.startsWith(selectedMonthStr));
-      const currentMonthSum = currentMonthPayments.reduce((sum, p) => sum + Number(p.amount), 0);
-      const isInterestFullyPaidThisMonth = monthlyYield > 0 && currentMonthSum >= (monthlyYield - 0.01);
-      const hasAdvance = interestPayments.some(function(p) { return p.note && p.note.indexOf('[Advance]') !== -1; });
-      const statusInMonth = outstandingPrincipal > 0 ? 'active' : 'paid';
-
-      loan._stats = {
-        outstandingPrincipal, totalReceived, totalRepaid, monthlyYield, currentMonthSum,
-        isInterestFullyPaidThisMonth, statusInMonth, lastPaymentDate, hasAdvance
-      };
-
-      group.totalPrincipal += Number(loan.principal);
-      group.totalOutstanding += outstandingPrincipal;
-      group.totalRepaid += totalRepaid;
-      group.totalReceived += totalReceived;
-      group.monthlyYieldSum = (group.monthlyYieldSum || 0) + monthlyYield;
-      group.currentMonthSum = (group.currentMonthSum || 0) + (currentMonthSum || 0);
-      if (hasAdvance) group.hasAdvance = true;
-
-      if (statusInMonth === 'active') {
-        group.statusInMonth = 'active';
-        group.hasActiveLoans = true;
-        if (!isInterestFullyPaidThisMonth) {
-          group.allActiveInterestPaid = false;
-        }
-      }
-    });
+    loan._stats = {
+      outstandingPrincipal, totalReceived, totalRepaid, monthlyYield, currentMonthSum,
+      isInterestFullyPaidThisMonth, statusInMonth, lastPaymentDate, hasAdvance
+    };
   });
 
-  const sortedGroups = Object.values(groupedLent).sort((a,b) => {
-    if (a.statusInMonth !== b.statusInMonth) return a.statusInMonth === 'active' ? -1 : 1;
-    return b.totalOutstanding - a.totalOutstanding;
+  const sortedLoans = visibleLoans.sort((a, b) => {
+    if (a._stats.statusInMonth !== b._stats.statusInMonth) return a._stats.statusInMonth === 'active' ? -1 : 1;
+    return b._stats.outstandingPrincipal - a._stats.outstandingPrincipal;
   });
 
-  sortedGroups.forEach(group => {
+  sortedLoans.forEach(loan => {
+    const stats = loan._stats;
     const card = document.createElement('div');
-    card.className = `card loan-card ${_expandedCards.has(group.id) ? 'expanded' : ''}`;
-    card.setAttribute('data-group-id', group.id);
-    card.setAttribute('data-loan-ids', group.loans.map(l => l.id).join(','));
-
-    let stampHtml = '';
-
-    const principalHtml = `<div class="amount-value" style="color: var(--color-warning);">${formatCurrency(group.totalOutstanding)}</div>
-       <div class="amount-in-words" style="font-size: 0.68rem; color: var(--text-secondary); max-width: 180px; line-height: 1.25; margin-top: 0.15rem; font-style: italic; text-align: right; word-wrap: break-word;">(${numberToIndianWords(group.totalOutstanding)})</div>
-       <div class="amount-label" style="margin-top: 0.25rem;">Total Outstanding</div>`;
-
-    let loansHtml = '';
-    group.loans.forEach((loan, idx) => {
-      const stats = loan._stats;
-      const loanIdxStr = group.loans.length > 1 ? ` <span style="font-size: 0.8em; color: var(--text-secondary); font-weight: normal;">(Loan No ${String(idx + 1).padStart(2, '0')})</span>` : '';
-      
-      loansHtml += `
-      <div style="position:relative; background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1rem; margin-top: 1rem;">
-        <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 0.75rem;">
-          <div>
-            <h4 style="margin: 0 0 0.25rem 0; font-size: 0.95rem;">${loan.borrowerName}${loanIdxStr} ${stats.statusInMonth !== 'active' ? '<span class="badge badge-muted">Settled</span>' : ''} ${stats.hasAdvance ? '<span class="badge" style="background: rgba(168,85,247,0.15); color: var(--color-purple); border:1px solid rgba(168,85,247,0.25); font-size:0.6rem; padding:0.1rem 0.35rem; margin-left:0.25rem;">Advance</span>' : ''}</h4>
-            <div style="font-size: 0.8rem; color: var(--text-secondary);">Issued: ${formatDate(loan.startDate)} ${loan.dueDate ? `• Due: ${formatDate(loan.dueDate)}` : ''}</div>
-          </div>
-          ${loan.phone ? `<div class="contact-btn-group">${getContactActionsHTML(loan.phone)}</div>` : ''}
-        </div>
-        <div style="position:absolute; top:0.5rem; right:0.5rem; display:flex; gap:0.5rem; z-index:2;">
-          <span onclick="editLoan('${loan.id}', 'lent')" style="cursor:pointer;font-size:0.85rem;line-height:1;opacity:0.7;transition:opacity 0.15s;" title="Edit" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.7">✏️</span>
-          <span onclick="deleteLoan('${loan.id}', 'lent')" style="cursor:pointer;font-size:0.85rem;line-height:1;opacity:0.7;transition:opacity 0.15s;" title="Delete" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.7">🗑️</span>
-        </div>
-
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 0.75rem;">
-          <div class="card" style="padding: 0.75rem; text-align: center; background: var(--bg-secondary);">
-            <div style="font-size: 0.6rem; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.5px;">Principal</div>
-            <div style="font-size: 1.3rem; font-weight: 800; color: var(--color-warning); margin-top: 0.25rem;">${formatCurrency(stats.outstandingPrincipal)}</div>
-            <div style="font-size: 0.65rem; color: var(--text-muted); margin-top: 0.15rem;">Outstanding</div>
-          </div>
-          <div class="card" style="padding: 0.75rem; text-align: center; background: var(--bg-secondary);">
-            <div style="font-size: 0.6rem; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.5px;">Monthly Yield</div>
-            <div style="font-size: 1.3rem; font-weight: 800; color: #16a34a; margin-top: 0.25rem;">${formatCurrency(stats.monthlyYield)}</div>
-          </div>
-        </div>
-
-        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.5rem; margin-bottom: 0.75rem;">
-          <div class="card" style="padding: 0.5rem; text-align: center;">
-            <div style="font-size: 0.6rem; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.5px;">${loan.isEMI ? 'EMI' : 'Interest Rate'}</div>
-            <div style="font-size: 1rem; font-weight: 700; color: var(--text-primary); margin-top: 0.2rem;">${loan.isEMI ? formatCurrency(loan.emiAmount) : loan.interestRate + '%'}</div>
-            <div style="font-size: 0.65rem; color: var(--text-muted); margin-top: 0.15rem;">/ month</div>
-          </div>
-          <div class="card" style="padding: 0.5rem; text-align: center; cursor: pointer;" onclick="showLedger('${loan.id}', 'lent')">
-            <div style="font-size: 0.6rem; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.5px;">${loan.isEMI ? 'Tenure' : 'Total Received'}</div>
-            <div style="font-size: 1rem; font-weight: 700; color: var(--color-success); margin-top: 0.2rem;">${loan.isEMI ? loan.tenureMonths + 'm' : formatCurrency(stats.totalReceived)}</div>
-            ${stats.hasAdvance ? '<div style="font-size: 0.6rem; color: var(--color-purple); font-weight: 600; margin-top: 0.15rem;">Includes Advance</div>' : ''}
-          </div>
-          <div class="card" style="padding: 0.5rem; text-align: center;">
-            <div style="font-size: 0.6rem; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.5px;">Last Payment</div>
-            <div style="font-size: 1rem; font-weight: 700; margin-top: 0.2rem;">${stats.lastPaymentDate ? formatDate(stats.lastPaymentDate) : '—'}</div>
-          </div>
-        </div>
-        
-        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.5rem; padding: 0.3rem 0.5rem; background: var(--input-bg); border-radius: 4px; font-size: 0.75rem;">
-          <span style="font-weight:600; color:var(--text-primary);">This Month:</span>
-          ${stats.isInterestFullyPaidThisMonth
-            ? '<span style="color:var(--color-success);font-weight:700;">Received ✓</span>'
-            : `<span><span style="color:var(--color-success);font-weight:600;">${formatCurrency(stats.currentMonthSum)}</span> received / Balance <span style="color:var(--color-warning);font-weight:600;">${formatCurrency(Math.max(0, stats.monthlyYield - stats.currentMonthSum))}</span></span>`
-          }
-        </div>
-
-        ${loan.notes ? `<div style="font-size: 0.8rem; color: var(--text-secondary); font-style: italic; margin-bottom: 0.5rem;">Notes: ${loan.notes}</div>` : ''}
-
-        <div class="loan-actions" style="margin-top: 0.5rem;">
-          ${stats.statusInMonth === 'active' 
-            ? (loan.isEMI
-? `<button class="btn btn-primary btn-sm" onclick="promptRecordEMI('${loan.id}', 'received')">Record EMI</button>
-                   <button class="btn btn-sm" style="background: linear-gradient(135deg, var(--color-accent), #0369a1); color: #fff; box-shadow: 0 4px 14px rgba(14,165,233,0.3);" onclick="lendMore('${loan.id}')">Lend More</button>`
-               : `<button class="btn btn-primary btn-sm" onclick="quickReceiveInterest('${loan.id}', 'lent')">Receive interest</button>
-                    <button class="btn btn-success btn-sm" onclick="promptPayment('${loan.id}', 'received', 'principal')">Repay principal</button>
-                   <button class="btn btn-sm" style="background: linear-gradient(135deg, var(--color-accent), #0369a1); color: #fff; box-shadow: 0 4px 14px rgba(14,165,233,0.3);" onclick="lendMore('${loan.id}')">Lend More</button>`)
-            : `<button class="btn btn-secondary btn-sm" onclick="toggleLoanStatus('${loan.id}', 'lent')">Reopen</button>`
-          }
-          ${stats.statusInMonth === 'active' && !loan.isEMI ? `<button class="btn btn-secondary btn-sm" onclick="promptConvertEMI('${loan.id}', 'lent')">Convert to EMI</button>` : ''}
-        </div>
-      </div>`;
-    });
+    card.className = 'card loan-card';
+    card.style.padding = '0.75rem';
+    card.setAttribute('data-loan-id', loan.id);
 
     card.innerHTML = `
-      <div class="item-row">
-        <div class="item-title-col">
-          <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
-            <span class="item-name">${group.name}</span>
-            ${group.statusInMonth === 'active' ? '' : '<span class="badge badge-muted">Settled</span>'}
-            ${stampHtml}
-          </div>
-          ${group.phone ? `<div style="margin-top: 0.25rem; font-size: 0.85rem; color: var(--text-secondary);">${getContactActionsHTML(group.phone)}</div>` : ''}
-          <div class="item-meta" style="margin-top: 0.25rem; display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;">
-            <span>${group.loans.length} Loan${group.loans.length > 1 ? 's' : ''}</span>
-            <span style="font-size:0.7rem;color:var(--text-muted);${group.allActiveInterestPaid ? 'color:var(--color-success);font-weight:700;' : ''}">${group.allActiveInterestPaid ? 'Received ✓' : 'Recd: ' + formatCurrency(group.currentMonthSum || 0) + ' / Bal ' + formatCurrency(Math.max(0, (group.monthlyYieldSum || 0) - (group.currentMonthSum || 0)))}</span>
-            ${group.hasAdvance ? `<span style="font-size:0.65rem;color:var(--color-purple);font-weight:600;">Adv: ${formatCurrency(group.currentMonthSum - group.monthlyYieldSum)}</span>` : ''}
-            <div style="display: flex; gap: 0.4rem; align-items: center;" onclick="event.stopPropagation()">
-              <input type="number" id="quick-pay-${group.id}" class="form-input" placeholder="₹ Amount" style="width: 130px; padding: 0.4rem 0.6rem; min-height: 38px; font-size: 1rem;">
-              <button class="btn btn-primary" style="padding: 0.4rem 1rem; font-size: 0.95rem; min-height: 38px; font-weight: 700;" onclick="quickGroupPayment('${group.id}', 'lent')">Recv</button>
-            </div>
-          </div>
+      <div style="position:absolute; top:0.5rem; right:0.5rem; display:flex; gap:0.5rem; z-index:2;">
+        <span onclick="editLoan('${loan.id}', 'lent')" style="cursor:pointer;font-size:0.85rem;line-height:1;opacity:0.7;transition:opacity 0.15s;" title="Edit" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.7">✏️</span>
+        <span onclick="deleteLoan('${loan.id}', 'lent')" style="cursor:pointer;font-size:0.85rem;line-height:1;opacity:0.7;transition:opacity 0.15s;" title="Delete" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.7">🗑️</span>
+      </div>
+
+      <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:0.5rem; padding-right:2.2rem; margin-bottom:0.25rem;">
+        <div>
+          <div style="font-weight:700; font-size:0.95rem; color:var(--text-primary);">${loan.borrowerName} ${stats.statusInMonth !== 'active' ? '<span class="badge badge-muted">Settled</span>' : ''} ${stats.hasAdvance ? '<span style="font-size:0.55rem;background:rgba(168,85,247,0.15);color:var(--color-purple);border:1px solid rgba(168,85,247,0.25);padding:0.1rem 0.3rem;border-radius:3px;margin-left:0.2rem;vertical-align:middle;">Adv</span>' : ''}</div>
+          <div style="font-size:0.68rem; color:var(--text-secondary); margin-top:0.15rem;">${formatDate(loan.startDate)}${loan.dueDate ? ' • Due: ' + formatDate(loan.dueDate) : ''}</div>
         </div>
-        <div class="amount-display" style="text-align: right;">
-          ${principalHtml}
+        <div style="text-align:right; font-size:0.72rem; line-height:1.4; flex-shrink:0;">
+          <div style="color:var(--text-primary); font-weight:600;">${loan.interestRate}%/mo</div>
+          <div style="color:var(--text-secondary);">Recv: <span style="color:var(--color-success);font-weight:600;">${formatCurrency(stats.totalReceived)}</span></div>
         </div>
+      </div>
+
+      ${loan.phone ? `<div style="margin:0.25rem 0 0.35rem;">${getContactActionsHTML(loan.phone)}</div>` : ''}
+
+      <div style="display:flex; justify-content:space-between; align-items:center; margin:0.35rem 0;">
+        <div>
+          <div style="font-size:0.55rem; text-transform:uppercase; color:var(--text-muted); letter-spacing:0.5px;">Principal</div>
+          <div style="font-size:1.15rem; font-weight:800; color:var(--color-warning);">${formatCurrency(stats.outstandingPrincipal)}</div>
+        </div>
+        <div style="text-align:right;">
+          <div style="font-size:0.55rem; text-transform:uppercase; color:var(--text-muted); letter-spacing:0.5px;">Monthly Yield</div>
+          <div style="font-size:0.95rem; font-weight:700; color:#16a34a;">${formatCurrency(stats.monthlyYield)}</div>
+        </div>
+        <div style="text-align:right;">
+          <div style="font-size:0.55rem; text-transform:uppercase; color:var(--text-muted); letter-spacing:0.5px;">Last Payment</div>
+          <div style="font-size:0.85rem; font-weight:600;">${stats.lastPaymentDate ? formatDate(stats.lastPaymentDate) : '—'}</div>
+        </div>
+      </div>
+
+      <div style="display:flex; align-items:center; justify-content:space-between; padding:0.3rem 0.5rem; background:var(--input-bg); border-radius:4px; font-size:0.72rem; margin:0.3rem 0 0.4rem;">
+        <span style="font-weight:600; color:var(--text-primary);">This Month:</span>
+        ${stats.isInterestFullyPaidThisMonth
+          ? '<span style="color:var(--color-success);font-weight:700;">Received ✓</span>'
+          : '<span><span style="color:var(--color-success);font-weight:600;">' + formatCurrency(stats.currentMonthSum) + '</span> recv / Bal <span style="color:var(--color-warning);font-weight:600;">' + formatCurrency(Math.max(0, stats.monthlyYield - stats.currentMonthSum)) + '</span></span>'
+        }
+      </div>
+
+      <div style="display:flex; gap:0.4rem; align-items:center; margin-bottom:0.45rem;">
+        <input type="number" id="quick-pay-${loan.id}" class="form-input" placeholder="₹ Amount" style="flex:1; min-height:42px; font-size:1rem; padding:0.4rem 0.6rem; font-weight:600;">
+        <button class="btn btn-primary" style="min-height:42px; font-weight:700; font-size:0.95rem; padding:0.4rem 1rem;" onclick="quickLoanPayment('${loan.id}', 'lent')">Recv</button>
+      </div>
+
+      ${loan.notes ? '<div style="font-size:0.75rem; color:var(--text-secondary); font-style:italic; margin-bottom:0.4rem;">' + loan.notes + '</div>' : ''}
+
+      <div class="loan-actions" style="margin-top:0;">
+        ${stats.statusInMonth === 'active' 
+          ? (loan.isEMI
+            ? '<button class="btn btn-primary btn-sm" onclick="promptRecordEMI(\'' + loan.id + '\', \'received\')">Record EMI</button> <button class="btn btn-sm" style="background:linear-gradient(135deg,var(--color-accent),#0369a1);color:#fff;box-shadow:0 4px 14px rgba(14,165,233,0.3);" onclick="lendMore(\'' + loan.id + '\')">Lend More</button>'
+            : '<button class="btn btn-primary btn-sm" onclick="quickReceiveInterest(\'' + loan.id + '\', \'lent\')">Receive interest</button> <button class="btn btn-success btn-sm" onclick="promptPayment(\'' + loan.id + '\', \'received\', \'principal\')">Repay principal</button> <button class="btn btn-sm" style="background:linear-gradient(135deg,var(--color-accent),#0369a1);color:#fff;box-shadow:0 4px 14px rgba(14,165,233,0.3);" onclick="lendMore(\'' + loan.id + '\')">Lend More</button>')
+          : '<button class="btn btn-secondary btn-sm" onclick="toggleLoanStatus(\'' + loan.id + '\', \'lent\')">Reopen</button>'
+        }
+        ${stats.statusInMonth === 'active' && !loan.isEMI ? '<button class="btn btn-secondary btn-sm" onclick="promptConvertEMI(\'' + loan.id + '\', \'lent\')">Convert to EMI</button>' : ''}
       </div>
     `;
 
-    const itemRow = card.querySelector('.item-row');
-    itemRow.addEventListener('click', (e) => {
-      try {
-        if (e.target.closest('.contact-action-btn')) return;
-        const titleEl = document.getElementById('group-details-title');
-        const bodyEl = document.getElementById('group-details-body');
-        if (!titleEl || !bodyEl) {
-          alert('Error: Modal elements not found. Please do a hard refresh (Ctrl+F5) to clear your cache.');
-          return;
-        }
-        titleEl.textContent = `${group.name}'s Loans`;
-        bodyEl.innerHTML = loansHtml;
-        openModal('modal-group-details');
-      } catch (err) {
-        alert('Error opening modal: ' + err.message);
-      }
-    });
-
     listContainer.appendChild(card);
   });
-}
-
-function deleteLoanGroup(groupId, direction) {
-  const listName = direction === 'lent' ? 'lent' : 'borrowed';
-  const card = document.querySelector(`[data-group-id="${groupId}"]`);
-  if (!card) return;
-  const ids = (card.getAttribute('data-loan-ids') || '').split(',').filter(Boolean);
-  if (!ids.length) return;
-  const label = direction === 'lent' ? 'lent' : 'borrowed';
-  if (!confirm(`Delete all ${ids.length} loan(s) in this group? All associated payments will also be removed.`)) return;
-  loadState();
-  ids.forEach(id => {
-    state[listName] = state[listName].filter(x => x.id !== id);
-    state.interestPayments = state.interestPayments.filter(p => p.loanId !== id);
-  });
-  saveState();
-  if (direction === 'lent') renderLending();
-  else renderBorrowing();
 }
 
 // 8. BORROWING TAB LOGIC
@@ -3016,185 +2857,103 @@ function renderBorrowing() {
     return;
   }
 
-  const groupedBorrowed = {};
+  // Compute per-loan stats
   visibleLoans.forEach(loan => {
-    const normName = (loan.financierName || '').toLowerCase().trim();
-    if (!groupedBorrowed[normName]) {
-      groupedBorrowed[normName] = {
-        id: 'group-b-' + btoa(encodeURIComponent(normName)).replace(/[^a-zA-Z0-9]/g, ''),
-        name: loan.financierName,
-        phone: loan.phone || '',
-        loans: [],
-        totalPrincipal: 0,
-        totalOutstanding: 0,
-        totalRepaid: 0,
-        totalPaid: 0,
-        statusInMonth: 'paid',
-        allActiveInterestPaid: true,
-        hasActiveLoans: false
-      };
-    }
-    groupedBorrowed[normName].phone = groupedBorrowed[normName].phone || loan.phone;
-    groupedBorrowed[normName].loans.push(loan);
-  });
+    const loanPayments = state.interestPayments.filter(p => p.loanId === loan.id && p.type === 'paid' && p.date <= endDateOfSelectedMonth);
+    const interestPayments = loanPayments.filter(p => p.category === 'interest');
+    const principalPayments = loanPayments.filter(p => p.category === 'principal');
+    const topupPayments = loanPayments.filter(p => p.category === 'increase');
 
-  Object.values(groupedBorrowed).forEach(group => {
-    group.loans.sort((a,b) => new Date(a.startDate) - new Date(b.startDate));
+    const totalPaid = interestPayments.reduce((sum, p) => sum + Number(p.amount), 0);
+    const totalRepaid = principalPayments.reduce((sum, p) => sum + Number(p.amount), 0);
+    const totalTopups = topupPayments.reduce((sum, p) => sum + Number(p.amount), 0);
+    const outstandingPrincipal = Math.max(0, Number(loan.principal) + totalTopups - totalRepaid);
     
-    group.loans.forEach(loan => {
-      const loanPayments = state.interestPayments.filter(p => p.loanId === loan.id && p.type === 'paid' && p.date <= endDateOfSelectedMonth);
-      const interestPayments = loanPayments.filter(p => p.category === 'interest');
-      const principalPayments = loanPayments.filter(p => p.category === 'principal');
-      const topupPayments = loanPayments.filter(p => p.category === 'increase');
+    const lastPaymentDate = loanPayments.length > 0 ? loanPayments.reduce((max, p) => p.date > max ? p.date : max, loanPayments[0].date) : null;
+    const monthlyCost = outstandingPrincipal * (Number(loan.interestRate) / 100);
+    const currentMonthPayments = interestPayments.filter(p => p.date.startsWith(selectedMonthStr));
+    const currentMonthSum = currentMonthPayments.reduce((sum, p) => sum + Number(p.amount), 0);
+    const isInterestFullyPaidThisMonth = monthlyCost > 0 && currentMonthSum >= (monthlyCost - 0.01);
+    const statusInMonth = outstandingPrincipal > 0 ? 'active' : 'paid';
 
-      const totalPaid = interestPayments.reduce((sum, p) => sum + Number(p.amount), 0);
-      const totalRepaid = principalPayments.reduce((sum, p) => sum + Number(p.amount), 0);
-      const totalTopups = topupPayments.reduce((sum, p) => sum + Number(p.amount), 0);
-      const outstandingPrincipal = Math.max(0, Number(loan.principal) + totalTopups - totalRepaid);
-      
-      const lastPaymentDate = loanPayments.length > 0 ? loanPayments.reduce((max, p) => p.date > max ? p.date : max, loanPayments[0].date) : null;
-      const monthlyCost = outstandingPrincipal * (Number(loan.interestRate) / 100);
-      const currentMonthPayments = interestPayments.filter(p => p.date.startsWith(selectedMonthStr));
-      const currentMonthSum = currentMonthPayments.reduce((sum, p) => sum + Number(p.amount), 0);
-      const isInterestFullyPaidThisMonth = monthlyCost > 0 && currentMonthSum >= (monthlyCost - 0.01);
-      const statusInMonth = outstandingPrincipal > 0 ? 'active' : 'paid';
-
-      loan._stats = {
-        outstandingPrincipal, totalPaid, totalRepaid, monthlyCost,
-        isInterestFullyPaidThisMonth, statusInMonth, lastPaymentDate
-      };
-
-      group.totalPrincipal += Number(loan.principal);
-      group.totalOutstanding += outstandingPrincipal;
-      group.totalRepaid += totalRepaid;
-      group.totalPaid += totalPaid;
-
-      if (statusInMonth === 'active') {
-        group.statusInMonth = 'active';
-        group.hasActiveLoans = true;
-        if (!isInterestFullyPaidThisMonth) {
-          group.allActiveInterestPaid = false;
-        }
-      }
-    });
+    loan._stats = {
+      outstandingPrincipal, totalPaid, totalRepaid, monthlyCost,
+      isInterestFullyPaidThisMonth, statusInMonth, lastPaymentDate
+    };
   });
 
-  const sortedGroups = Object.values(groupedBorrowed).sort((a,b) => {
-    if (a.statusInMonth !== b.statusInMonth) return a.statusInMonth === 'active' ? -1 : 1;
-    return b.totalOutstanding - a.totalOutstanding;
+  const sortedLoans = visibleLoans.sort((a, b) => {
+    if (a._stats.statusInMonth !== b._stats.statusInMonth) return a._stats.statusInMonth === 'active' ? -1 : 1;
+    return b._stats.outstandingPrincipal - a._stats.outstandingPrincipal;
   });
 
-  sortedGroups.forEach(group => {
+  sortedLoans.forEach(loan => {
+    const stats = loan._stats;
     const card = document.createElement('div');
-    card.className = `card loan-card ${_expandedCards.has(group.id) ? 'expanded' : ''}`;
-    card.setAttribute('data-group-id', group.id);
-    card.setAttribute('data-loan-ids', group.loans.map(l => l.id).join(','));
-
-    let stampHtml = '';
-    if (group.hasActiveLoans && group.allActiveInterestPaid) {
-      stampHtml = `<div class="card-stamp stamp-paid">INTEREST PAID</div>`;
-    }
-
-    const principalHtml = `<div class="amount-value" style="color: var(--color-danger); font-size: 1.1rem;">${formatCurrency(group.totalOutstanding)}</div>
-       <div class="amount-in-words" style="font-size: 0.68rem; color: var(--text-secondary); max-width: 180px; line-height: 1.25; margin-top: 0.15rem; font-style: italic; text-align: right; word-wrap: break-word;">(${numberToIndianWords(group.totalOutstanding)})</div>
-       <div class="amount-label" style="margin-top: 0.25rem;">Total Outstanding</div>`;
-
-    let loansHtml = '';
-    group.loans.forEach((loan, idx) => {
-      const stats = loan._stats;
-      const loanIdxStr = group.loans.length > 1 ? ` <span style="font-size: 0.8em; color: var(--text-secondary); font-weight: normal;">(Loan No ${String(idx + 1).padStart(2, '0')})</span>` : '';
-      
-      loansHtml += `
-      <div style="position:relative; background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1rem; margin-top: 1rem;">
-        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.75rem;">
-          <div>
-            <h4 style="margin: 0 0 0.25rem 0; font-size: 0.95rem;">${loan.financierName}${loanIdxStr} ${stats.statusInMonth !== 'active' ? '<span class="badge badge-muted">Loan Closed</span>' : ''}</h4>
-            <div style="font-size: 0.8rem; color: var(--text-secondary);">Issued: ${formatDate(loan.startDate)} ${loan.dueDate ? `• Due: ${formatDate(loan.dueDate)}` : ''}</div>
-          </div>
-          <div style="text-align: right;">
-            <div style="color: var(--color-danger); font-weight: bold;">${formatCurrency(stats.outstandingPrincipal)}</div>
-            <div style="font-size: 0.75rem; color: var(--text-muted);">Principal</div>
-          </div>
-        </div>
-        <div style="position:absolute; top:0.5rem; right:0.5rem; display:flex; gap:0.5rem; z-index:2;">
-          <span onclick="editLoan('${loan.id}', 'borrowed')" style="cursor:pointer;font-size:0.85rem;line-height:1;opacity:0.7;transition:opacity 0.15s;" title="Edit" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.7">✏️</span>
-          <span onclick="deleteLoan('${loan.id}', 'borrowed')" style="cursor:pointer;font-size:0.85rem;line-height:1;opacity:0.7;transition:opacity 0.15s;" title="Delete" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.7">🗑️</span>
-        </div>
-        
-        <div style="display: flex; align-items: center; gap: 0.35rem; margin-bottom: 0.75rem;" onclick="event.stopPropagation();">
-          ${stats.isInterestFullyPaidThisMonth || stats.statusInMonth !== 'active' ? '' : `<label for="chk-interest-paid-${loan.id}" style="cursor: pointer; font-size: 0.85rem; color: var(--text-primary); margin: 0;">Interest Paid</label><input type="checkbox" id="chk-interest-paid-${loan.id}" onchange="if(this.checked) { quickMarkInterestPaid('${loan.id}', 'paid', ${stats.monthlyCost}, '${selectedMonthStr}'); }" style="width: 15px; height: 15px; cursor: pointer; accent-color: var(--color-success); margin: 0; flex-shrink: 0;">`}
-        </div>
-
-        <div class="loan-stats-grid">
-          <div class="loan-stat-box" style="padding: 0.5rem;">
-            <span class="loan-stat-val" style="font-size: 0.9rem;">${loan.isEMI ? `${formatCurrency(loan.emiAmount)} / mo` : `${loan.interestRate}% / mo`}</span>
-            <span class="loan-stat-lbl" style="font-size: 0.7rem;">${loan.isEMI ? 'EMI Amount' : 'Interest Rate'}</span>
-          </div>
-          <div class="loan-stat-box" style="padding: 0.5rem;">
-            <span class="loan-stat-val" style="font-size: 0.9rem;">${loan.isEMI ? loan.tenureMonths + ' Months' : formatCurrency(stats.totalPaid)}</span>
-            <span class="loan-stat-lbl" style="font-size: 0.7rem;">${loan.isEMI ? 'Tenure' : 'Interest Paid'}</span>
-          </div>
-          <div class="loan-stat-box" style="padding: 0.5rem;">
-            <span class="loan-stat-val" style="font-size: 0.9rem;">${stats.lastPaymentDate ? formatDate(stats.lastPaymentDate) : 'Never'}</span>
-            <span class="loan-stat-lbl" style="font-size: 0.7rem;">Last Payment</span>
-          </div>
-        </div>
-
-        <div style="font-size: 0.8rem; color: var(--text-secondary); display:flex; justify-content:space-between; flex-wrap:wrap; gap: 0.5rem; margin-top: 0.75rem; margin-bottom: 0.75rem;">
-          <div><span><strong>${formatCurrency(stats.monthlyCost)}</strong>/mo ${loan.isEMI ? '(Interest part)' : ''}</span></div>
-          ${loan.notes ? `<div><span style="font-style: italic;">Notes: ${loan.notes}</span></div>` : ''}
-        </div>
-
-        <div class="loan-actions" style="margin-top: 0.5rem;">
-          ${stats.statusInMonth === 'active' 
-            ? (loan.isEMI
-               ? `<button class="btn btn-primary btn-sm" onclick="promptRecordEMI('${loan.id}', 'paid')">Record EMI</button>
-                  <button class="btn btn-sm" style="background: linear-gradient(135deg, var(--color-accent), #0369a1); color: #fff; box-shadow: 0 4px 14px rgba(14,165,233,0.3);" onclick="lendMore('${loan.id}')">Borrow More</button>`
-                : `${stats.isInterestFullyPaidThisMonth ? '' : `<button class="btn btn-primary btn-sm" onclick="promptPayment('${loan.id}', 'paid', 'interest')">Record payout</button>`}
-                   <button class="btn btn-sm" style="background: linear-gradient(135deg, var(--color-accent), #0369a1); color: #fff; box-shadow: 0 4px 14px rgba(14,165,233,0.3);" onclick="lendMore('${loan.id}')">Borrow More</button>`)
-            : `<button class="btn btn-secondary btn-sm" onclick="toggleLoanStatus('${loan.id}', 'borrowed')">Reopen</button>`
-          }
-          ${loan.isEMI ? '' : `<button class="btn btn-secondary btn-sm" onclick="promptConvertEMI('${loan.id}', 'borrowed')">Convert to EMI</button>`}
-        </div>
-      </div>`;
-    });
+    card.className = 'card loan-card';
+    card.style.padding = '0.75rem';
+    card.setAttribute('data-loan-id', loan.id);
 
     card.innerHTML = `
-      <div class="item-row">
-        <div class="item-title-col">
-          <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
-            <span class="item-name">${group.name}</span>
-            ${group.statusInMonth === 'active' ? '' : '<span class="badge badge-muted">Loan Closed</span>'}
-            ${stampHtml}
-          </div>
-          ${group.phone ? `<div style="margin-top: 0.25rem; font-size: 0.85rem; color: var(--text-secondary);">${getContactActionsHTML(group.phone)}</div>` : ''}
-          <div class="item-meta" style="margin-top: 0.25rem;">
-            <span>${group.loans.length} Loan${group.loans.length > 1 ? 's' : ''}</span>
-          </div>
+      <div style="position:absolute; top:0.5rem; right:0.5rem; display:flex; gap:0.5rem; z-index:2;">
+        <span onclick="editLoan('${loan.id}', 'borrowed')" style="cursor:pointer;font-size:0.85rem;line-height:1;opacity:0.7;transition:opacity 0.15s;" title="Edit" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.7">✏️</span>
+        <span onclick="deleteLoan('${loan.id}', 'borrowed')" style="cursor:pointer;font-size:0.85rem;line-height:1;opacity:0.7;transition:opacity 0.15s;" title="Delete" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.7">🗑️</span>
+      </div>
+
+      <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:0.5rem; padding-right:2.2rem; margin-bottom:0.25rem;">
+        <div>
+          <div style="font-weight:700; font-size:0.95rem; color:var(--text-primary);">${loan.financierName} ${stats.statusInMonth !== 'active' ? '<span class="badge badge-muted">Loan Closed</span>' : ''}</div>
+          <div style="font-size:0.68rem; color:var(--text-secondary); margin-top:0.15rem;">${formatDate(loan.startDate)}${loan.dueDate ? ' • Due: ' + formatDate(loan.dueDate) : ''}</div>
         </div>
-        <div class="amount-display" style="text-align: right;">
-          ${principalHtml}
+        <div style="text-align:right; font-size:0.72rem; line-height:1.4; flex-shrink:0;">
+          <div style="color:var(--text-primary); font-weight:600;">${loan.interestRate}%/mo</div>
+          ${loan.isEMI ? '' : '<div style="color:var(--text-secondary);">Paid: <span style="color:var(--color-success);font-weight:600;">' + formatCurrency(stats.totalPaid) + '</span></div>'}
         </div>
       </div>
-    `;
 
-    const itemRow = card.querySelector('.item-row');
-    itemRow.addEventListener('click', (e) => {
-      try {
-        if (e.target.closest('.contact-action-btn') || e.target.closest('.btn-delete-group')) return;
-        const titleEl = document.getElementById('group-details-title');
-        const bodyEl = document.getElementById('group-details-body');
-        if (!titleEl || !bodyEl) {
-          alert('Error: Modal elements not found. Please do a hard refresh (Ctrl+F5) to clear your cache.');
-          return;
+      ${loan.phone ? `<div style="margin:0.25rem 0 0.35rem;">${getContactActionsHTML(loan.phone)}</div>` : ''}
+
+      <div style="margin:0.15rem 0 0.35rem;">
+        <div style="font-size:0.55rem; text-transform:uppercase; color:var(--text-muted); letter-spacing:0.5px;">Principal Owed</div>
+        <div style="font-size:1.15rem; font-weight:800; color:var(--color-danger);">${formatCurrency(stats.outstandingPrincipal)}</div>
+      </div>
+
+      <div style="display:flex; justify-content:space-between; gap:0.5rem; margin:0.3rem 0;">
+        <div>
+          <div style="font-size:0.55rem; text-transform:uppercase; color:var(--text-muted); letter-spacing:0.5px;">${loan.isEMI ? 'EMI' : 'Rate'}</div>
+          <div style="font-size:0.9rem; font-weight:700;">${loan.isEMI ? formatCurrency(loan.emiAmount) : loan.interestRate + '%'}</div>
+        </div>
+        <div>
+          <div style="font-size:0.55rem; text-transform:uppercase; color:var(--text-muted); letter-spacing:0.5px;">Monthly Cost</div>
+          <div style="font-size:0.9rem; font-weight:700; color:var(--color-danger);">${formatCurrency(stats.monthlyCost)}</div>
+        </div>
+        <div style="text-align:right;">
+          <div style="font-size:0.55rem; text-transform:uppercase; color:var(--text-muted); letter-spacing:0.5px;">Last Payment</div>
+          <div style="font-size:0.85rem; font-weight:600;">${stats.lastPaymentDate ? formatDate(stats.lastPaymentDate) : '—'}</div>
+        </div>
+      </div>
+
+      <div style="display:flex; align-items:center; justify-content:space-between; padding:0.3rem 0.5rem; background:var(--input-bg); border-radius:4px; font-size:0.72rem; margin:0.3rem 0 0.4rem;">
+        ${stats.isInterestFullyPaidThisMonth
+          ? '<span style="color:var(--color-success);font-weight:700;">Interest Paid ✓</span>'
+          : (stats.statusInMonth === 'active'
+            ? '<label style="cursor:pointer; display:flex; align-items:center; gap:0.35rem; color:var(--text-primary);font-weight:600;"><input type="checkbox" onchange="if(this.checked) { quickMarkInterestPaid(\'' + loan.id + '\', \'paid\', ' + stats.monthlyCost + ', \'' + selectedMonthStr + '\'); }" style="width:15px;height:15px;accent-color:var(--color-success);cursor:pointer;">Mark Interest Paid</label>'
+            : '')
         }
-        titleEl.textContent = `${group.name}'s Loans`;
-        bodyEl.innerHTML = loansHtml;
-        openModal('modal-group-details');
-      } catch (err) {
-        alert('Error opening modal: ' + err.message);
-      }
-    });
+      </div>
+
+      ${loan.notes ? '<div style="font-size:0.75rem; color:var(--text-secondary); font-style:italic; margin-bottom:0.4rem;">' + loan.notes + '</div>' : ''}
+
+      <div class="loan-actions" style="margin-top:0;">
+        ${stats.statusInMonth === 'active' 
+          ? (loan.isEMI
+            ? '<button class="btn btn-primary btn-sm" onclick="promptRecordEMI(\'' + loan.id + '\', \'paid\')">Record EMI</button> <button class="btn btn-sm" style="background:linear-gradient(135deg,var(--color-accent),#0369a1);color:#fff;box-shadow:0 4px 14px rgba(14,165,233,0.3);" onclick="lendMore(\'' + loan.id + '\')">Borrow More</button>'
+            : (stats.isInterestFullyPaidThisMonth ? '' : '<button class="btn btn-primary btn-sm" onclick="promptPayment(\'' + loan.id + '\', \'paid\', \'interest\')">Record payout</button>') + ' <button class="btn btn-sm" style="background:linear-gradient(135deg,var(--color-accent),#0369a1);color:#fff;box-shadow:0 4px 14px rgba(14,165,233,0.3);" onclick="lendMore(\'' + loan.id + '\')">Borrow More</button>')
+          : '<button class="btn btn-secondary btn-sm" onclick="toggleLoanStatus(\'' + loan.id + '\', \'borrowed\')">Reopen</button>'
+        }
+        ${loan.isEMI ? '' : '<button class="btn btn-secondary btn-sm" onclick="promptConvertEMI(\'' + loan.id + '\', \'borrowed\')">Convert to EMI</button>'}
+      </div>
+    `;
 
     listContainer.appendChild(card);
   });
@@ -3425,40 +3184,21 @@ document.getElementById('form-loan').addEventListener('submit', (e) => {
 
   saveState();
   closeModal('modal-loan');
-  
-  if (direction === 'lent') {
-    var normName = (party || '').toLowerCase().trim();
-    var groupId = 'group-' + btoa(encodeURIComponent(normName)).replace(/[^a-zA-Z0-9]/g, '');
-    _expandedCards.add(groupId);
-    renderDashboard();
+  renderDashboard();
+  setTimeout(function() {
+    switchTab('dashboard');
+    if (currentReminderFilter === 'interest') currentReminderFilter = 'all';
+    toggleReminderFilter('interest');
+    var card = document.getElementById('card-interest');
+    if (card) card.classList.add('highlight-card');
     setTimeout(function() {
-      switchTab('dashboard');
-      if (currentReminderFilter === 'interest') currentReminderFilter = 'all';
-      toggleReminderFilter('interest');
-      var card = document.getElementById('card-interest');
-      if (card) card.classList.add('highlight-card');
-      setTimeout(function() {
-        var newCard = document.querySelector('[data-group-id="' + groupId + '"]');
-        if (newCard) newCard.classList.add('new-entry-highlight');
-      }, 100);
-    }, 150);
-  } else {
-    var normName = (party || '').toLowerCase().trim();
-    var groupId = 'group-b-' + btoa(encodeURIComponent(normName)).replace(/[^a-zA-Z0-9]/g, '');
-    _expandedCards.add(groupId);
-    renderDashboard();
-    setTimeout(function() {
-      switchTab('dashboard');
-      if (currentReminderFilter === 'interest') currentReminderFilter = 'all';
-      toggleReminderFilter('interest');
-      var card = document.getElementById('card-interest');
-      if (card) card.classList.add('highlight-card');
-      setTimeout(function() {
-        var newCard = document.querySelector('[data-group-id="' + groupId + '"]');
-        if (newCard) newCard.classList.add('new-entry-highlight-red');
-      }, 100);
-    }, 150);
-  }
+      var loanId = id || (typeof newId !== 'undefined' ? newId : null);
+      if (loanId) {
+        var newCard = document.querySelector('[data-loan-id="' + loanId + '"]');
+        if (newCard) newCard.classList.add(direction === 'lent' ? 'new-entry-highlight' : 'new-entry-highlight-red');
+      }
+    }, 100);
+  }, 150);
 });
 
 // Edit Loan Action Trigger
@@ -6143,7 +5883,7 @@ window.navigateToCard = function(filterType, id, type) {
   refreshActiveTab();
   renderDashboard();
   setTimeout(() => {
-    const selector = type === 'rent' ? `[data-id="${id}"]` : `[data-group-id="${id}"]`;
+    const selector = type === 'rent' ? `[data-id="${id}"]` : `[data-loan-id="${id}"]`;
     const el = document.querySelector(selector);
     if (el) {
       el.scrollIntoView({behavior:'smooth', block:'center'});
