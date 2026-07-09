@@ -2893,16 +2893,15 @@ function renderLending() {
         <div class="loan-actions" style="margin-top: 0.5rem;">
           ${stats.statusInMonth === 'active' 
             ? (loan.isEMI
-               ? `<button class="btn btn-primary btn-sm" onclick="promptRecordEMI('${loan.id}', 'received')">Record EMI</button>
-                  <button class="btn btn-sm" style="background: linear-gradient(135deg, var(--color-accent), #0369a1); color: #fff; box-shadow: 0 4px 14px rgba(14,165,233,0.3);" onclick="lendMore('${loan.id}')">Lend More</button>`
+? `<button class="btn btn-primary btn-sm" onclick="promptRecordEMI('${loan.id}', 'received')">Record EMI</button>
+                   <button class="btn btn-sm" style="background: linear-gradient(135deg, var(--color-accent), #0369a1); color: #fff; box-shadow: 0 4px 14px rgba(14,165,233,0.3);" onclick="lendMore('${loan.id}')">Lend More</button>`
                : `<button class="btn btn-primary btn-sm" onclick="quickReceiveInterest('${loan.id}', 'lent')">Receive interest</button>
-                   <button class="btn btn-success btn-sm" onclick="promptPayment('${loan.id}', 'received', 'principal')">Repay principal</button>
-                  <button class="btn btn-sm" style="background: linear-gradient(135deg, var(--color-accent), #0369a1); color: #fff; box-shadow: 0 4px 14px rgba(14,165,233,0.3);" onclick="lendMore('${loan.id}')">Lend More</button>
-                  <button class="btn btn-secondary btn-sm" onclick="promptConvertEMI('${loan.id}', 'lent')">Convert to EMI</button>`)
+                    <button class="btn btn-success btn-sm" onclick="promptPayment('${loan.id}', 'received', 'principal')">Repay principal</button>
+                   <button class="btn btn-sm" style="background: linear-gradient(135deg, var(--color-accent), #0369a1); color: #fff; box-shadow: 0 4px 14px rgba(14,165,233,0.3);" onclick="lendMore('${loan.id}')">Lend More</button>`)
             : `<button class="btn btn-secondary btn-sm" onclick="toggleLoanStatus('${loan.id}', 'lent')">Reopen</button>`
           }
           <button class="btn btn-secondary btn-sm" onclick="editLoan('${loan.id}', 'lent')">Edit</button>
-          <button class="btn btn-secondary btn-sm" onclick="promptConvertEMI('${loan.id}', 'lent')">Convert to EMI</button>
+          ${stats.statusInMonth === 'active' && !loan.isEMI ? `<button class="btn btn-secondary btn-sm" onclick="promptConvertEMI('${loan.id}', 'lent')">Convert to EMI</button>` : ''}
         </div>
       </div>`;
     });
