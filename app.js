@@ -2998,12 +2998,11 @@ function renderRentals() {
     
     // Check if there is a rent payment logged where monthYear matches the selected month
     const isRentPaidThisMonth = rentPayments.some(p => p.monthYear === selectedMonthStr);
+    const currentMonthPayments = rentPayments.filter(p => p.monthYear === selectedMonthStr);
+    const currentMonthRentSum = currentMonthPayments.reduce((sum, p) => sum + Number(p.amount), 0);
+    const isRentFullyPaid = isRentPaidThisMonth && currentMonthRentSum >= (rental.monthlyRent - 0.01);
+    const rentBalance = Math.max(0, rental.monthlyRent - currentMonthRentSum);
     
-    let stampHtml = '';
-    if (isRentPaidThisMonth) {
-      stampHtml = `<div class="card-stamp stamp-received" style="margin-left: 0; margin-top: 0.2rem; font-size: 0.6rem; font-weight: 600;">Received</div>`;
-    }
-
     const card = document.createElement('div');
     const renewData = getNextRenewal(rental.startDate);
     const isRenewalSoon = renewData && renewData.daysLeft <= 30;
@@ -3036,7 +3035,6 @@ function renderRentals() {
         <div style="text-align:right;">
           <div style="font-size:1.15rem;font-weight:800;color:var(--color-success);line-height:1.2;">${formatCurrency(rental.monthlyRent)}</div>
           <div style="font-size:0.68rem;color:var(--text-secondary);margin-top:0.1rem;">Monthly Rent</div>
-          ${stampHtml}
         </div>
       </div>
 
@@ -3046,10 +3044,13 @@ function renderRentals() {
         ${!isRentPaidThisMonth && rental.status === 'active' ? '<span style="color:var(--color-warning);font-weight:600;float:right;">Due</span>' : ''}
       </div>
 
-      ${!isRentPaidThisMonth && rental.status === 'active' ? `<div style="display:flex; gap:0.35rem; align-items:center; margin-bottom:0.25rem;">
-        <input type="number" id="quick-rent-${rental.id}" class="form-input" placeholder="₹ Amount" style="flex:1; min-height:40px; font-size:1rem; padding:0.3rem 0.5rem; font-weight:600;">
-        <button class="btn btn-primary" style="min-height:40px; font-weight:700; font-size:0.9rem; padding:0.3rem 1rem;" onclick="quickRentPayment('${rental.id}')">Pay</button>
-      </div>` : ''}
+      ${!isRentPaidThisMonth && rental.status === 'active'
+        ? `<div style="display:flex; gap:0.35rem; align-items:center; margin-bottom:0.1rem;">
+          <input type="number" id="quick-rent-${rental.id}" class="form-input" placeholder="₹ Amount" style="flex:1; min-height:40px; font-size:1rem; padding:0.3rem 0.5rem; font-weight:600;">
+          <button class="btn btn-primary" style="min-height:40px; font-weight:700; font-size:0.9rem; padding:0.3rem 1rem;" onclick="quickRentPayment('${rental.id}')">Pay</button>
+        </div>`
+        : ''}
+      ${isRentPaidThisMonth && isRentFullyPaid ? '' : `<div style="font-size:0.7rem;color:#fff;font-style:italic;margin-bottom:0.15rem;">${isRentPaidThisMonth ? 'Rcvd ' + formatCurrency(currentMonthRentSum) + ' · Bal ' + formatCurrency(rentBalance) : 'Due ' + formatCurrency(rental.monthlyRent)}</div>`}
 
       <div class="icon-strip">
         <div class="icon-strip-left">
