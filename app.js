@@ -3035,6 +3035,7 @@ function renderRentals() {
         <div style="text-align:right;">
           <div style="font-size:1.15rem;font-weight:800;color:var(--color-success);line-height:1.2;">${formatCurrency(rental.monthlyRent)}</div>
           <div style="font-size:0.68rem;color:var(--text-secondary);margin-top:0.1rem;">Monthly Rent</div>
+          ${isRentFullyPaid ? '<div style="font-size:0.6rem;color:var(--color-success);font-weight:600;margin-top:0.15rem;">Received ✅</div>' : ''}
         </div>
       </div>
 
