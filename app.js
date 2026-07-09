@@ -1398,6 +1398,7 @@ function lendMore(loanId) {
   loan = state.borrowed.find(l => l.id === loanId);
   if (!loan) return;
 
+  closeModal('modal-group-details');
   document.getElementById('form-loan').reset();
   document.getElementById('loan-id').value = '';
   document.getElementById('loan-direction').value = 'borrowed';
