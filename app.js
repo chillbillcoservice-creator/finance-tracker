@@ -2754,61 +2754,62 @@ function renderLending() {
     card.style.padding = '0.75rem';
     card.setAttribute('data-loan-id', loan.id);
 
+    const settledBadge = stats.statusInMonth !== 'active' ? ' <span class="badge badge-muted">Settled</span>' : '';
+    const advBadge = stats.hasAdvance ? ' <span style="font-size:0.55rem;color:var(--color-purple);font-weight:600;margin-left:0.2rem;">Adv</span>' : '';
+    const formattedYield = formatCurrency(stats.monthlyYield);
+    const formattedPrincipal = formatCurrency(stats.outstandingPrincipal);
+    const formattedReceived = formatCurrency(stats.totalReceived);
+    const formattedSum = formatCurrency(stats.currentMonthSum);
+    const formattedBal = formatCurrency(Math.max(0, stats.monthlyYield - stats.currentMonthSum));
+
     card.innerHTML = `
-      <div style="position:absolute; top:0.5rem; right:0.5rem; display:flex; gap:0.5rem; z-index:2;">
-        <span onclick="editLoan('${loan.id}', 'lent')" style="cursor:pointer;font-size:0.85rem;line-height:1;opacity:0.7;transition:opacity 0.15s;" title="Edit" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.7">✏️</span>
-        <span onclick="deleteLoan('${loan.id}', 'lent')" style="cursor:pointer;font-size:0.85rem;line-height:1;opacity:0.7;transition:opacity 0.15s;" title="Delete" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.7">🗑️</span>
+      <div style="position:absolute; top:0.4rem; right:0.5rem; display:flex; gap:0.4rem; z-index:2;">
+        <span onclick="editLoan('${loan.id}', 'lent')" style="cursor:pointer;font-size:0.85rem;line-height:1;opacity:0.5;transition:opacity 0.15s;" title="Edit" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.5">✏️</span>
+        <span onclick="deleteLoan('${loan.id}', 'lent')" style="cursor:pointer;font-size:0.85rem;line-height:1;opacity:0.5;transition:opacity 0.15s;" title="Delete" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.5">🗑️</span>
       </div>
 
-      <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:0.5rem; padding-right:2.2rem; margin-bottom:0.25rem;">
+      <div style="display:flex; justify-content:space-between; align-items:flex-start; padding-right:2rem;">
         <div>
-          <div style="font-weight:700; font-size:0.95rem; color:var(--text-primary);">${loan.borrowerName} ${stats.statusInMonth !== 'active' ? '<span class="badge badge-muted">Settled</span>' : ''} ${stats.hasAdvance ? '<span style="font-size:0.55rem;background:rgba(168,85,247,0.15);color:var(--color-purple);border:1px solid rgba(168,85,247,0.25);padding:0.1rem 0.3rem;border-radius:3px;margin-left:0.2rem;vertical-align:middle;">Adv</span>' : ''}</div>
-          <div style="font-size:0.68rem; color:var(--text-secondary); margin-top:0.15rem;">${formatDate(loan.startDate)}${loan.dueDate ? ' • Due: ' + formatDate(loan.dueDate) : ''}</div>
+          <div style="font-weight:700; font-size:0.95rem;">${loan.borrowerName}${settledBadge}${advBadge}</div>
+          <div style="font-size:0.68rem; color:var(--text-secondary);">${formatDate(loan.startDate)}${loan.dueDate ? ' • Due: ' + formatDate(loan.dueDate) : ''}</div>
+          ${loan.phone ? '<div style="margin-top:0.15rem;">' + getContactActionsHTML(loan.phone) + '</div>' : ''}
         </div>
-        <div style="text-align:right; font-size:0.72rem; line-height:1.4; flex-shrink:0;">
-          <div style="color:var(--text-primary); font-weight:600;">${loan.interestRate}%/mo</div>
-          <div style="color:var(--text-secondary);">Recv: <span style="color:var(--color-success);font-weight:600;">${formatCurrency(stats.totalReceived)}</span></div>
-        </div>
-      </div>
-
-      ${loan.phone ? `<div style="margin:0.25rem 0 0.35rem;">${getContactActionsHTML(loan.phone)}</div>` : ''}
-
-      <div style="display:flex; justify-content:space-between; align-items:center; margin:0.35rem 0;">
-        <div>
-          <div style="font-size:0.55rem; text-transform:uppercase; color:var(--text-muted); letter-spacing:0.5px;">Principal</div>
-          <div style="font-size:1.15rem; font-weight:800; color:var(--color-warning);">${formatCurrency(stats.outstandingPrincipal)}</div>
-        </div>
-        <div style="text-align:right;">
-          <div style="font-size:0.55rem; text-transform:uppercase; color:var(--text-muted); letter-spacing:0.5px;">Monthly Yield</div>
-          <div style="font-size:0.95rem; font-weight:700; color:#16a34a;">${formatCurrency(stats.monthlyYield)}</div>
-        </div>
-        <div style="text-align:right;">
-          <div style="font-size:0.55rem; text-transform:uppercase; color:var(--text-muted); letter-spacing:0.5px;">Last Payment</div>
-          <div style="font-size:0.85rem; font-weight:600;">${stats.lastPaymentDate ? formatDate(stats.lastPaymentDate) : '—'}</div>
+        <div style="text-align:right; font-size:0.72rem; line-height:1.35; flex-shrink:0;">
+          <div style="font-weight:600;">${loan.interestRate}%</div>
+          <div style="color:var(--text-secondary);">Recv <span style="color:var(--color-success);font-weight:600;">${formattedReceived}</span></div>
         </div>
       </div>
 
-      <div style="display:flex; align-items:center; justify-content:space-between; padding:0.3rem 0.5rem; background:var(--input-bg); border-radius:4px; font-size:0.72rem; margin:0.3rem 0 0.4rem;">
-        <span style="font-weight:600; color:var(--text-primary);">This Month:</span>
-        ${stats.isInterestFullyPaidThisMonth
-          ? '<span style="color:var(--color-success);font-weight:700;">Received ✓</span>'
-          : '<span><span style="color:var(--color-success);font-weight:600;">' + formatCurrency(stats.currentMonthSum) + '</span> recv / Bal <span style="color:var(--color-warning);font-weight:600;">' + formatCurrency(Math.max(0, stats.monthlyYield - stats.currentMonthSum)) + '</span></span>'
-        }
+      <div style="display:flex; align-items:baseline; gap:0.75rem; margin:0.3rem 0 0.15rem;">
+        <span style="font-size:1.2rem; font-weight:800; color:var(--color-warning); line-height:1.2;">${formattedPrincipal}</span>
+        <span style="font-size:0.6rem; color:var(--text-muted);">Principal</span>
+        <span style="flex:1;"></span>
+        <span style="font-size:1rem; font-weight:700; color:#16a34a;">${formattedYield}<span style="font-size:0.6rem; color:var(--text-muted); font-weight:400;">/mo</span></span>
       </div>
 
-      <div style="display:flex; gap:0.4rem; align-items:center; margin-bottom:0.45rem;">
-        <input type="number" id="quick-pay-${loan.id}" class="form-input" placeholder="₹ Amount" style="flex:1; min-height:42px; font-size:1rem; padding:0.4rem 0.6rem; font-weight:600;">
-        <button class="btn btn-primary" style="min-height:42px; font-weight:700; font-size:0.95rem; padding:0.4rem 1rem;" onclick="quickLoanPayment('${loan.id}', 'lent')">Recv</button>
+      <div style="display:flex; justify-content:space-between; font-size:0.68rem; color:var(--text-secondary); margin-bottom:0.3rem;">
+        <span>${stats.lastPaymentDate ? 'Last: ' + formatDate(stats.lastPaymentDate) : 'No payments yet'}</span>
+        <span style="font-weight:600; color:var(--text-primary);">
+          ${stats.isInterestFullyPaidThisMonth
+            ? '<span style="color:var(--color-success);">Received ✓</span>'
+            : '<span>' + formattedSum + ' recv / <span style="color:var(--color-warning);font-weight:700;">' + formattedBal + '</span></span>'
+          }
+        </span>
       </div>
 
-      ${loan.notes ? '<div style="font-size:0.75rem; color:var(--text-secondary); font-style:italic; margin-bottom:0.4rem;">' + loan.notes + '</div>' : ''}
+      <div style="display:flex; gap:0.35rem; align-items:center; margin-bottom:0.35rem;">
+        <input type="number" id="quick-pay-${loan.id}" class="form-input" placeholder="₹ Amount" style="flex:1; min-height:40px; font-size:1rem; padding:0.3rem 0.5rem; font-weight:600;">
+        <button class="btn btn-primary" style="min-height:40px; font-weight:700; font-size:0.9rem; padding:0.3rem 1rem;" onclick="quickLoanPayment('${loan.id}', 'lent')">Recv</button>
+      </div>
+
+      ${loan.notes ? '<div style="font-size:0.7rem; color:var(--text-secondary); font-style:italic; margin-bottom:0.3rem;">' + loan.notes + '</div>' : ''}
 
       <div class="loan-actions" style="margin-top:0;">
-        <button class="btn btn-secondary btn-sm" onclick="showLedger('${loan.id}', 'lent')">📋 Ledger</button>
+        <button class="btn btn-sm" style="background:transparent;border:1px solid var(--border-color);color:var(--text-secondary);" onclick="showLedger('${loan.id}', 'lent')">📋 Ledger</button>
         ${stats.statusInMonth === 'active' 
           ? (loan.isEMI
-            ? '<button class="btn btn-primary btn-sm" onclick="promptRecordEMI(\'' + loan.id + '\', \'received\')">Record EMI</button> <button class="btn btn-sm" style="background:linear-gradient(135deg,var(--color-accent),#0369a1);color:#fff;box-shadow:0 4px 14px rgba(14,165,233,0.3);" onclick="lendMore(\'' + loan.id + '\')">Lend More</button>'
-            : '<button class="btn btn-primary btn-sm" onclick="quickReceiveInterest(\'' + loan.id + '\', \'lent\')">Receive interest</button> <button class="btn btn-success btn-sm" onclick="promptPayment(\'' + loan.id + '\', \'received\', \'principal\')">Repay principal</button> <button class="btn btn-sm" style="background:linear-gradient(135deg,var(--color-accent),#0369a1);color:#fff;box-shadow:0 4px 14px rgba(14,165,233,0.3);" onclick="lendMore(\'' + loan.id + '\')">Lend More</button>')
+            ? '<button class="btn btn-primary btn-sm" onclick="promptRecordEMI(\'' + loan.id + '\', \'received\')">Record EMI</button> <button class="btn btn-sm btn-accent" onclick="lendMore(\'' + loan.id + '\')">Lend More</button>'
+            : '<button class="btn btn-primary btn-sm" onclick="quickReceiveInterest(\'' + loan.id + '\', \'lent\')">Receive</button> <button class="btn btn-success btn-sm" onclick="promptPayment(\'' + loan.id + '\', \'received\', \'principal\')">Repay</button> <button class="btn btn-sm btn-accent" onclick="lendMore(\'' + loan.id + '\')">Lend More</button>')
           : '<button class="btn btn-secondary btn-sm" onclick="toggleLoanStatus(\'' + loan.id + '\', \'lent\')">Reopen</button>'
         }
         ${stats.statusInMonth === 'active' && !loan.isEMI ? '<button class="btn btn-secondary btn-sm" onclick="promptConvertEMI(\'' + loan.id + '\', \'lent\')">Convert to EMI</button>' : ''}
@@ -2895,62 +2896,56 @@ function renderBorrowing() {
     card.style.padding = '0.75rem';
     card.setAttribute('data-loan-id', loan.id);
 
+    const settledBadgeB = stats.statusInMonth !== 'active' ? ' <span class="badge badge-muted">Loan Closed</span>' : '';
+    const formattedCost = formatCurrency(stats.monthlyCost);
+    const formattedOwed = formatCurrency(stats.outstandingPrincipal);
+    const formattedPaid = formatCurrency(stats.totalPaid);
+
     card.innerHTML = `
-      <div style="position:absolute; top:0.5rem; right:0.5rem; display:flex; gap:0.5rem; z-index:2;">
-        <span onclick="editLoan('${loan.id}', 'borrowed')" style="cursor:pointer;font-size:0.85rem;line-height:1;opacity:0.7;transition:opacity 0.15s;" title="Edit" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.7">✏️</span>
-        <span onclick="deleteLoan('${loan.id}', 'borrowed')" style="cursor:pointer;font-size:0.85rem;line-height:1;opacity:0.7;transition:opacity 0.15s;" title="Delete" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.7">🗑️</span>
+      <div style="position:absolute; top:0.4rem; right:0.5rem; display:flex; gap:0.4rem; z-index:2;">
+        <span onclick="editLoan('${loan.id}', 'borrowed')" style="cursor:pointer;font-size:0.85rem;line-height:1;opacity:0.5;transition:opacity 0.15s;" title="Edit" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.5">✏️</span>
+        <span onclick="deleteLoan('${loan.id}', 'borrowed')" style="cursor:pointer;font-size:0.85rem;line-height:1;opacity:0.5;transition:opacity 0.15s;" title="Delete" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.5">🗑️</span>
       </div>
 
-      <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:0.5rem; padding-right:2.2rem; margin-bottom:0.25rem;">
+      <div style="display:flex; justify-content:space-between; align-items:flex-start; padding-right:2rem;">
         <div>
-          <div style="font-weight:700; font-size:0.95rem; color:var(--text-primary);">${loan.financierName} ${stats.statusInMonth !== 'active' ? '<span class="badge badge-muted">Loan Closed</span>' : ''}</div>
-          <div style="font-size:0.68rem; color:var(--text-secondary); margin-top:0.15rem;">${formatDate(loan.startDate)}${loan.dueDate ? ' • Due: ' + formatDate(loan.dueDate) : ''}</div>
+          <div style="font-weight:700; font-size:0.95rem;">${loan.financierName}${settledBadgeB}</div>
+          <div style="font-size:0.68rem; color:var(--text-secondary);">${formatDate(loan.startDate)}${loan.dueDate ? ' • Due: ' + formatDate(loan.dueDate) : ''}</div>
+          ${loan.phone ? '<div style="margin-top:0.15rem;">' + getContactActionsHTML(loan.phone) + '</div>' : ''}
         </div>
-        <div style="text-align:right; font-size:0.72rem; line-height:1.4; flex-shrink:0;">
-          <div style="color:var(--text-primary); font-weight:600;">${loan.interestRate}%/mo</div>
-          ${loan.isEMI ? '' : '<div style="color:var(--text-secondary);">Paid: <span style="color:var(--color-success);font-weight:600;">' + formatCurrency(stats.totalPaid) + '</span></div>'}
-        </div>
-      </div>
-
-      ${loan.phone ? `<div style="margin:0.25rem 0 0.35rem;">${getContactActionsHTML(loan.phone)}</div>` : ''}
-
-      <div style="margin:0.15rem 0 0.35rem;">
-        <div style="font-size:0.55rem; text-transform:uppercase; color:var(--text-muted); letter-spacing:0.5px;">Principal Owed</div>
-        <div style="font-size:1.15rem; font-weight:800; color:var(--color-danger);">${formatCurrency(stats.outstandingPrincipal)}</div>
-      </div>
-
-      <div style="display:flex; justify-content:space-between; gap:0.5rem; margin:0.3rem 0;">
-        <div>
-          <div style="font-size:0.55rem; text-transform:uppercase; color:var(--text-muted); letter-spacing:0.5px;">${loan.isEMI ? 'EMI' : 'Rate'}</div>
-          <div style="font-size:0.9rem; font-weight:700;">${loan.isEMI ? formatCurrency(loan.emiAmount) : loan.interestRate + '%'}</div>
-        </div>
-        <div>
-          <div style="font-size:0.55rem; text-transform:uppercase; color:var(--text-muted); letter-spacing:0.5px;">Monthly Cost</div>
-          <div style="font-size:0.9rem; font-weight:700; color:var(--color-danger);">${formatCurrency(stats.monthlyCost)}</div>
-        </div>
-        <div style="text-align:right;">
-          <div style="font-size:0.55rem; text-transform:uppercase; color:var(--text-muted); letter-spacing:0.5px;">Last Payment</div>
-          <div style="font-size:0.85rem; font-weight:600;">${stats.lastPaymentDate ? formatDate(stats.lastPaymentDate) : '—'}</div>
+        <div style="text-align:right; font-size:0.72rem; line-height:1.35; flex-shrink:0;">
+          <div style="font-weight:600;">${loan.interestRate}%</div>
+          ${loan.isEMI ? '' : '<div style="color:var(--text-secondary);">Paid <span style="color:var(--color-success);font-weight:600;">' + formattedPaid + '</span></div>'}
         </div>
       </div>
 
-      <div style="display:flex; align-items:center; justify-content:space-between; padding:0.3rem 0.5rem; background:var(--input-bg); border-radius:4px; font-size:0.72rem; margin:0.3rem 0 0.4rem;">
-        ${stats.isInterestFullyPaidThisMonth
-          ? '<span style="color:var(--color-success);font-weight:700;">Interest Paid ✓</span>'
-          : (stats.statusInMonth === 'active'
-            ? '<label style="cursor:pointer; display:flex; align-items:center; gap:0.35rem; color:var(--text-primary);font-weight:600;"><input type="checkbox" onchange="if(this.checked) { quickMarkInterestPaid(\'' + loan.id + '\', \'paid\', ' + stats.monthlyCost + ', \'' + selectedMonthStr + '\'); }" style="width:15px;height:15px;accent-color:var(--color-success);cursor:pointer;">Mark Interest Paid</label>'
-            : '')
-        }
+      <div style="display:flex; align-items:baseline; gap:0.75rem; margin:0.3rem 0 0.15rem;">
+        <span style="font-size:1.2rem; font-weight:800; color:var(--color-danger); line-height:1.2;">${formattedOwed}</span>
+        <span style="font-size:0.6rem; color:var(--text-muted);">Owed</span>
+        <span style="flex:1;"></span>
+        <span style="font-size:1rem; font-weight:700; color:var(--color-danger);">${formattedCost}<span style="font-size:0.6rem; color:var(--text-muted); font-weight:400;">/mo</span></span>
       </div>
 
-      ${loan.notes ? '<div style="font-size:0.75rem; color:var(--text-secondary); font-style:italic; margin-bottom:0.4rem;">' + loan.notes + '</div>' : ''}
+      <div style="display:flex; justify-content:space-between; font-size:0.68rem; color:var(--text-secondary); margin-bottom:0.3rem;">
+        <span>${stats.lastPaymentDate ? 'Last: ' + formatDate(stats.lastPaymentDate) : 'No payments yet'}</span>
+        <span>
+          ${stats.isInterestFullyPaidThisMonth
+            ? '<span style="color:var(--color-success);font-weight:600;">Paid ✓</span>'
+            : (stats.statusInMonth === 'active'
+              ? '<label style="cursor:pointer;display:inline-flex;align-items:center;gap:0.25rem;font-weight:600;"><input type="checkbox" onchange="if(this.checked){quickMarkInterestPaid(\'' + loan.id + '\',\'paid\',' + stats.monthlyCost + ',\'' + selectedMonthStr + '\');}" style="width:13px;height:13px;accent-color:var(--color-success);cursor:pointer;margin:0;">Mark Paid</label>'
+              : '')
+          }
+        </span>
+      </div>
+
+      ${loan.notes ? '<div style="font-size:0.7rem; color:var(--text-secondary); font-style:italic; margin-bottom:0.3rem;">' + loan.notes + '</div>' : ''}
 
       <div class="loan-actions" style="margin-top:0;">
-        <button class="btn btn-secondary btn-sm" onclick="showLedger('${loan.id}', 'borrowed')">📋 Ledger</button>
+        <button class="btn btn-sm" style="background:transparent;border:1px solid var(--border-color);color:var(--text-secondary);" onclick="showLedger('${loan.id}', 'borrowed')">📋 Ledger</button>
         ${stats.statusInMonth === 'active' 
           ? (loan.isEMI
-            ? '<button class="btn btn-primary btn-sm" onclick="promptRecordEMI(\'' + loan.id + '\', \'paid\')">Record EMI</button> <button class="btn btn-sm" style="background:linear-gradient(135deg,var(--color-accent),#0369a1);color:#fff;box-shadow:0 4px 14px rgba(14,165,233,0.3);" onclick="lendMore(\'' + loan.id + '\')">Borrow More</button>'
-            : (stats.isInterestFullyPaidThisMonth ? '' : '<button class="btn btn-primary btn-sm" onclick="promptPayment(\'' + loan.id + '\', \'paid\', \'interest\')">Record payout</button>') + ' <button class="btn btn-sm" style="background:linear-gradient(135deg,var(--color-accent),#0369a1);color:#fff;box-shadow:0 4px 14px rgba(14,165,233,0.3);" onclick="lendMore(\'' + loan.id + '\')">Borrow More</button>')
+            ? '<button class="btn btn-primary btn-sm" onclick="promptRecordEMI(\'' + loan.id + '\', \'paid\')">Record EMI</button> <button class="btn btn-sm btn-accent" onclick="lendMore(\'' + loan.id + '\')">Borrow More</button>'
+            : (stats.isInterestFullyPaidThisMonth ? '' : '<button class="btn btn-primary btn-sm" onclick="promptPayment(\'' + loan.id + '\', \'paid\', \'interest\')">Pay</button>') + ' <button class="btn btn-sm btn-accent" onclick="lendMore(\'' + loan.id + '\')">Borrow More</button>')
           : '<button class="btn btn-secondary btn-sm" onclick="toggleLoanStatus(\'' + loan.id + '\', \'borrowed\')">Reopen</button>'
         }
         ${loan.isEMI ? '' : '<button class="btn btn-secondary btn-sm" onclick="promptConvertEMI(\'' + loan.id + '\', \'borrowed\')">Convert to EMI</button>'}

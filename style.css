@@ -1017,6 +1017,12 @@ body::before {
   background: rgba(var(--color-success-rgb), 0.2);
 }
 
+.btn-accent {
+  background: linear-gradient(135deg, var(--color-accent), #0369a1);
+  color: #fff;
+  box-shadow: 0 4px 14px rgba(14,165,233,0.3);
+}
+
 .btn-sm {
   padding: 0.4rem 0.7rem;
   font-size: 0.78rem;
@@ -1815,12 +1821,16 @@ body::before {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 34px;
-  height: 34px;
-  border-radius: 9px;
-  transition: all var(--transition-fast);
+  width: 26px;
+  height: 26px;
   text-decoration: none;
   cursor: pointer;
+  opacity: 0.6;
+  transition: opacity 0.15s;
+}
+
+.contact-action-btn:hover {
+  opacity: 1;
 }
 
 .contact-action-btn svg {
@@ -1829,33 +1839,11 @@ body::before {
 }
 
 .contact-action-btn.call-btn {
-  background: rgba(var(--color-accent-rgb), 0.08);
-  border: 1px solid rgba(var(--color-accent-rgb), 0.2);
   color: var(--color-accent);
 }
 
 .contact-action-btn.wa-btn {
-  background: rgba(37, 211, 102, 0.08);
-  border: 1px solid rgba(37, 211, 102, 0.2);
   color: #25d366;
-}
-
-.contact-action-btn:hover {
-  transform: scale(1.12);
-}
-
-.contact-action-btn.call-btn:hover {
-  background: var(--color-accent);
-  color: #fff;
-  border-color: var(--color-accent);
-  box-shadow: 0 2px 8px rgba(var(--color-accent-rgb), 0.3);
-}
-
-.contact-action-btn.wa-btn:hover {
-  background: #25d366;
-  color: #fff;
-  border-color: #25d366;
-  box-shadow: 0 2px 8px rgba(37, 211, 102, 0.3);
 }
 
 /* ══════════════════════════════════════
