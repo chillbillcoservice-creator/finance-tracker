@@ -510,7 +510,7 @@ body::before {
 .pending-names-list {
   position: absolute;
   right: 0.25rem;
-  top: 50%;
+  top: 38%;
   transform: translateY(-50%);
   max-width: 46%;
   max-height: 80%;
