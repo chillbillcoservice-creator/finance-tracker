@@ -3073,7 +3073,7 @@ function renderBorrowing() {
       <div style="background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1rem; margin-top: 1rem;">
         <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.75rem;">
           <div>
-            <h4 style="margin: 0 0 0.25rem 0; font-size: 0.95rem;">${loan.financierName}${loanIdxStr} ${stats.statusInMonth !== 'active' ? '<span class="badge badge-muted">Settled</span>' : ''}</h4>
+            <h4 style="margin: 0 0 0.25rem 0; font-size: 0.95rem;">${loan.financierName}${loanIdxStr} ${stats.statusInMonth !== 'active' ? '<span class="badge badge-muted">Loan Closed</span>' : ''}</h4>
             <div style="font-size: 0.8rem; color: var(--text-secondary);">Issued: ${formatDate(loan.startDate)} ${loan.dueDate ? `• Due: ${formatDate(loan.dueDate)}` : ''}</div>
           </div>
           <div style="text-align: right;">
@@ -3112,9 +3112,8 @@ function renderBorrowing() {
             ? (loan.isEMI
                ? `<button class="btn btn-primary btn-sm" onclick="promptRecordEMI('${loan.id}', 'paid')">Record EMI</button>
                   <button class="btn btn-sm" style="background: linear-gradient(135deg, var(--color-accent), #0369a1); color: #fff; box-shadow: 0 4px 14px rgba(14,165,233,0.3);" onclick="lendMore('${loan.id}')">Borrow More</button>`
-               : `${stats.isInterestFullyPaidThisMonth ? '' : `<button class="btn btn-primary btn-sm" onclick="promptPayment('${loan.id}', 'paid', 'interest')">Record payout</button>`}
-                  <button class="btn btn-success btn-sm" onclick="promptPayment('${loan.id}', 'paid', 'principal')">Repay principal</button>
-                  <button class="btn btn-secondary btn-sm" onclick="toggleLoanStatus('${loan.id}', 'borrowed')">Mark Settled</button>`)
+                : `${stats.isInterestFullyPaidThisMonth ? '' : `<button class="btn btn-primary btn-sm" onclick="promptPayment('${loan.id}', 'paid', 'interest')">Record payout</button>`}
+                   <button class="btn btn-sm" style="background: linear-gradient(135deg, var(--color-accent), #0369a1); color: #fff; box-shadow: 0 4px 14px rgba(14,165,233,0.3);" onclick="lendMore('${loan.id}')">Borrow More</button>`)
             : `<button class="btn btn-secondary btn-sm" onclick="toggleLoanStatus('${loan.id}', 'borrowed')">Reopen</button>`
           }
           ${loan.isEMI ? '' : `<button class="btn btn-secondary btn-sm" onclick="promptConvertEMI('${loan.id}', 'borrowed')">Convert to EMI</button>`}
@@ -3128,7 +3127,7 @@ function renderBorrowing() {
         <div class="item-title-col">
           <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
             <span class="item-name">${group.name}</span>
-            ${group.statusInMonth === 'active' ? '' : '<span class="badge badge-muted">Settled</span>'}
+            ${group.statusInMonth === 'active' ? '' : '<span class="badge badge-muted">Loan Closed</span>'}
             ${stampHtml}
           </div>
           ${group.phone ? `<div style="margin-top: 0.25rem; font-size: 0.85rem; color: var(--text-secondary);">${getContactActionsHTML(group.phone)}</div>` : ''}
