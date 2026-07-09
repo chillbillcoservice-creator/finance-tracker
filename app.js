@@ -2903,6 +2903,11 @@ function renderBorrowing() {
 
       ${loan.notes ? '<div style="font-size:0.68rem; color:var(--text-secondary); font-style:italic; margin-bottom:0.3rem;">' + loan.notes + '</div>' : ''}
 
+      <div style="display:flex; gap:0.35rem; align-items:center; margin-bottom:0.4rem;">
+        <input type="number" id="quick-pay-${loan.id}" class="form-input" placeholder="₹ Amount" style="flex:1; min-height:40px; font-size:1rem; padding:0.3rem 0.5rem; font-weight:600;">
+        <button class="btn btn-primary" style="min-height:40px; font-weight:700; font-size:0.9rem; padding:0.3rem 1rem;" onclick="quickLoanPayment('${loan.id}', 'borrowed')">Pay</button>
+      </div>
+
       <div class="icon-strip">
         ${loan.phone ? '<span onclick="window.open(\'tel:' + loan.phone.replace(/\D/g, '') + '\',\'_self\')" title="Call">📞</span><span onclick="window.open(\'https://wa.me/91' + loan.phone.replace(/\D/g, '') + '\',\'_blank\')" title="WhatsApp">💬</span>' : ''}
         <span onclick="showLedger('${loan.id}', 'borrowed')" title="Ledger">📋</span>
@@ -2911,7 +2916,7 @@ function renderBorrowing() {
         ${stats.statusInMonth === 'active'
           ? (loan.isEMI
             ? '<span onclick="promptRecordEMI(\'' + loan.id + '\', \'paid\')" title="Record EMI">📅</span><span onclick="lendMore(\'' + loan.id + '\')" title="Borrow More">➕</span>'
-            : (stats.isInterestFullyPaidThisMonth ? '' : '<span onclick="promptPayment(\'' + loan.id + '\', \'paid\', \'interest\')" title="Record payout">💳</span>') + '<span onclick="lendMore(\'' + loan.id + '\')" title="Borrow More">➕</span>')
+            : '<span onclick="lendMore(\'' + loan.id + '\')" title="Borrow More">➕</span>')
           : '<span onclick="toggleLoanStatus(\'' + loan.id + '\', \'borrowed\')" title="Reopen">🔄</span>'
         }
         ${loan.isEMI ? '' : '<span onclick="promptConvertEMI(\'' + loan.id + '\', \'borrowed\')" title="Convert to EMI">📊</span>'}
