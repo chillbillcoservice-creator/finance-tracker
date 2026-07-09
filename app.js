@@ -2854,8 +2854,8 @@ function renderLending() {
           ${loan.phone ? `<div class="contact-btn-group">${getContactActionsHTML(loan.phone)}</div>` : ''}
         </div>
         <div style="position:absolute; top:0.5rem; right:0.5rem; display:flex; gap:0.25rem; z-index:2;">
-          <button class="btn btn-secondary btn-sm" onclick="editLoan('${loan.id}', 'lent')" style="padding:0.15rem 0.35rem;font-size:0.7rem;line-height:1;" title="Edit">✏️</button>
-          <button class="btn btn-danger btn-sm" onclick="deleteLoan('${loan.id}', 'lent')" style="padding:0.15rem 0.35rem;font-size:0.7rem;line-height:1;" title="Delete">🗑️</button>
+          <span onclick="editLoan('${loan.id}', 'lent')" style="cursor:pointer;font-size:0.85rem;line-height:1;opacity:0.7;transition:opacity 0.15s;" title="Edit" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.7">✏️</span>
+          <span onclick="deleteLoan('${loan.id}', 'lent')" style="cursor:pointer;font-size:0.85rem;line-height:1;opacity:0.7;transition:opacity 0.15s;" title="Delete" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.7">🗑️</span>
         </div>
 
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 0.75rem;">
@@ -3117,8 +3117,8 @@ function renderBorrowing() {
           </div>
         </div>
         <div style="position:absolute; top:0.5rem; right:0.5rem; display:flex; gap:0.25rem; z-index:2;">
-          <button class="btn btn-secondary btn-sm" onclick="editLoan('${loan.id}', 'borrowed')" style="padding:0.15rem 0.35rem;font-size:0.7rem;line-height:1;" title="Edit">✏️</button>
-          <button class="btn btn-danger btn-sm" onclick="deleteLoan('${loan.id}', 'borrowed')" style="padding:0.15rem 0.35rem;font-size:0.7rem;line-height:1;" title="Delete">🗑️</button>
+          <span onclick="editLoan('${loan.id}', 'borrowed')" style="cursor:pointer;font-size:0.85rem;line-height:1;opacity:0.7;transition:opacity 0.15s;" title="Edit" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.7">✏️</span>
+          <span onclick="deleteLoan('${loan.id}', 'borrowed')" style="cursor:pointer;font-size:0.85rem;line-height:1;opacity:0.7;transition:opacity 0.15s;" title="Delete" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.7">🗑️</span>
         </div>
         
         <div style="display: flex; align-items: center; gap: 0.35rem; margin-bottom: 0.75rem;" onclick="event.stopPropagation();">
