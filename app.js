@@ -3059,7 +3059,7 @@ ${!isRentFullyPaid && rental.status === 'active'
           <span onclick="showRentalLedger('${rental.id}')" title="Ledger">📋</span>
           ${rental.status === 'active'
             ? `<span onclick="editRental('${rental.id}')" title="Edit">✏️</span><span onclick="deleteRental('${rental.id}')" title="Delete">🗑️</span>
-               <span onclick="toggleRentalStatus('${rental.id}')" title="End Lease">🔒</span>${renewData ? `<span onclick="renewRentalAgreement('${rental.id}')" title="Renew">🔄</span>` : ''}`
+               <span onclick="toggleRentalStatus('${rental.id}')" title="End Lease">🔒</span><span onclick="openTenantDetails('${rental.id}')" title="Details & Renew">📝</span>`
             : `<span onclick="editRental('${rental.id}')" title="Edit">✏️</span><span onclick="deleteRental('${rental.id}')" title="Delete">🗑️</span>
                <span onclick="toggleRentalStatus('${rental.id}')" title="Activate">🔓</span>`
           }
