@@ -2785,17 +2785,21 @@ function renderLending() {
       ${loan.notes ? '<div style="font-size:0.68rem; color:var(--text-secondary); font-style:italic; margin-bottom:0.3rem;">' + loan.notes + '</div>' : ''}
 
       <div class="icon-strip">
-        ${loan.phone ? '<span onclick="window.open(\'tel:' + loan.phone.replace(/\D/g, '') + '\',\'_self\')" title="Call">📞</span><span onclick="window.open(\'https://wa.me/91' + loan.phone.replace(/\D/g, '') + '\',\'_blank\')" title="WhatsApp">💬</span>' : ''}
-        <span onclick="showLedger('${loan.id}', 'lent')" title="Ledger">📋</span>
-        <span onclick="editLoan('${loan.id}', 'lent')" title="Edit">✏️</span>
-        <span onclick="deleteLoan('${loan.id}', 'lent')" title="Delete">🗑️</span>
-        ${stats.statusInMonth === 'active'
-          ? (loan.isEMI
-            ? '<span onclick="promptRecordEMI(\'' + loan.id + '\', \'received\')" title="Record EMI">📅</span><span onclick="lendMore(\'' + loan.id + '\')" title="Lend More">➕</span>'
-            : '<span onclick="quickReceiveInterest(\'' + loan.id + '\', \'lent\')" title="Quick Receive">⚡</span><span onclick="promptPayment(\'' + loan.id + '\', \'received\', \'principal\')" title="Repay">💰</span><span onclick="lendMore(\'' + loan.id + '\')" title="Lend More">➕</span>')
-          : '<span onclick="toggleLoanStatus(\'' + loan.id + '\', \'lent\')" title="Reopen">🔄</span>'
-        }
-        ${stats.statusInMonth === 'active' && !loan.isEMI ? '<span onclick="promptConvertEMI(\'' + loan.id + '\', \'lent\')" title="Convert to EMI">📊</span>' : ''}
+        <div class="icon-strip-left">
+          ${loan.phone ? '<span onclick="window.open(\'tel:' + loan.phone.replace(/\D/g, '') + '\',\'_self\')" title="Call">📞</span><span onclick="window.open(\'https://wa.me/91' + loan.phone.replace(/\D/g, '') + '\',\'_blank\')" title="WhatsApp">💬</span>' : ''}
+          <span onclick="showLedger('${loan.id}', 'lent')" title="Ledger">📋</span>
+          ${stats.statusInMonth === 'active'
+            ? (loan.isEMI
+              ? '<span onclick="promptRecordEMI(\'' + loan.id + '\', \'received\')" title="Record EMI">📅</span><span onclick="lendMore(\'' + loan.id + '\')" title="Lend More">➕</span>'
+              : '<span onclick="quickReceiveInterest(\'' + loan.id + '\', \'lent\')" title="Quick Receive">⚡</span><span onclick="promptPayment(\'' + loan.id + '\', \'received\', \'principal\')" title="Repay">💰</span><span onclick="lendMore(\'' + loan.id + '\')" title="Lend More">➕</span>')
+            : '<span onclick="toggleLoanStatus(\'' + loan.id + '\', \'lent\')" title="Reopen">🔄</span>'
+          }
+          ${stats.statusInMonth === 'active' && !loan.isEMI ? '<span onclick="promptConvertEMI(\'' + loan.id + '\', \'lent\')" title="Convert to EMI">📊</span>' : ''}
+        </div>
+        <div class="icon-strip-right">
+          <span onclick="editLoan('${loan.id}', 'lent')" title="Edit">✏️</span>
+          <span onclick="deleteLoan('${loan.id}', 'lent')" title="Delete">🗑️</span>
+        </div>
       </div>
     `;
 
@@ -2909,17 +2913,21 @@ function renderBorrowing() {
       </div>
 
       <div class="icon-strip">
-        ${loan.phone ? '<span onclick="window.open(\'tel:' + loan.phone.replace(/\D/g, '') + '\',\'_self\')" title="Call">📞</span><span onclick="window.open(\'https://wa.me/91' + loan.phone.replace(/\D/g, '') + '\',\'_blank\')" title="WhatsApp">💬</span>' : ''}
-        <span onclick="showLedger('${loan.id}', 'borrowed')" title="Ledger">📋</span>
-        <span onclick="editLoan('${loan.id}', 'borrowed')" title="Edit">✏️</span>
-        <span onclick="deleteLoan('${loan.id}', 'borrowed')" title="Delete">🗑️</span>
-        ${stats.statusInMonth === 'active'
-          ? (loan.isEMI
-            ? '<span onclick="promptRecordEMI(\'' + loan.id + '\', \'paid\')" title="Record EMI">📅</span><span onclick="lendMore(\'' + loan.id + '\')" title="Borrow More">➕</span>'
-            : '<span onclick="lendMore(\'' + loan.id + '\')" title="Borrow More">➕</span>')
-          : '<span onclick="toggleLoanStatus(\'' + loan.id + '\', \'borrowed\')" title="Reopen">🔄</span>'
-        }
-        ${loan.isEMI ? '' : '<span onclick="promptConvertEMI(\'' + loan.id + '\', \'borrowed\')" title="Convert to EMI">📊</span>'}
+        <div class="icon-strip-left">
+          ${loan.phone ? '<span onclick="window.open(\'tel:' + loan.phone.replace(/\D/g, '') + '\',\'_self\')" title="Call">📞</span><span onclick="window.open(\'https://wa.me/91' + loan.phone.replace(/\D/g, '') + '\',\'_blank\')" title="WhatsApp">💬</span>' : ''}
+          <span onclick="showLedger('${loan.id}', 'borrowed')" title="Ledger">📋</span>
+          ${stats.statusInMonth === 'active'
+            ? (loan.isEMI
+              ? '<span onclick="promptRecordEMI(\'' + loan.id + '\', \'paid\')" title="Record EMI">📅</span><span onclick="lendMore(\'' + loan.id + '\')" title="Borrow More">➕</span>'
+              : '<span onclick="lendMore(\'' + loan.id + '\')" title="Borrow More">➕</span>')
+            : '<span onclick="toggleLoanStatus(\'' + loan.id + '\', \'borrowed\')" title="Reopen">🔄</span>'
+          }
+          ${loan.isEMI ? '' : '<span onclick="promptConvertEMI(\'' + loan.id + '\', \'borrowed\')" title="Convert to EMI">📊</span>'}
+        </div>
+        <div class="icon-strip-right">
+          <span onclick="editLoan('${loan.id}', 'borrowed')" title="Edit">✏️</span>
+          <span onclick="deleteLoan('${loan.id}', 'borrowed')" title="Delete">🗑️</span>
+        </div>
       </div>
     `;
 

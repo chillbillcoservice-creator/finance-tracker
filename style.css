@@ -1472,10 +1472,21 @@ body::before {
 
 .icon-strip {
   display: flex;
+  justify-content: space-between;
   gap: 0.25rem;
   margin-top: 0.35rem;
   padding-top: 0.35rem;
   border-top: 1px solid var(--border-color);
+}
+
+.icon-strip-left {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.icon-strip-right {
+  display: flex;
+  gap: 0.25rem;
 }
 
 .icon-strip span {
