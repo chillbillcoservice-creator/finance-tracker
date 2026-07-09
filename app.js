@@ -3032,7 +3032,7 @@ function renderRentals() {
             <span style="font-size: 0.75rem; color: var(--text-secondary); font-weight: 500;">${rental.propertyName}</span>
             ${rental.status === 'active' ? '' : '<span class="badge badge-muted">Ended</span>'}
           </div>
-          ${rental.contactInfo ? `<div style="font-size: 0.85rem; color: var(--text-secondary);">${getContactActionsHTML(rental.contactInfo)}</div>` : ''}
+          ${rental.contactInfo ? `<div style="font-size:0.75rem;color:var(--text-secondary);margin-top:0.1rem;"><span onclick="window.open('tel:${rental.contactInfo.replace(/\D/g, '')}','_self')" style="cursor:pointer;" title="Call">📞</span> ${rental.contactInfo} <span onclick="window.open('https://wa.me/91${rental.contactInfo.replace(/\D/g, '')}','_blank')" style="cursor:pointer;" title="WhatsApp">💬</span></div>` : ''}
           <div class="item-meta" style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; font-size: 0.68rem;">
             <span>Due: <strong>${rental.rentDueDay}<sup>th</sup></strong></span>
             <span class="meta-divider"></span>
