@@ -1234,8 +1234,9 @@ function quickLoanPayment(loanId, direction) {
   var payms = state.interestPayments.filter(function(p) { return p.loanId === loanId && p.category === 'interest'; });
   var monthPayms = payms.filter(function(p) { return p.date && p.date.startsWith(selectedMonthStr); });
   var sumPayms = monthPayms.reduce(function(s, p) { return s + Number(p.amount); }, 0);
-  var isAdvance = monthlyYield > 0 && sumPayms >= (monthlyYield - 0.01);
-  if (isAdvance && !confirm('Interest already received this month. Record as advance?')) return;
+  var totalIfPaid = sumPayms + amount;
+  var isAdvance = monthlyYield > 0 && totalIfPaid > (monthlyYield + 0.01);
+  if (isAdvance && !confirm('₹' + amount + ' exceeds the remaining interest of ₹' + (monthlyYield - sumPayms).toFixed(0) + '. Record excess as advance?')) return;
   var today = new Date().toISOString().split('T')[0];
   state.interestPayments.push({
     id: 'p' + Math.random().toString(36).substr(2, 9),
