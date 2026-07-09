@@ -3030,7 +3030,7 @@ function renderRentals() {
             <span style="font-size:0.72rem;color:var(--text-secondary);font-weight:500;margin-left:0.3rem;">${rental.propertyName}</span>
             ${rental.status === 'active' ? '' : '<span class="badge badge-muted">Ended</span>'}
           </div>
-          ${rental.contactInfo ? `<div style="font-size:0.82rem;color:#fff;margin-top:0.05rem;">📞 ${rental.contactInfo}</div>` : ''}
+          ${rental.contactInfo ? `<div style="font-size:0.82rem;color:#fff;margin-top:0.05rem;">${rental.contactInfo}</div>` : ''}
         </div>
         <div style="text-align:right;">
           <div style="font-size:1.15rem;font-weight:800;color:var(--color-success);line-height:1.2;">${formatCurrency(rental.monthlyRent)}</div>
@@ -3050,7 +3050,7 @@ function renderRentals() {
           <button class="btn btn-primary" style="min-height:40px; font-weight:700; font-size:0.9rem; padding:0.3rem 1rem;" onclick="quickRentPayment('${rental.id}')">Pay</button>
         </div>`
         : ''}
-      ${isRentPaidThisMonth && isRentFullyPaid ? '' : `<div style="font-size:0.7rem;color:#fff;font-style:italic;margin-bottom:0.15rem;">${isRentPaidThisMonth ? 'Rcvd ' + formatCurrency(currentMonthRentSum) + ' · Bal ' + formatCurrency(rentBalance) : 'Due ' + formatCurrency(rental.monthlyRent)}</div>`}
+      ${isRentPaidThisMonth && isRentFullyPaid ? '' : (isRentPaidThisMonth ? `<div style="font-size:0.7rem;color:#fff;font-style:italic;margin-bottom:0.15rem;">Rcvd ${formatCurrency(currentMonthRentSum)} · Bal ${formatCurrency(rentBalance)}</div>` : '')}
 
       <div class="icon-strip">
         <div class="icon-strip-left">
