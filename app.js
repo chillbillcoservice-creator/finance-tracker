@@ -2758,7 +2758,11 @@ function renderLending() {
     const advBadge = stats.hasAdvance ? ' <span style="font-size:0.55rem;color:var(--color-purple);font-weight:600;margin-left:0.2rem;">Adv</span>' : '';
     const formattedYield = formatCurrency(stats.monthlyYield);
     const formattedPrincipal = formatCurrency(stats.outstandingPrincipal);
-    const formattedReceived = formatCurrency(stats.totalReceived);
+    const currentRecv = formatCurrency(stats.currentMonthSum);
+    const currentBal = formatCurrency(Math.max(0, stats.monthlyYield - stats.currentMonthSum));
+    const recvDisplay = stats.isInterestFullyPaidThisMonth
+      ? 'Recv ' + currentRecv + ' ✅'
+      : 'Recv ' + currentRecv + ' · Bal ' + currentBal;
 
     card.innerHTML = `
       <div style="display:flex; justify-content:space-between; align-items:center;">
@@ -2778,7 +2782,7 @@ function renderLending() {
         <button class="btn btn-primary" style="min-height:40px; font-weight:700; font-size:0.9rem; padding:0.3rem 1rem;" onclick="quickLoanPayment('${loan.id}', 'lent')">Recv</button>
       </div>
 
-      <div style="font-size:0.68rem; color:var(--text-secondary); font-style:italic; margin-bottom:0.3rem;">Recv ${formattedReceived}</div>
+      <div style="font-size:0.68rem; color:var(--text-secondary); font-style:italic; margin-bottom:0.3rem;">${recvDisplay}</div>
 
       <div class="icon-strip">
         <div class="icon-strip-left">
