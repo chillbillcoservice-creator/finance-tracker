@@ -2846,12 +2846,17 @@ function renderLending() {
       
       loansHtml += `
       <div style="position:relative; background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1rem; margin-top: 1rem;">
-        <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 0.75rem;">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 0.5rem;">
           <div>
-            <h4 style="margin: 0 0 0.25rem 0; font-size: 0.95rem;">${loan.borrowerName}${loanIdxStr} ${stats.statusInMonth !== 'active' ? '<span class="badge badge-muted">Settled</span>' : ''} ${stats.hasAdvance ? '<span class="badge" style="background: rgba(168,85,247,0.15); color: var(--color-purple); border:1px solid rgba(168,85,247,0.25); font-size:0.6rem; padding:0.1rem 0.35rem; margin-left:0.25rem;">Advance</span>' : ''}</h4>
+            <h4 style="margin: 0 0 0.25rem 0; font-size: 0.95rem; padding-right:2rem;">${loan.borrowerName}${loanIdxStr} ${stats.statusInMonth !== 'active' ? '<span class="badge badge-muted">Settled</span>' : ''} ${stats.hasAdvance ? '<span class="badge" style="background: rgba(168,85,247,0.15); color: var(--color-purple); border:1px solid rgba(168,85,247,0.25); font-size:0.6rem; padding:0.1rem 0.35rem; margin-left:0.25rem;">Advance</span>' : ''}</h4>
             <div style="font-size: 0.8rem; color: var(--text-secondary);">Issued: ${formatDate(loan.startDate)} ${loan.dueDate ? `• Due: ${formatDate(loan.dueDate)}` : ''}</div>
           </div>
-          ${loan.phone ? `<div class="contact-btn-group">${getContactActionsHTML(loan.phone)}</div>` : ''}
+          <div style="text-align:right; white-space:nowrap; flex-shrink:0;">
+            <div style="font-weight:bold; font-size:0.95rem;">${formatCurrency(stats.outstandingPrincipal)}</div>
+            <div style="font-size:0.65rem; color:var(--text-muted);">Principal</div>
+          </div>
+        </div>
+        ${loan.phone ? `<div style="margin-top:0.3rem;">${getContactActionsHTML(loan.phone)}</div>` : ''}
         </div>
         <div style="position:absolute; top:0.5rem; right:0.5rem; display:flex; gap:0.5rem; z-index:2;">
           <span onclick="editLoan('${loan.id}', 'lent')" style="cursor:pointer;font-size:0.85rem;line-height:1;opacity:0.7;transition:opacity 0.15s;" title="Edit" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.7">✏️</span>
@@ -3106,22 +3111,22 @@ function renderBorrowing() {
       
       loansHtml += `
       <div style="position:relative; background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1rem; margin-top: 1rem;">
-        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.75rem;">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 0.5rem;">
           <div>
-            <h4 style="margin: 0 0 0.25rem 0; font-size: 0.95rem;">${loan.financierName}${loanIdxStr} ${stats.statusInMonth !== 'active' ? '<span class="badge badge-muted">Loan Closed</span>' : ''}</h4>
+            <h4 style="margin: 0 0 0.25rem 0; font-size: 0.95rem; padding-right:2rem;">${loan.financierName}${loanIdxStr} ${stats.statusInMonth !== 'active' ? '<span class="badge badge-muted">Loan Closed</span>' : ''}</h4>
             <div style="font-size: 0.8rem; color: var(--text-secondary);">Issued: ${formatDate(loan.startDate)} ${loan.dueDate ? `• Due: ${formatDate(loan.dueDate)}` : ''}</div>
           </div>
-          <div style="text-align: right;">
-            <div style="color: var(--color-danger); font-weight: bold;">${formatCurrency(stats.outstandingPrincipal)}</div>
-            <div style="font-size: 0.75rem; color: var(--text-muted);">Principal</div>
+          <div style="text-align: right; white-space: nowrap; flex-shrink:0;">
+            <div style="color: var(--color-danger); font-weight: bold; font-size:0.95rem;">${formatCurrency(stats.outstandingPrincipal)}</div>
+            <div style="font-size: 0.65rem; color: var(--text-muted);">Principal</div>
           </div>
         </div>
         <div style="position:absolute; top:0.5rem; right:0.5rem; display:flex; gap:0.5rem; z-index:2;">
           <span onclick="editLoan('${loan.id}', 'borrowed')" style="cursor:pointer;font-size:0.85rem;line-height:1;opacity:0.7;transition:opacity 0.15s;" title="Edit" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.7">✏️</span>
           <span onclick="deleteLoan('${loan.id}', 'borrowed')" style="cursor:pointer;font-size:0.85rem;line-height:1;opacity:0.7;transition:opacity 0.15s;" title="Delete" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.7">🗑️</span>
         </div>
-        
-        <div style="display: flex; align-items: center; gap: 0.35rem; margin-bottom: 0.75rem;" onclick="event.stopPropagation();">
+
+        <div style="display: flex; flex-wrap:wrap; align-items:center; gap:0.35rem; margin:0.5rem 0;" onclick="event.stopPropagation();">
           ${stats.isInterestFullyPaidThisMonth || stats.statusInMonth !== 'active' ? '' : `<label for="chk-interest-paid-${loan.id}" style="cursor: pointer; font-size: 0.85rem; color: var(--text-primary); margin: 0;">Interest Paid</label><input type="checkbox" id="chk-interest-paid-${loan.id}" onchange="if(this.checked) { quickMarkInterestPaid('${loan.id}', 'paid', ${stats.monthlyCost}, '${selectedMonthStr}'); }" style="width: 15px; height: 15px; cursor: pointer; accent-color: var(--color-success); margin: 0; flex-shrink: 0;">`}
         </div>
 
