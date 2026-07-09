@@ -2761,9 +2761,10 @@ function renderLending() {
     const formattedPrincipal = formatCurrency(stats.outstandingPrincipal);
     const currentRecv = formatCurrency(stats.currentMonthSum);
     const currentBal = formatCurrency(Math.max(0, stats.monthlyYield - stats.currentMonthSum));
+    const advTotal = stats.hasAdvance ? interestPayments.filter(function(p) { return p.note && p.note.indexOf('[Advance]') !== -1; }).reduce(function(s, p) { return s + Number(p.amount); }, 0) : 0;
     const recvDisplay = stats.isInterestFullyPaidThisMonth
-      ? 'Recv ' + currentRecv + ' ✅'
-      : 'Recv ' + currentRecv + ' · Bal ' + currentBal;
+      ? 'Rcvd ' + currentRecv + ' ✅'
+      : 'Rcvd ' + currentRecv + ' · Bal ' + currentBal;
 
     card.innerHTML = `
       <div style="display:flex; justify-content:space-between; align-items:center;">
@@ -2783,7 +2784,7 @@ function renderLending() {
         <button class="btn btn-primary" style="min-height:40px; font-weight:700; font-size:0.9rem; padding:0.3rem 1rem;" onclick="quickLoanPayment('${loan.id}', 'lent')">Recv</button>
       </div>
 
-      <div style="font-size:0.68rem; color:var(--text-secondary); font-style:italic; margin-bottom:0.3rem;">${recvDisplay}${stats.lastPaymentDate ? ' · ' + formatDate(stats.lastPaymentDate) : ''}</div>
+      <div style="font-size:0.68rem; color:var(--text-secondary); font-style:italic; margin-bottom:0.3rem;">${recvDisplay}${advTotal > 0 ? ' · Adv ' + formatCurrency(advTotal) : ''}${stats.lastPaymentDate ? ' · Last ' + formatDate(stats.lastPaymentDate) : ''}</div>
 
       <div class="icon-strip">
         <div class="icon-strip-left">
