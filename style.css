@@ -1838,6 +1838,45 @@ body::before {
 }
 
 /* ══════════════════════════════════════
+   CONTACT BUTTONS
+   ══════════════════════════════════════ */
+.contact-actions-wrapper {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  flex-wrap: wrap;
+}
+
+.contact-action-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  text-decoration: none;
+  cursor: pointer;
+  opacity: 0.6;
+  transition: opacity 0.15s;
+}
+
+.contact-action-btn:hover {
+  opacity: 1;
+}
+
+.contact-action-btn svg {
+  width: 18px !important;
+  height: 18px !important;
+}
+
+.contact-action-btn.call-btn {
+  color: var(--color-accent);
+}
+
+.contact-action-btn.wa-btn {
+  color: #25d366;
+}
+
+/* ══════════════════════════════════════
    COLLAPSIBLE CARDS
    ══════════════════════════════════════ */
 .tenant-card .item-row {
