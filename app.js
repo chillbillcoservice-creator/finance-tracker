@@ -2782,8 +2782,6 @@ function renderLending() {
         <button class="btn btn-primary" style="min-height:40px; font-weight:700; font-size:0.9rem; padding:0.3rem 1rem;" onclick="quickLoanPayment('${loan.id}', 'lent')">Recv</button>
       </div>
 
-      ${loan.notes ? '<div style="font-size:0.68rem; color:var(--text-secondary); font-style:italic; margin-bottom:0.3rem;">' + loan.notes + '</div>' : ''}
-
       <div class="icon-strip">
         <div class="icon-strip-left">
           ${loan.phone ? '<span onclick="window.open(\'tel:' + loan.phone.replace(/\D/g, '') + '\',\'_self\')" title="Call">📞</span><span onclick="window.open(\'https://wa.me/91' + loan.phone.replace(/\D/g, '') + '\',\'_blank\')" title="WhatsApp">💬</span>' : ''}
