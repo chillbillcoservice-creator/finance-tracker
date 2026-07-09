@@ -3007,8 +3007,8 @@ function renderRentals() {
     const card = document.createElement('div');
     const renewData = getNextRenewal(rental.startDate);
     const isRenewalSoon = renewData && renewData.daysLeft <= 30;
-    card.className = `card loan-card ${_expandedCards.has(rental.id) ? 'expanded' : ''}`;
-    card.style.padding = '0.85rem';
+    card.className = 'card loan-card';
+    card.style.padding = '0.75rem';
     card.setAttribute('data-id', rental.id);
     if (isRenewalSoon) {
       card.style.borderColor = '#ef4444';
@@ -3025,75 +3025,50 @@ function renderRentals() {
     }
 
     card.innerHTML = `
-      <div class="item-row">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
         <div>
-          <div style="display:flex; justify-content:space-between; align-items:center;">
-            <div style="display:flex; align-items:center; gap:0.4rem;">
-              <svg class="card-chevron" viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2.5" fill="none"><polyline points="6 9 12 15 18 9"/></svg>
-              <span style="font-weight:700; font-size:1rem;">${rental.tenantName}</span>
-              <span style="font-size:0.75rem;color:var(--text-secondary);font-weight:500;">${rental.propertyName}</span>
-              ${rental.status === 'active' ? '' : '<span class="badge badge-muted">Ended</span>'}
-            </div>
-            <div style="text-align:right;">
-              <div style="font-size:1.15rem;font-weight:800;color:var(--color-success);line-height:1.2;">${formatCurrency(rental.monthlyRent)}</div>
-              <div style="font-size:0.68rem;color:var(--text-secondary);margin-top:0.1rem;">Monthly Rent</div>
-              ${stampHtml}
-            </div>
+          <div style="font-weight:700; font-size:1rem;">${rental.tenantName}
+            <span style="font-size:0.72rem;color:var(--text-secondary);font-weight:500;margin-left:0.3rem;">${rental.propertyName}</span>
+            ${rental.status === 'active' ? '' : '<span class="badge badge-muted">Ended</span>'}
           </div>
           ${rental.contactInfo ? `<div style="font-size:0.82rem;color:#fff;margin-top:0.05rem;">📞 ${rental.contactInfo}</div>` : ''}
-          <div style="font-size:0.68rem;color:var(--text-secondary);margin:0.15rem 0 0.25rem;">
-            Due: ${rental.rentDueDay}<sup>th</sup> · Since ${formatDate(rental.startDate)}
-            ${renewData ? `· Renews: ${renewData.dateStr}` : ''}
-            ${!isRentPaidThisMonth && rental.status === 'active' ? '<span style="color:var(--color-warning);font-weight:600;float:right;">Due</span>' : ''}
-          </div>
-          <div class="icon-strip" style="margin-top:0;border-top:none;padding-top:0;">
-            <div class="icon-strip-left">
-              ${rental.contactInfo ? `<span onclick="window.open('tel:${rental.contactInfo.replace(/\D/g, '')}','_self')" title="Call">📞</span><span onclick="window.open('https://wa.me/91${rental.contactInfo.replace(/\D/g, '')}','_blank')" title="WhatsApp">💬</span>` : ''}
-              <span onclick="showRentalLedger('${rental.id}')" title="Ledger">📋</span>
-              <span onclick="editRental('${rental.id}')" title="Edit">✏️</span>
-              <span onclick="deleteRental('${rental.id}')" title="Delete">🗑️</span>
-            </div>
-            <div class="icon-strip-right"></div>
-          </div>
+        </div>
+        <div style="text-align:right;">
+          <div style="font-size:1.15rem;font-weight:800;color:var(--color-success);line-height:1.2;">${formatCurrency(rental.monthlyRent)}</div>
+          <div style="font-size:0.68rem;color:var(--text-secondary);margin-top:0.1rem;">Monthly Rent</div>
+          ${stampHtml}
         </div>
       </div>
 
-      <div class="card-collapse-content">
-        <div class="loan-stats-grid" style="margin-top: 1rem;">
-          <div class="loan-stat-box">
-            <span class="loan-stat-val">${formatCurrency(rental.securityDeposit)}</span>
-            <span class="loan-stat-lbl">Security Deposit</span>
-          </div>
-          <div class="loan-stat-box">
-            <span class="loan-stat-val">${formatCurrency(totalCollected)}</span>
-            <span class="loan-stat-lbl">Total Rent Collected</span>
-          </div>
-          <div class="loan-stat-box">
-            <span class="loan-stat-val">${rentPayments.length}</span>
-            <span class="loan-stat-lbl">Payments Logged</span>
-          </div>
-        </div>
+      <div style="font-size:0.68rem;color:var(--text-secondary);margin:0.15rem 0 0.25rem;">
+        Due: ${rental.rentDueDay}<sup>th</sup> · Since ${formatDate(rental.startDate)}
+        ${renewData ? `· Renews: ${renewData.dateStr}` : ''}
+        ${!isRentPaidThisMonth && rental.status === 'active' ? '<span style="color:var(--color-warning);font-weight:600;float:right;">Due</span>' : ''}
+      </div>
 
-        <div class="loan-actions">
-          <button class="btn btn-secondary btn-sm" onclick="showRentalLedger('${rental.id}')">History</button>
-          <button class="btn btn-secondary btn-sm" onclick="editRental('${rental.id}')">Edit</button>
-          ${rental.aadhaarImg ? `<button class="btn btn-secondary btn-sm" onclick="viewDocumentImage('${rental.id}', 'aadhaar')" style="border-color: var(--color-success); color: var(--color-success); background: rgba(16,185,129,0.05); display: inline-flex; align-items: center; gap: 4px;"><svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="2.5" fill="none"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg> Aadhaar</button>` : ''}
-          ${rental.agreementImg ? `<button class="btn btn-secondary btn-sm" onclick="viewDocumentImage('${rental.id}', 'agreement')" style="border-color: var(--color-success); color: var(--color-success); background: rgba(16,185,129,0.05); display: inline-flex; align-items: center; gap: 4px;"><svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="2.5" fill="none"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg> Agreement</button>` : ''}
-          ${rental.status === 'active' 
-            ? `${isRentPaidThisMonth ? '' : `<button class="btn btn-primary btn-sm" onclick="promptRentPayment('${rental.id}')">Log Rent Payment</button>`}
-               <button class="btn btn-secondary btn-sm" onclick="toggleRentalStatus('${rental.id}')">End Lease</button>`
-            : `<button class="btn btn-secondary btn-sm" onclick="toggleRentalStatus('${rental.id}')">Activate Lease</button>`
+      ${!isRentPaidThisMonth && rental.status === 'active' ? `<div style="display:flex; gap:0.35rem; align-items:center; margin-bottom:0.25rem;">
+        <input type="number" id="quick-rent-${rental.id}" class="form-input" placeholder="₹ Amount" style="flex:1; min-height:40px; font-size:1rem; padding:0.3rem 0.5rem; font-weight:600;">
+        <button class="btn btn-primary" style="min-height:40px; font-weight:700; font-size:0.9rem; padding:0.3rem 1rem;" onclick="quickRentPayment('${rental.id}')">Pay</button>
+      </div>` : ''}
+
+      <div class="icon-strip">
+        <div class="icon-strip-left">
+          ${rental.contactInfo ? `<span onclick="window.open('tel:${rental.contactInfo.replace(/\D/g, '')}','_self')" title="Call">📞</span><span onclick="window.open('https://wa.me/91${rental.contactInfo.replace(/\D/g, '')}','_blank')" title="WhatsApp">💬</span>` : ''}
+          <span onclick="showRentalLedger('${rental.id}')" title="Ledger">📋</span>
+          ${rental.status === 'active'
+            ? `<span onclick="editRental('${rental.id}')" title="Edit">✏️</span><span onclick="deleteRental('${rental.id}')" title="Delete">🗑️</span>
+               <span onclick="toggleRentalStatus('${rental.id}')" title="End Lease">🔒</span>`
+            : `<span onclick="editRental('${rental.id}')" title="Edit">✏️</span><span onclick="deleteRental('${rental.id}')" title="Delete">🗑️</span>
+               <span onclick="toggleRentalStatus('${rental.id}')" title="Activate">🔓</span>`
           }
-          <button class="btn btn-danger btn-sm" onclick="deleteRental('${rental.id}')">Delete</button>
+          ${rental.aadhaarImg ? `<span onclick="viewDocumentImage('${rental.id}', 'aadhaar')" title="Aadhaar">🪪</span>` : ''}
+          ${rental.agreementImg ? `<span onclick="viewDocumentImage('${rental.id}', 'agreement')" title="Agreement">📄</span>` : ''}
+        </div>
+        <div class="icon-strip-right">
+          <!-- edit/delete moved to left for rental, keep right empty or add future -->
         </div>
       </div>
     `;
-
-    const itemRow = card.querySelector('.item-row');
-    itemRow.addEventListener('click', (e) => {
-      if (e.target.closest('.icon-strip, button, .btn, input')) return;
-      window.openTenantDetails(rental.id);
-    });
 
     listContainer.appendChild(card);
   });
@@ -3839,6 +3814,29 @@ function promptRentPayment(rentalId) {
 
   openModal('modal-rent-payment');
 }
+
+function quickRentPayment(rentalId) {
+  loadState();
+  var input = document.getElementById('quick-rent-' + rentalId);
+  if (!input) return;
+  var amount = Number(input.value);
+  if (!amount || amount <= 0) { alert('Enter an amount'); return; }
+  input.value = '';
+  var today = new Date();
+  var monthYear = today.toISOString().slice(0, 7);
+  var datePaid = today.toISOString().split('T')[0];
+  state.rentPayments.push({
+    id: 'rp' + Math.random().toString(36).substr(2, 9),
+    rentalId: rentalId,
+    amount: amount,
+    monthYear: monthYear,
+    datePaid: datePaid,
+    note: 'Quick Pay'
+  });
+  saveState();
+  renderRentals();
+}
+window.quickRentPayment = quickRentPayment;
 
 // Rent payment submit handler
 document.getElementById('form-rent-payment').addEventListener('submit', (e) => {
