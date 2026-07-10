@@ -480,6 +480,7 @@ function loadState() {
       state.showPendingNames = state.showPendingNames !== false;
       state.showPayMethod = state.showPayMethod !== false;
       state.showExpenseDetails = state.showExpenseDetails !== false;
+      state.sortRentalsByDue = state.sortRentalsByDue === true;
       state.properties = state.properties || [];
       var defaults = ['23/48 ground floor', '23/48 3rd floor', '1/104'];
       defaults.forEach(function(d) { if (state.properties.indexOf(d) === -1) state.properties.push(d); });
@@ -490,6 +491,8 @@ function loadState() {
       if(pm) pm.checked = state.showPayMethod;
       const ed = document.getElementById('toggle-expense-details');
       if(ed) ed.checked = state.showExpenseDetails;
+      const sr = document.getElementById('toggle-sort-rentals');
+      if(sr) sr.checked = state.sortRentalsByDue;
     } catch (e) {
       console.error('Failed to parse local storage data, resetting to default.', e);
       saveState();
@@ -2976,10 +2979,14 @@ function renderRentals() {
     return;
   }
 
-  // Sort: active first, then inactive
+  // Sort: active first, then by preference
   const sortedRentals = [...visibleRentals].sort((a,b) => {
-    if (a.status === b.status) return a.propertyName.localeCompare(b.propertyName);
-    return a.status === 'active' ? -1 : 1;
+    if (a.status !== b.status) return a.status === 'active' ? -1 : 1;
+    if (state.sortRentalsByDue) {
+      if (Number(a.rentDueDay) !== Number(b.rentDueDay)) return Number(a.rentDueDay) - Number(b.rentDueDay);
+      return Number(b.monthlyRent) - Number(a.monthlyRent);
+    }
+    return Number(b.monthlyRent) - Number(a.monthlyRent);
   });
 
   sortedRentals.forEach(rental => {
@@ -5545,6 +5552,12 @@ window.togglePayMethod = function() {
 
 window.toggleExpenseDetails = function() {
   state.showExpenseDetails = document.getElementById('toggle-expense-details').checked;
+  saveState();
+  renderDashboard();
+};
+
+window.toggleSortRentals = function() {
+  state.sortRentalsByDue = document.getElementById('toggle-sort-rentals').checked;
   saveState();
   renderDashboard();
 };
