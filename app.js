@@ -3052,7 +3052,7 @@ function renderRentals() {
 
       <div style="font-size:0.68rem;color:#fff;margin:0.15rem 0 0.25rem;">
         ${rental.status === 'active'
-          ? `Due: ${rental.rentDueDay}<sup>${getOrdinal(rental.rentDueDay)}</sup> · Since ${formatDate(rental.startDate)}${renewData ? ` · Renews: ${renewData.dateStr}` : ''}${!isRentPaidThisMonth ? '<span style="color:var(--color-warning);font-weight:600;float:right;">Due' + (carryOverArrears > 0 ? ' · Bal: ' + formatCurrency(carryOverArrears) : '') + '</span>' : ''}`
+          ? `<span style="color:var(--color-warning);font-weight:700;">DUE</span>: ${rental.rentDueDay}<sup>${getOrdinal(rental.rentDueDay)}</sup> · Since ${formatDate(rental.startDate)}${renewData ? ` · Renews: ${renewData.dateStr}` : ''}${!isRentPaidThisMonth ? '<span style="color:var(--color-warning);font-weight:600;float:right;">Due' + (carryOverArrears > 0 ? ' · Bal: ' + formatCurrency(carryOverArrears) : '') + '</span>' : ''}`
           : `Since ${formatDate(rental.startDate)} · Ended ${rental.endDate ? formatDate(rental.endDate) : '-'}`
         }
 </div>
@@ -5778,7 +5778,7 @@ window.openTenantDetails = function(rentalId) {
   const sinceDate = formatDate(rental.startDate);
   const renewedDate = rental.lastRenewed ? formatDate(rental.lastRenewed) : null;
   
-  titleEl.innerHTML = `<span style="display:flex;align-items:center;gap:1rem;">${rental.tenantName}<span class="contact-btn-group" style="display:inline-flex;align-items:center;gap:0.3rem;">${callLink}${waLink}</span><button onclick="renewRentalAgreement('${rental.id}')" style="padding:0.2rem 0.4rem;font-size:0.6rem;background:var(--color-warning);border:none;border-radius:var(--border-radius-sm);cursor:pointer;color:#000;font-weight:700;white-space:nowrap;">Renew Agreement</button></span>`;
+  titleEl.innerHTML = `<span style="display:flex;align-items:center;gap:0.75rem;flex-wrap:wrap;">${rental.tenantName}<span class="contact-btn-group" style="display:inline-flex;align-items:center;gap:0.3rem;flex-wrap:wrap;">${callLink}${waLink}<button onclick="renewRentalAgreement('${rental.id}')" style="padding:0.2rem 0.4rem;font-size:0.6rem;background:var(--color-warning);border:none;border-radius:var(--border-radius-sm);cursor:pointer;color:#000;font-weight:700;white-space:nowrap;">Renew Agreement</button></span></span>`;
   
   let html = `
     <div style="margin-bottom: 1rem;">
@@ -5820,8 +5820,11 @@ window.openTenantDetails = function(rentalId) {
       ${renewedDate ? `<div style="display: flex; justify-content: space-between; padding: 0.4rem 0; border-bottom: 1px solid var(--border-color); font-size: 0.85rem;"><span style="color: var(--color-success); font-weight: 600;">Renewed on</span><span style="color: var(--text-primary);">${renewedDate}</span></div>` : ''}
       ${payments.length > 0 ? payments.map(p => `
         <div style="display: flex; justify-content: space-between; padding: 0.4rem 0; border-bottom: 1px solid var(--border-color); font-size: 0.85rem;">
-          <span style="color: var(--text-primary);">${formatDisplayDate(p.monthYear || p.datePaid)}</span>
-          <span style="font-weight: 600; color: var(--color-success);">${formatCurrency(p.amount)}</span>
+          <div>
+            <div style="color: var(--text-primary);">${formatDisplayDate(p.monthYear || p.datePaid)}</div>
+            <div style="color: var(--text-muted); font-size: 0.7rem; margin-top: 0.1rem;">${p.datePaid ? 'Paid ' + formatDate(p.datePaid) : ''}</div>
+          </div>
+          <span style="font-weight: 600; color: var(--color-success); align-self: center;">${formatCurrency(p.amount)}</span>
         </div>
       `).join('') : '<div style="color: var(--text-muted); font-size: 0.85rem;">No payments recorded yet.</div>'}
     </div>
