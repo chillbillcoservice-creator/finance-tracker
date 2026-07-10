@@ -1903,7 +1903,7 @@ function renderDashboard() {
         var pendingTenantsHTML = '<div class="pending-names-list">';
         pTenants.forEach(function(t) {
           var nameColor = t.renewalDue ? 'var(--color-danger)' : 'var(--text-primary)';
-          pendingTenantsHTML += '<div class="pending-name-item"><span style="color:' + nameColor + ';font-weight:' + (t.renewalDue ? '800' : '600') + '">' + t.name + '</span> (' + formatCurrency(t.owe) + ')</div>';
+          pendingTenantsHTML += '<div class="pending-name-item"><span style="color:' + nameColor + ';font-weight:' + (t.renewalDue ? '800' : '600') + '">' + t.name + '</span> (' + Math.round(t.owe / 1000) + 'K)</div>';
         });
         pendingTenantsHTML += '</div>';
         document.getElementById('card-rent').insertAdjacentHTML('afterbegin', pendingTenantsHTML);
@@ -1922,9 +1922,14 @@ function renderDashboard() {
       }
     });
 
+    // Merge duplicate borrower names
+    var merged = {};
+    pBorrowers.forEach(function(b) { merged[b.name] = (merged[b.name] || 0) + b.owe; });
+    pBorrowers = Object.keys(merged).map(function(name) { return {name: name, owe: merged[name]}; });
+
     if (pBorrowers.length > 0) {
       var pendingBorrowersHTML = '<div class="pending-names-list">' + pBorrowers.map(function(b) {
-        return '<div class="pending-name-item"><span>' + b.name + '</span> (' + formatCurrency(b.owe) + ')</div>';
+        return '<div class="pending-name-item"><span>' + b.name + '</span> (' + Math.round(b.owe / 1000) + 'K)</div>';
       }).join('') + '</div>';
       document.getElementById('card-interest').insertAdjacentHTML('afterbegin', pendingBorrowersHTML);
       document.getElementById('card-interest').classList.add('has-pending-names');
@@ -2737,7 +2742,7 @@ function renderLending() {
     return sum + Math.max(0, Number(l.principal) + added - repaid);
   }, 0);
   var emiEl = document.getElementById('lent-emi-total');
-  if (emiEl) emiEl.textContent = 'EMI Amount = ' + formatCurrency(emiOutstanding);
+  if (emiEl) emiEl.textContent = formatCurrency(emiOutstanding);
 
   var emiCountEl = document.getElementById('lent-emi-count');
   if (emiCountEl) {
