@@ -2728,8 +2728,8 @@ function renderLending() {
     const outstandingPrincipal = Math.max(0, Number(loan.principal) + totalTopups - totalRepaid);
     
     const lastPaymentDate = loanPayments.length > 0 ? loanPayments.reduce((max, p) => p.date > max ? p.date : max, loanPayments[0].date) : null;
-    const monthlyYield = outstandingPrincipal * (Number(loan.interestRate) / 100);
-    const currentMonthPayments = interestPayments.filter(p => p.date.startsWith(selectedMonthStr));
+    const monthlyYield = loan.isEMI ? Number(loan.emiAmount) : outstandingPrincipal * (Number(loan.interestRate) / 100);
+    const currentMonthPayments = (loan.isEMI ? loanPayments : interestPayments).filter(p => p.date.startsWith(selectedMonthStr));
     const currentMonthSum = currentMonthPayments.reduce((sum, p) => sum + Number(p.amount), 0);
     const isInterestFullyPaidThisMonth = monthlyYield > 0 && currentMonthSum >= (monthlyYield - 0.01);
     const hasAdvance = interestPayments.some(function(p) { return p.note && p.note.indexOf('[Advance]') !== -1; });
