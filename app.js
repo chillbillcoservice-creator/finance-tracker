@@ -1659,20 +1659,38 @@ function renderDashboard() {
       .reduce((sum, p) => sum + Number(p.amount), 0);
   }
 
-  // F. Calculate interest received in the selected period
-  let totalInterestReceived;
+  // F. Calculate total collection (interest + EMI) received in the selected period
+  let totalInterestReceived = 0;
   if (isDayMode) {
-    totalInterestReceived = state.interestPayments
-      .filter(p => p.type === 'received' && p.category === 'interest' && p.date === selectedDateStr)
-      .reduce((sum, p) => sum + Number(p.amount), 0);
+    activeLendingLoans.forEach(function(loan) {
+      var outstanding = getOutstandingPrincipalAtMonth(loan.id, loan.principal, selectedMonthStr);
+      if (outstanding > 0) {
+        var cat = loan.isEMI ? 'principal' : 'interest';
+        totalInterestReceived += state.interestPayments
+          .filter(function(p) { return p.type === 'received' && p.category === cat && p.loanId === loan.id && p.date === selectedDateStr; })
+          .reduce(function(sum, p) { return sum + Number(p.amount); }, 0);
+      }
+    });
   } else if (isYearMode) {
-    totalInterestReceived = state.interestPayments
-      .filter(p => p.type === 'received' && p.category === 'interest' && p.date && p.date.startsWith(selectedYear))
-      .reduce((sum, p) => sum + Number(p.amount), 0);
+    activeLendingLoans.forEach(function(loan) {
+      var outstanding = getOutstandingPrincipalAtMonth(loan.id, loan.principal, selectedMonthStr);
+      if (outstanding > 0) {
+        var cat = loan.isEMI ? 'principal' : 'interest';
+        totalInterestReceived += state.interestPayments
+          .filter(function(p) { return p.type === 'received' && p.category === cat && p.loanId === loan.id && p.date && p.date.startsWith(selectedYear); })
+          .reduce(function(sum, p) { return sum + Number(p.amount); }, 0);
+      }
+    });
   } else {
-    totalInterestReceived = state.interestPayments
-      .filter(p => p.type === 'received' && p.category === 'interest' && p.date.startsWith(selectedMonthStr))
-      .reduce((sum, p) => sum + Number(p.amount), 0);
+    activeLendingLoans.forEach(function(loan) {
+      var outstanding = getOutstandingPrincipalAtMonth(loan.id, loan.principal, selectedMonthStr);
+      if (outstanding > 0) {
+        var cat = loan.isEMI ? 'principal' : 'interest';
+        totalInterestReceived += state.interestPayments
+          .filter(function(p) { return p.type === 'received' && p.category === cat && p.loanId === loan.id && p.date.startsWith(selectedMonthStr); })
+          .reduce(function(sum, p) { return sum + Number(p.amount); }, 0);
+      }
+    });
   }
 
   // G. Calculate interest paid in the selected period
@@ -1719,6 +1737,7 @@ function renderDashboard() {
   const expectedInterestReceived = activeLendingLoans.reduce((sum, loan) => {
     const outstanding = getOutstandingPrincipalAtMonth(loan.id, loan.principal, selectedMonthStr);
     if (outstanding > 0) {
+      if (loan.isEMI) return sum + Number(loan.emiAmount || 0);
       return sum + (outstanding * (Number(loan.interestRate) / 100));
     }
     return sum;
@@ -1892,26 +1911,21 @@ function renderDashboard() {
       }
 
     const pBorrowers = [];
-    activeLendingLoans.forEach(l => {
-      const outstanding = getOutstandingPrincipalAtMonth(l.id, l.principal, selectedMonthStr);
+    activeLendingLoans.forEach(function(l) {
+      var outstanding = getOutstandingPrincipalAtMonth(l.id, l.principal, selectedMonthStr);
       if (outstanding > 0) {
-        const expected = outstanding * (Number(l.interestRate) / 100);
-        const pPaid = state.interestPayments.filter(p => p.type === 'received' && p.category !== 'issuance' && p.loanId === l.id && p.date.startsWith(selectedMonthStr)).reduce((sum, p) => sum + Number(p.amount), 0);
-        const pOwe = expected - pPaid;
+        var expected = l.isEMI ? Number(l.emiAmount || 0) : outstanding * (Number(l.interestRate) / 100);
+        var cat = l.isEMI ? 'principal' : 'interest';
+        var pPaid = state.interestPayments.filter(function(p) { return p.type === 'received' && p.category === cat && p.loanId === l.id && p.date.startsWith(selectedMonthStr); }).reduce(function(sum, p) { return sum + Number(p.amount); }, 0);
+        var pOwe = expected - pPaid;
         if (pOwe > 0) pBorrowers.push({name: l.borrowerName, owe: pOwe});
       }
     });
 
     if (pBorrowers.length > 0) {
-      const pendingBorrowersHTML = '<div class="pending-names-list">' + activeLendingLoans.map(l => {
-        const outstanding = getOutstandingPrincipalAtMonth(l.id, l.principal, selectedMonthStr);
-        if (outstanding <= 0) return '';
-        const expected = outstanding * (Number(l.interestRate) / 100);
-        const pPaid = state.interestPayments.filter(p => p.type === 'received' && p.category !== 'issuance' && p.loanId === l.id && p.date.startsWith(selectedMonthStr)).reduce((sum, p) => sum + Number(p.amount), 0);
-        const pOwe = expected - pPaid;
-        if (pOwe <= 0) return '';
-        return `<div class="pending-name-item"><span>${l.borrowerName}</span> (${formatCurrency(pOwe)})</div>`;
-      }).filter(Boolean).join('') + '</div>';
+      var pendingBorrowersHTML = '<div class="pending-names-list">' + pBorrowers.map(function(b) {
+        return '<div class="pending-name-item"><span>' + b.name + '</span> (' + formatCurrency(b.owe) + ')</div>';
+      }).join('') + '</div>';
       document.getElementById('card-interest').insertAdjacentHTML('afterbegin', pendingBorrowersHTML);
       document.getElementById('card-interest').classList.add('has-pending-names');
     }
