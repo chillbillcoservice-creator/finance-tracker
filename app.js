@@ -4176,6 +4176,48 @@ window.loadRealSeedData = function() {
   showToast('Demo data loaded!', 'success');
 };
 
+window.seedRenovationExpenses = function() {
+  loadState();
+  var items = [
+    {note:'Aggarwal Hardware', laborType:'Hardware', amount:92200, date:'2026-06-15'},
+    {note:'Dharmu (Plumber)', laborType:'Plumber', amount:72000, date:'2026-06-16'},
+    {note:'Welding', laborType:'Welding', amount:27000, date:'2026-06-17'},
+    {note:'Raghu Painter', laborType:'Painter', amount:22500, date:'2026-06-18'},
+    {note:'Ghisai Wala', laborType:'Ghisai', amount:16000, date:'2026-06-19'},
+    {note:'Almirah', laborType:'Furniture', amount:10650, date:'2026-06-20'},
+    {note:'Plumber', laborType:'Plumber', amount:9000, date:'2026-06-21'},
+    {note:'Ground Floor Shed', laborType:'Welding', amount:8000, date:'2026-06-22'},
+    {note:'Furniture', laborType:'Furniture', amount:7400, date:'2026-06-23'},
+    {note:'Carpenter', laborType:'Carpenter', amount:7310, date:'2026-06-24'},
+    {note:'AC Service', laborType:'AC Service', amount:3500, date:'2026-06-25'},
+    {note:'Electrician Hardware', laborType:'Hardware', amount:3595, date:'2026-06-26'},
+    {note:'Pest Control', laborType:'Others', amount:3000, date:'2026-06-27'},
+    {note:'Tiles + Basin + Pot', laborType:'Tiles', amount:25400, date:'2026-06-28'},
+    {note:'Wood/Ply', laborType:'Carpenter', amount:1750, date:'2026-06-29'},
+    {note:'Tiles', laborType:'Tiles', amount:1600, date:'2026-06-30'},
+    {note:'Puran', laborType:'Others', amount:1400, date:'2026-07-01'},
+    {note:'Electrics Material', laborType:'Electrician', amount:1322, date:'2026-07-02'},
+    {note:'Electrician', laborType:'Electrician', amount:4440, date:'2026-07-03'},
+    {note:'RO', laborType:'Others', amount:600, date:'2026-07-04'},
+    {note:'Labour', laborType:'Mistri', amount:500, date:'2026-07-05'}
+  ];
+  items.forEach(function(item) {
+    state.expenses.push({
+      id:'exp_' + Date.now() + '_' + Math.random().toString(36).slice(2,6),
+      category:'construction',
+      project:'1/104',
+      laborType:item.laborType,
+      paymentMethod:'cash',
+      amount:item.amount,
+      date:item.date,
+      note:item.note
+    });
+  });
+  saveState();
+  renderConstruction();
+  showToast('21 renovation expenses added for 1/104!', 'success');
+};
+
 // Hard system reset
 document.getElementById('btn-reset-data').addEventListener('click', () => {
   if (confirm('CRITICAL WARNING: This will completely delete all your loans, properties, tenants, and logged history. Are you absolutely sure?')) {
@@ -4543,7 +4585,7 @@ function renderConstruction() {
     var projects = (state.properties || []).slice();
     if (projects.length === 0) projects = ['23/48 Ground Floor', '23/48 3rd Floor', '1/104'];
     var constructionExpenses = (state.expenses || []).filter(function(e) { return e && e.category === 'construction'; });
-    var categories = ['Carpenter', 'Painter', 'Welding', 'Mistri', 'Electrician', 'Plumber', 'Malba', 'Hardware', 'Furniture', 'Ghisai', 'Glass Work', 'AC Service', 'Others'];
+    var categories = ['Carpenter', 'Painter', 'Welding', 'Mistri', 'Electrician', 'Plumber', 'Malba', 'Hardware', 'Furniture', 'Ghisai', 'Glass Work', 'AC Service', 'Tiles', 'Others'];
     
     var selectedProject = window._selectedConstProject;
     if (!selectedProject || projects.indexOf(selectedProject) === -1) {
