@@ -2698,7 +2698,7 @@ function renderLending() {
   if (!listContainer) return;
   listContainer.innerHTML = '';
 
-  const visibleLoans = state.lent.filter(l => l.startDate <= endDateOfSelectedMonth);
+  const visibleLoans = state.lent.filter(l => l.startDate <= endDateOfSelectedMonth && !l.isEMI && Number(l.interestRate) > 0);
 
   const countEl = document.getElementById('lent-loans-count');
   const principalEl = document.getElementById('lent-loans-principal');
@@ -2707,6 +2707,23 @@ function renderLending() {
     const totalPrincipal = visibleLoans.reduce((s, l) => s + Number(l.principal), 0);
     principalEl.textContent = formatCurrency(totalPrincipal);
   }
+
+  // EMI outstanding total
+  var emiOutstanding = state.lent.filter(function(l) {
+    return l.isEMI && l.startDate <= endDateOfSelectedMonth;
+  }).reduce(function(sum, l) {
+    var payments = state.interestPayments.filter(function(p) {
+      return p.loanId === l.id && p.type === 'received' && p.category === 'principal' && p.date <= endDateOfSelectedMonth;
+    });
+    var topups = state.interestPayments.filter(function(p) {
+      return p.loanId === l.id && p.type === 'received' && p.category === 'increase' && p.date <= endDateOfSelectedMonth;
+    });
+    var repaid = payments.reduce(function(s, p) { return s + Number(p.amount); }, 0);
+    var added = topups.reduce(function(s, p) { return s + Number(p.amount); }, 0);
+    return sum + Math.max(0, Number(l.principal) + added - repaid);
+  }, 0);
+  var emiEl = document.getElementById('lent-emi-total');
+  if (emiEl) emiEl.textContent = 'EMI Amount = ' + formatCurrency(emiOutstanding);
   if (visibleLoans.length === 0) {
     listContainer.innerHTML = `
       <div class="empty-state">
