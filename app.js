@@ -545,13 +545,6 @@ function saveState() {
   }
 }
 
-function seedInitialData() {
-  state = { lent: [], borrowed: [], rentals: [], interestPayments: [], rentPayments: [], expenses: [], renewals: [], files: [], theme: 'black-and-colored-plain' };
-  state.properties = ['23/48 ground floor', '23/48 3rd floor', '1/104'];
-  clearFileDB();
-  saveState();
-}
-
 // 3. UI Helpers & Formatting
 const formatCurrency = (val) => {
   return '₹ ' + Number(val).toLocaleString('en-IN', {
@@ -3994,174 +3987,7 @@ window.deleteRentPayment = deleteRentPayment;
 // 12. SYSTEM SETTINGS HANDLERS
 
 // Load mock demo data
-window.loadMockData = function() {
-  if (!confirm('Load demo data? This will replace all existing data with sample entries.')) return;
-  loadState();
-  var today = new Date();
-  var y = today.getFullYear();
-  var m = String(today.getMonth() + 1).padStart(2, '0');
-  var d = String(today.getDate()).padStart(2, '0');
-  var todayStr = y + '-' + m + '-' + d;
-  var currMonth = y + '-' + m;
-
-  function daysAgo(n) { var dt = new Date(today); dt.setDate(dt.getDate() - n); return dt.toISOString().slice(0,10); }
-  function daysFromNow(n) { var dt = new Date(today); dt.setDate(dt.getDate() + n); return dt.toISOString().slice(0,10); }
-
-  // Clear existing data
-  state.rentals = [];
-  state.lent = [];
-  state.borrowed = [];
-  state.interestPayments = [];
-  state.rentPayments = [];
-  state.expenses = [];
-  state.renewals = [];
-  state.files = [];
-
-  // === RENTALS (5) ===
-  state.rentals.push(
-    { id: 'r_demo_1', propertyName: '23/48 ground floor', tenantName: 'Rahul Sharma', contactInfo: '9876543210', monthlyRent: 18000, securityDeposit: 54000, startDate: '2024-01-01', rentDueDay: 5, aadhaarImg: '', agreementImg: '', status: 'active' },
-    { id: 'r_demo_2', propertyName: '23/48 3rd floor', tenantName: 'Amit Verma', contactInfo: '9876543211', monthlyRent: 22000, securityDeposit: 66000, startDate: '2024-06-01', rentDueDay: 7, aadhaarImg: '', agreementImg: '', status: 'active' },
-    { id: 'r_demo_3', propertyName: '1/104', tenantName: 'Priya Singh', contactInfo: '9876543212', monthlyRent: 15000, securityDeposit: 30000, startDate: '2025-03-01', rentDueDay: 10, aadhaarImg: '', agreementImg: '', status: 'active' },
-    { id: 'r_demo_4', propertyName: '5/202', tenantName: 'Suresh Reddy', contactInfo: '9876543213', monthlyRent: 25000, securityDeposit: 75000, startDate: '2025-09-01', rentDueDay: 3, aadhaarImg: '', agreementImg: '', status: 'active' },
-    { id: 'r_demo_5', propertyName: '23/48 ground floor', tenantName: 'Meera Nair', contactInfo: '9876543214', monthlyRent: 12000, securityDeposit: 24000, startDate: '2026-01-15', rentDueDay: 15, aadhaarImg: '', agreementImg: '', status: 'active' }
-  );
-
-  // === RENT PAYMENTS (mix of paid months, some current month pending) ===
-  var pm1 = getPreviousMonthStr(1); // last month
-  var pm2 = getPreviousMonthStr(2); // 2 months ago
-  var pm3 = getPreviousMonthStr(3); // 3 months ago
-
-  state.rentPayments.push(
-    // Rahul - paid last 3 months
-    { id: 'rp_demo_1', rentalId: 'r_demo_1', amount: 18000, monthYear: currMonth, datePaid: daysAgo(3), note: 'Rent collected' },
-    { id: 'rp_demo_2', rentalId: 'r_demo_1', amount: 18000, monthYear: pm1, datePaid: daysAgo(33), note: 'Rent collected' },
-    { id: 'rp_demo_3', rentalId: 'r_demo_1', amount: 18000, monthYear: pm2, datePaid: daysAgo(63), note: 'Rent collected' },
-    // Amit - paid last 2 months (current month unpaid)
-    { id: 'rp_demo_4', rentalId: 'r_demo_2', amount: 22000, monthYear: pm1, datePaid: daysAgo(28), note: 'Rent collected' },
-    { id: 'rp_demo_5', rentalId: 'r_demo_2', amount: 22000, monthYear: pm2, datePaid: daysAgo(58), note: 'Rent collected' },
-    // Priya - paid last month (current month unpaid)
-    { id: 'rp_demo_6', rentalId: 'r_demo_3', amount: 15000, monthYear: pm1, datePaid: daysAgo(25), note: 'Rent collected' },
-    // Suresh - paid all 3 months
-    { id: 'rp_demo_7', rentalId: 'r_demo_4', amount: 25000, monthYear: currMonth, datePaid: daysAgo(2), note: 'Rent collected' },
-    { id: 'rp_demo_8', rentalId: 'r_demo_4', amount: 25000, monthYear: pm1, datePaid: daysAgo(30), note: 'Rent collected' },
-    { id: 'rp_demo_9', rentalId: 'r_demo_4', amount: 25000, monthYear: pm2, datePaid: daysAgo(60), note: 'Rent collected' },
-    // Meera - paid last month only
-    { id: 'rp_demo_10', rentalId: 'r_demo_5', amount: 12000, monthYear: pm1, datePaid: daysAgo(20), note: 'Rent collected' }
-  );
-
-  // === LENT LOANS (5) ===
-  state.lent.push(
-    { id: 'l_demo_1', borrowerName: 'Vikram Patel', phone: '9988776655', principal: 100000, interestRate: 3, startDate: '2025-01-15', dueDate: null, status: 'active', notes: 'Business loan' },
-    { id: 'l_demo_2', borrowerName: 'Sunil Kumar', phone: '9988776644', principal: 50000, interestRate: 2.5, startDate: '2025-03-01', dueDate: null, status: 'active', notes: 'Personal loan' },
-    { id: 'l_demo_3', borrowerName: 'Deepak Joshi', phone: '9988776633', principal: 200000, interestRate: 2, startDate: '2025-06-01', dueDate: null, status: 'active', notes: 'Emergency loan' },
-    { id: 'l_demo_4', borrowerName: 'Ravi Deshmukh', phone: '9988776622', principal: 75000, interestRate: 4, startDate: '2025-11-01', dueDate: '2026-09-01', status: 'active', notes: 'Short-term business loan' },
-    { id: 'l_demo_5', borrowerName: 'Anita Sharma', phone: '9988776611', principal: 300000, interestRate: 1.5, startDate: '2024-04-01', dueDate: '2026-03-01', status: 'paid', notes: 'Settled - full principal + interest paid' }
-  );
-
-  // === BORROWED LOANS (3) ===
-  state.borrowed.push(
-    { id: 'b_demo_1', financierName: 'HDFC Bank', phone: '18002586161', principal: 500000, interestRate: 1.5, startDate: '2024-08-01', dueDate: null, status: 'active', notes: 'Home loan - 20 year tenure' },
-    { id: 'b_demo_2', financierName: 'Anil Gupta', phone: '9876501234', principal: 150000, interestRate: 2, startDate: '2025-05-01', dueDate: '2026-12-01', status: 'active', notes: 'Personal loan' },
-    { id: 'b_demo_3', financierName: 'SBI Card', phone: '18001801111', principal: 45000, interestRate: 3.5, startDate: '2026-02-01', dueDate: null, status: 'active', notes: 'Credit card outstanding' }
-  );
-
-  // === INTEREST PAYMENTS (mix) ===
-  // Lent interest received
-  state.interestPayments.push(
-    // Vikram - paid current month + last 3 months
-    { id: 'ip_demo_01', loanId: 'l_demo_1', type: 'received', category: 'interest', amount: 3000, date: daysAgo(2), note: 'Monthly interest - July' },
-    { id: 'ip_demo_02', loanId: 'l_demo_1', type: 'received', category: 'interest', amount: 3000, date: daysAgo(32), note: 'Monthly interest - June' },
-    { id: 'ip_demo_03', loanId: 'l_demo_1', type: 'received', category: 'interest', amount: 3000, date: daysAgo(62), note: 'Monthly interest - May' },
-    { id: 'ip_demo_04', loanId: 'l_demo_1', type: 'received', category: 'interest', amount: 3000, date: daysAgo(92), note: 'Monthly interest - Apr' },
-    // Sunil - paid current month
-    { id: 'ip_demo_05', loanId: 'l_demo_2', type: 'received', category: 'interest', amount: 1250, date: daysAgo(5), note: 'Monthly interest - July' },
-    { id: 'ip_demo_06', loanId: 'l_demo_2', type: 'received', category: 'interest', amount: 1250, date: daysAgo(35), note: 'Monthly interest - June' },
-    // Deepak - paid current month
-    { id: 'ip_demo_07', loanId: 'l_demo_3', type: 'received', category: 'interest', amount: 4000, date: daysAgo(4), note: 'Monthly interest - July' },
-    { id: 'ip_demo_08', loanId: 'l_demo_3', type: 'received', category: 'interest', amount: 4000, date: daysAgo(34), note: 'Monthly interest - June' },
-    // Ravi - paid current month
-    { id: 'ip_demo_09', loanId: 'l_demo_4', type: 'received', category: 'interest', amount: 3000, date: daysAgo(1), note: 'Monthly interest - July' },
-    { id: 'ip_demo_10', loanId: 'l_demo_4', type: 'received', category: 'interest', amount: 3000, date: daysAgo(31), note: 'Monthly interest - June' },
-    // Initial issuances
-    { id: 'ip_demo_11', loanId: 'l_demo_1', type: 'received', category: 'issuance', amount: 100000, date: '2025-01-15', note: 'Principal disbursed' },
-    { id: 'ip_demo_12', loanId: 'l_demo_2', type: 'received', category: 'issuance', amount: 50000, date: '2025-03-01', note: 'Principal disbursed' },
-    { id: 'ip_demo_13', loanId: 'l_demo_3', type: 'received', category: 'issuance', amount: 200000, date: '2025-06-01', note: 'Principal disbursed' },
-    { id: 'ip_demo_14', loanId: 'l_demo_4', type: 'received', category: 'issuance', amount: 75000, date: '2025-11-01', note: 'Principal disbursed' },
-    { id: 'ip_demo_15', loanId: 'l_demo_5', type: 'received', category: 'issuance', amount: 300000, date: '2024-04-01', note: 'Principal disbursed' },
-    // Anita - fully settled (principal returned + final interest)
-    { id: 'ip_demo_16', loanId: 'l_demo_5', type: 'received', category: 'interest', amount: 4500, date: '2026-03-01', note: 'Final interest' },
-    { id: 'ip_demo_17', loanId: 'l_demo_5', type: 'received', category: 'principal', amount: 300000, date: '2026-03-01', note: 'Principal repaid' },
-    // Borrowed interest paid
-    { id: 'ip_demo_18', loanId: 'b_demo_1', type: 'paid', category: 'issuance', amount: 500000, date: '2024-08-01', note: 'Loan disbursed' },
-    { id: 'ip_demo_19', loanId: 'b_demo_2', type: 'paid', category: 'issuance', amount: 150000, date: '2025-05-01', note: 'Loan disbursed' },
-    { id: 'ip_demo_20', loanId: 'b_demo_3', type: 'paid', category: 'issuance', amount: 45000, date: '2026-02-01', note: 'Credit card' },
-    { id: 'ip_demo_21', loanId: 'b_demo_1', type: 'paid', category: 'interest', amount: 7500, date: daysAgo(3), note: 'Monthly interest - July' },
-    { id: 'ip_demo_22', loanId: 'b_demo_1', type: 'paid', category: 'interest', amount: 7500, date: daysAgo(33), note: 'Monthly interest - June' },
-    { id: 'ip_demo_23', loanId: 'b_demo_2', type: 'paid', category: 'interest', amount: 3000, date: daysAgo(10), note: 'Monthly interest - July' },
-    { id: 'ip_demo_24', loanId: 'b_demo_2', type: 'paid', category: 'interest', amount: 3000, date: daysAgo(40), note: 'Monthly interest - June' },
-    { id: 'ip_demo_25', loanId: 'b_demo_3', type: 'paid', category: 'interest', amount: 1575, date: daysAgo(7), note: 'Monthly interest - July' },
-    { id: 'ip_demo_26', loanId: 'b_demo_3', type: 'paid', category: 'interest', amount: 1575, date: daysAgo(37), note: 'Monthly interest - June' }
-  );
-
-  // === EXPENSES (15 entries across categories) ===
-  state.expenses.push(
-    { id: 'exp_demo_01', amount: 3500, date: daysAgo(1), category: 'Utilities', note: 'Electricity bill - July' },
-    { id: 'exp_demo_02', amount: 1200, date: daysAgo(3), category: 'Travel / Fuel', note: 'Petrol' },
-    { id: 'exp_demo_03', amount: 8500, date: daysAgo(7), category: 'Maintenance', note: 'Plumber - bathroom leak fix' },
-    { id: 'exp_demo_04', amount: 2000, date: daysAgo(10), category: 'Others', note: 'Groceries' },
-    { id: 'exp_demo_05', amount: 15000, date: daysAgo(14), category: 'Insurance', note: 'Car insurance premium paid' },
-    { id: 'exp_demo_06', amount: 2500, date: daysAgo(5), category: 'Utilities', note: 'Water bill' },
-    { id: 'exp_demo_07', amount: 600, date: daysAgo(8), category: 'Travel / Fuel', note: 'Auto rickshaw' },
-    { id: 'exp_demo_08', amount: 4200, date: daysAgo(12), category: 'Maintenance', note: 'Electrician - wiring repair' },
-    { id: 'exp_demo_09', amount: 11000, date: daysAgo(15), category: 'Taxes', note: 'Property tax installment' },
-    { id: 'exp_demo_10', amount: 1800, date: daysAgo(6), category: 'Others', note: 'Medicine' },
-    { id: 'exp_demo_11', amount: 45000, date: daysAgo(20), category: 'Construction', project: '23/48 3rd floor', laborType: 'Mistri', workerName: 'Rajesh', paymentMethod: 'cash', note: 'Bathroom renovation - labor' },
-    { id: 'exp_demo_12', amount: 12000, date: daysAgo(22), category: 'Construction', project: '23/48 3rd floor', laborType: 'Electrician', workerName: 'Suresh', paymentMethod: 'upi', note: 'Electrical work - materials + labor' },
-    { id: 'exp_demo_13', amount: 8500, date: daysAgo(18), category: 'Construction', project: '23/48 ground floor', laborType: 'Painter', workerName: 'Mohan', paymentMethod: 'cash', note: 'Living room painting' },
-    { id: 'exp_demo_14', amount: 22000, date: daysAgo(25), category: 'Construction', project: '23/48 ground floor', laborType: 'Carpenter', workerName: 'Ramesh', paymentMethod: 'cash', note: 'Modular kitchen - advance' },
-    { id: 'exp_demo_15', amount: 3000, date: daysAgo(30), category: 'Maintenance', note: 'AC servicing - 2 units' }
-  );
-
-  // === RENEWALS (8) ===
-  state.renewals.push(
-    { id: 'rn_demo_1', title: 'Car Insurance', category: 'Insurance', amount: 12000, dueDate: daysFromNow(15), frequency: 'yearly', note: 'Maruti Suzuki Baleno', lastRenewed: null, createdAt: new Date().toISOString() },
-    { id: 'rn_demo_2', title: 'Health Insurance', category: 'Insurance', amount: 25000, dueDate: daysFromNow(22), frequency: 'yearly', note: 'Family floater - 4 members', lastRenewed: null, createdAt: new Date().toISOString() },
-    { id: 'rn_demo_3', title: 'Pollution Certificate', category: 'Certificate', amount: 800, dueDate: daysFromNow(10), frequency: 'yearly', note: 'KA-01-1234', lastRenewed: null, createdAt: new Date().toISOString() },
-    { id: 'rn_demo_4', title: 'I.T.R Filing', category: 'Tax', amount: 0, dueDate: daysFromNow(45), frequency: 'yearly', note: 'FY 2025-26', lastRenewed: null, createdAt: new Date().toISOString() },
-    { id: 'rn_demo_5', title: 'House Tax', category: 'Tax', amount: 8500, dueDate: daysFromNow(60), frequency: 'yearly', note: 'BBMP property tax', lastRenewed: null, createdAt: new Date().toISOString() },
-    { id: 'rn_demo_6', title: 'Netflix Subscription', category: 'Subscription', amount: 650, dueDate: daysFromNow(18), frequency: 'monthly', note: 'Monthly premium plan', lastRenewed: null, createdAt: new Date().toISOString() },
-    { id: 'rn_demo_7', title: 'Life Insurance', category: 'Insurance', amount: 18000, dueDate: daysFromNow(35), frequency: 'yearly', note: 'LIC Jeevan Anand', lastRenewed: null, createdAt: new Date().toISOString() },
-    { id: 'rn_demo_8', title: 'Vehicle RC Renewal', category: 'Certificate', amount: 600, dueDate: daysFromNow(28), frequency: 'yearly', note: 'KA-01-1234', lastRenewed: null, createdAt: new Date().toISOString() }
-  );
-
-  // === FILES (metadata only, no base64) ===
-  state.files.push(
-    { id: 'file_demo_1', type: 'bills', title: 'July Electricity Bill', date: daysAgo(2) },
-    { id: 'file_demo_2', type: 'bills', title: 'Water Bill - Q2', date: daysAgo(10) },
-    { id: 'file_demo_3', type: 'documents', title: 'Rahul Sharma - Rent Agreement', date: '2024-01-01', fileNumber: 'RA-2024-001' },
-    { id: 'file_demo_4', type: 'documents', title: 'Property Tax Receipt 2025-26', date: daysAgo(15), fileNumber: 'PTR-2025-1234' },
-    { id: 'file_demo_5', type: 'policies', title: 'Car Insurance Policy', date: '2025-07-15', fileNumber: 'MOT-2025-7890' },
-    { id: 'file_demo_6', type: 'policies', title: 'Health Insurance Policy', date: '2025-06-01', fileNumber: 'HLTH-2025-4567' }
-  );
-
-  state.properties = ['23/48 ground floor', '23/48 3rd floor', '1/104', '5/202'];
-
-  // Reset glance renewal dismiss index
-  _glanceRenewalDismissIdx = 0;
-
-  saveState();
-  switchTab('dashboard');
-  renderDashboard();
-  showToast('Demo data loaded!', 'success');
-};
-
-// Helper
-function getPreviousMonthStr(monthsAgo) {
-  var dt = new Date();
-  dt.setDate(1);
-  dt.setMonth(dt.getMonth() - monthsAgo);
-  return dt.getFullYear() + '-' + String(dt.getMonth() + 1).padStart(2, '0');
-}
+// 12. SYSTEM SETTINGS HANDLERS
 
 // Hard system reset
 document.getElementById('btn-reset-data').addEventListener('click', () => {
@@ -4850,6 +4676,22 @@ function compressImage(file, maxDimension, quality, callback) {
 
 function initApp() {
   loadState();
+  if (!state._realDataSeeded) {
+    state.properties = ['23/48 ground floor', '23/48 3rd floor', '1/104'];
+    state.rentals = [
+      {id:'r1',propertyName:'23/48 3rd floor',tenantName:'Ankit',contactInfo:'8968946839',monthlyRent:12500,securityDeposit:12500,startDate:'2025-08-24',rentDueDay:1,aadhaarImg:'',agreementImg:'',status:'active'},
+      {id:'r2',propertyName:'23/48 3rd floor',tenantName:'Shubham',contactInfo:'7982484842',monthlyRent:12000,securityDeposit:12000,startDate:'2025-08-24',rentDueDay:1,aadhaarImg:'',agreementImg:'',status:'active'},
+      {id:'r3',propertyName:'23/48 3rd floor',tenantName:'Shahbaz',contactInfo:'9756905688',monthlyRent:12000,securityDeposit:12000,startDate:'2025-08-24',rentDueDay:5,aadhaarImg:'',agreementImg:'',status:'active'},
+      {id:'r4',propertyName:'23/48 3rd floor',tenantName:'Gaurav',contactInfo:'9926481148',monthlyRent:8000,securityDeposit:8000,startDate:'2025-08-24',rentDueDay:1,aadhaarImg:'',agreementImg:'',status:'active'},
+      {id:'r5',propertyName:'23/48 3rd floor',tenantName:'Nilesh',contactInfo:'9873805638',monthlyRent:10000,securityDeposit:10000,startDate:'2025-08-24',rentDueDay:8,aadhaarImg:'',agreementImg:'',status:'active'},
+      {id:'r6',propertyName:'23/48 ground floor',tenantName:'Aniket',contactInfo:'7304195700',monthlyRent:18500,securityDeposit:18500,startDate:'2025-08-24',rentDueDay:3,aadhaarImg:'',agreementImg:'',status:'active'},
+      {id:'r7',propertyName:'23/48 ground floor',tenantName:'Dikshant',contactInfo:'6283007016',monthlyRent:13000,securityDeposit:13000,startDate:'2025-08-24',rentDueDay:5,aadhaarImg:'',agreementImg:'',status:'active'},
+      {id:'r8',propertyName:'23/48 ground floor',tenantName:'Anandpal',contactInfo:'9115765900',monthlyRent:15000,securityDeposit:15000,startDate:'2025-08-24',rentDueDay:5,aadhaarImg:'',agreementImg:'',status:'active'},
+      {id:'r9',propertyName:'1/104',tenantName:'Aryan',contactInfo:'9076923358',monthlyRent:35000,securityDeposit:35000,startDate:'2026-07-05',rentDueDay:5,aadhaarImg:'',agreementImg:'',status:'active'}
+    ];
+    state._realDataSeeded = true;
+    saveState();
+  }
   initNavigation();
   
   // Initialize month selector (default view is monthly)
