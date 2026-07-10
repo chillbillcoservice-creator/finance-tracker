@@ -4167,18 +4167,8 @@ window.loadRealSeedData = function() {
   // Sailesh l15: ₹6K interest (1.5L @ 4%) Jun 25
   lip('l15', 6000, 'interest', '2026-06-25');
 
-  state._realDataSeeded = true;
-  state._realPaymentsSeeded = true;
-  saveState();
-  switchTab('dashboard');
-  renderDashboard();
-  renderRentals();
-  showToast('Demo data loaded!', 'success');
-};
-
-window.seedRenovationExpenses = function() {
-  loadState();
-  var items = [
+  // 1/104 Renovation expenses (Jun 15 – Jul 5)
+  var renoItems = [
     {note:'Aggarwal Hardware', laborType:'Hardware', amount:92200, date:'2026-06-15'},
     {note:'Dharmu (Plumber)', laborType:'Plumber', amount:72000, date:'2026-06-16'},
     {note:'Welding', laborType:'Welding', amount:27000, date:'2026-06-17'},
@@ -4201,9 +4191,9 @@ window.seedRenovationExpenses = function() {
     {note:'RO', laborType:'Others', amount:600, date:'2026-07-04'},
     {note:'Labour', laborType:'Mistri', amount:500, date:'2026-07-05'}
   ];
-  items.forEach(function(item) {
+  renoItems.forEach(function(item) {
     state.expenses.push({
-      id:'exp_' + Date.now() + '_' + Math.random().toString(36).slice(2,6),
+      id:'exp_seed_' + (pid++),
       category:'construction',
       project:'1/104',
       laborType:item.laborType,
@@ -4213,10 +4203,17 @@ window.seedRenovationExpenses = function() {
       note:item.note
     });
   });
+
+  state._realDataSeeded = true;
+  state._realPaymentsSeeded = true;
   saveState();
-  renderConstruction();
-  showToast('21 renovation expenses added for 1/104!', 'success');
+  switchTab('dashboard');
+  renderDashboard();
+  renderRentals();
+  showToast('Demo data loaded!', 'success');
 };
+
+// Hard system reset
 
 // Hard system reset
 document.getElementById('btn-reset-data').addEventListener('click', () => {
