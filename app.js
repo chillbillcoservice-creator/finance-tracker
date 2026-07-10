@@ -5309,8 +5309,6 @@ function exportReportsCSV() {
 // 14. REPORTS TAB LOGIC
 let reportsViewMode = 'month';
 let reportsSelectedMonth = new Date().toISOString().slice(0, 7);
-let reportsChart = null;
-
 function reportsSetViewMode(mode) {
   reportsViewMode = mode;
   const monthlyBtn = document.getElementById('reports-btn-mode-monthly');
@@ -5328,7 +5326,7 @@ function reportsSetViewMode(mode) {
     if (selectorBar) selectorBar.style.display = 'flex';
     document.getElementById('reports-selector-label').textContent = reportsSelectedMonth.slice(0, 4);
   }
-  renderReportsChart();
+  renderReportsPropertyBreakdown();
 }
 window.reportsSetViewMode = reportsSetViewMode;
 
@@ -5345,7 +5343,7 @@ function reportsNavigate(dir) {
     reportsSelectedMonth = `${y}-01`;
     document.getElementById('reports-selector-label').textContent = String(y);
   }
-  renderReportsChart();
+  renderReportsPropertyBreakdown();
 }
 window.reportsNavigate = reportsNavigate;
 
@@ -5367,7 +5365,7 @@ function renderReports() {
   const label = document.getElementById('reports-selector-label');
   if (label) label.textContent = formatMonth(reportsSelectedMonth);
   
-  renderReportsChart();
+  renderReportsPropertyBreakdown();
   renderYearlySummaryTable();
 }
 
@@ -5409,84 +5407,60 @@ function renderYearlySummaryTable() {
   });
 }
 
-function renderReportsChart() {
+function renderReportsPropertyBreakdown() {
+  const container = document.getElementById('reports-property-breakdown');
+  if (!container) return;
+
   const [selYear, selMonth] = reportsSelectedMonth.split('-').map(Number);
-  const endDate = `${reportsSelectedMonth}-${String(new Date(selYear, selMonth, 0).getDate()).padStart(2, '0')}`;
-  
-  let labels = [];
-  let rentData = [];
-  let interestData = [];
-  let expenseData = [];
-  
-  if (reportsViewMode === 'month') {
-    // Daily breakdown for the selected month
-    const daysInMonth = new Date(selYear, selMonth, 0).getDate();
-    for (let d = 1; d <= daysInMonth; d++) {
-      const dayStr = `${reportsSelectedMonth}-${String(d).padStart(2, '0')}`;
-      labels.push(d);
-      
-      const dayRent = state.rentPayments.filter(p => p.date === dayStr).reduce((s, p) => s + Number(p.amount), 0);
-      const dayInterest = state.interestPayments.filter(p => p.date === dayStr).reduce((s, p) => s + Number(p.amount), 0);
-      const dayExpense = state.expenses.filter(e => e.date === dayStr).reduce((s, e) => s + Number(e.amount), 0);
-      
-      rentData.push(dayRent);
-      interestData.push(dayInterest);
-      expenseData.push(dayExpense);
+  const props = state.properties || [];
+
+  let rows = [];
+  var grandTotal = 0;
+
+  props.forEach(function(prop) {
+    var rentalsAtProp = state.rentals.filter(function(r) { return r.propertyName === prop; });
+    if (rentalsAtProp.length === 0) return;
+
+    var propTotal = 0;
+    if (reportsViewMode === 'month') {
+      rentalsAtProp.forEach(function(r) {
+        propTotal += state.rentPayments
+          .filter(function(p) { return p.rentalId === r.id && p.monthYear === reportsSelectedMonth; })
+          .reduce(function(sum, p) { return sum + Number(p.amount); }, 0);
+      });
+    } else {
+      rentalsAtProp.forEach(function(r) {
+        propTotal += state.rentPayments
+          .filter(function(p) { return p.rentalId === r.id && (p.datePaid || '').startsWith(String(selYear)); })
+          .reduce(function(sum, p) { return sum + Number(p.amount); }, 0);
+      });
     }
-  } else {
-    // Monthly breakdown for the selected year
-    MONTH_NAMES
-    for (let m = 1; m <= 12; m++) {
-      const mStr = `${selYear}-${String(m).padStart(2, '0')}`;
-      const mEnd = `${mStr}-${String(new Date(selYear, m, 0).getDate()).padStart(2, '0')}`;
-      labels.push(MONTH_UPPER_NAMES[m - 1]);
-      
-      const mRent = state.rentPayments.filter(p => p.date && p.date.startsWith(mStr)).reduce((s, p) => s + Number(p.amount), 0);
-      const mInterest = state.interestPayments.filter(p => p.date && p.date.startsWith(mStr)).reduce((s, p) => s + Number(p.amount), 0);
-      const mExpense = state.expenses.filter(e => e.date && e.date.startsWith(mStr)).reduce((s, e) => s + Number(e.amount), 0);
-      
-      rentData.push(mRent);
-      interestData.push(mInterest);
-      expenseData.push(mExpense);
-    }
-  }
-  
-  const rentTotal = rentData.reduce((a, b) => a + b, 0);
-  const interestTotal = interestData.reduce((a, b) => a + b, 0);
-  const expenseTotal = expenseData.reduce((a, b) => a + b, 0);
-  
-  document.getElementById('reports-total-income').textContent = formatCurrency(rentTotal + interestTotal);
-  document.getElementById('reports-total-expenses').textContent = formatCurrency(expenseTotal);
-  document.getElementById('reports-net-balance').textContent = formatCurrency(rentTotal + interestTotal - expenseTotal);
-  
-  const canvas = document.getElementById('reports-chart');
-  if (!canvas) return;
-  
-  if (reportsChart) reportsChart.destroy();
-  
-  const ctx = canvas.getContext('2d');
-  reportsChart = new Chart(ctx, {
-    type: 'bar',
-    data: {
-      labels,
-      datasets: [
-        { label: 'Rent: ' + formatCurrency(rentTotal), data: rentData, backgroundColor: 'rgba(234, 179, 8, 0.8)', borderRadius: 4 },
-        { label: 'Interest: ' + formatCurrency(interestTotal), data: interestData, backgroundColor: 'rgba(16, 185, 129, 0.8)', borderRadius: 4 },
-        { label: 'Expenses: ' + formatCurrency(expenseTotal), data: expenseData, backgroundColor: 'rgba(239, 68, 68, 0.8)', borderRadius: 4 }
-      ]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: { position: 'bottom', labels: { color: '#94a3b8', font: { size: 11 }, padding: 16, usePointStyle: true } }
-      },
-      scales: {
-        x: { stacked: true, grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: '#94a3b8', font: { size: 10 }, maxRotation: 0 } },
-        y: { stacked: true, grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: '#94a3b8', callback: v => '₹' + (v >= 1000 ? (v/1000).toFixed(0) + 'k' : v) } }
-      }
-    }
+
+    rows.push({ name: prop, total: propTotal });
+    grandTotal += propTotal;
   });
+
+  var html = '';
+  rows.forEach(function(row) {
+    html += '<div style="display:flex;justify-content:space-between;align-items:center;padding:0.6rem 0;border-bottom:1px solid var(--border-color);">';
+    html += '<span style="font-weight:600;color:var(--text-primary);">' + row.name + '</span>';
+    html += '<span style="font-weight:700;color:var(--color-success)">' + formatCurrency(row.total) + '</span>';
+    html += '</div>';
+  });
+
+  if (rows.length === 0) {
+    html = '<div style="text-align:center;padding:2rem 0;color:var(--text-muted);font-size:0.85rem;">No properties found.</div>';
+  } else {
+    html += '<div style="display:flex;justify-content:space-between;align-items:center;padding:0.75rem 0;margin-top:0.25rem;border-top:2px solid var(--color-accent);">';
+    html += '<span style="font-weight:800;color:var(--text-primary);font-size:1rem;">Total Rent Collected</span>';
+    html += '<span style="font-weight:800;color:var(--color-success);font-size:1.15rem;">' + formatCurrency(grandTotal) + '</span>';
+    html += '</div>';
+  }
+
+  container.innerHTML = html;
+
+  var totalEl = document.getElementById('reports-total-rent');
+  if (totalEl) totalEl.textContent = formatCurrency(grandTotal);
 }
 
 // Bind to window for global templates
