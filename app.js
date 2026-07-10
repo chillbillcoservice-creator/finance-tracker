@@ -5327,6 +5327,7 @@ function reportsSetViewMode(mode) {
     document.getElementById('reports-selector-label').textContent = reportsSelectedMonth.slice(0, 4);
   }
   renderReportsPropertyBreakdown();
+  renderReportsEarnings();
 }
 window.reportsSetViewMode = reportsSetViewMode;
 
@@ -5344,6 +5345,7 @@ function reportsNavigate(dir) {
     document.getElementById('reports-selector-label').textContent = String(y);
   }
   renderReportsPropertyBreakdown();
+  renderReportsEarnings();
 }
 window.reportsNavigate = reportsNavigate;
 
@@ -5366,6 +5368,7 @@ function renderReports() {
   if (label) label.textContent = formatMonth(reportsSelectedMonth);
   
   renderReportsPropertyBreakdown();
+  renderReportsEarnings();
   renderYearlySummaryTable();
 }
 
@@ -5459,8 +5462,57 @@ function renderReportsPropertyBreakdown() {
 
   container.innerHTML = html;
 
-  var totalEl = document.getElementById('reports-total-rent');
-  if (totalEl) totalEl.textContent = formatCurrency(grandTotal);
+  // Compute bottom 4 cards
+  const [selYear, selMonth] = reportsSelectedMonth.split('-').map(Number);
+  var intReceived = 0, intPaid = 0, expenses = 0;
+  if (reportsViewMode === 'month') {
+    intReceived = state.interestPayments.filter(function(p) { return p.type === 'received' && p.category === 'interest' && p.date && p.date.startsWith(reportsSelectedMonth); }).reduce(function(s, p) { return s + Number(p.amount); }, 0);
+    intPaid = state.interestPayments.filter(function(p) { return p.type === 'paid' && p.category === 'interest' && p.date && p.date.startsWith(reportsSelectedMonth); }).reduce(function(s, p) { return s + Number(p.amount); }, 0);
+    expenses = state.expenses.filter(function(e) { return e.date && e.date.startsWith(reportsSelectedMonth); }).reduce(function(s, e) { return s + Number(e.amount); }, 0);
+  } else {
+    intReceived = state.interestPayments.filter(function(p) { return p.type === 'received' && p.category === 'interest' && p.date && p.date.startsWith(String(selYear)); }).reduce(function(s, p) { return s + Number(p.amount); }, 0);
+    intPaid = state.interestPayments.filter(function(p) { return p.type === 'paid' && p.category === 'interest' && p.date && p.date.startsWith(String(selYear)); }).reduce(function(s, p) { return s + Number(p.amount); }, 0);
+    expenses = state.expenses.filter(function(e) { return e.date && e.date.startsWith(String(selYear)); }).reduce(function(s, e) { return s + Number(e.amount); }, 0);
+  }
+
+  var totalIncome = grandTotal + intReceived;
+  var netFlow = totalIncome - intPaid;
+  var remaining = netFlow - expenses;
+
+  var incEl = document.getElementById('reports-total-income');
+  if (incEl) incEl.textContent = formatCurrency(totalIncome);
+  var flowEl = document.getElementById('reports-net-flow');
+  if (flowEl) flowEl.textContent = formatCurrency(netFlow);
+  var expEl = document.getElementById('reports-expenses');
+  if (expEl) expEl.textContent = formatCurrency(expenses);
+  var remEl = document.getElementById('reports-remaining-balance');
+  if (remEl) remEl.textContent = formatCurrency(remaining);
+}
+
+function renderReportsEarnings() {
+  const [selYear, selMonth] = reportsSelectedMonth.split('-').map(Number);
+  var endDate = reportsSelectedMonth + '-' + String(new Date(selYear, selMonth, 0).getDate()).padStart(2, '0');
+  
+  var activeLent = state.lent.filter(function(l) { return l.startDate <= endDate; }).reduce(function(sum, l) { return sum + getOutstandingPrincipalAtMonth(l.id, l.principal, reportsSelectedMonth); }, 0);
+  var activeBorrowed = state.borrowed.filter(function(b) { return b.startDate <= endDate; }).reduce(function(sum, b) { return sum + getOutstandingPrincipalAtMonth(b.id, b.principal, reportsSelectedMonth); }, 0);
+
+  var recv = 0, paid = 0;
+  if (reportsViewMode === 'month') {
+    recv = state.interestPayments.filter(function(p) { return p.type === 'received' && p.category === 'interest' && p.date && p.date.startsWith(reportsSelectedMonth); }).reduce(function(s, p) { return s + Number(p.amount); }, 0);
+    paid = state.interestPayments.filter(function(p) { return p.type === 'paid' && p.category === 'interest' && p.date && p.date.startsWith(reportsSelectedMonth); }).reduce(function(s, p) { return s + Number(p.amount); }, 0);
+  } else {
+    recv = state.interestPayments.filter(function(p) { return p.type === 'received' && p.category === 'interest' && p.date && p.date.startsWith(String(selYear)); }).reduce(function(s, p) { return s + Number(p.amount); }, 0);
+    paid = state.interestPayments.filter(function(p) { return p.type === 'paid' && p.category === 'interest' && p.date && p.date.startsWith(String(selYear)); }).reduce(function(s, p) { return s + Number(p.amount); }, 0);
+  }
+
+  var el = document.getElementById('dash-interest-received');
+  if (el) el.textContent = formatCurrency(recv);
+  el = document.getElementById('dash-interest-paid');
+  if (el) el.textContent = formatCurrency(paid);
+  el = document.getElementById('dash-total-lent');
+  if (el) el.textContent = formatCurrency(activeLent);
+  el = document.getElementById('dash-total-borrowed');
+  if (el) el.textContent = formatCurrency(activeBorrowed);
 }
 
 // Bind to window for global templates
