@@ -4047,6 +4047,85 @@ window.loadRealSeedData = function() {
       state.rentPayments.push({id:'rp_seed_' + (pid++),rentalId:'r9',amount:35000,monthYear:'2026-07',datePaid:'2026-07-05',note:'Rent - Jul 2026'});
     }
   });
+
+  // Loans
+  state.lent = [
+    {id:'l1',borrowerName:'Rupesh',phone:'9821040492',principal:750000,interestRate:4,startDate:'2026-06-01',status:'active',isEMI:false},
+    {id:'l2',borrowerName:'Chirag',phone:'9650585876',principal:110000,interestRate:0,startDate:'2025-03-01',status:'active',isEMI:true,emiAmount:5000,emiTotal:22},
+    {id:'l3',borrowerName:'Chirag',phone:'9650585876',principal:300000,interestRate:0,startDate:'2026-05-01',status:'active',isEMI:true,emiAmount:12500,emiTotal:24},
+    {id:'l4',borrowerName:'Chirag',phone:'9650585876',principal:150000,interestRate:4,startDate:'2026-07-01',status:'active',isEMI:false},
+    {id:'l5',borrowerName:'Inder',phone:'8219391213',principal:50000,interestRate:4,startDate:'2026-06-01',status:'active',isEMI:false},
+    {id:'l6',borrowerName:'Arjun',phone:'9816564364',principal:25000,interestRate:4,startDate:'2026-07-10',status:'active',isEMI:false},
+    {id:'l7',borrowerName:'Sahil',phone:'9899264044',principal:144000,interestRate:0,startDate:'2026-07-01',status:'active',isEMI:false},
+    {id:'l8',borrowerName:'Bir Didi',phone:'8894158391',principal:36300,interestRate:0,startDate:'2026-06-01',status:'active',isEMI:false},
+    {id:'l9',borrowerName:'Tushar',phone:'9999366827',principal:400000,interestRate:4,startDate:'2026-06-20',status:'active',isEMI:false},
+    {id:'l10',borrowerName:'Tushar',phone:'9999366827',principal:240000,interestRate:0,startDate:'2026-06-20',status:'active',isEMI:true,emiAmount:10000,emiTotal:24},
+    {id:'l11',borrowerName:'M.K',phone:'9999315929',principal:900000,interestRate:0,startDate:'2024-01-20',status:'active',isEMI:true,emiAmount:15000,emiTotal:60},
+    {id:'l12',borrowerName:'M.K',phone:'9999315929',principal:300000,interestRate:0,startDate:'2026-08-01',status:'active',isEMI:false},
+    {id:'l13',borrowerName:'Sailesh',phone:'9899551694',principal:200000,interestRate:0,startDate:'2025-09-25',status:'active',isEMI:true,emiAmount:4000,emiTotal:50},
+    {id:'l14',borrowerName:'Sailesh',phone:'9899551694',principal:25000,interestRate:3,startDate:'2026-06-25',status:'active',isEMI:false},
+    {id:'l15',borrowerName:'Sailesh',phone:'9899551694',principal:150000,interestRate:4,startDate:'2026-06-25',status:'active',isEMI:false}
+  ];
+
+  // Generate interest payment records
+  var lip = function(loanId, amount, category, date) {
+    state.interestPayments.push({id:'lip_seed_' + (pid++), loanId:loanId, amount:amount, type:'received', category:category, date:date});
+  };
+
+  // Helper: generate months between start and end (inclusive)
+  var monthRange = function(startStr, endStr) {
+    var res = [];
+    var d = new Date(startStr + '-01');
+    var end = new Date(endStr + '-01');
+    while (d <= end) {
+      res.push(d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0'));
+      d.setMonth(d.getMonth() + 1);
+    }
+    return res;
+  };
+
+  // Chirag l2: 17 EMIs ₹5k, Mar 2025 – Jul 2026, 1st
+  monthRange('2025-03', '2026-07').forEach(function(m) { lip('l2', 5000, 'principal', m + '-01'); });
+
+  // Chirag l3: 3 EMIs ₹12.5k, May 2026 – Jul 2026, 1st
+  monthRange('2026-05', '2026-07').forEach(function(m) { lip('l3', 12500, 'principal', m + '-01'); });
+
+  // Chirag l4: ₹6K interest Jul 1
+  lip('l4', 6000, 'interest', '2026-07-01');
+
+  // Rupesh: ₹15K interest Jul 1
+  lip('l1', 15000, 'interest', '2026-07-01');
+
+  // Inder: ₹2K interest Jul 1
+  lip('l5', 2000, 'interest', '2026-07-01');
+
+  // Arjun: ₹1K interest Jul 10
+  lip('l6', 1000, 'interest', '2026-07-10');
+
+  // Sahil: ₹1K principal Jul 8
+  lip('l7', 1000, 'principal', '2026-07-08');
+
+  // Bir Didi: ₹500 principal Jun 28
+  lip('l8', 500, 'principal', '2026-06-28');
+
+  // Tushar l9: ₹16K interest Jun 20
+  lip('l9', 16000, 'interest', '2026-06-20');
+
+  // Tushar l10: 1 EMI ₹10k Jun 20
+  lip('l10', 10000, 'principal', '2026-06-20');
+
+  // M.K l11: 30 EMIs ₹15k, Jan 2024 – Jun 2026, 20th
+  monthRange('2024-01', '2026-06').forEach(function(m) { lip('l11', 15000, 'principal', m + '-20'); });
+
+  // Sailesh l13: 10 EMIs ₹4k, Sep 2025 – Jun 2026, 25th
+  monthRange('2025-09', '2026-06').forEach(function(m) { lip('l13', 4000, 'principal', m + '-25'); });
+
+  // Sailesh l14: ₹750 interest (25K @ 3%) Jun 25
+  lip('l14', 750, 'interest', '2026-06-25');
+
+  // Sailesh l15: ₹6K interest (1.5L @ 4%) Jun 25
+  lip('l15', 6000, 'interest', '2026-06-25');
+
   state._realDataSeeded = true;
   state._realPaymentsSeeded = true;
   saveState();
