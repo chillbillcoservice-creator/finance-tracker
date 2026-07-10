@@ -4679,6 +4679,12 @@ window._openUploadModalWithFile = function(type) {
   document.getElementById('upload-type').value = type;
   document.getElementById('upload-title').value = '';
   document.getElementById('upload-number').value = '';
+  var labelMap = {bills:'Bill No.',documents:'Document No.',policies:'Policy No.'};
+  var placeholderMap = {bills:'Enter bill number...',documents:'Enter document number...',policies:'Enter policy number...'};
+  var label = document.getElementById('upload-number-label');
+  if (label) label.textContent = labelMap[type] || 'Number';
+  var input = document.getElementById('upload-number');
+  if (input) input.placeholder = placeholderMap[type] || 'Enter number...';
   const img = document.getElementById('upload-preview-img');
   const txt = document.getElementById('upload-preview-text');
   if (window._pendingFileData) {
