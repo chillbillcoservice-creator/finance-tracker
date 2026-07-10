@@ -4692,6 +4692,31 @@ function initApp() {
     state._realDataSeeded = true;
     saveState();
   }
+  if (!state._realPaymentsSeeded) {
+    var months = [];
+    for (var y = 2025; y <= 2026; y++) {
+      var mStart = y === 2025 ? 9 : 1;
+      var mEnd = y === 2026 ? 7 : 12;
+      for (var m = mStart; m <= mEnd; m++) months.push(y + '-' + String(m).padStart(2, '0'));
+    }
+    var pid = 0;
+    months.forEach(function(month) {
+      ['r1','r2','r3','r4','r5','r6','r7'].forEach(function(rid) {
+        var r = state.rentals.find(function(x) { return x.id === rid; });
+        state.rentPayments.push({id:'rp_seed_' + (pid++),rentalId:rid,amount:r.monthlyRent,monthYear:month,datePaid:month + '-' + String(r.rentDueDay).padStart(2,'0'),note:'Rent - ' + month});
+      });
+      if (month <= '2026-05') {
+        state.rentPayments.push({id:'rp_seed_' + (pid++),rentalId:'r8',amount:15000,monthYear:month,datePaid:month + '-05',note:'Rent - ' + month});
+      } else if (month === '2026-06') {
+        state.rentPayments.push({id:'rp_seed_' + (pid++),rentalId:'r8',amount:11500,monthYear:'2026-06',datePaid:'2026-06-05',note:'Rent - Jun 2026 (partial)'});
+      }
+      if (month === '2026-07') {
+        state.rentPayments.push({id:'rp_seed_' + (pid++),rentalId:'r9',amount:35000,monthYear:'2026-07',datePaid:'2026-07-05',note:'Rent - Jul 2026'});
+      }
+    });
+    state._realPaymentsSeeded = true;
+    saveState();
+  }
   initNavigation();
   
   // Initialize month selector (default view is monthly)
