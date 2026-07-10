@@ -6537,48 +6537,53 @@ function renderGlanceWidget() {
     detailsEl.classList.add('glance-slide-in');
   }
 
+  // Build rotation items: collect message + upcoming renewals
+  var rotationItems = [];
+
   if (uniqueCount > 0) {
-    setGlanceDetails('Collect <strong>' + formatCurrency(totalPending) + '</strong> from <strong>' + uniqueCount + '</strong> ' + (uniqueCount === 1 ? 'person' : 'people'));
-  } else {
-    // Build upcoming renewals pool
-    var renewalItems = [];
-    today.setHours(0,0,0,0);
+    rotationItems.push({ text: 'Collect <strong>' + formatCurrency(totalPending) + '</strong> from <strong>' + uniqueCount + '</strong> ' + (uniqueCount === 1 ? 'person' : 'people'), daysLeft: 0 });
+  }
 
-    getUpcomingRenewals().forEach(function(r) {
-      var due = new Date(r.dueDate);
-      var diff = Math.ceil((due - today) / (1000 * 60 * 60 * 24));
-      var emoji = r.category === 'Insurance' ? '\uD83D\uDE97' : r.category === 'Tax' ? '\uD83D\uDCCB' : r.category === 'Certificate' ? '\uD83D\uDCC4' : r.category === 'Subscription' ? '\uD83D\uDD04' : '\uD83D\uDCCC';
-      renewalItems.push({ text: emoji + ' <strong>' + r.title + '</strong> renewal due in <strong>' + diff + '</strong> ' + (diff === 1 ? 'day' : 'days'), daysLeft: diff });
-    });
+  // Build upcoming renewals pool
+  var renewalItems = [];
+  today.setHours(0,0,0,0);
 
-    state.rentals.forEach(function(r) {
-      if (r.status === 'active') {
-        var info = getNextRenewal(r.startDate);
-        if (info && info.daysLeft <= 30) {
-          renewalItems.push({ text: '\uD83D\uDCCB <strong>' + r.tenantName + '\'s</strong> rent agreement renewal in <strong>' + info.daysLeft + '</strong> ' + (info.daysLeft === 1 ? 'day' : 'days'), daysLeft: info.daysLeft });
-        }
+  getUpcomingRenewals().forEach(function(r) {
+    var due = new Date(r.dueDate);
+    var diff = Math.ceil((due - today) / (1000 * 60 * 60 * 24));
+    var emoji = r.category === 'Insurance' ? '\uD83D\uDE97' : r.category === 'Tax' ? '\uD83D\uDCCB' : r.category === 'Certificate' ? '\uD83D\uDCC4' : r.category === 'Subscription' ? '\uD83D\uDD04' : '\uD83D\uDCCC';
+    renewalItems.push({ text: emoji + ' <strong>' + r.title + '</strong> renewal due in <strong>' + diff + '</strong> ' + (diff === 1 ? 'day' : 'days'), daysLeft: diff });
+  });
+
+  state.rentals.forEach(function(r) {
+    if (r.status === 'active') {
+      var info = getNextRenewal(r.startDate);
+      if (info && info.daysLeft <= 30) {
+        renewalItems.push({ text: '\uD83D\uDCCB <strong>' + r.tenantName + '\'s</strong> rent agreement renewal in <strong>' + info.daysLeft + '</strong> ' + (info.daysLeft === 1 ? 'day' : 'days'), daysLeft: info.daysLeft });
       }
-    });
-
-    renewalItems.sort(function(a, b) { return a.daysLeft - b.daysLeft; });
-
-    if (_glanceRenewalTimer) clearTimeout(_glanceRenewalTimer);
-
-    if (typeof _glanceRenewalDismissIdx === 'undefined') _glanceRenewalDismissIdx = 0;
-    if (_glanceRenewalDismissIdx < renewalItems.length) {
-      var item = renewalItems[_glanceRenewalDismissIdx];
-      setGlanceDetails(item.text + ' <span onclick="event.stopPropagation();dismissGlanceRenewal()" style="cursor:pointer;margin-left:0.5rem;opacity:0.5;font-size:0.82rem;">\u2715</span>');
-      _glanceRenewalTimer = setTimeout(function() {
-        _glanceRenewalDismissIdx++;
-        renderGlanceWidget();
-      }, 5000);
-    } else {
-      setGlanceDetails('Nothing due today. All caught up!');
-      _glanceRenewalTimer = setTimeout(function() {
-        _glanceRenewalDismissIdx = 0;
-        renderGlanceWidget();
-      }, 5000);
     }
+  });
+
+  renewalItems.sort(function(a, b) { return a.daysLeft - b.daysLeft; });
+  rotationItems = rotationItems.concat(renewalItems);
+
+  if (_glanceRenewalTimer) clearTimeout(_glanceRenewalTimer);
+
+  if (rotationItems.length > 0) {
+    if (typeof _glanceRenewalDismissIdx === 'undefined') _glanceRenewalDismissIdx = 0;
+    if (_glanceRenewalDismissIdx >= rotationItems.length) _glanceRenewalDismissIdx = 0;
+    var item = rotationItems[_glanceRenewalDismissIdx];
+    setGlanceDetails(item.text + ' <span onclick="event.stopPropagation();dismissGlanceRenewal()" style="cursor:pointer;margin-left:0.5rem;opacity:0.5;font-size:0.82rem;">\u2715</span>');
+    _glanceRenewalTimer = setTimeout(function() {
+      _glanceRenewalDismissIdx++;
+      renderGlanceWidget();
+    }, 5000);
+  } else {
+    setGlanceDetails('Nothing due today. All caught up!');
+    _glanceRenewalTimer = setTimeout(function() {
+      _glanceRenewalDismissIdx = 0;
+      renderGlanceWidget();
+    }, 5000);
   }
 
   widget.style.display = 'block';
