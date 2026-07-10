@@ -435,40 +435,8 @@
               Loans
             </h2>
           </div>
-          <div class="summary-grid" id="dash-interest-stats" style="margin-bottom: 0; gap: 1rem;">
-            <!-- Lent Card -->
-            <div class="reminder-item" data-tab="dashboard" style="cursor: pointer; align-items: flex-start;">
-              <div class="reminder-icon-wrapper" style="background: rgba(16, 185, 129, 0.15); color: var(--color-success); margin-top: 0.25rem;">
-                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-              </div>
-              <div class="reminder-details" style="display: flex; flex-direction: column; gap: 1rem; width: 100%;">
-                <div>
-                  <div class="reminder-title" id="dash-interest-received" style="color: var(--color-success); font-size: 1.25rem;">Rs. 0.00</div>
-                  <div class="reminder-subtitle">Interest Received (Lent)</div>
-                </div>
-                <div>
-                  <div class="reminder-title" id="dash-total-lent" style="color: var(--color-accent); font-size: 1.25rem;">Rs. 0.00</div>
-                  <div class="reminder-subtitle">Total Lent</div>
-                </div>
-              </div>
-            </div>
-            
-            <!-- Borrowed Card -->
-            <div class="reminder-item" data-tab="dashboard" style="cursor: pointer; align-items: flex-start;">
-              <div class="reminder-icon-wrapper" style="background: rgba(239, 68, 68, 0.15); color: var(--color-danger); margin-top: 0.25rem;">
-                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-              </div>
-              <div class="reminder-details" style="display: flex; flex-direction: column; gap: 1rem; width: 100%;">
-                <div>
-                  <div class="reminder-title" id="dash-interest-paid" style="color: var(--color-danger); font-size: 1.25rem;">Rs. 0.00</div>
-                  <div class="reminder-subtitle">Interest Paid (Borrowed)</div>
-                </div>
-                <div>
-                  <div class="reminder-title" id="dash-total-borrowed" style="color: var(--color-purple); font-size: 1.25rem;">Rs. 0.00</div>
-                  <div class="reminder-subtitle">Total Borrowed</div>
-                </div>
-              </div>
-            </div>
+          <div id="reports-loans-breakdown" style="padding: 0.5rem 0;">
+            <!-- Rows injected by renderReportsEarnings() -->
           </div>
         </div>
 

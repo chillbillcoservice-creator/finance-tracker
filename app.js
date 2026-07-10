@@ -1720,8 +1720,6 @@ function renderDashboard() {
   const netBalance = totalPendingRent + totalPendingInterest;
 
   // Update Summary DOM elements
-  document.getElementById('dash-total-lent').textContent = formatCurrency(activeLent);
-  document.getElementById('dash-total-borrowed').textContent = formatCurrency(activeBorrowed);
   
   const netNode = document.getElementById('dash-net-balance');
   netNode.textContent = formatCurrency(netBalance);
@@ -1832,8 +1830,6 @@ function renderDashboard() {
       constProjectsDiv.style.display = 'none';
     }
   }
-  document.getElementById('dash-interest-received').textContent = formatCurrency(totalInterestReceived);
-  document.getElementById('dash-interest-paid').textContent = formatCurrency(totalInterestPaid);
 
   // expectedInterestReceived is calculated above
 
@@ -5489,12 +5485,10 @@ function renderReportsPropertyBreakdown() {
 }
 
 function renderReportsEarnings() {
-  const [selYear, selMonth] = reportsSelectedMonth.split('-').map(Number);
-  var endDate = reportsSelectedMonth + '-' + String(new Date(selYear, selMonth, 0).getDate()).padStart(2, '0');
-  
-  var activeLent = state.lent.filter(function(l) { return l.startDate <= endDate; }).reduce(function(sum, l) { return sum + getOutstandingPrincipalAtMonth(l.id, l.principal, reportsSelectedMonth); }, 0);
-  var activeBorrowed = state.borrowed.filter(function(b) { return b.startDate <= endDate; }).reduce(function(sum, b) { return sum + getOutstandingPrincipalAtMonth(b.id, b.principal, reportsSelectedMonth); }, 0);
+  var container = document.getElementById('reports-loans-breakdown');
+  if (!container) return;
 
+  const [selYear] = reportsSelectedMonth.split('-').map(Number);
   var recv = 0, paid = 0;
   if (reportsViewMode === 'month') {
     recv = state.interestPayments.filter(function(p) { return p.type === 'received' && p.category === 'interest' && p.date && p.date.startsWith(reportsSelectedMonth); }).reduce(function(s, p) { return s + Number(p.amount); }, 0);
@@ -5504,14 +5498,30 @@ function renderReportsEarnings() {
     paid = state.interestPayments.filter(function(p) { return p.type === 'paid' && p.category === 'interest' && p.date && p.date.startsWith(String(selYear)); }).reduce(function(s, p) { return s + Number(p.amount); }, 0);
   }
 
-  var el = document.getElementById('dash-interest-received');
-  if (el) el.textContent = formatCurrency(recv);
-  el = document.getElementById('dash-interest-paid');
-  if (el) el.textContent = formatCurrency(paid);
-  el = document.getElementById('dash-total-lent');
-  if (el) el.textContent = formatCurrency(activeLent);
-  el = document.getElementById('dash-total-borrowed');
-  if (el) el.textContent = formatCurrency(activeBorrowed);
+  var activeLent = state.lent.reduce(function(sum, l) { return sum + getOutstandingPrincipalAtMonth(l.id, l.principal, reportsSelectedMonth); }, 0);
+  var activeBorrowed = state.borrowed.reduce(function(sum, b) { return sum + getOutstandingPrincipalAtMonth(b.id, b.principal, reportsSelectedMonth); }, 0);
+
+  var rows = [
+    { label: 'Interest Received', value: recv, color: 'var(--color-success)' },
+    { label: 'Interest Paid', value: paid, color: 'var(--color-danger)' },
+    { label: 'Total Lent', value: activeLent, color: 'var(--color-accent)' },
+    { label: 'Total Borrowed', value: activeBorrowed, color: 'var(--color-purple)' }
+  ];
+
+  var html = '';
+  rows.forEach(function(row) {
+    html += '<div style="display:flex;justify-content:space-between;align-items:center;padding:0.6rem 0;border-bottom:1px solid var(--border-color);">';
+    html += '<span style="font-weight:600;color:var(--text-primary);">' + row.label + '</span>';
+    html += '<span style="font-weight:700;color:' + row.color + '">' + formatCurrency(row.value) + '</span>';
+    html += '</div>';
+  });
+
+  var allZero = rows.every(function(r) { return r.value === 0; });
+  if (allZero) {
+    html = '<div style="text-align:center;padding:2rem 0;color:var(--text-muted);font-size:0.85rem;">No loan data for this period.</div>';
+  }
+
+  container.innerHTML = html;
 }
 
 // Bind to window for global templates
