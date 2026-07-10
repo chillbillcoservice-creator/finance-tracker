@@ -1903,7 +1903,7 @@ function renderDashboard() {
         var pendingTenantsHTML = '<div class="pending-names-list">';
         pTenants.forEach(function(t) {
           var nameColor = t.renewalDue ? 'var(--color-danger)' : 'var(--text-primary)';
-          pendingTenantsHTML += '<div class="pending-name-item"><span style="color:' + nameColor + ';font-weight:' + (t.renewalDue ? '800' : '600') + '">' + t.name + '</span> (' + Math.round(t.owe / 1000) + 'K)</div>';
+          pendingTenantsHTML += '<div class="pending-name-item"><span style="color:' + nameColor + ';font-weight:' + (t.renewalDue ? '800' : '600') + '">' + t.name + '</span> (' + (t.owe % 1000 === 0 ? Math.round(t.owe / 1000) + 'K' : String(t.owe)) + ')</div>';
         });
         pendingTenantsHTML += '</div>';
         document.getElementById('card-rent').insertAdjacentHTML('afterbegin', pendingTenantsHTML);
@@ -1929,7 +1929,7 @@ function renderDashboard() {
 
     if (pBorrowers.length > 0) {
       var pendingBorrowersHTML = '<div class="pending-names-list">' + pBorrowers.map(function(b) {
-        return '<div class="pending-name-item"><span>' + b.name + '</span> (' + Math.round(b.owe / 1000) + 'K)</div>';
+        return '<div class="pending-name-item"><span>' + b.name + '</span> (' + (b.owe % 1000 === 0 ? Math.round(b.owe / 1000) + 'K' : String(b.owe)) + ')</div>';
       }).join('') + '</div>';
       document.getElementById('card-interest').insertAdjacentHTML('afterbegin', pendingBorrowersHTML);
       document.getElementById('card-interest').classList.add('has-pending-names');
@@ -6503,9 +6503,10 @@ function renderGlanceWidget() {
     if (l.status === 'active' && l.startDate <= todayStr) {
       var outstanding = getOutstandingPrincipalAtMonth(l.id, l.principal, currentMonth);
       if (outstanding > 0) {
-        var expected = outstanding * (Number(l.interestRate) / 100);
+        var expected = l.isEMI ? Number(l.emiAmount || 0) : outstanding * (Number(l.interestRate) / 100);
+        var paidCat = l.isEMI ? 'principal' : 'interest';
         var paid = state.interestPayments
-          .filter(function(p) { return p.type === 'received' && p.category !== 'issuance' && p.loanId === l.id && p.date.startsWith(currentMonth); })
+          .filter(function(p) { return p.type === 'received' && p.category === paidCat && p.loanId === l.id && p.date.startsWith(currentMonth); })
           .reduce(function(s, p) { return s + Number(p.amount); }, 0);
         var owe = expected - paid;
         if (owe > 0) {
