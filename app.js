@@ -2996,6 +2996,15 @@ function renderRentals() {
     const isRentFullyPaid = isRentPaidThisMonth && currentMonthRentSum >= (rental.monthlyRent - 0.01);
     const rentBalance = Math.max(0, rental.monthlyRent - currentMonthRentSum);
     
+    // Calculate carried-over arrears from months before selected month
+    var prevPayments = state.rentPayments.filter(function(p) { return p.rentalId === rental.id && p.monthYear < selectedMonthStr; });
+    var prevTotalPaid = prevPayments.reduce(function(sum, p) { return sum + Number(p.amount); }, 0);
+    var st = rental.startDate.split('-');
+    var monthsFromStart = (selYear * 12 + selMonth) - (parseInt(st[0]) * 12 + parseInt(st[1]));
+    var monthsBeforeCurrent = Math.max(0, monthsFromStart - 1);
+    var prevExpected = Math.max(0, monthsBeforeCurrent) * Number(rental.monthlyRent);
+    var carryOverArrears = Math.max(0, prevExpected - prevTotalPaid);
+    
     const card = document.createElement('div');
     const renewData = getNextRenewal(rental.startDate);
     const isRenewalSoon = renewData && renewData.daysLeft <= 30;
@@ -3034,7 +3043,7 @@ function renderRentals() {
 
       <div style="font-size:0.68rem;color:#fff;margin:0.15rem 0 0.25rem;">
         ${rental.status === 'active'
-          ? `Due: ${rental.rentDueDay}<sup>th</sup> · Since ${formatDate(rental.startDate)}${renewData ? ` · Renews: ${renewData.dateStr}` : ''}${!isRentPaidThisMonth ? '<span style="color:var(--color-warning);font-weight:600;float:right;">Due</span>' : ''}`
+          ? `Due: ${rental.rentDueDay}<sup>th</sup> · Since ${formatDate(rental.startDate)}${renewData ? ` · Renews: ${renewData.dateStr}` : ''}${!isRentPaidThisMonth ? '<span style="color:var(--color-warning);font-weight:600;float:right;">Due' + (carryOverArrears > 0 ? ' · Bal: ' + formatCurrency(carryOverArrears) : '') + '</span>' : ''}`
           : `Since ${formatDate(rental.startDate)} · Ended ${rental.endDate ? formatDate(rental.endDate) : '-'}`
         }
 </div>
@@ -4755,7 +4764,9 @@ function initApp() {
         var r = state.rentals.find(function(x) { return x.id === rid; });
         state.rentPayments.push({id:'rp_seed_' + (pid++),rentalId:rid,amount:r.monthlyRent,monthYear:month,datePaid:month + '-' + String(r.rentDueDay).padStart(2,'0'),note:'Rent - ' + month});
       });
-      if (month <= '2026-05') {
+      if (month === '2026-04') {
+        state.rentPayments.push({id:'rp_seed_' + (pid++),rentalId:'r8',amount:0,monthYear:'2026-04',datePaid:'2026-04-05',note:'Rent - Apr 2026 (missed)'});
+      } else if (month <= '2026-05') {
         state.rentPayments.push({id:'rp_seed_' + (pid++),rentalId:'r8',amount:15000,monthYear:month,datePaid:month + '-05',note:'Rent - ' + month});
       } else if (month === '2026-06') {
         state.rentPayments.push({id:'rp_seed_' + (pid++),rentalId:'r8',amount:11500,monthYear:'2026-06',datePaid:'2026-06-05',note:'Rent - Jun 2026 (partial)'});
