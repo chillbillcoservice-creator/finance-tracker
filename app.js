@@ -5463,7 +5463,6 @@ function renderReportsPropertyBreakdown() {
   container.innerHTML = html;
 
   // Compute bottom 4 cards
-  const [selYear, selMonth] = reportsSelectedMonth.split('-').map(Number);
   var intReceived = 0, intPaid = 0, expenses = 0;
   if (reportsViewMode === 'month') {
     intReceived = state.interestPayments.filter(function(p) { return p.type === 'received' && p.category === 'interest' && p.date && p.date.startsWith(reportsSelectedMonth); }).reduce(function(s, p) { return s + Number(p.amount); }, 0);
