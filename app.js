@@ -3880,7 +3880,7 @@ function quickUnmarkRentPaid(rentalId) {
   loadState();
   var payments = state.rentPayments;
   for (var i = payments.length - 1; i >= 0; i--) {
-    if (payments[i].rentalId === rentalId && payments[i].monthYear === selectedMonthStr && payments[i].note === 'Marked Paid') {
+    if (payments[i].rentalId === rentalId && payments[i].monthYear === selectedMonthStr) {
       payments.splice(i, 1);
       break;
     }
