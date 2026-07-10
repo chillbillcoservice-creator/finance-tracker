@@ -481,6 +481,7 @@ function loadState() {
       state.showPayMethod = state.showPayMethod !== false;
       state.showExpenseDetails = state.showExpenseDetails !== false;
       state.sortRentalsByDue = state.sortRentalsByDue === true;
+      state.groupLoansByName = state.groupLoansByName === true;
       state.properties = state.properties || [];
       var defaults = ['23/48 ground floor', '23/48 3rd floor', '1/104'];
       defaults.forEach(function(d) { if (state.properties.indexOf(d) === -1) state.properties.push(d); });
@@ -493,6 +494,8 @@ function loadState() {
       if(ed) ed.checked = state.showExpenseDetails;
       const sr = document.getElementById('toggle-sort-rentals');
       if(sr) sr.checked = state.sortRentalsByDue;
+      const gl = document.getElementById('toggle-group-loans');
+      if(gl) gl.checked = state.groupLoansByName;
     } catch (e) {
       console.error('Failed to parse local storage data, resetting to default.', e);
       saveState();
@@ -2747,11 +2750,29 @@ function renderLending() {
     return b._stats.outstandingPrincipal - a._stats.outstandingPrincipal;
   });
 
-  sortedLoans.forEach(loan => {
+  // Group by borrower name if enabled
+  const loanGroups = [];
+  if (state.groupLoansByName) {
+    const map = {};
+    sortedLoans.forEach(function(l) { var n = l.borrowerName || 'Unknown'; if (!map[n]) map[n] = []; map[n].push(l); });
+    Object.keys(map).sort().forEach(function(name) { loanGroups.push({ label: name, loans: map[name] }); });
+  } else {
+    loanGroups.push({ label: null, loans: sortedLoans });
+  }
+
+  loanGroups.forEach(function(group) {
+    if (group.label) {
+      var hdr = document.createElement('div');
+      hdr.textContent = group.label;
+      hdr.style.cssText = 'font-size:0.9rem;font-weight:700;color:var(--color-purple);padding:0.5rem 0 0.25rem 0;margin-top:0.5rem;border-bottom:1px solid var(--border-color);';
+      listContainer.appendChild(hdr);
+    }
+    group.loans.forEach(function(loan) {
     const stats = loan._stats;
     const card = document.createElement('div');
     card.className = 'card loan-card';
     card.style.padding = '0.75rem';
+    if (loan.isEMI) { card.style.borderColor = 'var(--color-purple)'; card.style.borderWidth = '2px'; }
     card.setAttribute('data-loan-id', loan.id);
 
     const settledBadge = stats.statusInMonth !== 'active' ? ' <span class="badge badge-muted">Settled</span>' : '';
@@ -2803,6 +2824,7 @@ function renderLending() {
     `;
 
     listContainer.appendChild(card);
+    });
   });
 }
 
@@ -2875,11 +2897,29 @@ function renderBorrowing() {
     return b._stats.outstandingPrincipal - a._stats.outstandingPrincipal;
   });
 
-  sortedLoans.forEach(loan => {
+  // Group by financier name if enabled
+  const loanGroupsB = [];
+  if (state.groupLoansByName) {
+    const map = {};
+    sortedLoans.forEach(function(l) { var n = l.financierName || 'Unknown'; if (!map[n]) map[n] = []; map[n].push(l); });
+    Object.keys(map).sort().forEach(function(name) { loanGroupsB.push({ label: name, loans: map[name] }); });
+  } else {
+    loanGroupsB.push({ label: null, loans: sortedLoans });
+  }
+
+  loanGroupsB.forEach(function(group) {
+    if (group.label) {
+      var hdr = document.createElement('div');
+      hdr.textContent = group.label;
+      hdr.style.cssText = 'font-size:0.9rem;font-weight:700;color:var(--color-purple);padding:0.5rem 0 0.25rem 0;margin-top:0.5rem;border-bottom:1px solid var(--border-color);';
+      listContainer.appendChild(hdr);
+    }
+    group.loans.forEach(function(loan) {
     const stats = loan._stats;
     const card = document.createElement('div');
     card.className = 'card loan-card';
     card.style.padding = '0.75rem';
+    if (loan.isEMI) { card.style.borderColor = 'var(--color-purple)'; card.style.borderWidth = '2px'; }
     card.setAttribute('data-loan-id', loan.id);
 
     const settledBadgeB = stats.statusInMonth !== 'active' ? ' <span class="badge badge-muted">Loan Closed</span>' : '';
@@ -2931,6 +2971,7 @@ function renderBorrowing() {
     `;
 
     listContainer.appendChild(card);
+    });
   });
 }
 
@@ -5679,6 +5720,13 @@ window.toggleSortRentals = function() {
   state.sortRentalsByDue = document.getElementById('toggle-sort-rentals').checked;
   saveState();
   renderDashboard();
+};
+
+window.toggleGroupLoans = function() {
+  state.groupLoansByName = document.getElementById('toggle-group-loans').checked;
+  saveState();
+  renderLending();
+  renderBorrowing();
 };
 
 window.renderPropertiesList = function() {
