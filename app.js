@@ -2724,6 +2724,12 @@ function renderLending() {
   }, 0);
   var emiEl = document.getElementById('lent-emi-total');
   if (emiEl) emiEl.textContent = 'EMI Amount = ' + formatCurrency(emiOutstanding);
+
+  var emiCountEl = document.getElementById('lent-emi-count');
+  if (emiCountEl) {
+    var emiCount = state.lent.filter(function(l) { return l.isEMI && l.startDate <= endDateOfSelectedMonth; }).length;
+    emiCountEl.textContent = 'EMI ' + emiCount;
+  }
   if (visibleLoans.length === 0) {
     listContainer.innerHTML = `
       <div class="empty-state">
