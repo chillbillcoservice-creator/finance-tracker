@@ -3069,7 +3069,7 @@ function renderRentals() {
           <span onclick="showRentalLedger('${rental.id}')" title="Ledger">📋</span>
           <span onclick="openTenantDetails('${rental.id}')" title="Details">📝</span>
           ${rental.status === 'active'
-            ? `<span onclick="var r=document.getElementById('quick-rent-row-${rental.id}');if(r)r.style.display=r.style.display==='none'?'':'none';" title="Pay">💰</span><span onclick="toggleRentalStatus('${rental.id}')" title="End Lease">🔒</span><label style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;cursor:pointer;"><input type="checkbox" onchange="if(this.checked){quickMarkRentPaid('${rental.id}')}else{quickUnmarkRentPaid('${rental.id}')}" ${isRentFullyPaid ? 'checked' : ''} style="width:16px;height:16px;accent-color:var(--color-success);cursor:pointer;margin:0;"></label>`
+            ? `<span onclick="var r=document.getElementById('quick-rent-row-${rental.id}');if(r)r.style.display=r.style.display==='none'?'':'none';" title="Pay">💰</span><span onclick="toggleRentalStatus('${rental.id}')" title="End Lease">🔒</span><label style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;cursor:pointer;"><input type="checkbox" onchange="if(this.checked){quickMarkRentPaid('${rental.id}')}else{quickUnmarkRentPaid('${rental.id}')}" ${isRentFullyPaid ? 'checked' : ''} style="width:16px;height:16px;accent-color:var(--color-success);          cursor:pointer;margin:2px 0 0 0;"></label>`
             : `<span onclick="toggleRentalStatus('${rental.id}')" title="Activate">🔓</span>`
           }
           ${rental.aadhaarImg ? `<span onclick="viewDocumentImage('${rental.id}', 'aadhaar')" title="Aadhaar">🪪</span>` : ''}
