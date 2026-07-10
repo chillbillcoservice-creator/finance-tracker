@@ -1910,7 +1910,7 @@ function renderDashboard() {
         document.getElementById('card-rent').classList.add('has-pending-names');
       }
 
-    const pBorrowers = [];
+    var pBorrowers = [];
     activeLendingLoans.forEach(function(l) {
       var outstanding = getOutstandingPrincipalAtMonth(l.id, l.principal, selectedMonthStr);
       if (outstanding > 0) {
