@@ -5665,18 +5665,20 @@ function renderReportsPropertyBreakdown() {
   container.innerHTML = html;
 
   // Compute bottom 4 cards
-  var intReceived = 0, intPaid = 0, expenses = 0;
+  var intReceived = 0, intPaid = 0, expenses = 0, emiRecv = 0;
   if (reportsViewMode === 'month') {
     intReceived = state.interestPayments.filter(function(p) { return p.type === 'received' && p.category === 'interest' && p.date && p.date.startsWith(reportsSelectedMonth); }).reduce(function(s, p) { return s + Number(p.amount); }, 0);
     intPaid = state.interestPayments.filter(function(p) { return p.type === 'paid' && p.category === 'interest' && p.date && p.date.startsWith(reportsSelectedMonth); }).reduce(function(s, p) { return s + Number(p.amount); }, 0);
     expenses = state.expenses.filter(function(e) { return e.date && e.date.startsWith(reportsSelectedMonth); }).reduce(function(s, e) { return s + Number(e.amount); }, 0);
+    emiRecv = state.interestPayments.filter(function(p) { return p.type === 'received' && p.category === 'principal' && p.date && p.date.startsWith(reportsSelectedMonth); }).reduce(function(s, p) { return s + Number(p.amount); }, 0);
   } else {
     intReceived = state.interestPayments.filter(function(p) { return p.type === 'received' && p.category === 'interest' && p.date && p.date.startsWith(String(selYear)); }).reduce(function(s, p) { return s + Number(p.amount); }, 0);
     intPaid = state.interestPayments.filter(function(p) { return p.type === 'paid' && p.category === 'interest' && p.date && p.date.startsWith(String(selYear)); }).reduce(function(s, p) { return s + Number(p.amount); }, 0);
     expenses = state.expenses.filter(function(e) { return e.date && e.date.startsWith(String(selYear)); }).reduce(function(s, e) { return s + Number(e.amount); }, 0);
+    emiRecv = state.interestPayments.filter(function(p) { return p.type === 'received' && p.category === 'principal' && p.date && p.date.startsWith(String(selYear)); }).reduce(function(s, p) { return s + Number(p.amount); }, 0);
   }
 
-  var totalIncome = grandTotal + intReceived;
+  var totalIncome = grandTotal + intReceived + emiRecv;
   var netFlow = totalIncome - intPaid;
   var remaining = netFlow - expenses;
 
@@ -5695,20 +5697,22 @@ function renderReportsEarnings() {
   if (!container) return;
 
   const [selYear] = reportsSelectedMonth.split('-').map(Number);
-  var recv = 0, paid = 0;
+  var recv = 0, paid = 0, emiRecv = 0;
   if (reportsViewMode === 'month') {
     recv = state.interestPayments.filter(function(p) { return p.type === 'received' && p.category === 'interest' && p.date && p.date.startsWith(reportsSelectedMonth); }).reduce(function(s, p) { return s + Number(p.amount); }, 0);
     paid = state.interestPayments.filter(function(p) { return p.type === 'paid' && p.category === 'interest' && p.date && p.date.startsWith(reportsSelectedMonth); }).reduce(function(s, p) { return s + Number(p.amount); }, 0);
+    emiRecv = state.interestPayments.filter(function(p) { return p.type === 'received' && p.category === 'principal' && p.date && p.date.startsWith(reportsSelectedMonth); }).reduce(function(s, p) { return s + Number(p.amount); }, 0);
   } else {
     recv = state.interestPayments.filter(function(p) { return p.type === 'received' && p.category === 'interest' && p.date && p.date.startsWith(String(selYear)); }).reduce(function(s, p) { return s + Number(p.amount); }, 0);
     paid = state.interestPayments.filter(function(p) { return p.type === 'paid' && p.category === 'interest' && p.date && p.date.startsWith(String(selYear)); }).reduce(function(s, p) { return s + Number(p.amount); }, 0);
+    emiRecv = state.interestPayments.filter(function(p) { return p.type === 'received' && p.category === 'principal' && p.date && p.date.startsWith(String(selYear)); }).reduce(function(s, p) { return s + Number(p.amount); }, 0);
   }
 
   var activeLent = state.lent.reduce(function(sum, l) { return sum + getOutstandingPrincipalAtMonth(l.id, l.principal, reportsSelectedMonth); }, 0);
   var activeBorrowed = state.borrowed.reduce(function(sum, b) { return sum + getOutstandingPrincipalAtMonth(b.id, b.principal, reportsSelectedMonth); }, 0);
 
   var rows = [
-    { label: 'Interest Received', value: recv, color: 'var(--color-success)' },
+    { label: 'Total Collection', value: recv + emiRecv, color: 'var(--color-success)' },
     { label: 'Interest Paid', value: paid, color: 'var(--color-danger)' },
     { label: 'Total Lent', value: activeLent, color: 'var(--color-accent)' },
     { label: 'Total Borrowed', value: activeBorrowed, color: 'var(--color-purple)' }
