@@ -2759,34 +2759,25 @@ function renderLending() {
 
   const countEl = document.getElementById('lent-loans-count');
   const principalEl = document.getElementById('lent-loans-principal');
+  const emiTotalEl = document.getElementById('lent-emi-total');
+  const totalEl = document.getElementById('lent-total-outstanding');
   if (countEl) countEl.textContent = visibleLoans.length;
-  if (principalEl) {
-    const totalPrincipal = visibleLoans.reduce((s, l) => s + Number(l.principal), 0);
-    principalEl.textContent = formatCurrency(totalPrincipal);
-  }
 
-  // EMI outstanding total
-  var emiOutstanding = state.lent.filter(function(l) {
-    return l.isEMI && l.startDate <= endDateOfSelectedMonth;
-  }).reduce(function(sum, l) {
+  // Outstanding totals for regular (4%) and EMI loans
+  function calcOutstanding(loan) {
     var payments = state.interestPayments.filter(function(p) {
-      return p.loanId === l.id && p.type === 'received' && p.category === 'principal' && p.date <= endDateOfSelectedMonth;
+      return p.loanId === loan.id && p.type === 'received' && p.category === 'principal' && p.date <= endDateOfSelectedMonth;
     });
     var topups = state.interestPayments.filter(function(p) {
-      return p.loanId === l.id && p.type === 'received' && p.category === 'increase' && p.date <= endDateOfSelectedMonth;
+      return p.loanId === loan.id && p.type === 'received' && p.category === 'increase' && p.date <= endDateOfSelectedMonth;
     });
-    var repaid = payments.reduce(function(s, p) { return s + Number(p.amount); }, 0);
-    var added = topups.reduce(function(s, p) { return s + Number(p.amount); }, 0);
-    return sum + Math.max(0, Number(l.principal) + added - repaid);
-  }, 0);
-  var emiEl = document.getElementById('lent-emi-total');
-  if (emiEl) emiEl.textContent = formatCurrency(emiOutstanding);
-
-  var emiCountEl = document.getElementById('lent-emi-count');
-  if (emiCountEl) {
-    var emiCount = state.lent.filter(function(l) { return l.isEMI && l.startDate <= endDateOfSelectedMonth; }).length;
-    emiCountEl.textContent = 'EMI ' + emiCount;
+    return Math.max(0, Number(loan.principal) + topups.reduce(function(s, p) { return s + Number(p.amount); }, 0) - payments.reduce(function(s, p) { return s + Number(p.amount); }, 0));
   }
+  var regularOutstanding = visibleLoans.filter(function(l) { return !l.isEMI; }).reduce(function(s, l) { return s + calcOutstanding(l); }, 0);
+  var emiOutstanding = visibleLoans.filter(function(l) { return l.isEMI; }).reduce(function(s, l) { return s + calcOutstanding(l); }, 0);
+  if (principalEl) principalEl.textContent = formatCurrency(regularOutstanding);
+  if (emiTotalEl) emiTotalEl.textContent = formatCurrency(emiOutstanding);
+  if (totalEl) totalEl.textContent = formatCurrency(regularOutstanding + emiOutstanding);
   if (visibleLoans.length === 0) {
     listContainer.innerHTML = `
       <div class="empty-state">
