@@ -716,7 +716,7 @@ body::before {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 2rem;
+  margin-bottom: 0;
   gap: 1rem;
   flex-wrap: wrap;
 }
@@ -2021,7 +2021,7 @@ body::before {
   .mobile-nav { display: flex; }
   
   .page-header {
-    margin-bottom: 1.25rem;
+    margin-bottom: 0;
     gap: 0.5rem;
   }
   
