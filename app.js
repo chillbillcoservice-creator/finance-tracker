@@ -2758,6 +2758,7 @@ function renderLending() {
   const visibleLoans = state.lent.filter(l => l.startDate <= endDateOfSelectedMonth);
 
   const countEl = document.getElementById('lent-loans-count');
+  const regPrincipalEl = document.getElementById('lent-reg-principal');
   const emiTotalEl = document.getElementById('lent-emi-total');
   const totalEl = document.getElementById('lent-total-outstanding');
   if (countEl) countEl.textContent = visibleLoans.length;
@@ -2772,11 +2773,12 @@ function renderLending() {
     });
     return Math.max(0, Number(loan.principal) + topups.reduce(function(s, p) { return s + Number(p.amount); }, 0) - payments.reduce(function(s, p) { return s + Number(p.amount); }, 0));
   }
+  var regOutstanding = visibleLoans.filter(function(l) { return !l.isEMI; }).reduce(function(s, l) { return s + calcOutstanding(l); }, 0);
   var emiOutstanding = visibleLoans.filter(function(l) { return l.isEMI; }).reduce(function(s, l) { return s + calcOutstanding(l); }, 0);
-  var allOutstanding = visibleLoans.reduce(function(s, l) { return s + calcOutstanding(l); }, 0);
   var emiCount = visibleLoans.filter(function(l) { return l.isEMI; }).length;
+  if (regPrincipalEl) regPrincipalEl.textContent = formatCurrency(regOutstanding);
   if (emiTotalEl) emiTotalEl.innerHTML = (emiCount > 0 ? 'EMI ' + emiCount + ' · ' : '') + formatCurrency(emiOutstanding);
-  if (totalEl) totalEl.textContent = formatCurrency(allOutstanding);
+  if (totalEl) totalEl.textContent = formatCurrency(regOutstanding + emiOutstanding);
   if (visibleLoans.length === 0) {
     listContainer.innerHTML = `
       <div class="empty-state">
