@@ -2776,8 +2776,9 @@ function renderLending() {
   var regOutstanding = visibleLoans.filter(function(l) { return !l.isEMI; }).reduce(function(s, l) { return s + calcOutstanding(l); }, 0);
   var emiOutstanding = visibleLoans.filter(function(l) { return l.isEMI; }).reduce(function(s, l) { return s + calcOutstanding(l); }, 0);
   var emiCount = visibleLoans.filter(function(l) { return l.isEMI; }).length;
+  var nonEmiCount = visibleLoans.length - emiCount;
   if (regPrincipalEl) regPrincipalEl.textContent = formatCurrency(regOutstanding);
-  if (emiTotalEl) emiTotalEl.innerHTML = (emiCount > 0 ? 'EMI ' + emiCount + ' · ' : '') + formatCurrency(emiOutstanding);
+  if (emiTotalEl) emiTotalEl.textContent = emiCount > 0 ? 'EMI ' + emiCount : '';
   if (totalEl) totalEl.textContent = formatCurrency(regOutstanding + emiOutstanding);
   if (visibleLoans.length === 0) {
     listContainer.innerHTML = `
