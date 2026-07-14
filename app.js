@@ -2910,7 +2910,6 @@ function renderLending() {
           card.innerHTML += '<div style="font-size:0.82rem;"><span style="font-weight:600;">' + formattedPrincipal + '</span> <span style="color:var(--color-purple);font-weight:600;">EMI</span> <span style="color:var(--text-secondary);">@ ' + formatCurrency(Number(loan.emiAmount)) + '/mo · Paid ' + stats.emiPaidCount + '/' + stats.emiTotalCount + '</span></div>';
           var emiPct = stats.emiTotalCount > 0 ? Math.round(stats.emiPaidCount / stats.emiTotalCount * 100) : 0;
           card.innerHTML += '<div style="width:100%;height:3px;background:var(--bg-tertiary);border-radius:2px;margin:0.15rem 0 0.2rem;"><div style="width:' + Math.min(emiPct,100) + '%;height:3px;background:var(--color-purple);border-radius:2px;"></div></div>';
-          card.innerHTML += '<div style="font-size:0.72rem;color:#fff;font-style:italic;">' + recvDisplay + (stats.lastPaymentDate ? ' · ' + formatDate(stats.lastPaymentDate) : '') + '</div>';
         }
       });
 
