@@ -2803,7 +2803,7 @@ function renderLending() {
     
     const lastPaymentDate = loanPayments.length > 0 ? loanPayments.reduce((max, p) => p.date > max ? p.date : max, loanPayments[0].date) : null;
     const monthlyYield = loan.isEMI ? Number(loan.emiAmount) : outstandingPrincipal * (Number(loan.interestRate) / 100);
-    const currentMonthPayments = (loan.isEMI ? loanPayments : interestPayments).filter(p => p.date.startsWith(selectedMonthStr));
+    const currentMonthPayments = loanPayments.filter(p => p.date.startsWith(selectedMonthStr));
     const currentMonthSum = currentMonthPayments.reduce((sum, p) => sum + Number(p.amount), 0);
     const isInterestFullyPaidThisMonth = monthlyYield > 0 && currentMonthSum >= (monthlyYield - 0.01);
     const hasAdvance = interestPayments.some(function(p) { return p.note && p.note.indexOf('[Advance]') !== -1; });
@@ -2844,7 +2844,7 @@ function renderLending() {
         const formattedPrincipal = formatCurrency(stats.outstandingPrincipal);
         const currentRecv = formatCurrency(stats.currentMonthSum);
         const currentBal = formatCurrency(Math.max(0, stats.monthlyYield - stats.currentMonthSum));
-        const recvDisplay = stats.isInterestFullyPaidThisMonth ? 'Rcvd ' + currentRecv + ' ✅' : 'Rcvd ' + currentRecv + ' · Bal ' + currentBal;
+        const recvDisplay = stats.monthlyYield === 0 ? 'Rcvd ' + currentRecv : (stats.isInterestFullyPaidThisMonth ? 'Rcvd ' + currentRecv + ' ✅' : 'Rcvd ' + currentRecv + ' · Bal ' + currentBal);
         const settledBadge = stats.statusInMonth !== 'active' ? ' <span class="badge badge-muted">Settled</span>' : '';
         const advBadge = stats.hasAdvance ? ' <span style="font-size:0.55rem;color:var(--color-purple);font-weight:600;margin-left:0.2rem;">Adv</span>' : '';
 
