@@ -314,7 +314,7 @@ window.markRenewalDone = markRenewalDone;
 window.deleteRenewal = deleteRenewal;
 
 function updateHeaderDateDisplay() {
-  const headerDate = document.getElementById('header-date');
+  const headerDate = document.getElementById('glance-date');
   if (!headerDate) return;
   
   const [yearStr, monthStr, dayStr] = selectedDateStr.split('-');
@@ -1595,21 +1595,17 @@ function switchTab(tabId) {
 
   // Toggle header elements per tab
   var headerActions = document.querySelector('.header-actions');
-  var dateBadge = document.getElementById('current-date-badge');
   if (headerActions) {
     if (tabId === 'records') {
       headerActions.style.display = '';
       document.getElementById('dashboard-search').style.display = 'none';
       document.getElementById('records-search-header').style.display = '';
-      if (dateBadge) dateBadge.style.display = 'flex';
     } else if (tabId === 'settings') {
       headerActions.style.display = 'none';
-      if (dateBadge) dateBadge.style.display = 'none';
     } else {
       headerActions.style.display = '';
       document.getElementById('dashboard-search').style.display = '';
       document.getElementById('records-search-header').style.display = 'none';
-      if (dateBadge) dateBadge.style.display = 'flex';
     }
   }
 
@@ -6703,17 +6699,18 @@ function renderGlanceWidget() {
   document.getElementById('glance-icon').textContent = icon;
   document.getElementById('glance-greeting').textContent = greeting + '!';
 
+  var glanceDate = document.getElementById('glance-date');
+  if (glanceDate) {
+    glanceDate.textContent = today.toLocaleDateString('en-US', { weekday:'short', month:'short', day:'numeric' }).toUpperCase();
+  }
+
   var summaryEl = document.getElementById('glance-summary');
   var detailsEl = document.getElementById('glance-details');
 
-  if (totalCollected > 0) {
-    summaryEl.innerHTML = 'Collected <strong>' + formatCurrency(totalCollected) + '</strong> today';
-  } else {
-    summaryEl.innerHTML = '';
-  }
+  summaryEl.innerHTML = 'Collected <strong>' + formatCurrency(totalCollected) + '</strong> today';
 
   function setGlanceDetails(html) {
-    detailsEl.innerHTML = html;
+    detailsEl.innerHTML = '<span style="display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + html + '</span>';
     detailsEl.classList.remove('glance-slide-in');
     void detailsEl.offsetWidth;
     detailsEl.classList.add('glance-slide-in');
