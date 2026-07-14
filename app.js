@@ -2835,93 +2835,69 @@ function renderLending() {
     return b._stats.outstandingPrincipal - a._stats.outstandingPrincipal;
   });
 
-  // Always group by borrower name
-  const loanGroups = [];
-  const map = {};
-  sortedLoans.forEach(function(l) { var n = l.borrowerName || 'Unknown'; if (!map[n]) map[n] = []; map[n].push(l); });
-  Object.keys(map).sort().forEach(function(name) { loanGroups.push({ label: name, loans: map[name] }); });
-
-  loanGroups.forEach(function(group) {
-    var groupOutstanding = 0, groupYield = 0;
-    group.loans.forEach(function(l) { groupOutstanding += l._stats.outstandingPrincipal; groupYield += l._stats.monthlyYield; });
-    const first = group.loans[0];
-    const allIds = group.loans.map(function(l) { return l.id; }).join(',');
-
+  sortedLoans.forEach(loan => {
+    const stats = loan._stats;
     const card = document.createElement('div');
     card.className = 'card loan-card';
     card.style.padding = '0.75rem';
-    card.setAttribute('data-loan-ids', allIds);
+    card.setAttribute('data-loan-id', loan.id);
+    card.setAttribute('data-loan-ids', loan.id);
+
+    const settledBadge = stats.statusInMonth !== 'active' ? ' <span class="badge badge-muted">' + (loan.isEMI ? 'Closed' : 'Settled') + '</span>' : '';
+    const advBadge = stats.hasAdvance ? ' <span style="font-size:0.55rem;color:var(--color-purple);font-weight:600;margin-left:0.2rem;">Adv</span>' : '';
+    const formattedYield = formatCurrency(stats.monthlyYield);
+    const formattedPrincipal = formatCurrency(stats.outstandingPrincipal);
+    const currentRecv = formatCurrency(stats.currentMonthSum);
+    const currentBal = formatCurrency(Math.max(0, stats.monthlyYield - stats.currentMonthSum));
+    const recvDisplay = stats.isInterestFullyPaidThisMonth
+      ? 'Rcvd ' + currentRecv + ' <span style="font-style:normal;">✅</span>'
+      : 'Rcvd ' + currentRecv + ' · Bal ' + currentBal;
+
+    var innerHtml = '';
 
     // Header
-    const hdr = document.createElement('div');
-    hdr.style.cssText = 'display:flex;justify-content:space-between;align-items:center;';
-    hdr.innerHTML = '<div><div style="font-weight:700;font-size:1rem;">' + group.label + '</div>' + (first.phone ? '<div style="font-size:0.82rem;color:#fff;margin-top:0.05rem;">' + first.phone + '</div>' : '') + '</div><div style="text-align:right;"><div style="font-size:1.15rem;font-weight:800;color:var(--color-warning);line-height:1.2;">' + formatCurrency(groupOutstanding) + '</div><div style="font-size:0.72rem;color:var(--text-secondary);line-height:1.3;">+' + formatCurrency(groupYield) + '/mo</div></div>';
-    card.appendChild(hdr);
+    var headerRight = stats.statusInMonth !== 'active'
+      ? '<div style="font-size:1.15rem;font-weight:800;color:var(--color-warning);line-height:1.2;">' + formattedPrincipal + '</div>'
+      : loan.isEMI
+        ? '<div style="font-size:1.15rem;font-weight:800;color:var(--color-warning);line-height:1.2;">' + formattedPrincipal + '</div><div style="font-size:0.72rem;color:var(--text-secondary);line-height:1.3;">EMI @ ' + formatCurrency(Number(loan.emiAmount)) + '/mo · Paid ' + stats.emiPaidCount + '/' + stats.emiTotalCount + '</div>'
+        : '<div style="font-size:1.15rem;font-weight:800;color:var(--color-warning);line-height:1.2;">' + formattedPrincipal + '</div><div style="font-size:0.72rem;color:var(--text-secondary);line-height:1.3;">+' + formattedYield + '/mo</div>';
 
-    // Loan rows (text only, no icons, no quick-pay)
-    group.loans.forEach(function(loan, idx) {
-      if (idx > 0) {
-        var div = document.createElement('div');
-        div.style.cssText = 'border-top:1px solid var(--border-color);margin:0.4rem 0;';
-        card.appendChild(div);
-      }
-      const stats = loan._stats;
-      const row = document.createElement('div');
-      row.setAttribute('data-loan-id', loan.id);
+    innerHtml += '<div style="display:flex; justify-content:space-between; align-items:center;">' +
+      '<div><div style="font-weight:700; font-size:1rem;">' + loan.borrowerName + settledBadge + advBadge + '</div>' +
+      (loan.phone ? '<div style="font-size:0.82rem;color:#fff;margin-top:0.05rem;">' + loan.phone + '</div>' : '') + '</div>' +
+      '<div style="text-align:right;">' + headerRight + '</div></div>';
 
-      const formattedYield = formatCurrency(stats.monthlyYield);
-      const formattedPrincipal = formatCurrency(stats.outstandingPrincipal);
-      const currentRecv = formatCurrency(stats.currentMonthSum);
-      const currentBal = formatCurrency(Math.max(0, stats.monthlyYield - stats.currentMonthSum));
-      const recvDisplay = stats.isInterestFullyPaidThisMonth ? 'Rcvd ' + currentRecv + ' ✅' : 'Rcvd ' + currentRecv + ' · Bal ' + currentBal;
-      const settledBadge = stats.statusInMonth !== 'active' ? ' <span class="badge badge-muted">Settled</span>' : '';
+    // Quick-pay row
+    innerHtml += '<div style="display:flex; gap:0.35rem; align-items:center; margin-bottom:0.25rem; margin-top:0.35rem;">' +
+      '<input type="number" id="quick-pay-' + loan.id + '" class="form-input" placeholder="₹ Amount" style="flex:1; min-height:40px; font-size:1rem; padding:0.3rem 0.5rem; font-weight:600;">' +
+      '<button class="btn btn-primary" style="min-height:40px; font-weight:700; font-size:0.9rem; padding:0.3rem 1rem;" onclick="quickLoanPayment(\'' + loan.id + '\', \'lent\')">Recv</button></div>';
 
-      if (stats.statusInMonth !== 'active') {
-        row.innerHTML = '<div style="font-size:0.82rem;"><span style="font-weight:600;">' + formattedPrincipal + (loan.isEMI ? ' <span style="color:var(--color-purple);font-weight:600;">EMI</span>' : '') + settledBadge + '</span> <span style="color:var(--text-secondary);">· ' + recvDisplay + '</span></div>';
-      } else if (loan.isEMI) {
-        var emiPct = stats.emiTotalCount > 0 ? Math.round(stats.emiPaidCount / stats.emiTotalCount * 100) : 0;
-        row.innerHTML =
-          '<div style="font-size:0.82rem;"><span style="font-weight:600;">' + formattedPrincipal + '</span> <span style="color:var(--color-purple);font-weight:600;">EMI</span> <span style="color:var(--text-secondary);">@ ' + formatCurrency(Number(loan.emiAmount)) + '/mo · Paid ' + stats.emiPaidCount + '/' + stats.emiTotalCount + '</span></div>' +
-          '<div style="width:100%;height:3px;background:var(--bg-tertiary);border-radius:2px;margin:0.15rem 0 0.2rem;"><div style="width:' + Math.min(emiPct,100) + '%;height:3px;background:var(--color-purple);border-radius:2px;"></div></div>' +
-          '<div style="font-size:0.72rem;color:#fff;font-style:italic;">' + recvDisplay + (stats.lastPaymentDate ? ' · ' + formatDate(stats.lastPaymentDate) : '') + '</div>';
-      } else {
-        const advBadge = stats.hasAdvance ? ' <span style="font-size:0.55rem;color:var(--color-purple);font-weight:600;margin-left:0.2rem;">Adv</span>' : '';
-        row.innerHTML =
-          '<div style="display:flex;justify-content:space-between;align-items:center;">' +
-            '<div></div>' +
-            '<div style="text-align:right;"><div style="font-size:1.15rem;font-weight:800;color:var(--color-warning);line-height:1.2;">' + formattedPrincipal + '</div><div style="font-size:0.72rem;color:var(--text-secondary);line-height:1.3;">+' + formattedYield + '/mo</div></div>' +
-          '</div>' +
-          '<div style="display:flex;gap:0.35rem;align-items:center;margin-bottom:0.25rem;"><input type="number" id="quick-pay-' + loan.id + '" class="form-input" placeholder="₹ Amount" style="flex:1;min-height:40px;font-size:1rem;padding:0.3rem 0.5rem;font-weight:600;"><button class="btn btn-primary" style="min-height:40px;font-weight:700;font-size:0.9rem;padding:0.3rem 1rem;" onclick="quickLoanPayment(\'' + loan.id + '\',\'lent\')">Recv</button></div>' +
-          '<div style="font-size:0.7rem;color:#fff;font-style:italic;margin-bottom:0.2rem;">' + recvDisplay + (stats.advTotal > 0 ? ' · Adv ' + formatCurrency(stats.advTotal) : '') + advBadge + (stats.lastPaymentDate ? ' · ' + formatDate(stats.lastPaymentDate) : '') + '</div>' +
-          '<div class="icon-strip"><div class="icon-strip-left"><span onclick="showLedger(\'' + loan.id + '\',\'lent\')" title="Ledger">📋</span><span onclick="quickReceiveInterest(\'' + loan.id + '\',\'lent\')" title="Quick Receive">⚡</span><span onclick="promptPayment(\'' + loan.id + '\',\'received\',\'principal\')" title="Repay">💰</span><span onclick="lendMore(\'' + loan.id + '\')" title="Lend More">➕</span><span onclick="promptConvertEMI(\'' + loan.id + '\',\'lent\')" title="Convert to EMI">📊</span></div><div class="icon-strip-right"><span onclick="editLoan(\'' + loan.id + '\',\'lent\')" title="Edit">✏️</span><span onclick="deleteLoan(\'' + loan.id + '\',\'lent\')" title="Delete">🗑️</span></div></div>';
-      }
-      card.appendChild(row);
-    });
+    // EMI progress bar (only for active EMI)
+    if (stats.statusInMonth === 'active' && loan.isEMI) {
+      var emiPct = stats.emiTotalCount > 0 ? Math.round(stats.emiPaidCount / stats.emiTotalCount * 100) : 0;
+      innerHtml += '<div style="width:100%;height:3px;background:var(--bg-tertiary);border-radius:2px;margin:0.15rem 0 0.2rem;"><div style="width:' + Math.min(emiPct,100) + '%;height:3px;background:var(--color-purple);border-radius:2px;"></div></div>';
+    }
 
-    // Bottom bar: summary + single input (balance) + icon strip (targets first loan)
-    var totalRcvd = 0;
-    group.loans.forEach(function(l) { totalRcvd += l._stats.currentMonthSum; });
-    var safeId = allIds.replace(/,/g, '_');
-    var primaryId = group.loans[0].id;
-    var isPrimaryEMI = group.loans[0].isEMI;
-    var isPrimaryActive = group.loans[0]._stats.statusInMonth === 'active';
-    var phone = first.phone ? first.phone.replace(/\D/g, '') : '';
-    var iconsHtml =
-      (phone ? '<span onclick="window.open(\'tel:' + phone + '\',\'_self\')" title="Call">📞</span><span onclick="window.open(\'https://wa.me/91' + phone + '\',\'_blank\')" title="WhatsApp">💬</span>' : '') +
-      '<span onclick="showLedger(\'' + primaryId + '\',\'lent\')" title="Ledger">📋</span>' +
-      (isPrimaryActive ? (isPrimaryEMI ? '<span onclick="promptRecordEMI(\'' + primaryId + '\',\'received\')" title="Record EMI">📅</span>' : '<span onclick="quickReceiveInterest(\'' + primaryId + '\',\'lent\')" title="Quick Receive">⚡</span><span onclick="promptPayment(\'' + primaryId + '\',\'received\',\'principal\')" title="Repay">💰</span>') : '<span onclick="toggleLoanStatus(\'' + primaryId + '\',\'lent\')" title="Reopen">🔄</span>') +
-      (isPrimaryActive ? '<span onclick="lendMore(\'' + primaryId + '\')" title="Lend More">➕</span>' : '') +
-      (isPrimaryActive && !isPrimaryEMI ? '<span onclick="promptConvertEMI(\'' + primaryId + '\',\'lent\')" title="Convert to EMI">📊</span>' : '') +
-      '<span onclick="editLoan(\'' + primaryId + '\',\'lent\')" title="Edit">✏️</span>' +
-      '<span onclick="deleteLoan(\'' + primaryId + '\',\'lent\')" title="Delete">🗑️</span>';
-    var botDiv = document.createElement('div');
-    botDiv.style.cssText = 'border-top:1px solid var(--border-color);margin-top:0.5rem;padding-top:0.5rem;';
-    botDiv.innerHTML =
-      '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.35rem;"><span style="font-size:0.75rem;color:var(--text-secondary);">Exp ' + formatCurrency(groupYield) + ' · Rcvd ' + formatCurrency(totalRcvd) + '</span></div>' +
-      '<div style="display:flex;gap:0.35rem;align-items:center;margin-bottom:0.25rem;"><input type="number" id="quick-pay-group-' + safeId + '" class="form-input" placeholder="₹ Amount" style="flex:1;min-height:40px;font-size:1rem;padding:0.3rem 0.5rem;font-weight:600;" oninput="document.getElementById(\'bal-display-' + safeId + '\').textContent=formatCurrency(Math.max(0,' + groupYield + '-' + totalRcvd + '-Number(this.value||0)))"><span id="bal-display-' + safeId + '" style="font-size:0.85rem;font-weight:700;color:var(--color-warning);min-width:65px;">' + formatCurrency(Math.max(0, groupYield - totalRcvd)) + '</span><button class="btn btn-primary" style="min-height:40px;font-weight:700;font-size:0.9rem;padding:0.3rem 1rem;" onclick="quickGroupPayment(\'' + safeId + '\',\'lent\')">Recv</button></div>' +
-      '<div class="icon-strip" style="border-top:none;margin-top:0.15rem;padding-top:0;"><div class="icon-strip-left">' + iconsHtml + '</div></div>';
-    card.appendChild(botDiv);
+    // Status line
+    innerHtml += '<div style="font-size:0.7rem; color:#fff; font-style:italic; margin-bottom:0.2rem;">' + recvDisplay + (stats.advTotal > 0 ? ' · Adv ' + formatCurrency(stats.advTotal) : '') + (stats.lastPaymentDate ? ' · Last ' + formatDate(stats.lastPaymentDate) : '') + '</div>';
 
+    // Icon strip
+    innerHtml += '<div class="icon-strip"><div class="icon-strip-left">' +
+      (loan.phone ? '<span onclick="window.open(\'tel:' + loan.phone.replace(/\D/g, '') + '\',\'_self\')" title="Call">📞</span><span onclick="window.open(\'https://wa.me/91' + loan.phone.replace(/\D/g, '') + '\',\'_blank\')" title="WhatsApp">💬</span>' : '') +
+      '<span onclick="showLedger(\'' + loan.id + '\', \'lent\')" title="Ledger">📋</span>' +
+      (stats.statusInMonth === 'active'
+        ? (loan.isEMI
+          ? '<span onclick="promptRecordEMI(\'' + loan.id + '\', \'received\')" title="Record EMI">📅</span><span onclick="lendMore(\'' + loan.id + '\')" title="Lend More">➕</span>'
+          : '<span onclick="quickReceiveInterest(\'' + loan.id + '\', \'lent\')" title="Quick Receive">⚡</span><span onclick="promptPayment(\'' + loan.id + '\', \'received\', \'principal\')" title="Repay">💰</span><span onclick="lendMore(\'' + loan.id + '\')" title="Lend More">➕</span>')
+        : '<span onclick="toggleLoanStatus(\'' + loan.id + '\', \'lent\')" title="Reopen">🔄</span>'
+      ) +
+      (stats.statusInMonth === 'active' && !loan.isEMI ? '<span onclick="promptConvertEMI(\'' + loan.id + '\', \'lent\')" title="Convert to EMI">📊</span>' : '') +
+    '</div><div class="icon-strip-right">' +
+      '<span onclick="editLoan(\'' + loan.id + '\', \'lent\')" title="Edit">✏️</span>' +
+      '<span onclick="deleteLoan(\'' + loan.id + '\', \'lent\')" title="Delete">🗑️</span>' +
+    '</div></div>';
+
+    card.innerHTML = innerHtml;
     listContainer.appendChild(card);
   });
 }
