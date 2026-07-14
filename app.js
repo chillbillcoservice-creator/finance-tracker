@@ -1532,7 +1532,7 @@ function renderRecords() {
 
 const VIEWS = {
   dashboard: { title: 'Status', subtitle: 'Your aggregated financial overview at a glance.', render: renderDashboard },
-  records: { title: 'Records', subtitle: 'Bills, documents, construction, and settings.', render: renderRecords }
+  records: { title: 'Records', subtitle: 'Rent Agreements, documents, construction, and settings.', render: renderRecords }
 };
 
 function selectRecordsTab(event, tab, projectName) {
@@ -4896,8 +4896,8 @@ window._openUploadModalWithFile = function(type) {
   document.getElementById('upload-type').value = type;
   document.getElementById('upload-title').value = '';
   document.getElementById('upload-number').value = '';
-  var labelMap = {bills:'Bill No.',documents:'Document No.',policies:'Policy No.'};
-  var placeholderMap = {bills:'Enter bill number...',documents:'Enter document number...',policies:'Enter policy number...'};
+  var labelMap = {bills:'Agreement No.',documents:'Document No.',policies:'Policy No.'};
+  var placeholderMap = {bills:'Enter agreement number...',documents:'Enter document number...',policies:'Enter policy number...'};
   var label = document.getElementById('upload-number-label');
   if (label) label.textContent = labelMap[type] || 'Number';
   var input = document.getElementById('upload-number');
