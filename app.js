@@ -2887,8 +2887,11 @@ function renderLending() {
       } else {
         const advBadge = stats.hasAdvance ? ' <span style="font-size:0.55rem;color:var(--color-purple);font-weight:600;margin-left:0.2rem;">Adv</span>' : '';
         row.innerHTML =
-          '<div style="font-size:0.82rem;"><span style="font-weight:600;">' + formattedPrincipal + '</span> <span style="color:var(--text-secondary);">+' + formattedYield + '/mo</span></div>' +
-          '<div style="font-size:0.72rem;color:#fff;font-style:italic;">' + recvDisplay + (stats.advTotal > 0 ? ' · Adv ' + formatCurrency(stats.advTotal) : '') + advBadge + (stats.lastPaymentDate ? ' · ' + formatDate(stats.lastPaymentDate) : '') + '</div>';
+          '<div style="display:flex;justify-content:space-between;align-items:center;">' +
+            '<div></div>' +
+            '<div style="text-align:right;"><div style="font-size:1.15rem;font-weight:800;color:var(--color-warning);line-height:1.2;">' + formattedPrincipal + '</div><div style="font-size:0.72rem;color:var(--text-secondary);line-height:1.3;">+' + formattedYield + '/mo</div></div>' +
+          '</div>' +
+          '<div style="font-size:0.7rem;color:#fff;font-style:italic;margin-top:0.15rem;">' + recvDisplay + (stats.advTotal > 0 ? ' · Adv ' + formatCurrency(stats.advTotal) : '') + advBadge + (stats.lastPaymentDate ? ' · ' + formatDate(stats.lastPaymentDate) : '') + '</div>';
       }
       card.appendChild(row);
     });
