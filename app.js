@@ -1246,6 +1246,9 @@ function quickLoanPayment(loanId, direction) {
     note: 'Principal repayment'
   });
   saveState();
+  if (getOutstandingPrincipal(loan.id, loan.principal) <= 0) {
+    alert('Loan fully settled! ✅');
+  }
   refreshActiveTab();
   renderDashboard();
 }
@@ -1281,6 +1284,9 @@ function quickGroupPayment(safeId, direction) {
     note: 'Principal repayment'
   });
   saveState();
+  if (getOutstandingPrincipal(target.id, target.principal) <= 0) {
+    alert('Loan fully settled! ✅');
+  }
   refreshActiveTab();
   renderDashboard();
 }
