@@ -365,7 +365,7 @@
                       <option value="Taxes">Taxes / Fees</option>
                       <option value="House Tax">House Tax</option>
                       <option value="ITR">ITR</option>
-                      <option value="Utilities">Utilities (Rent Agreements)</option>
+                      <option value="Utilities">Utilities (Bills)</option>
                       <option value="Insurance">Insurance</option>
                       <option value="Car Insurance">Car Insurance</option>
                       <option value="Health">Health</option>
@@ -479,13 +479,13 @@
         <!-- Bills / Docs / Policies Summary Cards -->
         <div class="card summary-card" onclick="selectRecordsTab('bills')" style="border-left: 4px solid var(--color-warning); cursor: pointer; margin-bottom: 0.75rem;">
           <div class="summary-card-header">
-            <span style="font-weight: 700; font-size: 0.78rem; color: var(--text-primary); text-transform: uppercase; letter-spacing: 0.3px;">Rent Agreements</span>
+            <span style="font-weight: 700; font-size: 0.78rem; color: var(--text-primary); text-transform: uppercase; letter-spacing: 0.3px;">Bills</span>
             <div class="summary-card-icon" style="background: rgba(251, 191, 36, 0.1); color: var(--color-warning);">
               <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
             </div>
           </div>
           <div class="summary-value summary-value-big" id="count-bills" style="color: var(--color-warning);">0</div>
-          <div class="summary-sub-value" style="margin-top: 0.25rem; font-size: 0.72rem; font-weight: 500; color: var(--text-secondary);">Agreements</div>
+          <div class="summary-sub-value" style="margin-top: 0.25rem; font-size: 0.72rem; font-weight: 500; color: var(--text-secondary);">Bills</div>
         </div>
         <div class="card summary-card" onclick="selectRecordsTab('documents')" style="border-left: 4px solid var(--color-success); cursor: pointer; margin-bottom: 0.75rem;">
           <div class="summary-card-header">
@@ -523,7 +523,7 @@
         <!-- Bills Section -->
         <div class="card" id="section-bills" style="margin-bottom: 1.25rem;">
           <div class="section-header" style="display: flex; justify-content: space-between; align-items: center;">
-            <h2 style="margin-bottom: 0;">Rent Agreements</h2>
+            <h2 style="margin-bottom: 0;">Bills</h2>
             <div style="display: flex; gap: 0.35rem; align-items: center;">
               <button class="btn btn-secondary btn-sm" onclick="triggerUpload('bills', 'camera')" title="Camera" style="padding:0.4rem 0.6rem;line-height:1;border-radius:6px;font-size:0.82rem;">📸</button>
               <button class="btn btn-sm" onclick="triggerUpload('bills', 'upload')" title="Upload" style="background:var(--color-success);color:#fff;border:none;padding:0.4rem 0.7rem;border-radius:6px;font-size:0.9rem;line-height:1;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;font-weight:700;">+</button>
@@ -534,7 +534,7 @@
               <div class="empty-state-icon">
                 <svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
               </div>
-              <p>No agreements to show yet.</p>
+              <p>No bills to show yet.</p>
             </div>
           </div>
         </div>
