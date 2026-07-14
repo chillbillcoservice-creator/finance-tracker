@@ -2914,8 +2914,8 @@ function renderLending() {
           var emiPct = stats.emiTotalCount > 0 ? Math.round(stats.emiPaidCount / stats.emiTotalCount * 100) : 0;
           card.innerHTML += '<div style="width:100%;height:3px;background:var(--bg-tertiary);border-radius:2px;margin:0.15rem 0 0.2rem;"><div style="width:' + Math.min(emiPct,100) + '%;height:3px;background:var(--color-purple);border-radius:2px;"></div></div>';
         } else {
-          const advBadge = stats.hasAdvance ? ' <span style="font-size:0.55rem;color:var(--color-purple);font-weight:600;margin-left:0.2rem;">Adv</span>' : '';
-          card.innerHTML += '<div style="font-size:0.82rem;"><span style="font-weight:600;">' + formattedPrincipal + '</span> <span style="color:var(--text-secondary);">+' + formatCurrency(stats.monthlyYield) + '/mo</span>' + advBadge + '</div>';
+          const advTotal = stats.advTotal > 0 ? formatCurrency(stats.advTotal) : '';
+          card.innerHTML += '<div style="font-size:0.82rem;"><span style="font-weight:600;">' + formattedPrincipal + '</span> <span style="color:var(--text-secondary);">+' + formatCurrency(stats.monthlyYield) + '/mo</span>' + (advTotal ? ' <span style="font-size:0.6rem;color:var(--color-purple);font-weight:700;">Advance ' + advTotal + '</span>' : '') + '</div>';
         }
       });
 
