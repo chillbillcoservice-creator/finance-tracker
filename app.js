@@ -2885,10 +2885,15 @@ function renderLending() {
         listContainer.appendChild(card);
       });
     } else {
-      // Has EMI: one grouped card with all loans (EMI + non-EMI)
-      var allIds = loans.map(function(l) { return l.id; }).join(',');
+      // Has EMI: one grouped card with all loans (non-EMI first, then EMI)
+      var sortedGroup = loans.slice().sort(function(a, b) {
+        if (a._stats.statusInMonth !== b._stats.statusInMonth) return a._stats.statusInMonth === 'active' ? -1 : 1;
+        if (a.isEMI !== b.isEMI) return a.isEMI ? 1 : -1;
+        return b._stats.outstandingPrincipal - a._stats.outstandingPrincipal;
+      });
+      var allIds = sortedGroup.map(function(l) { return l.id; }).join(',');
       var groupOutstanding = 0, groupYield = 0, totalRcvd = 0;
-      loans.forEach(function(l) { groupOutstanding += l._stats.outstandingPrincipal; groupYield += l._stats.monthlyYield; totalRcvd += l._stats.currentMonthSum; });
+      sortedGroup.forEach(function(l) { groupOutstanding += l._stats.outstandingPrincipal; groupYield += l._stats.monthlyYield; totalRcvd += l._stats.currentMonthSum; });
 
       var card = document.createElement('div');
       card.className = 'card loan-card';
@@ -2896,7 +2901,7 @@ function renderLending() {
       card.setAttribute('data-loan-ids', allIds);
       card.innerHTML = '<div style="display:flex;justify-content:space-between;align-items:center;"><div><div style="font-weight:700;font-size:1rem;">' + name + '</div>' + (first.phone ? '<div style="font-size:0.82rem;color:#fff;margin-top:0.05rem;">' + first.phone + '</div>' : '') + '</div><div style="text-align:right;"><div style="font-size:1.15rem;font-weight:800;color:var(--color-warning);line-height:1.2;">' + formatCurrency(groupOutstanding) + '</div><div style="font-size:0.72rem;color:var(--text-secondary);line-height:1.3;">+' + formatCurrency(groupYield) + '/mo</div></div></div>';
 
-      loans.forEach(function(loan) {
+      sortedGroup.forEach(function(loan) {
         const stats = loan._stats;
         const formattedPrincipal = formatCurrency(stats.outstandingPrincipal);
         card.innerHTML += '<div style="border-top:1px solid var(--border-color);margin:0.35rem 0;"></div>';
@@ -2915,8 +2920,8 @@ function renderLending() {
       });
 
       var safeId = allIds.replace(/,/g, '_');
-      var primaryId = loans[0].id;
-      var isPActive = loans[0]._stats.statusInMonth === 'active';
+      var primaryId = sortedGroup[0].id;
+      var isPActive = sortedGroup[0]._stats.statusInMonth === 'active';
       var phone = first.phone ? first.phone.replace(/\D/g, '') : '';
       var icons =
         (phone ? '<span onclick="window.open(\'tel:' + phone + '\',\'_self\')" title="Call">📞</span><span onclick="window.open(\'https://wa.me/91' + phone + '\',\'_blank\')" title="WhatsApp">💬</span>' : '') +
