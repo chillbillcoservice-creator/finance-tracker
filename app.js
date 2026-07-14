@@ -484,6 +484,8 @@ function loadState() {
       state.properties = state.properties || [];
       var defaults = ['23/48 ground floor', '23/48 3rd floor', '1/104'];
       defaults.forEach(function(d) { if (state.properties.indexOf(d) === -1) state.properties.push(d); });
+      state.projectStatus = state.projectStatus || {};
+      state.properties.forEach(function(p) { if (state.projectStatus[p] === undefined) state.projectStatus[p] = 'ongoing'; });
       
       const t = document.getElementById('toggle-pending-names');
       if(t) t.checked = state.showPendingNames;
@@ -519,7 +521,7 @@ function loadState() {
   } else {
     // Fresh start with empty data
     localStorage.removeItem(STORAGE_KEY);
-    state = { lent: [], borrowed: [], rentals: [], interestPayments: [], rentPayments: [], expenses: [], renewals: [], files: [], theme: 'black-and-colored-plain', properties: ['23/48 ground floor', '23/48 3rd floor', '1/104'] };
+    state = { lent: [], borrowed: [], rentals: [], interestPayments: [], rentPayments: [], expenses: [], renewals: [], files: [], theme: 'black-and-colored-plain', properties: ['23/48 ground floor', '23/48 3rd floor', '1/104'], projectStatus: { '23/48 ground floor': 'ongoing', '23/48 3rd floor': 'ongoing', '1/104': 'ongoing' } };
     saveState();
     localStorage.setItem(STORAGE_KEY + '_v', SEED_VERSION);
   }
@@ -1530,7 +1532,7 @@ function renderRecords() {
 
 const VIEWS = {
   dashboard: { title: 'Status', subtitle: 'Your aggregated financial overview at a glance.', render: renderDashboard },
-  records: { title: 'Records', subtitle: 'Bills, documents, construction, and settings.', render: renderRecords }
+  records: { title: 'Records', subtitle: 'Rent Agreements, documents, construction, and settings.', render: renderRecords }
 };
 
 function selectRecordsTab(event, tab, projectName) {
@@ -4604,6 +4606,13 @@ window.deleteConstruction = function(id) {
   }
 };
 
+window.finaliseProject = function(name) {
+  if (!confirm('Finalise "' + name + '"? This will move it to History.')) return;
+  state.projectStatus[name] = 'finalised';
+  saveState();
+  renderConstruction();
+};
+
 window._selectedConstCat = null;
 window._selectedConstPayMethod = 'cash';
 window._selectedConstProject = window._selectedConstProject || '23/48 Ground Floor';
@@ -4684,18 +4693,29 @@ function renderConstruction() {
   
   try {
     var projects = (state.properties || []).slice();
-    if (projects.length === 0) projects = ['23/48 Ground Floor', '23/48 3rd Floor', '1/104'];
+    if (projects.length === 0) projects = ['23/48 ground floor', '23/48 3rd floor', '1/104'];
+    state.projectStatus = state.projectStatus || {};
+    projects.forEach(function(p) { if (state.projectStatus[p] === undefined) state.projectStatus[p] = 'ongoing'; });
+    
+    var ongoingProjects = projects.filter(function(p) { return state.projectStatus[p] === 'ongoing'; });
+    var finalisedProjects = projects.filter(function(p) { return state.projectStatus[p] === 'finalised'; });
+    
+    var allProjects = ongoingProjects.concat(finalisedProjects);
+    if (allProjects.length === 0 && window._selectedConstProject) {
+      window._selectedConstProject = null;
+    }
+    
     var constructionExpenses = (state.expenses || []).filter(function(e) { return e && e.category === 'construction'; });
     var categories = ['Carpenter', 'Painter', 'Welding', 'Mistri', 'Electrician', 'Plumber', 'Malba', 'Hardware', 'Furniture', 'Ghisai', 'Glass Work', 'AC Service', 'Others'];
     
     var selectedProject = window._selectedConstProject;
-    if (!selectedProject || projects.indexOf(selectedProject) === -1) {
-      selectedProject = projects[0];
+    if (!selectedProject || allProjects.indexOf(selectedProject) === -1) {
+      selectedProject = allProjects.length > 0 ? allProjects[0] : null;
       window._selectedConstProject = selectedProject;
     }
     var payMethod = window._selectedConstPayMethod || 'cash';
     
-    var exps = constructionExpenses.filter(function(e) { return e && e.project === selectedProject; }).sort(function(a, b) { return new Date(b.date || 0) - new Date(a.date || 0); });
+    var exps = selectedProject ? constructionExpenses.filter(function(e) { return e && e.project === selectedProject; }).sort(function(a, b) { return new Date(b.date || 0) - new Date(a.date || 0); }) : [];
     var total = exps.reduce(function(sum, e) { return sum + (Number(e.amount) || 0); }, 0);
     
     var catButtonsHtml = categories.map(function(cat) {
@@ -4724,15 +4744,46 @@ function renderConstruction() {
       });
     }
     
+    // --- Ongoing Projects Status Block (only projects with expenses) ---
+    var ongoingWithExpenses = ongoingProjects.length > 0 ? ongoingProjects.filter(function(p) {
+      return constructionExpenses.filter(function(e) { return e && e.project === p; }).reduce(function(s, e) { return s + (Number(e.amount) || 0); }, 0) > 0;
+    }) : [];
+    var statusHtml = '';
+    ongoingWithExpenses.forEach(function(p) {
+      var pt = constructionExpenses.filter(function(e) { return e && e.project === p; }).reduce(function(s, e) { return s + (Number(e.amount) || 0); }, 0);
+      statusHtml += '<div style="display:flex;justify-content:space-between;align-items:center;padding:0.25rem 0.5rem;font-size:0.8rem;font-weight:600;color:var(--text-primary);background:var(--bg-card);border:1px solid var(--border-color);border-radius:6px;margin-bottom:0.35rem;">' +
+        '<span>🏗 ' + p + '</span>' +
+        '<div style="display:flex;align-items:center;gap:0.4rem;">' +
+          '<span style="color:var(--color-danger);font-weight:700;">' + formatCurrency(pt) + '</span>' +
+          '<button class="btn btn-sm" onclick="event.stopPropagation();finaliseProject(\'' + p.replace(/'/g, "\\'") + '\')" style="padding:0.1rem 0.45rem;font-size:0.58rem;background:transparent;color:var(--color-danger);border:1px solid var(--color-danger);border-radius:4px;cursor:pointer;font-weight:600;line-height:1.4;">Finalise</button>' +
+        '</div>' +
+      '</div>';
+    });
+    
+    // --- History Status Block (only projects with expenses) ---
+    var finalisedWithExpenses = finalisedProjects.length > 0 ? finalisedProjects.filter(function(p) {
+      return constructionExpenses.filter(function(e) { return e && e.project === p; }).reduce(function(s, e) { return s + (Number(e.amount) || 0); }, 0) > 0;
+    }) : [];
+    finalisedWithExpenses.forEach(function(p) {
+      var pt = constructionExpenses.filter(function(e) { return e && e.project === p; }).reduce(function(s, e) { return s + (Number(e.amount) || 0); }, 0);
+      statusHtml += '<div style="display:flex;justify-content:space-between;align-items:center;padding:0.25rem 0.5rem;font-size:0.8rem;font-weight:600;color:var(--text-secondary);opacity:0.7;background:var(--bg-card);border:1px solid var(--border-color);border-radius:6px;margin-bottom:0.35rem;">' +
+        '<span>✅ ' + p + '</span>' +
+        '<span style="font-weight:700;">' + formatCurrency(pt) + '</span>' +
+      '</div>';
+    });
+    
+    // --- Project Buttons (all projects) ---
     var projectBtnsHtml = '';
-    for (var i = 0; i < projects.length; i++) {
-      var p = projects[i];
+    for (var i = 0; i < allProjects.length; i++) {
+      var p = allProjects[i];
       var isSel = p === selectedProject;
-      projectBtnsHtml += '<button class="btn btn-sm" data-project="' + p + '" onclick="selectConstProject(this)" style="flex:1; min-width:80px; padding:0.3rem; font-size:0.7rem; background:' + (isSel ? 'var(--color-accent)' : 'var(--bg-secondary)') + '; color:' + (isSel ? '#fff' : 'var(--text-primary)') + '; border:1px solid ' + (isSel ? 'var(--color-accent)' : 'var(--border-color)') + '; cursor:pointer;">' + p + '</button>';
+      var isFinalised = state.projectStatus[p] === 'finalised';
+      projectBtnsHtml += '<button class="btn btn-sm" data-project="' + p + '" onclick="selectConstProject(this)" style="flex:1; min-width:80px; padding:0.3rem; font-size:0.7rem; background:' + (isSel ? (isFinalised ? 'var(--color-purple)' : 'var(--color-accent)') : 'var(--bg-secondary)') + '; color:' + (isSel ? '#fff' : (isFinalised ? 'var(--text-secondary)' : 'var(--text-primary)')) + '; border:1px solid ' + (isSel ? (isFinalised ? 'var(--color-purple)' : 'var(--color-accent)') : 'var(--border-color)') + '; cursor:pointer;">' + (isFinalised ? '✅ ' : '') + p + '</button>';
     }
     
-    var html = '<div style="display: flex; gap: 0.5rem; margin-bottom: 0.75rem; flex-wrap: wrap;">' + projectBtnsHtml + '</div>' +
-      '<div class="card" style="margin-bottom: 0; padding: 0.75rem; border: 1px solid var(--border-color); background: var(--bg-card);">' +
+    var html = statusHtml +
+      '<div style="display: flex; gap: 0.5rem; margin-bottom: 0.75rem; flex-wrap: wrap;">' + projectBtnsHtml + '</div>' +
+      (selectedProject ? '<div class="card" style="margin-bottom: 0; padding: 0.75rem; border: 1px solid var(--border-color); background: var(--bg-card);">' +
         '<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">' +
           '<strong style="font-size: 0.9rem; color: var(--color-accent);">' + selectedProject + '</strong>' +
           '<span style="font-weight: 700; color: var(--text-primary); font-size: 0.85rem;">Total: ' + formatCurrency(total) + '</span>' +
@@ -4766,13 +4817,15 @@ function renderConstruction() {
         '<div style="display: flex; flex-direction: column; gap: 0.35rem;">' +
           (expensesHtml || '<div style="font-size: 0.75rem; color: var(--text-muted); text-align: center; padding: 0.75rem; background: var(--input-bg); border-radius: 6px;">No payments.</div>') +
         '</div>' +
-      '</div>';
+      '</div>' : '');
     
     container.innerHTML = html;
     
     var totalConstExps = projects.length;
     var countEl = document.getElementById('count-construction');
     if (countEl) countEl.textContent = totalConstExps;
+    var subtextEl = document.getElementById('subtext-construction');
+    if (subtextEl) subtextEl.textContent = (ongoingWithExpenses.length > 0 ? ongoingWithExpenses.length + ' Ongoing' : '0 Ongoing') + (finalisedWithExpenses.length > 0 ? ' · ' + finalisedWithExpenses.length + ' History' : '');
   } catch (err) {
     container.innerHTML = '<div style="color:var(--color-danger); padding: 1rem; background: var(--bg-card); border-radius: 8px;">Error loading construction data: ' + err.message + '. Please clear your cache or check data integrity.</div>';
     console.error('Construction render error:', err);
@@ -4835,8 +4888,8 @@ window._openUploadModalWithFile = function(type) {
   document.getElementById('upload-type').value = type;
   document.getElementById('upload-title').value = '';
   document.getElementById('upload-number').value = '';
-  var labelMap = {bills:'Bill No.',documents:'Document No.',policies:'Policy No.'};
-  var placeholderMap = {bills:'Enter bill number...',documents:'Enter document number...',policies:'Enter policy number...'};
+  var labelMap = {bills:'Agreement No.',documents:'Document No.',policies:'Policy No.'};
+  var placeholderMap = {bills:'Enter agreement number...',documents:'Enter document number...',policies:'Enter policy number...'};
   var label = document.getElementById('upload-number-label');
   if (label) label.textContent = labelMap[type] || 'Number';
   var input = document.getElementById('upload-number');
