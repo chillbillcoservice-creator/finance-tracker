@@ -4700,7 +4700,8 @@ function renderConstruction() {
     var ongoingProjects = projects.filter(function(p) { return state.projectStatus[p] === 'ongoing'; });
     var finalisedProjects = projects.filter(function(p) { return state.projectStatus[p] === 'finalised'; });
     
-    if (ongoingProjects.length === 0 && window._selectedConstProject) {
+    var allProjects = ongoingProjects.concat(finalisedProjects);
+    if (allProjects.length === 0 && window._selectedConstProject) {
       window._selectedConstProject = null;
     }
     
@@ -4708,8 +4709,8 @@ function renderConstruction() {
     var categories = ['Carpenter', 'Painter', 'Welding', 'Mistri', 'Electrician', 'Plumber', 'Malba', 'Hardware', 'Furniture', 'Ghisai', 'Glass Work', 'AC Service', 'Others'];
     
     var selectedProject = window._selectedConstProject;
-    if (!selectedProject || ongoingProjects.indexOf(selectedProject) === -1) {
-      selectedProject = ongoingProjects.length > 0 ? ongoingProjects[0] : null;
+    if (!selectedProject || allProjects.indexOf(selectedProject) === -1) {
+      selectedProject = allProjects.length > 0 ? allProjects[0] : null;
       window._selectedConstProject = selectedProject;
     }
     var payMethod = window._selectedConstPayMethod || 'cash';
@@ -4771,12 +4772,13 @@ function renderConstruction() {
       '</div>';
     });
     
-    // --- Project Buttons (ongoing only) ---
+    // --- Project Buttons (all projects) ---
     var projectBtnsHtml = '';
-    for (var i = 0; i < ongoingProjects.length; i++) {
-      var p = ongoingProjects[i];
+    for (var i = 0; i < allProjects.length; i++) {
+      var p = allProjects[i];
       var isSel = p === selectedProject;
-      projectBtnsHtml += '<button class="btn btn-sm" data-project="' + p + '" onclick="selectConstProject(this)" style="flex:1; min-width:80px; padding:0.3rem; font-size:0.7rem; background:' + (isSel ? 'var(--color-accent)' : 'var(--bg-secondary)') + '; color:' + (isSel ? '#fff' : 'var(--text-primary)') + '; border:1px solid ' + (isSel ? 'var(--color-accent)' : 'var(--border-color)') + '; cursor:pointer;">' + p + '</button>';
+      var isFinalised = state.projectStatus[p] === 'finalised';
+      projectBtnsHtml += '<button class="btn btn-sm" data-project="' + p + '" onclick="selectConstProject(this)" style="flex:1; min-width:80px; padding:0.3rem; font-size:0.7rem; background:' + (isSel ? (isFinalised ? 'var(--color-purple)' : 'var(--color-accent)') : 'var(--bg-secondary)') + '; color:' + (isSel ? '#fff' : (isFinalised ? 'var(--text-secondary)' : 'var(--text-primary)')) + '; border:1px solid ' + (isSel ? (isFinalised ? 'var(--color-purple)' : 'var(--color-accent)') : 'var(--border-color)') + '; cursor:pointer;">' + (isFinalised ? '✅ ' : '') + p + '</button>';
     }
     
     var html = statusHtml +
