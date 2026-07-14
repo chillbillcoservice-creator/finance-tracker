@@ -2900,7 +2900,9 @@ function renderLending() {
     var primaryId = group.loans[0].id;
     var isPrimaryEMI = group.loans[0].isEMI;
     var isPrimaryActive = group.loans[0]._stats.statusInMonth === 'active';
+    var phone = first.phone ? first.phone.replace(/\D/g, '') : '';
     var iconsHtml =
+      (phone ? '<span onclick="window.open(\'tel:' + phone + '\',\'_self\')" title="Call">📞</span><span onclick="window.open(\'https://wa.me/91' + phone + '\',\'_blank\')" title="WhatsApp">💬</span>' : '') +
       '<span onclick="showLedger(\'' + primaryId + '\',\'lent\')" title="Ledger">📋</span>' +
       (isPrimaryActive ? (isPrimaryEMI ? '<span onclick="promptRecordEMI(\'' + primaryId + '\',\'received\')" title="Record EMI">📅</span>' : '<span onclick="quickReceiveInterest(\'' + primaryId + '\',\'lent\')" title="Quick Receive">⚡</span><span onclick="promptPayment(\'' + primaryId + '\',\'received\',\'principal\')" title="Repay">💰</span>') : '<span onclick="toggleLoanStatus(\'' + primaryId + '\',\'lent\')" title="Reopen">🔄</span>') +
       (isPrimaryActive ? '<span onclick="lendMore(\'' + primaryId + '\')" title="Lend More">➕</span>' : '') +
