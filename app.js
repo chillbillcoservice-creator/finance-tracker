@@ -4748,44 +4748,28 @@ function renderConstruction() {
       return constructionExpenses.filter(function(e) { return e && e.project === p; }).reduce(function(s, e) { return s + (Number(e.amount) || 0); }, 0) > 0;
     }) : [];
     var statusHtml = '';
-    if (ongoingWithExpenses.length > 0) {
-      statusHtml += '<div style="padding:0.4rem 0.5rem;background:rgba(var(--color-accent-rgb),0.08);border-radius:6px;border-left:3px solid var(--color-accent);margin-bottom:0.75rem;">' +
-        '<div style="font-size:0.62rem;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-secondary);margin-bottom:0.25rem;display:flex;align-items:center;gap:0.35rem;">' +
-          '<span>🏗 Ongoing Projects</span>' +
-          '<span style="background:var(--color-accent);color:#fff;font-size:0.6rem;font-weight:800;padding:0.05rem 0.4rem;border-radius:7px;">' + ongoingWithExpenses.length + '</span>' +
-        '</div>';
-      ongoingWithExpenses.forEach(function(p) {
-        var pt = constructionExpenses.filter(function(e) { return e && e.project === p; }).reduce(function(s, e) { return s + (Number(e.amount) || 0); }, 0);
-        statusHtml += '<div style="display:flex;justify-content:space-between;align-items:center;padding:0.2rem 0;font-size:0.75rem;font-weight:600;color:var(--text-primary);">' +
-          '<span>🏗 ' + p + '</span>' +
-          '<div style="display:flex;align-items:center;gap:0.35rem;">' +
-            '<span style="color:var(--color-danger);font-weight:700;">' + formatCurrency(pt) + '</span>' +
-            '<button class="btn btn-sm" onclick="event.stopPropagation();finaliseProject(\'' + p.replace(/'/g, "\\'") + '\')" style="padding:0.1rem 0.45rem;font-size:0.58rem;background:transparent;color:var(--color-danger);border:1px solid var(--color-danger);border-radius:4px;cursor:pointer;font-weight:600;line-height:1.4;">Finalise</button>' +
-          '</div>' +
-        '</div>';
-      });
-      statusHtml += '</div>';
-    }
+    ongoingWithExpenses.forEach(function(p) {
+      var pt = constructionExpenses.filter(function(e) { return e && e.project === p; }).reduce(function(s, e) { return s + (Number(e.amount) || 0); }, 0);
+      statusHtml += '<div style="display:flex;justify-content:space-between;align-items:center;padding:0.25rem 0.5rem;font-size:0.8rem;font-weight:600;color:var(--text-primary);background:var(--bg-card);border:1px solid var(--border-color);border-radius:6px;margin-bottom:0.35rem;">' +
+        '<span>🏗 ' + p + '</span>' +
+        '<div style="display:flex;align-items:center;gap:0.4rem;">' +
+          '<span style="color:var(--color-danger);font-weight:700;">' + formatCurrency(pt) + '</span>' +
+          '<button class="btn btn-sm" onclick="event.stopPropagation();finaliseProject(\'' + p.replace(/'/g, "\\'") + '\')" style="padding:0.1rem 0.45rem;font-size:0.58rem;background:transparent;color:var(--color-danger);border:1px solid var(--color-danger);border-radius:4px;cursor:pointer;font-weight:600;line-height:1.4;">Finalise</button>' +
+        '</div>' +
+      '</div>';
+    });
     
     // --- History Status Block (only projects with expenses) ---
     var finalisedWithExpenses = finalisedProjects.length > 0 ? finalisedProjects.filter(function(p) {
       return constructionExpenses.filter(function(e) { return e && e.project === p; }).reduce(function(s, e) { return s + (Number(e.amount) || 0); }, 0) > 0;
     }) : [];
-    if (finalisedWithExpenses.length > 0) {
-      statusHtml += '<div style="padding:0.4rem 0.5rem;background:rgba(128,90,213,0.08);border-radius:6px;border-left:3px solid var(--color-purple);margin-bottom:0.75rem;">' +
-        '<div style="font-size:0.62rem;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-secondary);margin-bottom:0.25rem;display:flex;align-items:center;gap:0.35rem;">' +
-          '<span>✅ History</span>' +
-          '<span style="background:var(--color-purple);color:#fff;font-size:0.6rem;font-weight:800;padding:0.05rem 0.4rem;border-radius:7px;">' + finalisedWithExpenses.length + '</span>' +
-        '</div>';
-      finalisedWithExpenses.forEach(function(p) {
-        var pt = constructionExpenses.filter(function(e) { return e && e.project === p; }).reduce(function(s, e) { return s + (Number(e.amount) || 0); }, 0);
-        statusHtml += '<div style="display:flex;justify-content:space-between;align-items:center;padding:0.2rem 0;font-size:0.75rem;font-weight:600;color:var(--text-secondary);opacity:0.7;">' +
-          '<span>✅ ' + p + '</span>' +
-          '<span style="font-weight:700;">' + formatCurrency(pt) + '</span>' +
-        '</div>';
-      });
-      statusHtml += '</div>';
-    }
+    finalisedWithExpenses.forEach(function(p) {
+      var pt = constructionExpenses.filter(function(e) { return e && e.project === p; }).reduce(function(s, e) { return s + (Number(e.amount) || 0); }, 0);
+      statusHtml += '<div style="display:flex;justify-content:space-between;align-items:center;padding:0.25rem 0.5rem;font-size:0.8rem;font-weight:600;color:var(--text-secondary);opacity:0.7;background:var(--bg-card);border:1px solid var(--border-color);border-radius:6px;margin-bottom:0.35rem;">' +
+        '<span>✅ ' + p + '</span>' +
+        '<span style="font-weight:700;">' + formatCurrency(pt) + '</span>' +
+      '</div>';
+    });
     
     // --- Project Buttons (ongoing only) ---
     var projectBtnsHtml = '';
