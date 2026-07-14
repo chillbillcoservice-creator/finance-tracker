@@ -2842,10 +2842,10 @@ function renderLending() {
       } else if (loan.isEMI) {
         var emiPct = stats.emiTotalCount > 0 ? Math.round(stats.emiPaidCount / stats.emiTotalCount * 100) : 0;
         row.innerHTML =
-          '<div style="display:flex;justify-content:space-between;align-items:center;">' +
+          (group.loans.length > 1 ? '<div style="display:flex;justify-content:space-between;align-items:center;">' +
             '<div><span style="font-size:0.75rem;color:var(--color-purple);font-weight:600;">EMI</span> <span style="font-size:0.72rem;color:var(--text-secondary);">@ ' + formatCurrency(Number(loan.emiAmount)) + '/mo</span></div>' +
             '<div style="text-align:right;"><div style="font-size:1.15rem;font-weight:800;color:var(--color-warning);line-height:1.2;">' + formattedPrincipal + '</div><div style="font-size:0.72rem;color:var(--text-secondary);line-height:1.3;">Paid ' + stats.emiPaidCount + '/' + stats.emiTotalCount + '</div></div>' +
-          '</div>' +
+          '</div>' : '') +
           '<div style="width:100%;height:3px;background:var(--bg-tertiary);border-radius:2px;margin:0.25rem 0;"><div style="width:' + Math.min(emiPct,100) + '%;height:3px;background:var(--color-purple);border-radius:2px;"></div></div>' +
           '<div style="display:flex;gap:0.35rem;align-items:center;margin-bottom:0.25rem;"><input type="number" id="quick-pay-' + loan.id + '" class="form-input" placeholder="₹ Amount" style="flex:1;min-height:40px;font-size:1rem;padding:0.3rem 0.5rem;font-weight:600;"><button class="btn btn-primary" style="min-height:40px;font-weight:700;font-size:0.9rem;padding:0.3rem 1rem;" onclick="quickLoanPayment(\'' + loan.id + '\',\'lent\')">Recv</button></div>' +
           '<div style="font-size:0.7rem;color:#fff;font-style:italic;margin-bottom:0.2rem;">' + recvDisplay + (stats.lastPaymentDate ? ' \u00b7 ' + formatDate(stats.lastPaymentDate) : '') + '</div>' +
@@ -2853,10 +2853,10 @@ function renderLending() {
       } else {
         const advBadge = stats.hasAdvance ? ' <span style="font-size:0.55rem;color:var(--color-purple);font-weight:600;margin-left:0.2rem;">Adv</span>' : '';
         row.innerHTML =
-          '<div style="display:flex;justify-content:space-between;align-items:center;">' +
+          (group.loans.length > 1 ? '<div style="display:flex;justify-content:space-between;align-items:center;">' +
             '<div></div>' +
             '<div style="text-align:right;"><div style="font-size:1.15rem;font-weight:800;color:var(--color-warning);line-height:1.2;">' + formattedPrincipal + '</div><div style="font-size:0.72rem;color:var(--text-secondary);line-height:1.3;">+' + formattedYield + '/mo</div></div>' +
-          '</div>' +
+          '</div>' : '') +
           '<div style="display:flex;gap:0.35rem;align-items:center;margin-bottom:0.25rem;"><input type="number" id="quick-pay-' + loan.id + '" class="form-input" placeholder="₹ Amount" style="flex:1;min-height:40px;font-size:1rem;padding:0.3rem 0.5rem;font-weight:600;"><button class="btn btn-primary" style="min-height:40px;font-weight:700;font-size:0.9rem;padding:0.3rem 1rem;" onclick="quickLoanPayment(\'' + loan.id + '\',\'lent\')">Recv</button></div>' +
           '<div style="font-size:0.7rem;color:#fff;font-style:italic;margin-bottom:0.2rem;">' + recvDisplay + (stats.advTotal > 0 ? ' \u00b7 Adv ' + formatCurrency(stats.advTotal) : '') + advBadge + (stats.lastPaymentDate ? ' \u00b7 ' + formatDate(stats.lastPaymentDate) : '') + '</div>' +
           '<div class="icon-strip"><div class="icon-strip-left"><span onclick="showLedger(\'' + loan.id + '\',\'lent\')" title="Ledger">📋</span><span onclick="quickReceiveInterest(\'' + loan.id + '\',\'lent\')" title="Quick Receive">⚡</span><span onclick="promptPayment(\'' + loan.id + '\',\'received\',\'principal\')" title="Repay">💰</span><span onclick="lendMore(\'' + loan.id + '\')" title="Lend More">➕</span><span onclick="promptConvertEMI(\'' + loan.id + '\',\'lent\')" title="Convert to EMI">📊</span></div><div class="icon-strip-right"><span onclick="editLoan(\'' + loan.id + '\',\'lent\')" title="Edit">✏️</span><span onclick="deleteLoan(\'' + loan.id + '\',\'lent\')" title="Delete">🗑️</span></div></div>';
