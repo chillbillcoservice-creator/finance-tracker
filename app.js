@@ -4743,15 +4743,18 @@ function renderConstruction() {
       });
     }
     
-    // --- Ongoing Projects Status Block ---
+    // --- Ongoing Projects Status Block (only projects with expenses) ---
+    var ongoingWithExpenses = ongoingProjects.length > 0 ? ongoingProjects.filter(function(p) {
+      return constructionExpenses.filter(function(e) { return e && e.project === p; }).reduce(function(s, e) { return s + (Number(e.amount) || 0); }, 0) > 0;
+    }) : [];
     var statusHtml = '';
-    if (ongoingProjects.length > 0) {
+    if (ongoingWithExpenses.length > 0) {
       statusHtml += '<div style="padding:0.4rem 0.5rem;background:rgba(var(--color-accent-rgb),0.08);border-radius:6px;border-left:3px solid var(--color-accent);margin-bottom:0.75rem;">' +
         '<div style="font-size:0.62rem;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-secondary);margin-bottom:0.25rem;display:flex;align-items:center;gap:0.35rem;">' +
           '<span>🏗 Ongoing Projects</span>' +
-          '<span style="background:var(--color-accent);color:#fff;font-size:0.6rem;font-weight:800;padding:0.05rem 0.4rem;border-radius:7px;">' + ongoingProjects.length + '</span>' +
+          '<span style="background:var(--color-accent);color:#fff;font-size:0.6rem;font-weight:800;padding:0.05rem 0.4rem;border-radius:7px;">' + ongoingWithExpenses.length + '</span>' +
         '</div>';
-      ongoingProjects.forEach(function(p) {
+      ongoingWithExpenses.forEach(function(p) {
         var pt = constructionExpenses.filter(function(e) { return e && e.project === p; }).reduce(function(s, e) { return s + (Number(e.amount) || 0); }, 0);
         statusHtml += '<div style="display:flex;justify-content:space-between;align-items:center;padding:0.2rem 0;font-size:0.75rem;font-weight:600;color:var(--text-primary);">' +
           '<span>🏗 ' + p + '</span>' +
@@ -4764,14 +4767,17 @@ function renderConstruction() {
       statusHtml += '</div>';
     }
     
-    // --- History Status Block ---
-    if (finalisedProjects.length > 0) {
+    // --- History Status Block (only projects with expenses) ---
+    var finalisedWithExpenses = finalisedProjects.length > 0 ? finalisedProjects.filter(function(p) {
+      return constructionExpenses.filter(function(e) { return e && e.project === p; }).reduce(function(s, e) { return s + (Number(e.amount) || 0); }, 0) > 0;
+    }) : [];
+    if (finalisedWithExpenses.length > 0) {
       statusHtml += '<div style="padding:0.4rem 0.5rem;background:rgba(128,90,213,0.08);border-radius:6px;border-left:3px solid var(--color-purple);margin-bottom:0.75rem;">' +
         '<div style="font-size:0.62rem;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-secondary);margin-bottom:0.25rem;display:flex;align-items:center;gap:0.35rem;">' +
           '<span>✅ History</span>' +
-          '<span style="background:var(--color-purple);color:#fff;font-size:0.6rem;font-weight:800;padding:0.05rem 0.4rem;border-radius:7px;">' + finalisedProjects.length + '</span>' +
+          '<span style="background:var(--color-purple);color:#fff;font-size:0.6rem;font-weight:800;padding:0.05rem 0.4rem;border-radius:7px;">' + finalisedWithExpenses.length + '</span>' +
         '</div>';
-      finalisedProjects.forEach(function(p) {
+      finalisedWithExpenses.forEach(function(p) {
         var pt = constructionExpenses.filter(function(e) { return e && e.project === p; }).reduce(function(s, e) { return s + (Number(e.amount) || 0); }, 0);
         statusHtml += '<div style="display:flex;justify-content:space-between;align-items:center;padding:0.2rem 0;font-size:0.75rem;font-weight:600;color:var(--text-secondary);opacity:0.7;">' +
           '<span>✅ ' + p + '</span>' +
@@ -4833,7 +4839,7 @@ function renderConstruction() {
     var countEl = document.getElementById('count-construction');
     if (countEl) countEl.textContent = totalConstExps;
     var subtextEl = document.getElementById('subtext-construction');
-    if (subtextEl) subtextEl.textContent = (ongoingProjects.length > 0 ? ongoingProjects.length + ' Ongoing' : '0 Ongoing') + (finalisedProjects.length > 0 ? ' · ' + finalisedProjects.length + ' History' : '');
+    if (subtextEl) subtextEl.textContent = (ongoingWithExpenses.length > 0 ? ongoingWithExpenses.length + ' Ongoing' : '0 Ongoing') + (finalisedWithExpenses.length > 0 ? ' · ' + finalisedWithExpenses.length + ' History' : '');
   } catch (err) {
     container.innerHTML = '<div style="color:var(--color-danger); padding: 1rem; background: var(--bg-card); border-radius: 8px;">Error loading construction data: ' + err.message + '. Please clear your cache or check data integrity.</div>';
     console.error('Construction render error:', err);
