@@ -2879,12 +2879,14 @@ function renderLending() {
       if (stats.statusInMonth !== 'active') {
         row.innerHTML = '<div><span style="font-weight:600;">' + formattedPrincipal + (loan.isEMI ? ' <span style="color:var(--color-purple);font-weight:600;">EMI</span>' : '') + settledBadge + '</span> <span style="font-size:0.72rem;color:var(--text-secondary);">· ' + recvDisplay + '</span></div>';
       } else if (loan.isEMI) {
+        var emiPct = stats.emiTotalCount > 0 ? Math.round(stats.emiPaidCount / stats.emiTotalCount * 100) : 0;
         row.innerHTML =
           '<div style="display:flex;justify-content:space-between;align-items:center;">' +
             '<div></div>' +
             '<div style="text-align:right;"><div style="font-size:1.15rem;font-weight:800;color:var(--color-warning);line-height:1.2;">' + formattedPrincipal + '</div><div style="font-size:0.72rem;color:var(--text-secondary);line-height:1.3;">EMI @ ' + formatCurrency(Number(loan.emiAmount)) + '/mo · Paid ' + stats.emiPaidCount + '/' + stats.emiTotalCount + '</div></div>' +
           '</div>' +
-          '<div style="font-size:0.7rem;color:#fff;font-style:italic;margin-top:0.15rem;">' + recvDisplay + (stats.lastPaymentDate ? ' · ' + formatDate(stats.lastPaymentDate) : '') + '</div>';
+          '<div style="width:100%;height:3px;background:var(--bg-tertiary);border-radius:2px;margin:0.2rem 0 0.3rem;"><div style="width:' + Math.min(emiPct,100) + '%;height:3px;background:var(--color-purple);border-radius:2px;"></div></div>' +
+          '<div style="font-size:0.7rem;color:#fff;font-style:italic;">' + recvDisplay + (stats.lastPaymentDate ? ' · ' + formatDate(stats.lastPaymentDate) : '') + '</div>';
       } else {
         const advBadge = stats.hasAdvance ? ' <span style="font-size:0.55rem;color:var(--color-purple);font-weight:600;margin-left:0.2rem;">Adv</span>' : '';
         row.innerHTML =
