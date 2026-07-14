@@ -6780,6 +6780,18 @@ window.dismissGlanceRenewal = function() {
 // Quick Actions modal
 window.openQuickActions = function() { openModal('modal-quick-actions'); };
 
+window.toggleActionsMenu = function() {
+  var menu = document.getElementById('header-actions-menu');
+  if (!menu) return;
+  menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+};
+document.addEventListener('click', function(e) {
+  var menu = document.getElementById('header-actions-menu');
+  if (menu && menu.style.display !== 'none' && !e.target.closest('#btn-header-actions') && !e.target.closest('#header-actions-menu')) {
+    menu.style.display = 'none';
+  }
+});
+
 // Notes Diary
 window.openNotesDiary = function() {
   openModal('modal-notes-diary');
