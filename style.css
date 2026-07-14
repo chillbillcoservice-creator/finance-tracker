@@ -719,6 +719,7 @@ body::before {
   margin-bottom: 0;
   gap: 1rem;
   flex-wrap: wrap;
+  padding-top: 0.85rem;
 }
 
 .page-title h1 {
@@ -927,6 +928,7 @@ body::before {
 
 .tab-content.active {
   display: block;
+  padding-top: 0.85rem;
 }
 
 @keyframes fadeSlideUp {
@@ -2023,6 +2025,7 @@ body::before {
   .page-header {
     margin-bottom: 0;
     gap: 0.5rem;
+    padding-top: 0;
   }
   
   .page-title h1 { font-size: 1.25rem; }
