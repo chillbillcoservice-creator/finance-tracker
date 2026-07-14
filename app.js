@@ -485,6 +485,8 @@ function loadState() {
       var defaults = ['23/48 ground floor', '23/48 3rd floor', '1/104'];
       defaults.forEach(function(d) { if (state.properties.indexOf(d) === -1) state.properties.push(d); });
       state.projectStatus = state.projectStatus || {};
+      state.projectFinalisedDates = state.projectFinalisedDates || {};
+      state.projectFinalTotals = state.projectFinalTotals || {};
       state.properties.forEach(function(p) { if (state.projectStatus[p] === undefined) state.projectStatus[p] = 'ongoing'; });
       
       const t = document.getElementById('toggle-pending-names');
@@ -521,7 +523,7 @@ function loadState() {
   } else {
     // Fresh start with empty data
     localStorage.removeItem(STORAGE_KEY);
-    state = { lent: [], borrowed: [], rentals: [], interestPayments: [], rentPayments: [], expenses: [], renewals: [], files: [], theme: 'black-and-colored-plain', properties: ['23/48 ground floor', '23/48 3rd floor', '1/104'], projectStatus: { '23/48 ground floor': 'ongoing', '23/48 3rd floor': 'ongoing', '1/104': 'ongoing' } };
+    state = { lent: [], borrowed: [], rentals: [], interestPayments: [], rentPayments: [], expenses: [], renewals: [], files: [], theme: 'black-and-colored-plain', properties: ['23/48 ground floor', '23/48 3rd floor', '1/104'], projectStatus: { '23/48 ground floor': 'ongoing', '23/48 3rd floor': 'ongoing', '1/104': 'ongoing' }, projectFinalisedDates: {}, projectFinalTotals: {} };
     saveState();
     localStorage.setItem(STORAGE_KEY + '_v', SEED_VERSION);
   }
@@ -1871,19 +1873,15 @@ function renderDashboard() {
       expenseCardDetails.parentNode.insertBefore(constProjectsDiv, expenseCardDetails.nextSibling);
     }
     var constExps = state.expenses.filter(function(e) { return e && e.category === 'construction'; });
-    var projectTotals = {};
-    constExps.forEach(function(e) {
-      if (e.project) {
-        projectTotals[e.project] = (projectTotals[e.project] || 0) + Number(e.amount);
-      }
-    });
-    var activeProjects = Object.keys(projectTotals).filter(function(p) { return p; });
+    var ongoingNames = (state.properties || []).filter(function(p) { return state.projectStatus && state.projectStatus[p] === 'ongoing'; });
+    var monthConstExps = constExps.filter(function(e) { return e.date && e.date.startsWith(selectedMonthStr); });
+    var activeProjects = ongoingNames.filter(function(p) { return monthConstExps.some(function(e) { return e.project === p; }); });
     if (activeProjects.length > 0) {
       var projHtml = '<div style="padding: 0.3rem 0.4rem; background: rgba(var(--color-accent-rgb), 0.08); border-radius: 4px; border-left: 3px solid var(--color-accent);">';
       projHtml += '<div style="font-size: 0.6rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-secondary); margin-bottom: 0.2rem;">Ongoing Projects</div>';
       activeProjects.forEach(function(p) {
-        var total = projectTotals[p];
-        projHtml += '<div style="cursor: pointer; font-size: 0.78rem; font-weight: 600; color: var(--color-accent); padding: 0.15rem 0; display: flex; justify-content: space-between; align-items: center;" onclick="event.stopPropagation(); switchTab(\'records\'); setTimeout(function(){ selectRecordsTab(\'construction\', \'' + p.replace(/'/g, "\\'") + '\'); }, 100);"><span>🏗 ' + p + '</span><span style="color: var(--color-danger); font-weight: 700;">' + formatCurrency(total) + '</span></div>';
+        var monthTotal = monthConstExps.filter(function(e) { return e.project === p; }).reduce(function(s, e) { return s + (Number(e.amount) || 0); }, 0);
+        projHtml += '<div style="font-size: 0.78rem; font-weight: 600; color: var(--color-accent); padding: 0.15rem 0; display: flex; justify-content: space-between; align-items: center;"><span>🏗 ' + p + '</span><span style="color: var(--color-danger); font-weight: 700; cursor: pointer;" onclick="event.stopPropagation(); showConstructionLedger(\'' + p.replace(/'/g, "\\'") + '\');">' + formatCurrency(monthTotal) + '</span></div>';
       });
       projHtml += '</div>';
       constProjectsDiv.innerHTML = projHtml;
@@ -4603,8 +4601,14 @@ window.deleteConstruction = function(id) {
 window.finaliseProject = function(name) {
   if (!confirm('Finalise "' + name + '"? This will move it to History.')) return;
   state.projectStatus[name] = 'finalised';
+  state.projectFinalisedDates = state.projectFinalisedDates || {};
+  state.projectFinalisedDates[name] = new Date().toISOString().split('T')[0];
+  var exps = (state.expenses || []).filter(function(e) { return e && e.category === 'construction' && e.project === name; });
+  state.projectFinalTotals = state.projectFinalTotals || {};
+  state.projectFinalTotals[name] = exps.reduce(function(s, e) { return s + (Number(e.amount) || 0); }, 0);
   saveState();
   renderConstruction();
+  renderDashboard();
 };
 
 window._selectedConstCat = null;
@@ -4663,6 +4667,11 @@ window.submitQuickConst = function() {
     note: notesInput.value.trim()
   };
   
+  if (state.projectStatus[project] === 'finalised') {
+    state.projectStatus[project] = 'ongoing';
+    state.projectFinalisedDates = state.projectFinalisedDates || {};
+    delete state.projectFinalisedDates[project];
+  }
   state.expenses.push(newExp);
   saveState();
   
@@ -4760,8 +4769,12 @@ function renderConstruction() {
     }) : [];
     finalisedWithExpenses.forEach(function(p) {
       var pt = constructionExpenses.filter(function(e) { return e && e.project === p; }).reduce(function(s, e) { return s + (Number(e.amount) || 0); }, 0);
+      var expsForProject = constructionExpenses.filter(function(e) { return e && e.project === p; }).sort(function(a, b) { return new Date(a.date) - new Date(b.date); });
+      var startDate = expsForProject.length > 0 ? formatDate(expsForProject[0].date) : '';
+      var endDate = state.projectFinalisedDates && state.projectFinalisedDates[p] ? formatDate(state.projectFinalisedDates[p]) : (expsForProject.length > 0 ? formatDate(expsForProject[expsForProject.length - 1].date) : '');
+      var dateStr = startDate && endDate ? startDate + ' → ' + endDate : '';
       statusHtml += '<div style="display:flex;justify-content:space-between;align-items:center;padding:0.25rem 0.5rem;font-size:0.8rem;font-weight:600;color:var(--text-secondary);opacity:0.7;background:var(--bg-card);border:1px solid var(--border-color);border-radius:6px;margin-bottom:0.35rem;">' +
-        '<span>✅ ' + p + '</span>' +
+        '<div><div>✅ ' + p + '</div>' + (dateStr ? '<div style="font-size:0.65rem;opacity:0.7;margin-top:0.1rem;">' + dateStr + '</div>' : '') + '</div>' +
         '<span style="font-weight:700;">' + formatCurrency(pt) + '</span>' +
       '</div>';
     });
@@ -4815,17 +4828,79 @@ function renderConstruction() {
     
     container.innerHTML = html;
     
-    var totalConstExps = projects.length;
     var countEl = document.getElementById('count-construction');
-    if (countEl) countEl.textContent = totalConstExps;
     var subtextEl = document.getElementById('subtext-construction');
-    if (subtextEl) subtextEl.textContent = (ongoingWithExpenses.length > 0 ? ongoingWithExpenses.length + ' Ongoing' : '0 Ongoing') + (finalisedWithExpenses.length > 0 ? ' · ' + finalisedWithExpenses.length + ' History' : '');
+    var finalisedThisMonth = finalisedProjects.filter(function(p) {
+      var fd = state.projectFinalisedDates && state.projectFinalisedDates[p];
+      return fd && fd.startsWith(selectedMonthStr);
+    });
+    if (finalisedThisMonth.length > 0) {
+      var fp = finalisedThisMonth[finalisedThisMonth.length - 1];
+      var fpt = state.projectFinalTotals && state.projectFinalTotals[fp] ? formatCurrency(state.projectFinalTotals[fp]) : formatCurrency(constructionExpenses.filter(function(e) { return e && e.project === fp; }).reduce(function(s, e) { return s + (Number(e.amount) || 0); }, 0));
+      var fexps = constructionExpenses.filter(function(e) { return e && e.project === fp; }).sort(function(a, b) { return new Date(a.date) - new Date(b.date); });
+      var fstart = fexps.length > 0 ? formatDate(fexps[0].date) : '';
+      var fend = state.projectFinalisedDates && state.projectFinalisedDates[fp] ? formatDate(state.projectFinalisedDates[fp]) : '';
+      if (countEl) countEl.innerHTML = '✅ ' + fp + '<span style="font-weight:800;font-size:1.1rem;display:block;margin-top:0.1rem;">' + fpt + '</span>';
+      if (subtextEl) subtextEl.textContent = (fstart && fend ? fstart + ' → ' + fend : '');
+    } else if (ongoingWithExpenses.length > 0) {
+      var op = ongoingWithExpenses[ongoingWithExpenses.length - 1];
+      var opt = constructionExpenses.filter(function(e) { return e && e.project === op && e.date && e.date.startsWith(selectedMonthStr); }).reduce(function(s, e) { return s + (Number(e.amount) || 0); }, 0);
+      var oexps = constructionExpenses.filter(function(e) { return e && e.project === op; }).sort(function(a, b) { return new Date(a.date) - new Date(b.date); });
+      var ostart = oexps.length > 0 ? formatDate(oexps[0].date) : '';
+      if (countEl) countEl.innerHTML = '🏗 ' + op + '<span style="font-weight:800;font-size:1.1rem;display:block;margin-top:0.1rem;">' + formatCurrency(opt) + '</span>';
+      if (subtextEl) subtextEl.textContent = (ostart ? 'Start: ' + ostart : '');
+    } else {
+      if (countEl) countEl.textContent = projects.length;
+      if (subtextEl) subtextEl.textContent = (ongoingWithExpenses.length > 0 ? ongoingWithExpenses.length + ' Ongoing' : '0 Ongoing') + (finalisedWithExpenses.length > 0 ? ' · ' + finalisedWithExpenses.length + ' History' : '');
+    }
   } catch (err) {
     container.innerHTML = '<div style="color:var(--color-danger); padding: 1rem; background: var(--bg-card); border-radius: 8px;">Error loading construction data: ' + err.message + '. Please clear your cache or check data integrity.</div>';
     console.error('Construction render error:', err);
   }
   applyRecordsFilter();
 }
+
+window.showConstructionLedger = function(filterProject) {
+  closeModal('modal-group-details');
+  loadState();
+  var exps = (state.expenses || []).filter(function(e) { return e && e.category === 'construction'; });
+  if (filterProject) exps = exps.filter(function(e) { return e.project === filterProject; });
+  var projects = {};
+  exps.forEach(function(e) {
+    if (!projects[e.project]) projects[e.project] = { name: e.project, total: 0, expenses: [] };
+    projects[e.project].total += Number(e.amount) || 0;
+    projects[e.project].expenses.push(e);
+  });
+  var projectNames = Object.keys(projects).sort();
+  var allTotal = 0;
+  projectNames.forEach(function(p) { allTotal += projects[p].total; });
+  document.getElementById('ledger-title').textContent = filterProject ? 'Construction: ' + filterProject : 'All Construction Expenses';
+  var statsContainer = document.getElementById('ledger-stats');
+  var statsHtml = '<div class="loan-stat-box"><span class="loan-stat-val">' + projectNames.length + '</span><span class="loan-stat-lbl">Projects</span></div>' +
+    '<div class="loan-stat-box"><span class="loan-stat-val" style="color:var(--color-danger);">' + formatCurrency(allTotal) + '</span><span class="loan-stat-lbl">Total Spent</span></div>' +
+    '<div class="loan-stat-box"><span class="loan-stat-val" style="color:var(--color-accent);">' + exps.length + '</span><span class="loan-stat-lbl">Entries</span></div>';
+  statsContainer.innerHTML = statsHtml;
+  var listContainer = document.getElementById('ledger-list-container');
+  listContainer.innerHTML = '';
+  if (exps.length === 0) {
+    listContainer.innerHTML = '<p style="text-align:center;color:var(--text-muted);font-size:0.85rem;padding:1rem 0;">No construction expenses yet.</p>';
+  } else {
+    var sorted = exps.slice().sort(function(a, b) { return new Date(b.date) - new Date(a.date); });
+    sorted.forEach(function(exp) {
+      var div = document.createElement('div');
+      div.className = 'ledger-item';
+      var badge = exp.project ? '<span class="badge" style="font-size:0.65rem;padding:0.15rem 0.4rem;margin-left:0.5rem;background:rgba(14,165,233,0.15);color:var(--color-accent);border:1px solid rgba(14,165,233,0.25);">' + exp.project + '</span>' : '';
+      var methodBadge = exp.paymentMethod === 'upi' ? '📱' : '💰';
+      div.innerHTML = '<div class="ledger-info"><div style="display:flex;align-items:center;gap:0.25rem;flex-wrap:wrap;"><span class="ledger-amount" style="color:var(--color-danger);">-' + formatCurrency(exp.amount) + '</span>' + badge + '<span style="font-size:0.6rem;opacity:0.6;">' + methodBadge + '</span></div>' +
+        '<span class="ledger-date">' + formatDate(exp.date) + '</span>' +
+        (exp.note || exp.laborType ? '<span class="ledger-note">' + (exp.laborType || '') + (exp.note ? ' - ' + exp.note : '') + '</span>' : '') +
+        '</div>' +
+        '<button class="ledger-delete" onclick="deleteConstruction(\'' + exp.id + '\'); showConstructionLedger(\'' + (filterProject || '') + '\')"><svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/></svg></button>';
+      listContainer.appendChild(div);
+    });
+  }
+  openModal('modal-ledger');
+};
 
 // FILE UPLOAD LOGIC
 
