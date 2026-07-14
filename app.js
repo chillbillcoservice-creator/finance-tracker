@@ -4577,121 +4577,11 @@ function initRecordsSearch() {
 }
 
 // CONSTRUCTION TRACKING LOGIC
-window.openConstructionModal = function(id = null) {
-  document.getElementById('form-construction').reset();
-  document.getElementById('construction-id').value = '';
-  document.getElementById('const-date').value = new Date().toISOString().slice(0, 10);
-  
-  if (id) {
-    const expense = state.expenses.find(e => e.id === id);
-    if (expense) {
-      document.getElementById('construction-id').value = expense.id;
-      document.getElementById('const-project').value = expense.project || '';
-      document.getElementById('const-labor').value = expense.laborType || '';
-      document.getElementById('const-worker').value = expense.workerName || '';
-      document.getElementById('const-amount').value = expense.amount || '';
-      document.getElementById('const-date').value = expense.date || '';
-      document.getElementById('const-notes').value = expense.note || '';
-    }
-  }
-  
-  document.getElementById('modal-construction').style.display = 'flex';
-};
-
-window.deleteConstruction = function(id) {
-  if(confirm('Are you sure you want to delete this construction payment?')) {
-    state.expenses = state.expenses.filter(e => e.id !== id);
-    saveState();
-    refreshActiveTab();
-  }
-};
-
-window._selectedConstCat = null;
-window._selectedConstPayMethod = 'cash';
-window._selectedConstProject = window._selectedConstProject || '23/48 Ground Floor';
-
-window.selectConstCategory = function(cat) {
-  if (window._selectedConstCat === cat) {
-    window._selectedConstCat = null;
-  } else {
-    window._selectedConstCat = cat;
-  }
-  renderConstruction();
-  if (window._selectedConstCat) {
-    setTimeout(function() {
-      var amtInput = document.getElementById('const-amount');
-      if (amtInput) amtInput.focus();
-    }, 50);
-  }
-};
-
-window.selectConstProject = function(el) {
-  if (typeof el === 'string') {
-    window._selectedConstProject = el;
-  } else {
-    window._selectedConstProject = el.getAttribute('data-project');
-  }
-  renderConstruction();
-};
-
 window.finaliseProject = function(name) {
   if (!confirm('Finalise "' + name + '"? This will move it to History.')) return;
   state.projectStatus[name] = 'finalised';
   saveState();
-  if (window._selectedConstProject === name) {
-    window._selectedConstProject = null;
-  }
   renderConstruction();
-};
-
-window.selectConstPayMethod = function(method) {
-  window._selectedConstPayMethod = method;
-  renderConstruction();
-};
-
-window.submitQuickConst = function() {
-  var project = window._selectedConstProject;
-  if (!project) { alert('Please select a property.'); return; }
-  var amtInput = document.getElementById('const-amount');
-  var notesInput = document.getElementById('const-notes');
-  if (!amtInput || !notesInput) return;
-  
-  var amt = Number(amtInput.value);
-  if (!amt || amt <= 0) {
-    alert('Please enter a valid amount.');
-    return;
-  }
-  
-  var cat = window._selectedConstCat || 'Mistri';
-  var method = window._selectedConstPayMethod || 'cash';
-  
-  var newExp = {
-    id: 'exp_' + Date.now(),
-    category: 'construction',
-    project: project,
-    laborType: cat,
-    paymentMethod: method,
-    amount: amt,
-    date: new Date().toISOString().slice(0, 10),
-    note: notesInput.value.trim()
-  };
-  
-  state.expenses.push(newExp);
-  saveState();
-  
-  amtInput.value = '';
-  notesInput.value = '';
-  window._selectedConstCat = null;
-  
-  switchTab('dashboard');
-  renderDashboard();
-  setTimeout(function() {
-    var card = document.getElementById('card-expenses');
-    if (card) {
-      card.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      card.classList.add('highlight-card');
-    }
-  }, 150);
 };
 
 function renderConstruction() {
@@ -4709,143 +4599,53 @@ function renderConstruction() {
     
     var constructionExpenses = (state.expenses || []).filter(function(e) { return e && e.category === 'construction'; });
     
-    var selectedProject = window._selectedConstProject;
-    if (!selectedProject || ongoingProjects.indexOf(selectedProject) === -1) {
-      selectedProject = ongoingProjects.length > 0 ? ongoingProjects[0] : null;
-      window._selectedConstProject = selectedProject;
-    }
-    
     function getProjectTotal(projectName) {
       return constructionExpenses.filter(function(e) { return e && e.project === projectName; })
         .reduce(function(sum, e) { return sum + (Number(e.amount) || 0); }, 0);
     }
     
-    // --- Ongoing Projects Cards ---
-    var ongoingCardsHtml = '';
+    var html = '';
+    
+    // --- Ongoing Projects ---
     if (ongoingProjects.length > 0) {
-      ongoingCardsHtml += '<div style="margin-bottom: 0.75rem;">' +
-        '<div style="font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-secondary);margin-bottom:0.45rem;display:flex;align-items:center;gap:0.4rem;">' +
+      html += '<div style="padding:0.4rem 0.5rem;background:rgba(var(--color-accent-rgb),0.08);border-radius:6px;border-left:3px solid var(--color-accent);margin-bottom:0.75rem;">' +
+        '<div style="font-size:0.62rem;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-secondary);margin-bottom:0.25rem;display:flex;align-items:center;gap:0.35rem;">' +
           '<span>🏗 Ongoing Projects</span>' +
-          '<span style="background:var(--color-accent);color:#fff;font-size:0.65rem;font-weight:800;padding:0.05rem 0.45rem;border-radius:8px;">' + ongoingProjects.length + '</span>' +
+          '<span style="background:var(--color-accent);color:#fff;font-size:0.6rem;font-weight:800;padding:0.05rem 0.4rem;border-radius:7px;">' + ongoingProjects.length + '</span>' +
         '</div>';
       ongoingProjects.forEach(function(p) {
         var total = getProjectTotal(p);
-        var isSelected = p === selectedProject;
-        ongoingCardsHtml +=
-          '<div onclick="selectConstProject(\'' + p.replace(/'/g, "\\'") + '\')" style="cursor:pointer;padding:0.55rem 0.65rem;background:' + (isSelected ? 'var(--bg-secondary)' : 'var(--bg-card)') + ';border:1px solid ' + (isSelected ? 'var(--color-accent)' : 'var(--border-color)') + ';border-radius:8px;margin-bottom:0.4rem;transition:all 0.15s;">' +
-            '<div style="display:flex;justify-content:space-between;align-items:flex-start;">' +
-              '<div style="display:flex;flex-direction:column;gap:0.15rem;">' +
-                '<span style="font-size:0.75rem;font-weight:700;color:var(--text-primary);">' + p + '</span>' +
-                '<span style="display:inline-flex;align-items:center;gap:0.25rem;font-size:0.62rem;font-weight:600;color:var(--color-danger);background:rgba(var(--color-danger-rgb),0.1);padding:0.1rem 0.4rem;border-radius:4px;width:fit-content;">🔴 Ongoing Project</span>' +
-              '</div>' +
-              '<div style="display:flex;flex-direction:column;align-items:flex-end;gap:0.2rem;">' +
-                '<span style="font-size:0.82rem;font-weight:800;color:var(--color-danger);">' + formatCurrency(total) + '</span>' +
-                '<button class="btn btn-sm" onclick="event.stopPropagation();finaliseProject(\'' + p.replace(/'/g, "\\'") + '\')" style="padding:0.15rem 0.5rem;font-size:0.6rem;background:transparent;color:var(--color-danger);border:1px solid var(--color-danger);border-radius:5px;cursor:pointer;font-weight:600;">Finalise Construction</button>' +
-              '</div>' +
-            '</div>' +
-          '</div>';
+        html += '<div style="display:flex;justify-content:space-between;align-items:center;padding:0.2rem 0;font-size:0.78rem;font-weight:600;color:var(--text-primary);">' +
+          '<span>🏗 ' + p + '</span>' +
+          '<div style="display:flex;align-items:center;gap:0.4rem;">' +
+            '<button class="btn btn-sm" onclick="finaliseProject(\'' + p.replace(/'/g, "\\'") + '\')" style="padding:0.1rem 0.45rem;font-size:0.58rem;background:transparent;color:var(--color-danger);border:1px solid var(--color-danger);border-radius:4px;cursor:pointer;font-weight:600;line-height:1.4;">Finalise</button>' +
+            '<span style="color:var(--color-danger);font-weight:700;">' + formatCurrency(total) + '</span>' +
+          '</div>' +
+        '</div>';
       });
-      ongoingCardsHtml += '</div>';
+      html += '</div>';
     }
     
-    // --- History Cards ---
-    var historyCardsHtml = '';
+    // --- History ---
     if (finalisedProjects.length > 0) {
-      historyCardsHtml += '<div style="margin-bottom: 0.75rem;">' +
-        '<div style="font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-secondary);margin-bottom:0.45rem;display:flex;align-items:center;gap:0.4rem;">' +
+      html += '<div style="padding:0.4rem 0.5rem;background:rgba(128,90,213,0.08);border-radius:6px;border-left:3px solid var(--color-purple);margin-bottom:0.75rem;">' +
+        '<div style="font-size:0.62rem;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-secondary);margin-bottom:0.25rem;display:flex;align-items:center;gap:0.35rem;">' +
           '<span>✅ History</span>' +
-          '<span style="background:var(--color-purple);color:#fff;font-size:0.65rem;font-weight:800;padding:0.05rem 0.45rem;border-radius:8px;">' + finalisedProjects.length + '</span>' +
+          '<span style="background:var(--color-purple);color:#fff;font-size:0.6rem;font-weight:800;padding:0.05rem 0.4rem;border-radius:7px;">' + finalisedProjects.length + '</span>' +
         '</div>';
       finalisedProjects.forEach(function(p) {
         var total = getProjectTotal(p);
-        historyCardsHtml +=
-          '<div style="padding:0.55rem 0.65rem;background:var(--bg-card);border:1px solid var(--border-color);border-radius:8px;margin-bottom:0.4rem;opacity:0.75;">' +
-            '<div style="display:flex;justify-content:space-between;align-items:flex-start;">' +
-              '<div style="display:flex;flex-direction:column;gap:0.15rem;">' +
-                '<span style="font-size:0.75rem;font-weight:700;color:var(--text-primary);">' + p + '</span>' +
-                '<span style="display:inline-flex;align-items:center;gap:0.25rem;font-size:0.62rem;font-weight:600;color:var(--color-purple);background:rgba(var(--color-purple-rgb,128,90,213),0.1);padding:0.1rem 0.4rem;border-radius:4px;width:fit-content;">✅ Finalised</span>' +
-              '</div>' +
-              '<span style="font-size:0.82rem;font-weight:800;color:var(--text-primary);">' + formatCurrency(total) + '</span>' +
-            '</div>' +
-          '</div>';
-      });
-      historyCardsHtml += '</div>';
-    }
-    
-    // --- Detail Form (only for selected ongoing project) ---
-    var formHtml = '';
-    if (selectedProject) {
-      var categories = ['Carpenter', 'Painter', 'Welding', 'Mistri', 'Electrician', 'Plumber', 'Malba', 'Hardware', 'Furniture', 'Ghisai', 'Glass Work', 'AC Service', 'Tiles', 'Others'];
-      var payMethod = window._selectedConstPayMethod || 'cash';
-      
-      var exps = constructionExpenses.filter(function(e) { return e && e.project === selectedProject; }).sort(function(a, b) { return new Date(b.date || 0) - new Date(a.date || 0); });
-      var total = exps.reduce(function(sum, e) { return sum + (Number(e.amount) || 0); }, 0);
-      
-      var catButtonsHtml = categories.map(function(cat) {
-        var isSelected = window._selectedConstCat === cat;
-        var bg = isSelected ? 'var(--color-accent)' : 'var(--bg-primary)';
-        var color = isSelected ? '#fff' : 'var(--text-secondary)';
-        var border = isSelected ? '1px solid var(--color-accent)' : '1px solid var(--border-color)';
-        return '<button type="button" class="const-cat-btn" data-cat="' + cat + '" onclick="selectConstCategory(\'' + cat + '\')" style="padding: 0.4rem 0.65rem; font-size: 0.78rem; border-radius: 5px; background: ' + bg + '; color: ' + color + '; border: ' + border + '; cursor: pointer; transition: all 0.2s;">' + cat + '</button>';
-      }).join('');
-      
-      var expensesHtml = '';
-      if (exps.length > 0) {
-        exps.slice(0, 10).forEach(function(exp) {
-          expensesHtml += '<div style="display: flex; justify-content: space-between; align-items: center; padding: 0.35rem 0.5rem; background: var(--input-bg); border-radius: 6px;">' +
-            '<div style="display: flex; flex-direction: column; gap: 0.1rem;">' +
-              '<span style="font-weight: 600; font-size: 0.8rem; color: var(--text-primary);">' + (exp.laborType || 'General') + '</span>' +
-              '<span style="font-weight: 600; font-size: 0.65rem; color: var(--text-primary);">' + formatDate(exp.date) + (exp.note ? ' - ' + exp.note : '') + ' <span style="font-size:0.6rem; color:var(--text-secondary);">[' + (exp.paymentMethod === 'upi' ? '📱UPI' : '💰Cash') + ']</span></span>' +
-            '</div>' +
-            '<div style="display: flex; align-items: center; gap: 0.5rem;">' +
-              '<span style="font-weight: 700; color: var(--color-danger); font-size: 0.8rem;">- ' + formatCurrency(exp.amount) + '</span>' +
-              '<button class="btn btn-secondary btn-sm" onclick="event.stopPropagation(); deleteConstruction(\'' + exp.id + '\')" style="padding: 0.15rem; min-width: auto; border: none; background: transparent; color: var(--text-secondary);">' +
-                '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>' +
-              '</button>' +
-            '</div>' +
-          '</div>';
-        });
-      }
-      
-      formHtml =
-        '<div class="card" style="margin-bottom: 0; padding: 0.75rem; border: 1px solid var(--border-color); background: var(--bg-card);">' +
-          '<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">' +
-            '<strong style="font-size: 0.9rem; color: var(--color-accent);">' + selectedProject + '</strong>' +
-            '<span style="font-weight: 700; color: var(--text-primary); font-size: 0.85rem;">Total: ' + formatCurrency(total) + '</span>' +
-          '</div>' +
-          '<div style="display: flex; flex-wrap: wrap; gap: 0.35rem; margin-bottom: 0.5rem;">' + catButtonsHtml + '</div>' +
-          (state.showPayMethod !== false ? '<div style="display: flex; gap: 0.4rem; align-items: center; margin-bottom: 0.5rem;">' +
-            '<span style="font-size: 0.65rem; color: var(--text-secondary); font-weight: 600;">Pay via:</span>' +
-            '<button type="button" class="btn btn-sm" onclick="selectConstPayMethod(\'cash\')" style="padding:0.1rem 0.4rem; font-size:0.6rem; background:' + (payMethod === 'cash' ? 'var(--color-success)' : 'var(--bg-secondary)') + '; color:' + (payMethod === 'cash' ? '#fff' : 'var(--text-primary)') + '; border:1px solid ' + (payMethod === 'cash' ? 'var(--color-success)' : 'var(--border-color)') + '; cursor:pointer;">💰 Cash</button>' +
-            '<button type="button" class="btn btn-sm" onclick="selectConstPayMethod(\'upi\')" style="padding:0.1rem 0.4rem; font-size:0.6rem; background:' + (payMethod === 'upi' ? 'var(--color-accent)' : 'var(--bg-secondary)') + '; color:' + (payMethod === 'upi' ? '#fff' : 'var(--text-primary)') + '; border:1px solid ' + (payMethod === 'upi' ? 'var(--color-accent)' : 'var(--border-color)') + '; cursor:pointer;">📱 UPI</button>' +
-          '</div>' : '') +
-          '<div style="display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: stretch; margin-bottom: 0.5rem;">' +
-            '<input type="number" id="const-amount" class="form-input" placeholder="Amount" style="flex: 1; min-width: 120px; background: var(--input-bg); margin: 0; padding: 0.55rem 0.65rem; font-size: 1rem;">' +
-            '<input type="text" id="const-notes" class="form-input" placeholder="Note" style="flex: 1; min-width: 140px; background: var(--input-bg); margin: 0; padding: 0.55rem 0.65rem; font-size: 1rem;">' +
-          '</div>' +
-          '<div style="display: flex; gap: 0.3rem; flex-wrap: wrap; align-items: center; margin-bottom: 0.5rem;">' +
-            '<button type="button" class="btn btn-sm" onclick="var i=document.getElementById(\'const-amount\'); i.value=(Number(i.value)||0)+100" style="padding:0.15rem 0.4rem; font-size:0.65rem; background:var(--bg-secondary); border:1px solid var(--border-color); cursor:pointer;">+100</button>' +
-            '<button type="button" class="btn btn-sm" onclick="var i=document.getElementById(\'const-amount\'); i.value=(Number(i.value)||0)+500" style="padding:0.15rem 0.4rem; font-size:0.65rem; background:var(--bg-secondary); border:1px solid var(--border-color); cursor:pointer;">+500</button>' +
-            '<button type="button" class="btn btn-sm" onclick="var i=document.getElementById(\'const-amount\'); i.value=(Number(i.value)||0)+1000" style="padding:0.15rem 0.4rem; font-size:0.65rem; background:var(--bg-secondary); border:1px solid var(--border-color); cursor:pointer;">+1000</button>' +
-            '<button type="button" class="btn btn-sm" onclick="var i=document.getElementById(\'const-amount\'); i.value=(Number(i.value)||0)+1500" style="padding:0.15rem 0.4rem; font-size:0.65rem; background:var(--bg-secondary); border:1px solid var(--border-color); cursor:pointer;">+1500</button>' +
-            '<button type="button" class="btn btn-sm" onclick="var i=document.getElementById(\'const-amount\'); i.value=(Number(i.value)||0)+2000" style="padding:0.15rem 0.4rem; font-size:0.65rem; background:var(--bg-secondary); border:1px solid var(--border-color); cursor:pointer;">+2000</button>' +
-            '<button type="button" class="btn btn-sm" onclick="var i=document.getElementById(\'const-amount\'); i.value=(Number(i.value)||0)+2500" style="padding:0.15rem 0.4rem; font-size:0.65rem; background:var(--bg-secondary); border:1px solid var(--border-color); cursor:pointer;">+2500</button>' +
-            '<button type="button" class="btn btn-sm" onclick="var i=document.getElementById(\'const-amount\'); i.value=(Number(i.value)||0)+5000" style="padding:0.15rem 0.4rem; font-size:0.65rem; background:var(--bg-secondary); border:1px solid var(--border-color); cursor:pointer;">+5000</button>' +
-            '<button type="button" class="btn btn-sm" onclick="var i=document.getElementById(\'const-amount\'); i.value=(Number(i.value)||0)+10000" style="padding:0.15rem 0.4rem; font-size:0.65rem; background:var(--bg-secondary); border:1px solid var(--border-color); cursor:pointer;">+10000</button>' +
-            '<span style="margin-left: auto;"></span>' +
-            '<button class="btn btn-primary" onclick="submitQuickConst()" style="margin: 0; padding: 0.55rem 0.9rem; font-size: 0.9rem;">' +
-              '<svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" style="margin-right: 2px;"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>' +
-              'Save' +
-            '</button>' +
-          '</div>' +
-          '<div style="font-size: 0.7rem; font-weight: 700; margin-bottom: 0.4rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px;">Recent Payments</div>' +
-          '<div style="display: flex; flex-direction: column; gap: 0.35rem;">' +
-            (expensesHtml || '<div style="font-size: 0.75rem; color: var(--text-muted); text-align: center; padding: 0.75rem; background: var(--input-bg); border-radius: 6px;">No payments.</div>') +
-          '</div>' +
+        html += '<div style="display:flex;justify-content:space-between;align-items:center;padding:0.2rem 0;font-size:0.78rem;font-weight:600;color:var(--text-secondary);opacity:0.7;">' +
+          '<span>✅ ' + p + '</span>' +
+          '<span style="font-weight:700;">' + formatCurrency(total) + '</span>' +
         '</div>';
+      });
+      html += '</div>';
     }
     
-    var html = ongoingCardsHtml + historyCardsHtml + formHtml;
+    if (!html) {
+      html = '<div style="text-align:center;padding:1rem;color:var(--text-muted);font-size:0.8rem;">No construction projects.</div>';
+    }
     
     container.innerHTML = html;
     
