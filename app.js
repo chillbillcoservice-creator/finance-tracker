@@ -1234,22 +1234,16 @@ function quickLoanPayment(loanId, direction) {
   if (!loan) return;
   var outstanding = getOutstandingPrincipal(loan.id, loan.principal);
   if (outstanding <= 0) { alert('Loan is already settled.'); return; }
-  var monthlyYield = outstanding * (Number(loan.interestRate) / 100);
-  var payms = state.interestPayments.filter(function(p) { return p.loanId === loanId && p.category === 'interest'; });
-  var monthPayms = payms.filter(function(p) { return p.date && p.date.startsWith(selectedMonthStr); });
-  var sumPayms = monthPayms.reduce(function(s, p) { return s + Number(p.amount); }, 0);
-  var totalIfPaid = sumPayms + amount;
-  var isAdvance = monthlyYield > 0 && totalIfPaid > (monthlyYield + 0.01);
-  if (isAdvance && !confirm('₹' + amount + ' exceeds the remaining interest of ₹' + (monthlyYield - sumPayms).toFixed(0) + '. Record excess as advance?')) return;
+  if (amount > outstanding && !confirm('₹' + amount + ' exceeds outstanding of ₹' + outstanding + '. Record as full settlement?')) return;
   var today = new Date().toISOString().split('T')[0];
   state.interestPayments.push({
     id: 'p' + Math.random().toString(36).substr(2, 9),
     loanId: loanId,
     type: direction === 'lent' ? 'received' : 'paid',
-    category: 'interest',
+    category: 'principal',
     amount: Number(amount),
     date: today,
-    note: (isAdvance ? '[Advance] ' : '') + 'Quick Pay'
+    note: 'Principal repayment'
   });
   saveState();
   refreshActiveTab();
@@ -1275,22 +1269,16 @@ function quickGroupPayment(safeId, direction) {
   }
   if (!target) { alert('No active loan in this group.'); return; }
   var outstanding = getOutstandingPrincipal(target.id, target.principal);
-  var monthlyYield = outstanding * (Number(target.interestRate) / 100);
-  var payms = state.interestPayments.filter(function(p) { return p.loanId === target.id && p.category === 'interest'; });
-  var monthPayms = payms.filter(function(p) { return p.date && p.date.startsWith(selectedMonthStr); });
-  var sumPayms = monthPayms.reduce(function(s, p) { return s + Number(p.amount); }, 0);
-  var totalIfPaid = sumPayms + amount;
-  var isAdvance = monthlyYield > 0 && totalIfPaid > (monthlyYield + 0.01);
-  if (isAdvance && !confirm('₹' + amount + ' exceeds the remaining interest of ₹' + (monthlyYield - sumPayms).toFixed(0) + '. Record excess as advance?')) return;
+  if (amount > outstanding && !confirm('₹' + amount + ' exceeds outstanding of ₹' + outstanding + '. Record as full settlement?')) return;
   var today = new Date().toISOString().split('T')[0];
   state.interestPayments.push({
     id: 'p' + Math.random().toString(36).substr(2, 9),
     loanId: target.id,
     type: direction === 'lent' ? 'received' : 'paid',
-    category: 'interest',
+    category: 'principal',
     amount: Number(amount),
     date: today,
-    note: (isAdvance ? '[Advance] ' : '') + 'Quick Pay'
+    note: 'Principal repayment'
   });
   saveState();
   refreshActiveTab();
