@@ -13,6 +13,9 @@
   <meta name="apple-mobile-web-app-title" content="CapitalFlow">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%230ea5e9'/><text x='50' y='65' font-size='40' font-weight='bold' text-anchor='middle' fill='white' font-family='Arial'>CF</text></svg>">
   <title>Capital Flow | Personal Finance Tracker</title>
+  <link rel="manifest" href="/manifest.json">
+  <link rel="apple-touch-icon" sizes="192x192" href="/icon-192.png">
+  <link rel="apple-touch-icon" sizes="512x512" href="/icon-512.png">
   <link rel="stylesheet" href="style.css?v=3">
 
 </head>
@@ -1680,5 +1683,10 @@ Tracks non-loan expenses and income:<br><br>
 
   <!-- JavaScript Modules -->
   <script src="app.js?v=5"></script>
+<script>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw.js');
+}
+</script>
 </body>
 </html>
