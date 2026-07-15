@@ -5128,9 +5128,9 @@ function renderConstruction() {
         var amtStyle = isFinalised && unarchivedTotal === 0 ? 'color:var(--color-success);' : 'color:var(--color-danger);';
         var amtDisplay = unarchivedTotal > 0 ? formatCurrency(unarchivedTotal) : (archivedTotal > 0 ? formatCurrency(archivedTotal) + ' ✅' : '₹ 0');
         var finaliseBtn = !isFinalised && unarchivedTotal > 0 ? '<button class="btn btn-sm" onclick="event.stopPropagation();finaliseProject(\'' + p.replace(/'/g, "\\'") + '\')" style="padding:0.05rem 0.4rem;font-size:0.55rem;background:transparent;color:var(--color-danger);border:1px solid var(--color-danger);border-radius:4px;cursor:pointer;font-weight:600;line-height:1.3;">Finalise</button>' : '';
-        summaryHtml += '<div style="display:flex;justify-content:space-between;align-items:center;padding:0.15rem 0.25rem;font-size:0.7rem;font-weight:600;' + labelStyle + '">' +
-          '<span>' + icon + ' ' + p + '</span>' +
-          '<div style="display:flex;align-items:center;gap:0.35rem;">' +
+        summaryHtml += '<div style="display:flex;justify-content:space-between;align-items:center;padding:0.15rem 0.25rem;font-size:0.7rem;font-weight:600;white-space:nowrap;overflow:hidden;' + labelStyle + '">' +
+          '<span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex-shrink:1;min-width:0;">' + icon + ' ' + p + '</span>' +
+          '<div style="display:flex;align-items:center;gap:0.2rem;flex-shrink:0;">' +
             '<span style="' + amtStyle + 'font-weight:700;">' + amtDisplay + '</span>' +
             finaliseBtn +
           '</div>' +
