@@ -464,9 +464,9 @@ function loadState() {
       state = JSON.parse(data);
       // Ensure all arrays are initialized
       // Migrate removed themes to valid ones
-      const removedThemes = ['dark-blue', 'midnight-purple', 'black-and-white', 'newspaper', 'neon-pulse'];
+      const removedThemes = ['dark-blue', 'midnight-purple', 'black-and-white', 'newspaper', 'neon-pulse', 'aurora'];
       if (removedThemes.includes(state.theme)) {
-        const themeMap = { 'dark-blue': 'black-and-colored', 'midnight-purple': 'light-elegant', 'black-and-white': 'black-and-colored-plain', 'newspaper': 'light-elegant', 'neon-pulse': 'ocean-deep' };
+        const themeMap = { 'dark-blue': 'black-and-colored', 'midnight-purple': 'light-elegant', 'black-and-white': 'black-and-colored-plain', 'newspaper': 'light-elegant', 'neon-pulse': 'ocean-deep', 'aurora': 'ocean-deep' };
         state.theme = themeMap[state.theme];
       }
       state.theme = state.theme || 'black-and-colored-plain';
