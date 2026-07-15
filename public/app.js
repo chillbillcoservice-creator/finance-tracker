@@ -4948,6 +4948,10 @@ window.selectConstCategory = function(cat) {
 window.selectConstProject = function(el) {
   window._selectedConstProject = el.getAttribute('data-project');
   renderConstruction();
+  setTimeout(function() {
+    var input = document.getElementById('const-amount');
+    if (input) input.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }, 50);
 };
 
 window.selectConstPayMethod = function(method) {
