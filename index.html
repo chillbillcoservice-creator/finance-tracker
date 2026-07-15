@@ -78,13 +78,17 @@
     <main class="main-content">
       
       <!-- Top header bar -->
-      <header class="page-header" style="position: sticky; top: 0; z-index: 100;">
-        <div class="header-actions" style="display:flex;gap:0.4rem;align-items:stretch;">
-          <div class="card" style="margin-bottom: 0; padding: 0.7rem 1rem; display: flex; align-items: center; gap: 0.6rem; flex:1; border-radius: 6px; box-shadow: none; border: 1px solid var(--border-color); background: var(--bg-primary);">
-            <svg viewBox="0 0 24 24" width="20" height="20" stroke="var(--text-secondary)" stroke-width="2" fill="none" style="flex-shrink: 0;"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-            <input type="text" id="dashboard-search" class="form-input" placeholder="Search by name (Borrower, Financier, Tenant)..." style="border: none; background: transparent; padding: 0; margin: 0; box-shadow: none; font-size:1rem;">
-            <input type="text" id="records-search-header" class="form-input" placeholder="Search records..." style="border: none; background: transparent; padding: 0; margin: 0; box-shadow: none; display: none; font-size:1rem;">
+      <header class="page-header" style="flex-direction: row; gap: 1rem; align-items: center;">
+        <div class="header-actions" style="flex: 1;">
+          <div class="card" style="margin-bottom: 0; padding: 0.5rem 0.85rem; display: flex; align-items: center; gap: 0.5rem; width: 100%; border-radius: 4px; box-shadow: none; border: 1px solid var(--border-color); background: var(--bg-primary);">
+            <svg viewBox="0 0 24 24" width="18" height="18" stroke="var(--text-secondary)" stroke-width="2" fill="none" style="flex-shrink: 0;"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="text" id="dashboard-search" class="form-input" placeholder="Search by name (Borrower, Financier, Tenant)..." style="border: none; background: transparent; padding: 0; margin: 0; box-shadow: none;">
+            <input type="text" id="records-search-header" class="form-input" placeholder="Search records..." style="border: none; background: transparent; padding: 0; margin: 0; box-shadow: none; display: none;">
           </div>
+        </div>
+        <div class="page-title" style="flex: 0 0 auto;">
+          <div id="quick-actions-trigger" onclick="event.stopPropagation(); openQuickActions()" title="Quick Actions" style="display:flex;align-items:center;cursor:pointer;padding:0.3rem 0.5rem;background:var(--bg-secondary);border-radius:4px;color:var(--text-secondary);">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/><circle cx="5" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="5" r="1"/><circle cx="19" cy="5" r="1"/><circle cx="5" cy="19" r="1"/><circle cx="19" cy="19" r="1"/></svg>
           </div>
         </div>
       </header>
@@ -131,32 +135,29 @@
         </div>
 
         <!-- At a Glance Widget -->
-        <div id="at-a-glance-widget" class="card" onclick="scrollToRecentActivity()" style="margin-bottom: 0.5rem; padding: 0.65rem; display: none; cursor: pointer;">
-          <div style="display: flex; align-items: stretch; gap: 0.5rem;">
-            <div id="glance-icon" style="font-size: 1.5rem; line-height: 1;" onclick="event.stopPropagation();"></div>
+        <div id="at-a-glance-widget" class="card" onclick="scrollToRecentActivity()" style="margin-bottom: 0.75rem; padding: 1rem; display: none; cursor: pointer;">
+          <div style="display: flex; align-items: stretch; gap: 0.75rem;">
+            <div id="glance-icon" style="font-size: 1.8rem; line-height: 1;" onclick="event.stopPropagation();"></div>
             <div style="flex: 1; min-width: 0;">
               <div style="display: flex; align-items: center; gap: 0.5rem;">
-                <div id="glance-greeting" style="font-size: 0.9rem; font-weight: 700; color: var(--text-primary);"></div>
-                <span id="glance-date" style="font-size: 0.65rem; opacity: 0.5; margin-left: auto; white-space: nowrap;"></span>
+                <div id="glance-greeting" style="font-size: 1rem; font-weight: 700; color: var(--text-primary);"></div>
+                <span id="header-date" style="font-size: 0.82rem; font-weight: 600; color: var(--text-secondary); white-space: nowrap; margin-left: auto;">--</span>
               </div>
-              <div id="glance-details" style="font-size: 0.72rem; color: #fff; margin-top: 0.05rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"></div>
-              <div id="glance-summary" style="font-size: 0.72rem; color: var(--text-secondary); margin-top: 0.05rem;"></div>
-            </div>
-            <div onclick="event.stopPropagation(); openQuickActions()" style="display: flex; align-items: center; cursor: pointer; padding: 0 0.25rem; color: var(--text-secondary); margin-top: -3px;" title="Quick Actions">
-              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/><circle cx="5" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="5" r="1"/><circle cx="19" cy="5" r="1"/><circle cx="5" cy="19" r="1"/><circle cx="19" cy="19" r="1"/></svg>
             </div>
           </div>
-          <div style="display: flex; gap: 0.35rem; margin-top: 0.35rem;">
-            <button onclick="event.stopPropagation(); openNotesDiary()" title="Notes / Diary" style="flex:1;background:#f59e0b;border:none;color:#fff;padding:0.4rem 0.35rem;border-radius:var(--radius-sm);cursor:pointer;font-size:0.72rem;font-weight:700;display:flex;align-items:center;justify-content:center;gap:0.3rem;">
-              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+          <div id="glance-details" style="font-size: 0.78rem; color: #fff; margin-top: 0.2rem; display: flex; align-items: center; gap: 0.25rem;"></div>
+          <div id="glance-summary" style="font-size: 0.82rem; color: var(--text-secondary); margin-top: 0.05rem;"></div>
+          <div style="display: flex; gap: 0.5rem; margin-top: 0.6rem;">
+            <button onclick="event.stopPropagation(); openNotesDiary()" title="Notes / Diary" style="flex:1;background:#f59e0b;border:none;color:#fff;padding:0.6rem 0.5rem;border-radius:var(--radius-sm);cursor:pointer;font-size:0.85rem;font-weight:700;display:flex;align-items:center;justify-content:center;gap:0.4rem;">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
               Notes
             </button>
-            <button onclick="event.stopPropagation(); openCalculator()" title="Calculator" style="flex:1;background:#10b981;border:none;color:#fff;padding:0.4rem 0.35rem;border-radius:var(--radius-sm);cursor:pointer;font-size:0.72rem;font-weight:700;display:flex;align-items:center;justify-content:center;gap:0.3rem;">
-              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="10" x2="8" y2="10"/><line x1="12" y1="10" x2="12" y2="10"/><line x1="16" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="8" y2="14"/><line x1="12" y1="14" x2="12" y2="14"/><line x1="16" y1="14" x2="16" y2="14"/><line x1="8" y1="18" x2="8" y2="18"/><line x1="12" y1="18" x2="12" y2="18"/><line x1="16" y1="18" x2="16" y2="18"/></svg>
+            <button onclick="event.stopPropagation(); openCalculator()" title="Calculator" style="flex:1;background:#10b981;border:none;color:#fff;padding:0.6rem 0.5rem;border-radius:var(--radius-sm);cursor:pointer;font-size:0.85rem;font-weight:700;display:flex;align-items:center;justify-content:center;gap:0.4rem;">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="10" x2="8" y2="10"/><line x1="12" y1="10" x2="12" y2="10"/><line x1="16" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="8" y2="14"/><line x1="12" y1="14" x2="12" y2="14"/><line x1="16" y1="14" x2="16" y2="14"/><line x1="8" y1="18" x2="8" y2="18"/><line x1="12" y1="18" x2="12" y2="18"/><line x1="16" y1="18" x2="16" y2="18"/></svg>
               Calculator
             </button>
-            <button onclick="event.stopPropagation(); openExpenseModal()" title="Record Expense" style="flex:1;background:var(--color-danger);border:none;color:#fff;padding:0.4rem 0.35rem;border-radius:var(--radius-sm);cursor:pointer;font-size:0.72rem;font-weight:700;display:flex;align-items:center;justify-content:center;gap:0.3rem;">
-              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+            <button onclick="event.stopPropagation(); openExpenseModal()" title="Record Expense" style="flex:1;background:var(--color-danger);border:none;color:#fff;padding:0.6rem 0.5rem;border-radius:var(--radius-sm);cursor:pointer;font-size:0.85rem;font-weight:700;display:flex;align-items:center;justify-content:center;gap:0.4rem;">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
               Expense
             </button>
           </div>
@@ -277,18 +278,18 @@
             </button>
 
             <div id="lent-funds-heading" style="margin-top: 0.25rem; margin-bottom: 0.5rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 0.5rem; display: flex; flex-direction: column; gap: 0.2rem;">
-              <div style="display: flex; justify-content: space-between; align-items: center;">
+              <div id="lending-filter-loans" style="display: flex; justify-content: space-between; align-items: center; cursor: pointer; border-radius: 4px; padding: 0.1rem 0;" onclick="setLendingFilter('loans')">
                 <span style="color: var(--color-warning); font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; gap: 0.5rem;">
                   <span style="font-size: 1.05rem; font-weight: 800;">Lent Loans</span>
                   <span id="lent-loans-count" style="background: var(--color-warning); color: #000; font-size: 0.7rem; font-weight: 800; padding: 0.1rem 0.5rem; border-radius: 10px;">0</span>
                 </span>
                 <span id="lent-reg-principal" style="color:var(--color-warning);font-size:1.05rem;font-weight:800;">₹ 0</span>
               </div>
-              <div style="display: flex; justify-content: space-between; align-items: center;">
+              <div id="lending-filter-emi" style="display: flex; justify-content: space-between; align-items: center; cursor: pointer; border-radius: 4px; padding: 0.1rem 0;" onclick="setLendingFilter('emi')">
                 <span style="font-size:0.85rem;color:var(--color-purple);font-weight:700;display:flex;align-items:center;gap:0.4rem;">EMI <span id="lent-emi-count" style="background:var(--color-purple);color:#fff;font-size:0.7rem;font-weight:800;padding:0.1rem 0.5rem;border-radius:10px;">0</span></span>
                 <span id="lent-emi-total" style="font-size:1rem;color:var(--color-purple);font-weight:800;">₹ 0</span>
               </div>
-              <div style="display: flex; justify-content: space-between; align-items: center; border-top:1px solid rgba(255,255,255,0.08); padding-top:0.2rem;">
+              <div id="lending-filter-all" style="display: flex; justify-content: space-between; align-items: center; cursor: pointer; border-radius: 4px; padding: 0.1rem 0; border-top:1px solid rgba(255,255,255,0.08); padding-top:0.2rem;" onclick="setLendingFilter('all')">
                 <span style="font-size:0.82rem;font-weight:700;color:var(--color-success);">Total</span>
                 <span id="lent-total-outstanding" style="font-size:1.1rem;font-weight:800;color:var(--color-success);">₹ 0</span>
               </div>
@@ -510,14 +511,13 @@
         <div class="card summary-card accent" onclick="selectRecordsTab('construction')" style="border-left: 4px solid var(--color-accent); cursor: pointer; margin-bottom: 1.25rem;">
           <div class="summary-card-header">
             <span style="font-weight: 700; font-size: 0.78rem; color: var(--text-primary); text-transform: uppercase; letter-spacing: 0.3px;">Construction</span>
-            <div class="summary-card-icon" onclick="event.stopPropagation(); showConstructionLedger()" style="background: rgba(var(--color-accent-rgb), 0.1); color: var(--color-accent); cursor: pointer;">
+            <div class="summary-card-icon" onclick="event.stopPropagation(); showConstructionHistory()" style="background: rgba(var(--color-accent-rgb), 0.1); color: var(--color-accent); cursor: pointer;">
               <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M12 12h.01"/><path d="M17 12h.01"/><path d="M7 12h.01"/></svg>
             </div>
           </div>
-          <div style="display:flex;flex-direction:column;gap:0.05rem;">
-            <div class="summary-value summary-value-big" id="count-construction" style="color: var(--color-accent);">0</div>
-            <div class="summary-sub-value" style="margin-top: 0; font-size: 0.72rem; font-weight: 500; color: var(--text-secondary);" id="subtext-construction">Projects</div>
-          </div>
+          <div id="construction-summary-projects" style="display: flex; flex-direction: column; gap: 0.2rem;"></div>
+          <div class="summary-value summary-value-big" id="count-construction" style="color: var(--color-accent);">0</div>
+          <div class="summary-sub-value" style="margin-top: 0.25rem; font-size: 0.72rem; font-weight: 500; color: var(--text-secondary);" id="subtext-construction">Projects</div>
         </div>
 
         <!-- Bills Section -->
@@ -579,9 +579,6 @@
 
         <!-- Construction Section -->
         <div class="card" id="section-construction">
-          <div class="section-header" style="display: flex; justify-content: space-between; align-items: center;">
-            <h2 style="margin-bottom: 0;">Construction</h2>
-          </div>
           <div class="list-container" id="construction-list-container">
             <!-- Rendered by JS -->
           </div>
@@ -633,6 +630,15 @@
               <p style="color: var(--text-secondary); margin: 0; font-size: 0.85rem;">Default: by rent descending. ON: by due day + rent descending</p>
             </div>
             <input type="checkbox" id="toggle-sort-rentals" onchange="window.toggleSortRentals()" style="width: 20px; height: 20px; cursor: pointer;">
+          </div>
+
+          <!-- Sound Toggle -->
+          <div style="border-bottom: 1px solid var(--border-color); padding: 0 0 1.25rem 0; margin-bottom: 1.25rem; display: flex; justify-content: space-between; align-items: center;">
+            <div>
+              <h3 style="margin: 0 0 0.25rem 0;">Sound Effects</h3>
+              <p style="color: var(--text-secondary); margin: 0; font-size: 0.85rem;">Play a cash register sound when receiving payments</p>
+            </div>
+            <input type="checkbox" id="toggle-sound" onchange="window.toggleSound()" style="width: 20px; height: 20px; cursor: pointer;">
           </div>
 
           <!-- Manage Properties -->
@@ -714,11 +720,184 @@
               <span style="font-size: 0.75rem; font-weight: 600;">Crimson Dusk</span>
             </div>
 
+            <div class="theme-btn" id="theme-btn-psychedelic" onclick="setTheme('psychedelic')" style="cursor: pointer; border: 2px solid var(--border-color); border-radius: var(--radius-sm); padding: 0.75rem; background: linear-gradient(135deg, #0a0015, #200040, #001520); color: #f0e6ff; display: flex; flex-direction: column; gap: 0.5rem; transition: all 0.2s;">
+              <div style="display: flex; gap: 0.25rem;">
+                <div style="width: 16px; height: 16px; border-radius: 50%; background: linear-gradient(135deg, #ff33cc, #00ffff);"></div>
+                <div style="width: 16px; height: 16px; border-radius: 50%; background: linear-gradient(135deg, #ffcc00, #ff33cc);"></div>
+              </div>
+              <span style="font-size: 0.75rem; font-weight: 600;">Psychedelic</span>
+            </div>
+
+            <div class="theme-btn" id="theme-btn-aurora" onclick="setTheme('aurora')" style="cursor: pointer; border: 2px solid var(--border-color); border-radius: var(--radius-sm); padding: 0.75rem; background: #020814; color: #e0f0ec; display: flex; flex-direction: column; gap: 0.5rem; transition: all 0.2s;">
+              <div style="display: flex; gap: 0.25rem;">
+                <div style="width: 16px; height: 16px; border-radius: 50%; background: linear-gradient(135deg, #34d399, #0d9488);"></div>
+                <div style="width: 16px; height: 16px; border-radius: 50%; background: linear-gradient(135deg, #a78bfa, #34d399);"></div>
+              </div>
+              <span style="font-size: 0.75rem; font-weight: 600;">Aurora</span>
+            </div>
+
+          </div>
+        </div>
+
+        <div class="card" style="margin-bottom: 1.25rem;">
+          <div class="section-header" style="cursor:pointer;" onclick="var c=document.getElementById('help-content');c.style.display=c.style.display==='none'?'':'none';this.querySelector('.help-chevron').style.transform=c.style.display==='none'?'rotate(0deg)':'rotate(180deg)';">
+            <h2 style="margin-bottom: 0; display: flex; align-items: center; gap: 0.5rem;">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+              <span>How This App Works</span>
+              <span class="help-chevron" style="font-size:0.7rem;transition:transform 0.2s;transform:rotate(180deg);">▼</span>
+            </h2>
+          </div>
+          <div id="help-content" style="font-size:0.82rem;color:var(--text-secondary);line-height:1.6;padding:0.5rem 0;">
+
+<script>function toggleHelpSec(i,e){var c=document.getElementById(i);if(!c)return;var v=c.style.display;c.style.display=v==='none'?'':'none';var a=e.querySelector('.hch');if(a)a.style.transform=v==='none'?'rotate(90deg)':'rotate(0deg)';}</script>
+
+<div>
+<p style="font-weight:700;color:var(--text-primary);margin:0.75rem 0 0.3rem;cursor:pointer;" onclick="toggleHelpSec('h1',this)"><span class="hch" style="font-size:0.6rem;display:inline-block;transition:transform 0.2s;transform:rotate(90deg);margin-right:0.3rem;">▶</span> 📌 3 CARD TYPES</p>
+<div id="h1" style="padding-left:1rem;display:none;">
+Every borrower's loans are grouped into <strong>3 types</strong> of cards:<br><br>
+<strong>1️⃣ Simple Loan</strong> — Interest-only (no EMI). Each non-EMI loan gets its own card.<br>
+&nbsp;&nbsp;→ Shows: Principal, monthly yield, interest received, Bal/Adv<br>
+&nbsp;&nbsp;→ <em>Examples:</em> Rupesh, Inder, Arjun, Sahil<br><br>
+<strong>2️⃣ EMI Only</strong> — Borrower has only EMI loans. Single grouped card.<br>
+&nbsp;&nbsp;→ Shows: Total principal across EMIs, per-EMI sub-lines with progress bars<br>
+&nbsp;&nbsp;→ Header: EMI +₹X/mo · Paid Y/Z<br>
+&nbsp;&nbsp;→ <em>Examples:</em> M.K.<br><br>
+<strong>3️⃣ Loan + EMI</strong> — BOTH EMI and non-EMI loans. Single grouped card.<br>
+&nbsp;&nbsp;→ Shows: Combined total, non-EMI sub-lines with interest, EMI sub-lines with progress<br>
+&nbsp;&nbsp;→ 📊 Convert to EMI button included<br>
+&nbsp;&nbsp;→ <em>Examples:</em> Chirag, Tushar, Sailesh
+</div>
+</div>
+
+<div>
+<p style="font-weight:700;color:var(--text-primary);margin:0.75rem 0 0.3rem;cursor:pointer;" onclick="toggleHelpSec('h2',this)"><span class="hch" style="font-size:0.6rem;display:inline-block;transition:transform 0.2s;transform:rotate(90deg);margin-right:0.3rem;">▶</span> 📌 ADDING A LOAN</p>
+<div id="h2" style="padding-left:1rem;display:none;">
+➤ Go to <strong>Lend Money</strong> → <strong>Add Loan</strong><br>
+➤ Enter: Name, Phone, Principal, Interest Rate (% per month)<br>
+➤ <strong>0% interest</strong> → Every payment goes to principal (reduces loan).<br>
+➤ Check <strong>"Is EMI?"</strong> for fixed monthly payments (set EMI amount + total count).<br><br>
+<em>Example 1:</em> Rupesh ₹1,00,000 @ 2%/mo → earn ₹2,000/month interest, principal untouched<br>
+<em>Example 2:</em> Sahil ₹25,000 @ 0% → every payment reduces ₹25,000<br>
+<em>Example 3:</em> Chirag ₹2,62,500 EMI @ 4% → fixed ₹12,500/month (auto-splits interest + principal)
+</div>
+</div>
+
+<div>
+<p style="font-weight:700;color:var(--text-primary);margin:0.75rem 0 0.3rem;cursor:pointer;" onclick="toggleHelpSec('h3',this)"><span class="hch" style="font-size:0.6rem;display:inline-block;transition:transform 0.2s;transform:rotate(90deg);margin-right:0.3rem;">▶</span> 📌 THE SUMMARY LINE</p>
+<div id="h3" style="padding-left:1rem;display:none;">
+Every card shows this at the bottom:<br><br>
+<strong>Exp ₹X · Rcvd ₹Y · Bal ₹Z · Last &lt;date&gt;</strong> — when Rcvd ≤ Exp<br>
+<strong>Exp ₹X · Rcvd ₹Y · Adv ₹Z · Last &lt;date&gt;</strong> — when Rcvd > Exp<br><br>
+➤ <strong>Exp</strong> = Monthly expectation (yield for simple loans, EMI for EMI loans)<br>
+➤ <strong>Rcvd</strong> = Total received this month (interest + EMI principal, excludes top-ups)<br>
+➤ <strong>Bal</strong> = Remaining due (Exp − Rcvd)<br>
+➤ <strong>Adv</strong> = Advance overpayment (Rcvd − Exp, shown in purple)<br>
+➤ <strong>Last</strong> = Latest payment date<br><br>
+<em>Example:</em> Exp ₹6,000 · Rcvd ₹10,000 · Adv ₹4,000 · Last Jul 15<br>
+→ ₹6K expected, ₹10K received, ₹4K is advance (prepaid for next month)
+</div>
+</div>
+
+<div>
+<p style="font-weight:700;color:var(--text-primary);margin:0.75rem 0 0.3rem;cursor:pointer;" onclick="toggleHelpSec('h4',this)"><span class="hch" style="font-size:0.6rem;display:inline-block;transition:transform 0.2s;transform:rotate(90deg);margin-right:0.3rem;">▶</span> 📌 RECEIVING PAYMENTS (Recv)</p>
+<div id="h4" style="padding-left:1rem;display:none;">
+➤ Type amount → press <strong>Recv</strong><br>
+➤ <strong>Simple Loan (&gt;0%):</strong> Fills monthly interest first. Excess → <strong>Advance</strong> (prepaid).<br>
+➤ <strong>Simple Loan (0%):</strong> Whole amount → principal (reduces loan).<br>
+➤ <strong>Grouped (Loan + EMI):</strong> Auto-splits in 3 phases:<br>
+&nbsp;&nbsp;Phase 1: Fill EMI installments (split interest+principal if rate&gt;0)<br>
+&nbsp;&nbsp;Phase 2: Fill interest on non-EMI loans (up to yield, skips if already paid)<br>
+&nbsp;&nbsp;Phase 3: Leftover → advance (rate&gt;0) or principal (0%)<br>
+➤ Use <strong>➖</strong> icon to manually record principal repayment anytime.<br><br>
+<em>Example:</em> ₹1,50,000 @ 4%/mo = ₹6,000 interest. Receive ₹10,000:<br>
+&nbsp;&nbsp;✓ ₹6,000 → interest (this month paid ✅)<br>
+&nbsp;&nbsp;✓ ₹4,000 → Advance (shows <strong>Adv ₹4,000</strong>)<br>
+&nbsp;&nbsp;→ Principal stays ₹1,50,000, yield stays ₹6,000/mo
+</div>
+</div>
+
+<div>
+<p style="font-weight:700;color:var(--text-primary);margin:0.75rem 0 0.3rem;cursor:pointer;" onclick="toggleHelpSec('h5',this)"><span class="hch" style="font-size:0.6rem;display:inline-block;transition:transform 0.2s;transform:rotate(90deg);margin-right:0.3rem;">▶</span> 📌 EMI LOANS</p>
+<div id="h5" style="padding-left:1rem;display:none;">
+➤ Fixed monthly payment, auto-splits into interest + principal.<br>
+➤ Tracked with "Paid X/Total" counter + progress bar.<br>
+➤ Interest part = outstanding × rate, Principal part = EMI amount − interest part.<br><br>
+<em>Example:</em> ₹2,62,500 at 4%, ₹12,500/mo. Outstanding = ₹2,50,000:<br>
+&nbsp;&nbsp;✓ Interest = ₹2,50,000 × 4% = ₹10,000<br>
+&nbsp;&nbsp;✓ Principal = ₹12,500 − ₹10,000 = ₹2,500
+</div>
+</div>
+
+<div>
+<p style="font-weight:700;color:var(--text-primary);margin:0.75rem 0 0.3rem;cursor:pointer;" onclick="toggleHelpSec('h6',this)"><span class="hch" style="font-size:0.6rem;display:inline-block;transition:transform 0.2s;transform:rotate(90deg);margin-right:0.3rem;">▶</span> 📌 LEDGER (Click Card)</p>
+<div id="h6" style="padding-left:1rem;display:none;">
+➤ Click anywhere on a lending card → opens <strong>Ledger</strong> for that borrower.<br>
+➤ Shows full transaction history: interest, principal, top-up payments.<br>
+➤ Grouped cards show group totals (combined stats for all loans with same name).<br>
+➤ Use the Transaction Report form to record custom payments.
+</div>
+</div>
+
+<div>
+<p style="font-weight:700;color:var(--text-primary);margin:0.75rem 0 0.3rem;cursor:pointer;" onclick="toggleHelpSec('h7',this)"><span class="hch" style="font-size:0.6rem;display:inline-block;transition:transform 0.2s;transform:rotate(90deg);margin-right:0.3rem;">▶</span> 📌 ICONS ON CARDS</p>
+<div id="h7" style="padding-left:1rem;display:none;">
+<strong>📞💬</strong> Call / WhatsApp &nbsp; <strong>➕</strong> Lend More &nbsp; <strong>➖</strong> Record Principal<br>
+<strong>📊</strong> Convert to EMI (on Simple / Loan+EMI cards) &nbsp; <strong>✏️</strong> Edit &nbsp; <strong>🗑️</strong> Delete<br>
+📋 icon removed — just click the card to open Ledger.
+</div>
+</div>
+
+<div>
+<p style="font-weight:700;color:var(--text-primary);margin:0.75rem 0 0.3rem;cursor:pointer;" onclick="toggleHelpSec('h8',this)"><span class="hch" style="font-size:0.6rem;display:inline-block;transition:transform 0.2s;transform:rotate(90deg);margin-right:0.3rem;">▶</span> 📌 FILTERING</p>
+<div id="h8" style="padding-left:1rem;display:none;">
+➤ Click <strong>Lent Loans</strong> stat → shows only Simple Loan cards (non-EMI)<br>
+➤ Click <strong>EMI</strong> stat → shows only EMI cards (EMI Only + Loan+EMI)<br>
+➤ Click <strong>Total</strong> (or same filter again) → shows everything<br>
+➤ Active filter highlighted with white background.
+</div>
+</div>
+
+<div>
+<p style="font-weight:700;color:var(--text-primary);margin:0.75rem 0 0.3rem;cursor:pointer;" onclick="toggleHelpSec('h9',this)"><span class="hch" style="font-size:0.6rem;display:inline-block;transition:transform 0.2s;transform:rotate(90deg);margin-right:0.3rem;">▶</span> 🏠 DASHBOARD</p>
+<div id="h9" style="padding-left:1rem;display:none;">
+Full financial snapshot:<br><br>
+<strong>Stats Header:</strong><br>
+➤ <strong>Lent Outstanding</strong> — Total principal across all lending loans<br>
+➤ <strong>Borrowed</strong> — Total principal across all borrowing loans<br>
+➤ <strong>Interest /mo</strong> — Net spread (lending yield − borrowing cost)<br>
+➤ <strong>Interest Rcvd</strong> — Total interest received lifetime<br>
+➤ <strong>Interest Paid</strong> — Total interest paid lifetime<br>
+➤ <strong>Expenses</strong> — Total expenses this month<br><br>
+<strong>Below stats:</strong><br>
+➤ Recent Transactions (latest payments across all loans)<br>
+➤ Overview Cards with quick-actions<br>
+➤ Upcoming reminders (rent, overdue loans, EMIs)
+</div>
+</div>
+
+<div>
+<p style="font-weight:700;color:var(--text-primary);margin:0.75rem 0 0.3rem;cursor:pointer;" onclick="toggleHelpSec('h10',this)"><span class="hch" style="font-size:0.6rem;display:inline-block;transition:transform 0.2s;transform:rotate(90deg);margin-right:0.3rem;">▶</span> 📋 RECORDS</p>
+<div id="h10" style="padding-left:1rem;display:none;">
+Tracks non-loan expenses and income:<br><br>
+<strong>Expense Categories:</strong><br>
+➤ <strong>Construction</strong> — Renovation with sub-types (Plumber, Carpenter, Tiles, Painter, etc.)<br>
+➤ <strong>Personal</strong> — Groceries, Dining, Transport, Shopping, Medical<br>
+➤ <strong>Bills</strong> — Electricity, Water, Internet, Phone, Rent<br>
+➤ <strong>Travel</strong> — Flights, Hotels, Fuel, Food<br>
+➤ <strong>Health</strong> — Doctor, Pharmacy, Lab, Hospital<br>
+➤ <strong>Others</strong> — Miscellaneous<br><br>
+<strong>Features:</strong><br>
+➤ Add Record → category, amount, date, note, upload receipt<br>
+➤ Search by note or category<br>
+➤ Edit / Delete via icons<br>
+➤ Month selector filters by month<br><br>
+<em>Example:</em> ₹22,500 "Raghu Painter" Jun 18 → category:construction, laborType:Painter
+</div>
+</div>
+
           </div>
         </div>
       </section>
-
-      
 
     </main>
     
@@ -1514,7 +1693,22 @@
     </div>
   </div>
 
+  <!-- MODAL: CONSTRUCTION HISTORY -->
+  <div class="modal-overlay" id="modal-construction-history">
+    <div class="modal-container" style="max-width: 520px;">
+      <div class="modal-header">
+        <h3 class="modal-title">Construction History</h3>
+        <button class="modal-close" onclick="closeModal('modal-construction-history')">
+          <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="modal-body" style="max-height: 75vh; overflow-y: auto;" id="construction-history-content">
+        <!-- Injected by JS -->
+      </div>
+    </div>
+  </div>
+
   <!-- JavaScript Modules -->
-  <script src="app.js?v=3"></script>
+  <script src="app.js?v=4"></script>
 </body>
 </html>
