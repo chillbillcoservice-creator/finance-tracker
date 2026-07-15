@@ -2970,7 +2970,7 @@ function renderLending() {
         const formattedPrincipal = formatCurrency(stats.outstandingPrincipal);
         const currentRecv = formatCurrency(stats.currentMonthSum);
         const currentBal = formatCurrency(Math.max(0, stats.monthlyYield - stats.currentMonthSum));
-        const recvDisplay = stats.monthlyYield === 0 ? 'Exp 0 · Rcvd ' + currentRecv : (stats.isInterestFullyPaidThisMonth ? 'Exp ' + formattedYield + ' · Rcvd ' + currentRecv + ' ✅' : 'Exp ' + formattedYield + ' · Rcvd ' + currentRecv + ' · Bal ' + currentBal);
+        const recvDisplay = stats.monthlyYield === 0 ? 'Exp 0 · Rcvd ' + currentRecv : (stats.isInterestFullyPaidThisMonth ? 'Exp ' + formattedYield + ' · Rcvd ' + currentRecv + ' ✅' : 'Exp ' + formattedYield + ' · Rcvd ' + currentRecv + (stats.currentMonthSum > 0 ? ' · Bal ' + currentBal : ''));
         const settledBadge = stats.statusInMonth !== 'active' ? ' <span class="badge badge-muted">Settled</span>' : '';
         const advBadge = stats.hasAdvance ? ' <span style="font-size:0.55rem;color:var(--color-purple);font-weight:600;margin-left:0.2rem;">Adv ' + formatCurrency(stats.advTotal) + '</span>' : '';
 
@@ -3050,7 +3050,7 @@ function renderLending() {
         '<span onclick="deleteLoan(\'' + primaryId + '\',\'lent\')" title="Delete">🗑️</span>';
 
       groupBal = groupYield - totalRcvd;
-      var summaryExtras = groupBal >= 0 ? ' · Bal ' + formatCurrency(groupBal) : '';
+      var summaryExtras = groupBal >= 0 && totalRcvd > 0 ? ' · Bal ' + formatCurrency(groupBal) : '';
       var groupLastDate = null;
       sortedGroup.forEach(function(l) { if (l._stats.lastPaymentDate && (!groupLastDate || l._stats.lastPaymentDate > groupLastDate)) groupLastDate = l._stats.lastPaymentDate; });
       var lastDisplay = groupLastDate ? ' · Last ' + formatDate(groupLastDate) : '';
@@ -3132,7 +3132,7 @@ function renderLending() {
         '<span onclick="deleteLoan(\'' + primaryId + '\',\'lent\')" title="Delete">🗑️</span>';
 
       groupBal = groupYield - totalRcvd;
-      var advDisplay = groupBal >= 0 ? ' · Bal ' + formatCurrency(groupBal) : '';
+      var advDisplay = groupBal >= 0 && totalRcvd > 0 ? ' · Bal ' + formatCurrency(groupBal) : '';
       var groupLastDate = null;
       sortedGroup.forEach(function(l) { if (l._stats.lastPaymentDate && (!groupLastDate || l._stats.lastPaymentDate > groupLastDate)) groupLastDate = l._stats.lastPaymentDate; });
       var lastDisplay = groupLastDate ? ' · Last ' + formatDate(groupLastDate) : '';
