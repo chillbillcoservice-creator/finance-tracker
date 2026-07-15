@@ -3026,7 +3026,7 @@ function renderLending() {
       card.style.padding = '0.75rem';
       card.setAttribute('data-loan-ids', allIds);
       var groupBal = groupYield - totalRcvd;
-      var advBadge = groupBal < 0 ? ' <span style="font-size:0.55rem;color:var(--color-purple);font-weight:600;margin-left:0.2rem;">Adv</span>' : '';
+      var advBadge = groupBal < 0 ? ' <span style="font-size:0.55rem;color:var(--color-purple);font-weight:600;margin-left:0.2rem;">Adv ' + formatCurrency(-groupBal) + '</span>' : '';
       card.innerHTML = '<div style="display:flex;justify-content:space-between;align-items:center;"><div><div style="font-weight:700;font-size:1rem;">' + name + advBadge + '</div>' + (first.phone ? '<div style="font-size:0.82rem;color:#fff;margin-top:0.05rem;">' + first.phone + '</div>' : '') + '</div><div style="text-align:right;"><div style="font-size:1.15rem;font-weight:800;color:var(--color-warning);line-height:1.2;">' + formatCurrency(groupOutstanding) + '</div><div style="font-size:0.72rem;color:var(--text-secondary);line-height:1.3;">EMI +' + formatCurrency(groupYield) + '/mo</div></div></div>';
 
       sortedGroup.forEach(function(loan) {
@@ -3056,7 +3056,7 @@ function renderLending() {
         '<span onclick="deleteLoan(\'' + primaryId + '\',\'lent\')" title="Delete">🗑️</span>';
 
       groupBal = groupYield - totalRcvd;
-      var summaryExtras = groupBal >= 0 ? ' · Bal ' + formatCurrency(groupBal) : ' · <span style="color:var(--color-purple);font-weight:600;">Adv ' + formatCurrency(-groupBal) + '</span>';
+      var summaryExtras = groupBal >= 0 ? ' · Bal ' + formatCurrency(groupBal) : '';
       var groupLastDate = null;
       sortedGroup.forEach(function(l) { if (l._stats.lastPaymentDate && (!groupLastDate || l._stats.lastPaymentDate > groupLastDate)) groupLastDate = l._stats.lastPaymentDate; });
       var lastDisplay = groupLastDate ? ' · Last ' + formatDate(groupLastDate) : '';
@@ -3091,7 +3091,7 @@ function renderLending() {
       card.style.padding = '0.75rem';
       card.setAttribute('data-loan-ids', allIds);
       var groupBal = groupYield - totalRcvd;
-      var advBadge = groupBal < 0 ? ' <span style="font-size:0.55rem;color:var(--color-purple);font-weight:600;margin-left:0.2rem;">Adv</span>' : '';
+      var advBadge = groupBal < 0 ? ' <span style="font-size:0.55rem;color:var(--color-purple);font-weight:600;margin-left:0.2rem;">Adv ' + formatCurrency(-groupBal) + '</span>' : '';
       card.innerHTML = '<div style="display:flex;justify-content:space-between;align-items:center;"><div><div style="font-weight:700;font-size:1rem;">' + name + advBadge + '</div>' + (first.phone ? '<div style="font-size:0.82rem;color:#fff;margin-top:0.05rem;">' + first.phone + '</div>' : '') + '</div><div style="text-align:right;"><div style="font-size:1.15rem;font-weight:800;color:var(--color-warning);line-height:1.2;">' + formatCurrency(groupOutstanding) + '</div><div style="font-size:0.72rem;color:var(--text-secondary);line-height:1.3;">+' + formatCurrency(groupYield) + '/mo</div></div></div>';
 
       sortedGroup.forEach(function(loan) {
@@ -3138,7 +3138,7 @@ function renderLending() {
         '<span onclick="deleteLoan(\'' + primaryId + '\',\'lent\')" title="Delete">🗑️</span>';
 
       groupBal = groupYield - totalRcvd;
-      var advDisplay = groupBal >= 0 ? ' · Bal ' + formatCurrency(groupBal) : ' · <span style="color:var(--color-purple);font-weight:600;">Adv ' + formatCurrency(-groupBal) + '</span>';
+      var advDisplay = groupBal >= 0 ? ' · Bal ' + formatCurrency(groupBal) : '';
       var groupLastDate = null;
       sortedGroup.forEach(function(l) { if (l._stats.lastPaymentDate && (!groupLastDate || l._stats.lastPaymentDate > groupLastDate)) groupLastDate = l._stats.lastPaymentDate; });
       var lastDisplay = groupLastDate ? ' · Last ' + formatDate(groupLastDate) : '';
