@@ -509,17 +509,20 @@ body::before {
 
 .pending-names-list {
   position: absolute;
-  right: 0.35rem;
+  right: 0.25rem;
   top: 50%;
   transform: translateY(-50%);
-  max-width: 48%;
-  max-height: 78%;
+  max-width: 46%;
+  max-height: 80%;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
   align-items: flex-end;
   justify-content: center;
-  gap: 0.1rem;
+  gap: 0.05rem;
+  font-size: 0.68rem;
+  color: var(--text-muted);
+  text-align: right;
   z-index: 2;
 }
 
@@ -532,31 +535,23 @@ body::before {
 
 .pending-name-item {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 0.2rem;
+  gap: 0.25rem;
   max-width: 100%;
+  color: var(--text-primary);
   cursor: pointer;
-  padding: 0.1rem 0.35rem;
+  padding: 0.15rem 0.3rem;
   border-left: 3px solid transparent;
-  transition: all 0.15s;
-  font-size: 0.65rem;
-  line-height: 1.3;
-  border-radius: 0 3px 3px 0;
-  white-space: nowrap;
+  transition: all 0.2s;
 }
-.pn-name {
-  font-weight: 650;
-  color: var(--pn-color, var(--text-primary));
-  font-weight: var(--pn-weight, 600);
-}
-.pn-amt {
-  font-weight: 700;
-  color: var(--color-danger);
-  opacity: 0.85;
+.pending-name-item span {
+  font-weight: 600;
 }
 .pending-name-item.selected {
-  border-left-color: var(--color-accent);
-  background: rgba(var(--color-accent-rgb), 0.08);
+  border-left-color: #3b82f6;
+  background: rgba(59, 130, 246, 0.1);
+  border-radius: 0 4px 4px 0;
 }
 
 .contact-btn-group {
@@ -2203,86 +2198,6 @@ body::before {
 /* ── Psychedelic ── */
 
 
-
-/* ── Expense List Items ── */
-.expense-list-item {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.25rem 0.45rem;
-  background: var(--input-bg);
-  border-radius: 4px;
-  font-size: 0.7rem;
-}
-.expense-list-label {
-  flex: 1;
-  font-weight: 600;
-  color: var(--text-primary);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.expense-list-method {
-  font-size: 0.6rem;
-  font-weight: 700;
-  color: var(--text-secondary);
-  background: var(--bg-tertiary);
-  padding: 0.1rem 0.3rem;
-  border-radius: 3px;
-  flex-shrink: 0;
-}
-.expense-list-amount {
-  flex-shrink: 0;
-  font-weight: 700;
-  color: var(--color-danger);
-  text-align: right;
-  min-width: 4.5rem;
-}
-
-/* ── Settings Toggles ── */
-.settings-toggles {
-  display: flex;
-  flex-direction: column;
-  gap: 0.35rem;
-}
-.settings-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0.55rem 0.7rem;
-  background: var(--bg-secondary);
-  border-radius: var(--radius-sm);
-  cursor: pointer;
-  transition: background 0.15s;
-  gap: 0.75rem;
-}
-.settings-row:hover {
-  background: var(--bg-tertiary);
-}
-.settings-info {
-  display: flex;
-  flex-direction: column;
-  gap: 0.1rem;
-  min-width: 0;
-}
-.settings-label {
-  font-weight: 650;
-  font-size: 0.8rem;
-  color: var(--text-primary);
-  line-height: 1.3;
-}
-.settings-desc {
-  font-size: 0.7rem;
-  color: var(--text-muted);
-  line-height: 1.3;
-}
-.settings-row input[type="checkbox"] {
-  width: 18px;
-  height: 18px;
-  cursor: pointer;
-  flex-shrink: 0;
-  accent-color: var(--color-accent);
-}
 
 /* Calendar View */
 #modal-calendar .modal-container {
