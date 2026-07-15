@@ -2978,7 +2978,7 @@ function renderLending() {
         const currentBal = formatCurrency(Math.max(0, stats.monthlyYield - stats.currentMonthSum));
         const recvDisplay = stats.monthlyYield === 0 ? 'Exp 0 · Rcvd ' + currentRecv : (stats.isInterestFullyPaidThisMonth ? 'Exp ' + formattedYield + ' · Rcvd ' + currentRecv + ' ✅' : 'Exp ' + formattedYield + ' · Rcvd ' + currentRecv + ' · Bal ' + currentBal);
         const settledBadge = stats.statusInMonth !== 'active' ? ' <span class="badge badge-muted">Settled</span>' : '';
-        const advBadge = stats.hasAdvance ? ' <span style="font-size:0.55rem;color:var(--color-purple);font-weight:600;margin-left:0.2rem;">Adv</span>' : '';
+        const advBadge = stats.hasAdvance ? ' <span style="font-size:0.55rem;color:var(--color-purple);font-weight:600;margin-left:0.2rem;">Adv ' + formatCurrency(stats.advTotal) + '</span>' : '';
 
         var html = '<div style="display:flex;justify-content:space-between;align-items:center;">' +
           '<div><div style="font-weight:700;font-size:1rem;">' + loan.borrowerName + settledBadge + advBadge + '</div>' +
@@ -2991,7 +2991,7 @@ function renderLending() {
             '<button class="btn btn-primary" style="min-height:40px;font-weight:700;font-size:0.9rem;padding:0.3rem 1rem;" onclick="quickLoanPayment(\'' + loan.id + '\',\'lent\')">Recv</button></div>';
         }
 
-        html += '<div style="font-size:0.7rem;color:#fff;font-style:italic;margin-bottom:0.2rem;">' + recvDisplay + (stats.advTotal > 0 ? ' · <span style="color:var(--color-purple);font-weight:600;">Adv ' + formatCurrency(stats.advTotal) + '</span>' : '') + (stats.lastPaymentDate ? ' · Last ' + formatDate(stats.lastPaymentDate) : '') + '</div>';
+        html += '<div style="font-size:0.7rem;color:#fff;font-style:italic;margin-bottom:0.2rem;">' + recvDisplay + (stats.lastPaymentDate ? ' · Last ' + formatDate(stats.lastPaymentDate) : '') + '</div>';
 
         html += '<div class="icon-strip"><div class="icon-strip-left">' +
           (loan.phone ? '<span onclick="window.open(\'tel:' + loan.phone.replace(/\D/g, '') + '\',\'_self\')" title="Call">📞</span><span onclick="window.open(\'https://wa.me/91' + loan.phone.replace(/\D/g, '') + '\',\'_blank\')" title="WhatsApp">💬</span>' : '') +
