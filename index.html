@@ -596,40 +596,35 @@
             </h2>
           </div>
 
-          <!-- Pay Method Toggle -->
-          <div style="border-bottom: 1px solid var(--border-color); padding: 0 0 1.25rem 0; margin-bottom: 1.25rem; display: flex; justify-content: space-between; align-items: center;">
-            <div>
-              <h3 style="margin: 0 0 0.25rem 0;">Show Pay Method</h3>
-              <p style="color: var(--text-secondary); margin: 0; font-size: 0.85rem;">Show Cash/UPI toggle in construction expenses</p>
-            </div>
-            <input type="checkbox" id="toggle-pay-method" onchange="window.togglePayMethod()" style="width: 20px; height: 20px; cursor: pointer;">
-          </div>
-
-          <!-- Expense Details Toggle -->
-          <div style="border-bottom: 1px solid var(--border-color); padding: 0 0 1.25rem 0; margin-bottom: 1.25rem; display: flex; justify-content: space-between; align-items: center;">
-            <div>
-              <h3 style="margin: 0 0 0.25rem 0;">Show Today's Expenses List</h3>
-              <p style="color: var(--text-secondary); margin: 0; font-size: 0.85rem;">Display individual expenses inside Today's Expenses card</p>
-            </div>
-            <input type="checkbox" id="toggle-expense-details" onchange="window.toggleExpenseDetails()" style="width: 20px; height: 20px; cursor: pointer;">
-          </div>
-
-          <!-- Preferences Toggle -->
-          <div style="border-bottom: 1px solid var(--border-color); padding: 0 0 1.25rem 0; margin-bottom: 1.25rem; display: flex; justify-content: space-between; align-items: center;">
-            <div>
-              <h3 style="margin: 0 0 0.25rem 0;">Show Pending Names</h3>
-              <p style="color: var(--text-secondary); margin: 0; font-size: 0.85rem;">Display who owes money on the dashboard cards</p>
-            </div>
-            <input type="checkbox" id="toggle-pending-names" onchange="window.togglePendingNames()" style="width: 20px; height: 20px; cursor: pointer;">
-          </div>
-
-          <!-- Sort Rentals Toggle -->
-          <div style="border-bottom: 1px solid var(--border-color); padding: 0 0 1.25rem 0; margin-bottom: 1.25rem; display: flex; justify-content: space-between; align-items: center;">
-            <div>
-              <h3 style="margin: 0 0 0.25rem 0;">Sort Rentals by Due Day</h3>
-              <p style="color: var(--text-secondary); margin: 0; font-size: 0.85rem;">Default: by rent descending. ON: by due day + rent descending</p>
-            </div>
-            <input type="checkbox" id="toggle-sort-rentals" onchange="window.toggleSortRentals()" style="width: 20px; height: 20px; cursor: pointer;">
+          <div class="settings-toggles">
+            <label class="settings-row">
+              <div class="settings-info">
+                <span class="settings-label">Show Pay Method</span>
+                <span class="settings-desc">Cash/UPI toggle in construction expenses</span>
+              </div>
+              <input type="checkbox" id="toggle-pay-method" onchange="window.togglePayMethod()">
+            </label>
+            <label class="settings-row">
+              <div class="settings-info">
+                <span class="settings-label">Show Today's Expenses List</span>
+                <span class="settings-desc">Individual expenses inside Today's Expenses card</span>
+              </div>
+              <input type="checkbox" id="toggle-expense-details" onchange="window.toggleExpenseDetails()">
+            </label>
+            <label class="settings-row">
+              <div class="settings-info">
+                <span class="settings-label">Show Pending Names</span>
+                <span class="settings-desc">Who owes money on the dashboard cards</span>
+              </div>
+              <input type="checkbox" id="toggle-pending-names" onchange="window.togglePendingNames()">
+            </label>
+            <label class="settings-row">
+              <div class="settings-info">
+                <span class="settings-label">Sort Rentals by Due Day</span>
+                <span class="settings-desc">Default: rent ↓. ON: due day + rent ↓</span>
+              </div>
+              <input type="checkbox" id="toggle-sort-rentals" onchange="window.toggleSortRentals()">
+            </label>
           </div>
 
 

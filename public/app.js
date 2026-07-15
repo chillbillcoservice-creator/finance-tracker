@@ -1953,12 +1953,12 @@ function renderDashboard() {
         todayExps.forEach(function(exp) {
           var leftText = exp.note || exp.category;
           if (exp.category === 'construction') {
-            leftText = 'Construction - ' + (exp.laborType || 'General') + ' - ' + (exp.project || '');
+            leftText = (exp.laborType || 'General') + ' · ' + (exp.project || '');
           }
-          expHtml += '<div style="display: flex; align-items: center; padding: 0.2rem 0.4rem; background: var(--input-bg); border-radius: 4px; font-size: 0.7rem;">' +
-            '<span style="flex: 1; font-weight: 600; color: var(--text-primary);">' + leftText + '</span>' +
-            (exp.paymentMethod ? '<span style="flex: 1; text-align: center; font-size:0.65rem; color:var(--text-secondary); font-weight:600;">' + (exp.paymentMethod === 'upi' ? 'UPI' : 'Cash') + '</span>' : '<span style="flex: 1;"></span>') +
-            '<span style="flex: 1; text-align: right; font-weight: 700; color: var(--color-danger);">' + formatCurrency(exp.amount) + '</span>' +
+          expHtml += '<div class="expense-list-item">' +
+            '<span class="expense-list-label">' + leftText + '</span>' +
+            (exp.paymentMethod && state.showPayMethod !== false ? '<span class="expense-list-method">' + (exp.paymentMethod === 'upi' ? 'UPI' : 'Cash') + '</span>' : '') +
+            '<span class="expense-list-amount">' + formatCurrency(exp.amount) + '</span>' +
           '</div>';
         });
         expenseCardDetails.innerHTML = expHtml;
@@ -2055,7 +2055,7 @@ function renderDashboard() {
       if (pTenants.length > 0) {
         var pendingTenantsHTML = '<div class="pending-names-list">';
         pTenants.forEach(function(t) {
-          pendingTenantsHTML += '<div class="pending-name-item"><span style="color:' + t.color + ';font-weight:' + t.weight + '">' + t.name + ' · ' + formatCurrency(t.amount) + '</span></div>';
+          pendingTenantsHTML += '<div class="pending-name-item" style="--pn-color:' + t.color + ';--pn-weight:' + t.weight + '"><span class="pn-name">' + t.name + '</span><span class="pn-amt">' + formatCurrency(t.amount) + '</span></div>';
         });
         pendingTenantsHTML += '</div>';
         document.getElementById('card-rent').insertAdjacentHTML('afterbegin', pendingTenantsHTML);
@@ -2081,7 +2081,7 @@ function renderDashboard() {
 
     if (pBorrowers.length > 0) {
       var pendingBorrowersHTML = '<div class="pending-names-list">' + pBorrowers.map(function(b) {
-        return '<div class="pending-name-item"><span>' + b.name + '</span> (' + (b.owe % 1000 === 0 ? Math.round(b.owe / 1000) + 'K' : String(b.owe)) + ')</div>';
+        return '<div class="pending-name-item"><span class="pn-name">' + b.name + '</span><span class="pn-amt">' + (b.owe % 1000 === 0 ? Math.round(b.owe / 1000) + 'K' : formatCurrency(b.owe)) + '</span></div>';
       }).join('') + '</div>';
       document.getElementById('card-interest').insertAdjacentHTML('afterbegin', pendingBorrowersHTML);
       document.getElementById('card-interest').classList.add('has-pending-names');
