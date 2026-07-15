@@ -482,7 +482,6 @@ function loadState() {
       state.showPayMethod = state.showPayMethod !== false;
       state.showExpenseDetails = state.showExpenseDetails !== false;
       state.sortRentalsByDue = state.sortRentalsByDue === true;
-      state.soundEnabled = state.soundEnabled !== false;
       state.properties = state.properties || [];
       var defaults = ['23/48 ground floor', '23/48 3rd floor', '1/104'];
       defaults.forEach(function(d) { if (state.properties.indexOf(d) === -1) state.properties.push(d); });
@@ -497,8 +496,6 @@ function loadState() {
       if(ed) ed.checked = state.showExpenseDetails;
       const sr = document.getElementById('toggle-sort-rentals');
       if(sr) sr.checked = state.sortRentalsByDue;
-      const snd = document.getElementById('toggle-sound');
-      if(snd) snd.checked = state.soundEnabled;
     } catch (e) {
       console.error('Failed to parse local storage data, resetting to default.', e);
       saveState();
@@ -1174,7 +1171,6 @@ function quickMarkInterestPaid(loanId, type, amount, monthStr) {
   });
   
   saveState();
-  if (type === 'received') playKaChing();
   refreshActiveTab();
   alert(`✓ Interest of ${formatCurrency(amount)} recorded as ${type === 'received' ? 'collected' : 'paid'} for ${type === 'received' ? loan.borrowerName : loan.financierName}!`);
 }
@@ -1260,7 +1256,6 @@ function quickLoanPayment(loanId, direction) {
     state.interestPayments.push({id: 'p' + Math.random().toString(36).substr(2, 9), loanId: loanId, type: direction === 'lent' ? 'received' : 'paid', category: 'principal', amount: payAmount, date: today, note: 'Principal repayment'});
   }
   saveState();
-  if (direction === 'lent') playKaChing();
   if (getOutstandingPrincipal(loan.id, loan.principal) <= 0) {
     alert('Loan fully settled! ✅');
   }
@@ -1348,7 +1343,6 @@ function quickGroupPayment(safeId, direction) {
     });
   }
   saveState();
-  if (direction === 'lent') playKaChing();
   var allSettled = true;
   for (var i = 0; i < groupLoans.length; i++) {
     if (getOutstandingPrincipal(groupLoans[i].id, groupLoans[i].principal) > 0) { allSettled = false; break; }
@@ -2978,7 +2972,7 @@ function renderLending() {
         const currentBal = formatCurrency(Math.max(0, stats.monthlyYield - stats.currentMonthSum));
         const recvDisplay = stats.monthlyYield === 0 ? 'Exp 0 · Rcvd ' + currentRecv : (stats.isInterestFullyPaidThisMonth ? 'Exp ' + formattedYield + ' · Rcvd ' + currentRecv + ' ✅' : 'Exp ' + formattedYield + ' · Rcvd ' + currentRecv + ' · Bal ' + currentBal);
         const settledBadge = stats.statusInMonth !== 'active' ? ' <span class="badge badge-muted">Settled</span>' : '';
-        const advBadge = stats.hasAdvance ? ' <span style="font-size:0.55rem;color:var(--color-purple);font-weight:600;margin-left:0.2rem;">Adv</span>' : '';
+        const advBadge = stats.hasAdvance ? ' <span style="font-size:0.55rem;color:var(--color-purple);font-weight:600;margin-left:0.2rem;">Adv ' + formatCurrency(stats.advTotal) + '</span>' : '';
 
         var html = '<div style="display:flex;justify-content:space-between;align-items:center;">' +
           '<div><div style="font-weight:700;font-size:1rem;">' + loan.borrowerName + settledBadge + advBadge + '</div>' +
@@ -2991,7 +2985,7 @@ function renderLending() {
             '<button class="btn btn-primary" style="min-height:40px;font-weight:700;font-size:0.9rem;padding:0.3rem 1rem;" onclick="quickLoanPayment(\'' + loan.id + '\',\'lent\')">Recv</button></div>';
         }
 
-        html += '<div style="font-size:0.7rem;color:#fff;font-style:italic;margin-bottom:0.2rem;">' + recvDisplay + (stats.advTotal > 0 ? ' · <span style="color:var(--color-purple);font-weight:600;">Adv ' + formatCurrency(stats.advTotal) + '</span>' : '') + (stats.lastPaymentDate ? ' · Last ' + formatDate(stats.lastPaymentDate) : '') + '</div>';
+        html += '<div style="font-size:0.7rem;color:#fff;font-style:italic;margin-bottom:0.2rem;">' + recvDisplay + (stats.lastPaymentDate ? ' · Last ' + formatDate(stats.lastPaymentDate) : '') + '</div>';
 
         html += '<div class="icon-strip"><div class="icon-strip-left">' +
           (loan.phone ? '<span onclick="window.open(\'tel:' + loan.phone.replace(/\D/g, '') + '\',\'_self\')" title="Call">📞</span><span onclick="window.open(\'https://wa.me/91' + loan.phone.replace(/\D/g, '') + '\',\'_blank\')" title="WhatsApp">💬</span>' : '') +
@@ -3026,7 +3020,7 @@ function renderLending() {
       card.style.padding = '0.75rem';
       card.setAttribute('data-loan-ids', allIds);
       var groupBal = groupYield - totalRcvd;
-      var advBadge = groupBal < 0 ? ' <span style="font-size:0.55rem;color:var(--color-purple);font-weight:600;margin-left:0.2rem;">Adv</span>' : '';
+      var advBadge = groupBal < 0 ? ' <span style="font-size:0.55rem;color:var(--color-purple);font-weight:600;margin-left:0.2rem;">Adv ' + formatCurrency(-groupBal) + '</span>' : '';
       card.innerHTML = '<div style="display:flex;justify-content:space-between;align-items:center;"><div><div style="font-weight:700;font-size:1rem;">' + name + advBadge + '</div>' + (first.phone ? '<div style="font-size:0.82rem;color:#fff;margin-top:0.05rem;">' + first.phone + '</div>' : '') + '</div><div style="text-align:right;"><div style="font-size:1.15rem;font-weight:800;color:var(--color-warning);line-height:1.2;">' + formatCurrency(groupOutstanding) + '</div><div style="font-size:0.72rem;color:var(--text-secondary);line-height:1.3;">EMI +' + formatCurrency(groupYield) + '/mo</div></div></div>';
 
       sortedGroup.forEach(function(loan) {
@@ -3056,12 +3050,12 @@ function renderLending() {
         '<span onclick="deleteLoan(\'' + primaryId + '\',\'lent\')" title="Delete">🗑️</span>';
 
       groupBal = groupYield - totalRcvd;
-      var summaryExtras = groupBal >= 0 ? ' · Bal ' + formatCurrency(groupBal) : ' · <span style="color:var(--color-purple);font-weight:600;">Adv ' + formatCurrency(-groupBal) + '</span>';
+      var summaryExtras = groupBal >= 0 ? ' · Bal ' + formatCurrency(groupBal) : '';
       var groupLastDate = null;
       sortedGroup.forEach(function(l) { if (l._stats.lastPaymentDate && (!groupLastDate || l._stats.lastPaymentDate > groupLastDate)) groupLastDate = l._stats.lastPaymentDate; });
       var lastDisplay = groupLastDate ? ' · Last ' + formatDate(groupLastDate) : '';
       card.innerHTML += '<div style="border-top:1px solid var(--border-color);margin-top:0.5rem;padding-top:0.5rem;">' +
-        '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.35rem;"><span style="font-size:0.75rem;color:var(--text-secondary);">Exp ' + formatCurrency(groupYield) + ' · Rcvd ' + formatCurrency(totalRcvd) + summaryExtras + lastDisplay + '</span></div>' +
+        '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.35rem;"><span style="font-size:0.75rem;color:#fff;">Exp ' + formatCurrency(groupYield) + ' · Rcvd ' + formatCurrency(totalRcvd) + summaryExtras + lastDisplay + '</span></div>' +
         '<div style="display:flex;gap:0.35rem;align-items:center;margin-bottom:0.25rem;"><input type="number" id="quick-pay-group-' + safeId + '" class="form-input" placeholder="₹ Amount" style="flex:1;min-height:40px;font-size:1rem;padding:0.3rem 0.5rem;font-weight:600;"><button class="btn btn-primary" style="min-height:40px;font-weight:700;font-size:0.9rem;padding:0.3rem 1rem;" onclick="quickGroupPayment(\'' + safeId + '\',\'lent\')">Recv</button></div>' +
         '<div class="icon-strip" style="border-top:none;margin-top:0.15rem;padding-top:0;"><div class="icon-strip-left">' + leftIcons + '</div><div class="icon-strip-right">' + rightIcons + '</div></div></div>';
 
@@ -3091,7 +3085,7 @@ function renderLending() {
       card.style.padding = '0.75rem';
       card.setAttribute('data-loan-ids', allIds);
       var groupBal = groupYield - totalRcvd;
-      var advBadge = groupBal < 0 ? ' <span style="font-size:0.55rem;color:var(--color-purple);font-weight:600;margin-left:0.2rem;">Adv</span>' : '';
+      var advBadge = groupBal < 0 ? ' <span style="font-size:0.55rem;color:var(--color-purple);font-weight:600;margin-left:0.2rem;">Adv ' + formatCurrency(-groupBal) + '</span>' : '';
       card.innerHTML = '<div style="display:flex;justify-content:space-between;align-items:center;"><div><div style="font-weight:700;font-size:1rem;">' + name + advBadge + '</div>' + (first.phone ? '<div style="font-size:0.82rem;color:#fff;margin-top:0.05rem;">' + first.phone + '</div>' : '') + '</div><div style="text-align:right;"><div style="font-size:1.15rem;font-weight:800;color:var(--color-warning);line-height:1.2;">' + formatCurrency(groupOutstanding) + '</div><div style="font-size:0.72rem;color:var(--text-secondary);line-height:1.3;">+' + formatCurrency(groupYield) + '/mo</div></div></div>';
 
       sortedGroup.forEach(function(loan) {
@@ -3138,12 +3132,12 @@ function renderLending() {
         '<span onclick="deleteLoan(\'' + primaryId + '\',\'lent\')" title="Delete">🗑️</span>';
 
       groupBal = groupYield - totalRcvd;
-      var advDisplay = groupBal >= 0 ? ' · Bal ' + formatCurrency(groupBal) : ' · <span style="color:var(--color-purple);font-weight:600;">Adv ' + formatCurrency(-groupBal) + '</span>';
+      var advDisplay = groupBal >= 0 ? ' · Bal ' + formatCurrency(groupBal) : '';
       var groupLastDate = null;
       sortedGroup.forEach(function(l) { if (l._stats.lastPaymentDate && (!groupLastDate || l._stats.lastPaymentDate > groupLastDate)) groupLastDate = l._stats.lastPaymentDate; });
       var lastDisplay = groupLastDate ? ' · Last ' + formatDate(groupLastDate) : '';
       card.innerHTML += '<div style="border-top:1px solid var(--border-color);margin-top:0.5rem;padding-top:0.5rem;">' +
-        '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.35rem;"><span style="font-size:0.75rem;color:var(--text-secondary);">Exp ' + formatCurrency(groupYield) + ' · Rcvd ' + formatCurrency(totalRcvd) + advDisplay + lastDisplay + '</span></div>' +
+        '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.35rem;"><span style="font-size:0.75rem;color:#fff;">Exp ' + formatCurrency(groupYield) + ' · Rcvd ' + formatCurrency(totalRcvd) + advDisplay + lastDisplay + '</span></div>' +
         '<div style="display:flex;gap:0.35rem;align-items:center;margin-bottom:0.25rem;"><input type="number" id="quick-pay-group-' + safeId + '" class="form-input" placeholder="₹ Amount" style="flex:1;min-height:40px;font-size:1rem;padding:0.3rem 0.5rem;font-weight:600;"><button class="btn btn-primary" style="min-height:40px;font-weight:700;font-size:0.9rem;padding:0.3rem 1rem;" onclick="quickGroupPayment(\'' + safeId + '\',\'lent\')">Recv</button></div>' +
         '<div class="icon-strip" style="border-top:none;margin-top:0.15rem;padding-top:0;"><div class="icon-strip-left">' + leftIcons + '</div><div class="icon-strip-right">' + rightIcons + '</div></div></div>';
 
@@ -3824,7 +3818,6 @@ document.getElementById('form-payment').addEventListener('submit', (e) => {
   });
 
   saveState();
-  if (type === 'received') playKaChing();
 
   // Auto mark-paid: if principal repayment brings outstanding to 0, auto-settle the loan
   if (category === 'principal') {
@@ -6250,20 +6243,6 @@ window.toggleSortRentals = function() {
   saveState();
   renderDashboard();
 };
-
-window.toggleSound = function() {
-  state.soundEnabled = document.getElementById('toggle-sound').checked;
-  saveState();
-};
-
-function playKaChing() {
-  if (!state.soundEnabled) return;
-  try {
-    var audio = new Audio('./kaching.mp3');
-    audio.volume = 0.6;
-    audio.play();
-  } catch(e) { /* audio play not supported */ }
-}
 
 window.renderPropertiesList = function() {
   var container = document.getElementById('properties-list');

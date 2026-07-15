@@ -482,7 +482,6 @@ function loadState() {
       state.showPayMethod = state.showPayMethod !== false;
       state.showExpenseDetails = state.showExpenseDetails !== false;
       state.sortRentalsByDue = state.sortRentalsByDue === true;
-      state.soundEnabled = state.soundEnabled !== false;
       state.properties = state.properties || [];
       var defaults = ['23/48 ground floor', '23/48 3rd floor', '1/104'];
       defaults.forEach(function(d) { if (state.properties.indexOf(d) === -1) state.properties.push(d); });
@@ -497,8 +496,6 @@ function loadState() {
       if(ed) ed.checked = state.showExpenseDetails;
       const sr = document.getElementById('toggle-sort-rentals');
       if(sr) sr.checked = state.sortRentalsByDue;
-      const snd = document.getElementById('toggle-sound');
-      if(snd) snd.checked = state.soundEnabled;
     } catch (e) {
       console.error('Failed to parse local storage data, resetting to default.', e);
       saveState();
@@ -1174,7 +1171,6 @@ function quickMarkInterestPaid(loanId, type, amount, monthStr) {
   });
   
   saveState();
-  if (type === 'received') playKaChing();
   refreshActiveTab();
   alert(`✓ Interest of ${formatCurrency(amount)} recorded as ${type === 'received' ? 'collected' : 'paid'} for ${type === 'received' ? loan.borrowerName : loan.financierName}!`);
 }
@@ -1260,7 +1256,6 @@ function quickLoanPayment(loanId, direction) {
     state.interestPayments.push({id: 'p' + Math.random().toString(36).substr(2, 9), loanId: loanId, type: direction === 'lent' ? 'received' : 'paid', category: 'principal', amount: payAmount, date: today, note: 'Principal repayment'});
   }
   saveState();
-  if (direction === 'lent') playKaChing();
   if (getOutstandingPrincipal(loan.id, loan.principal) <= 0) {
     alert('Loan fully settled! ✅');
   }
@@ -1348,7 +1343,6 @@ function quickGroupPayment(safeId, direction) {
     });
   }
   saveState();
-  if (direction === 'lent') playKaChing();
   var allSettled = true;
   for (var i = 0; i < groupLoans.length; i++) {
     if (getOutstandingPrincipal(groupLoans[i].id, groupLoans[i].principal) > 0) { allSettled = false; break; }
@@ -3824,7 +3818,6 @@ document.getElementById('form-payment').addEventListener('submit', (e) => {
   });
 
   saveState();
-  if (type === 'received') playKaChing();
 
   // Auto mark-paid: if principal repayment brings outstanding to 0, auto-settle the loan
   if (category === 'principal') {
@@ -6250,20 +6243,6 @@ window.toggleSortRentals = function() {
   saveState();
   renderDashboard();
 };
-
-window.toggleSound = function() {
-  state.soundEnabled = document.getElementById('toggle-sound').checked;
-  saveState();
-};
-
-function playKaChing() {
-  if (!state.soundEnabled) return;
-  try {
-    var audio = new Audio('./kaching.mp3');
-    audio.volume = 0.6;
-    audio.play();
-  } catch(e) { /* audio play not supported */ }
-}
 
 window.renderPropertiesList = function() {
   var container = document.getElementById('properties-list');
