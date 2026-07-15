@@ -482,6 +482,7 @@ function loadState() {
       state.showPayMethod = state.showPayMethod !== false;
       state.showExpenseDetails = state.showExpenseDetails !== false;
       state.sortRentalsByDue = state.sortRentalsByDue === true;
+      state.showNotifications = state.showNotifications !== false;
       state.properties = state.properties || [];
       var defaults = ['23/48 ground floor', '23/48 3rd floor', '1/104'];
       defaults.forEach(function(d) { if (state.properties.indexOf(d) === -1) state.properties.push(d); });
@@ -496,6 +497,8 @@ function loadState() {
       if(ed) ed.checked = state.showExpenseDetails;
       const sr = document.getElementById('toggle-sort-rentals');
       if(sr) sr.checked = state.sortRentalsByDue;
+      const nt = document.getElementById('toggle-notifications');
+      if(nt) nt.checked = state.showNotifications;
     } catch (e) {
       console.error('Failed to parse local storage data, resetting to default.', e);
       saveState();
@@ -2674,6 +2677,7 @@ function renderDashboard() {
       });
     }
   }
+  checkAndNotifyDueItems();
 }
 
 function getActivityPeriod(dateStr) {
@@ -5430,6 +5434,8 @@ function initApp() {
   // Initialize month selector (default view is monthly)
   renderMonthSelector();
 
+  requestNotifPermission();
+
   // File Upload Handlers
   const formUpload = document.getElementById('form-upload');
   const fileInput = document.getElementById('upload-file-input');
@@ -6221,6 +6227,118 @@ window.calculateEMIPreview = calculateEMIPreview;
 window.selectTenure = selectTenure;
 window.promptRecordEMI = promptRecordEMI;
 
+var _notifChecked = false;
+
+function showToast(message, type) {
+  var el = document.getElementById('toast-notification');
+  if (!el) {
+    el = document.createElement('div');
+    el.id = 'toast-notification';
+    el.className = 'toast-notification';
+    document.body.appendChild(el);
+  }
+  el.textContent = message;
+  el.className = 'toast-notification show';
+  if (type === 'error') el.style.background = 'linear-gradient(135deg, var(--color-danger), #dc2626)';
+  else if (type === 'info') el.style.background = 'linear-gradient(135deg, #3b82f6, #2563eb)';
+  else el.style.background = '';
+  clearTimeout(el._timer);
+  el._timer = setTimeout(function() { el.className = 'toast-notification'; }, 2500);
+}
+
+function requestNotifPermission() {
+  if (!('Notification' in window)) return;
+  if (Notification.permission === 'default') Notification.requestPermission();
+}
+
+function checkAndNotifyDueItems() {
+  if (!('Notification' in window)) return;
+  if (Notification.permission !== 'granted') return;
+  if (!state.showNotifications) return;
+  if (_notifChecked) return;
+  _notifChecked = true;
+
+  var today = new Date();
+  today.setHours(0, 0, 0, 0);
+  var todayStr = today.toISOString().slice(0, 10);
+  var currentMonth = todayStr.slice(0, 7);
+  var todayDateNum = today.getDate();
+  var notifs = [];
+
+  // Rent due today
+  state.rentals.forEach(function(r) {
+    if (r.status !== 'active' || r.startDate > todayStr) return;
+    var paid = state.rentPayments.some(function(p) { return p.rentalId === r.id && p.monthYear === currentMonth; });
+    if (!paid && Number(r.rentDueDay) === todayDateNum) {
+      notifs.push({ icon: '\uD83C\uDFE0', title: 'Rent Due', body: r.tenantName + ' \u00B7 ' + formatCurrency(r.monthlyRent) });
+    }
+    // Agreement renewal within 7 days
+    var renInfo = getNextRenewal(r.startDate, r.nextRenewalDate);
+    if (renInfo && renInfo.daysLeft <= 7 && renInfo.daysLeft >= 0) {
+      notifs.push({ icon: '\uD83D\uDCCB', title: 'Agreement Renewal', body: r.tenantName + ' \u00B7 ' + renInfo.dateStr });
+    }
+  });
+
+  // Interest due today (lending)
+  state.lent.forEach(function(l) {
+    if (l.status !== 'active' || l.startDate > todayStr) return;
+    var outstanding = getOutstandingPrincipalAtMonth(l.id, l.principal, currentMonth);
+    if (outstanding <= 0) return;
+    var annDay = new Date(l.startDate).getDate();
+    if (annDay !== todayDateNum) return;
+    var expected = l.isEMI ? Number(l.emiAmount || 0) : outstanding * (Number(l.interestRate) / 100);
+    var cat = l.isEMI ? 'principal' : 'interest';
+    var paid = state.interestPayments.filter(function(p) { return p.type === 'received' && p.category === cat && p.loanId === l.id && p.date.startsWith(currentMonth); }).reduce(function(s, p) { return s + Number(p.amount); }, 0);
+    if (paid < expected - 0.01) {
+      notifs.push({ icon: '\uD83D\uDCB0', title: 'Interest Due', body: l.borrowerName + ' \u00B7 ' + formatCurrency(expected - paid) });
+    }
+  });
+
+  // Interest due today (borrowing)
+  state.borrowed.forEach(function(b) {
+    if (b.status !== 'active' || b.startDate > todayStr) return;
+    var outstanding = getOutstandingPrincipalAtMonth(b.id, b.principal, currentMonth);
+    if (outstanding <= 0) return;
+    var annDay = new Date(b.startDate).getDate();
+    if (annDay !== todayDateNum) return;
+    var expected = b.isEMI ? Number(b.emiAmount || 0) : outstanding * (Number(b.interestRate) / 100);
+    var cat = b.isEMI ? 'principal' : 'interest';
+    var paid = state.interestPayments.filter(function(p) { return p.type === 'paid' && p.category === cat && p.loanId === b.id && p.date.startsWith(currentMonth); }).reduce(function(s, p) { return s + Number(p.amount); }, 0);
+    if (paid < expected - 0.01) {
+      notifs.push({ icon: '\uD83D\uDCC9', title: 'Payment Due', body: b.financierName + ' \u00B7 ' + formatCurrency(expected - paid) });
+    }
+  });
+
+  // Renewals due today
+  state.renewals.forEach(function(r) {
+    if (r.dueDate === todayStr) {
+      notifs.push({ icon: '\uD83D\uDD04', title: 'Renewal Due', body: r.title + (r.amount ? ' \u00B7 ' + formatCurrency(r.amount) : '') });
+    }
+  });
+
+  if (notifs.length === 0) return;
+
+  // Group by title and fire one notification per category
+  var grouped = {};
+  notifs.forEach(function(n) {
+    if (!grouped[n.title]) grouped[n.title] = [];
+    grouped[n.title].push(n.body);
+  });
+
+  var keys = Object.keys(grouped);
+  if (keys.length === 1) {
+    var g = grouped[keys[0]];
+    var body = g.length === 1 ? g[0] : g.length + ' items';
+    showToast(notifs.length + ' item' + (notifs.length > 1 ? 's' : '') + ' due today');
+    try { new Notification(keys[0] + ' \u00B7 ' + notifs.length + ' due', { body: body, icon: '/icon-192.png' }); } catch(e) {}
+  } else {
+    showToast(notifs.length + ' items due today');
+    keys.forEach(function(k) {
+      try { new Notification(k, { body: grouped[k].join(', '), icon: '/icon-192.png' }); } catch(e) {}
+    });
+  }
+}
+
 window.togglePendingNames = function() {
   state.showPendingNames = document.getElementById('toggle-pending-names').checked;
   saveState();
@@ -6243,6 +6361,15 @@ window.toggleSortRentals = function() {
   state.sortRentalsByDue = document.getElementById('toggle-sort-rentals').checked;
   saveState();
   renderDashboard();
+};
+
+window.toggleNotifications = function() {
+  state.showNotifications = document.getElementById('toggle-notifications').checked;
+  saveState();
+  if (state.showNotifications) {
+    requestNotifPermission();
+    checkAndNotifyDueItems();
+  }
 };
 
 window.renderPropertiesList = function() {
