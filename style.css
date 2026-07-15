@@ -321,35 +321,6 @@
   --sidebar-gradient: linear-gradient(180deg, rgba(15, 31, 56, 0.95) 0%, rgba(10, 22, 40, 0.98) 100%);
 }
 
-/* ── Crimson Dusk ── */
-[data-theme="crimson-dusk"] {
-  --bg-primary: #1a0a0a;
-  --bg-secondary: #2a1010;
-  --bg-tertiary: #3a1515;
-  --bg-card: rgba(26, 10, 10, 0.7);
-  --bg-card-hover: rgba(42, 16, 16, 0.8);
-  --border-color: rgba(248, 113, 113, 0.1);
-  --border-color-hover: rgba(248, 113, 113, 0.22);
-  --input-bg: rgba(0, 0, 0, 0.2);
-  --text-primary: #f0d4d4;
-  --text-secondary: #cc8888;
-  --text-muted: #944a4a;
-  --color-accent: #f87171;
-  --color-accent-rgb: 248, 113, 113;
-  --color-purple: #c084fc;
-  --color-purple-rgb: 192, 132, 252;
-  --color-success: #fbbf24;
-  --color-success-rgb: 251, 191, 36;
-  --color-warning: #fb923c;
-  --color-warning-rgb: 251, 146, 60;
-  --color-danger: #ef4444;
-  --color-danger-rgb: 239, 68, 68;
-  --shadow-base: 0 4px 6px rgba(0, 0, 0, 0.4);
-  --shadow-strong: 0 10px 15px rgba(0, 0, 0, 0.5);
-  --modal-overlay: rgba(26, 10, 10, 0.85);
-  --sidebar-gradient: linear-gradient(180deg, rgba(42, 16, 16, 0.95) 0%, rgba(26, 10, 10, 0.98) 100%);
-}
-
 /* ── Reset ── */
 *, *::before, *::after {
   box-sizing: border-box;
@@ -2194,10 +2165,6 @@ body::before {
   background: linear-gradient(180deg, var(--color-accent), var(--color-purple));
   border-radius: 0 2px 2px 0;
 }
-
-/* ── Psychedelic ── */
-
-
 
 /* Calendar View */
 #modal-calendar .modal-container {
