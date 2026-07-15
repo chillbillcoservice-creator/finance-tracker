@@ -3055,7 +3055,7 @@ function renderLending() {
       sortedGroup.forEach(function(l) { if (l._stats.lastPaymentDate && (!groupLastDate || l._stats.lastPaymentDate > groupLastDate)) groupLastDate = l._stats.lastPaymentDate; });
       var lastDisplay = groupLastDate ? ' · Last ' + formatDate(groupLastDate) : '';
       card.innerHTML += '<div style="border-top:1px solid var(--border-color);margin-top:0.5rem;padding-top:0.5rem;">' +
-        '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.35rem;"><span style="font-size:0.75rem;color:#fff;">Exp ' + formatCurrency(groupYield) + ' · Rcvd ' + formatCurrency(totalRcvd) + summaryExtras + lastDisplay + '</span></div>' +
+        '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.35rem;"><span style="font-size:0.7rem;color:#fff;font-style:italic;">Exp ' + formatCurrency(groupYield) + ' · Rcvd ' + formatCurrency(totalRcvd) + summaryExtras + lastDisplay + '</span></div>' +
         '<div style="display:flex;gap:0.35rem;align-items:center;margin-bottom:0.25rem;"><input type="number" id="quick-pay-group-' + safeId + '" class="form-input" placeholder="₹ Amount" style="flex:1;min-height:40px;font-size:1rem;padding:0.3rem 0.5rem;font-weight:600;"><button class="btn btn-primary" style="min-height:40px;font-weight:700;font-size:0.9rem;padding:0.3rem 1rem;" onclick="quickGroupPayment(\'' + safeId + '\',\'lent\')">Recv</button></div>' +
         '<div class="icon-strip" style="border-top:none;margin-top:0.15rem;padding-top:0;"><div class="icon-strip-left">' + leftIcons + '</div><div class="icon-strip-right">' + rightIcons + '</div></div></div>';
 
@@ -3137,7 +3137,7 @@ function renderLending() {
       sortedGroup.forEach(function(l) { if (l._stats.lastPaymentDate && (!groupLastDate || l._stats.lastPaymentDate > groupLastDate)) groupLastDate = l._stats.lastPaymentDate; });
       var lastDisplay = groupLastDate ? ' · Last ' + formatDate(groupLastDate) : '';
       card.innerHTML += '<div style="border-top:1px solid var(--border-color);margin-top:0.5rem;padding-top:0.5rem;">' +
-        '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.35rem;"><span style="font-size:0.75rem;color:#fff;">Exp ' + formatCurrency(groupYield) + ' · Rcvd ' + formatCurrency(totalRcvd) + advDisplay + lastDisplay + '</span></div>' +
+        '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.35rem;"><span style="font-size:0.7rem;color:#fff;font-style:italic;">Exp ' + formatCurrency(groupYield) + ' · Rcvd ' + formatCurrency(totalRcvd) + advDisplay + lastDisplay + '</span></div>' +
         '<div style="display:flex;gap:0.35rem;align-items:center;margin-bottom:0.25rem;"><input type="number" id="quick-pay-group-' + safeId + '" class="form-input" placeholder="₹ Amount" style="flex:1;min-height:40px;font-size:1rem;padding:0.3rem 0.5rem;font-weight:600;"><button class="btn btn-primary" style="min-height:40px;font-weight:700;font-size:0.9rem;padding:0.3rem 1rem;" onclick="quickGroupPayment(\'' + safeId + '\',\'lent\')">Recv</button></div>' +
         '<div class="icon-strip" style="border-top:none;margin-top:0.15rem;padding-top:0;"><div class="icon-strip-left">' + leftIcons + '</div><div class="icon-strip-right">' + rightIcons + '</div></div></div>';
 
