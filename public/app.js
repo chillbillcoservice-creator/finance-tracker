@@ -1258,6 +1258,9 @@ function quickLoanPayment(loanId, direction) {
   } else {
     state.interestPayments.push({id: 'p' + Math.random().toString(36).substr(2, 9), loanId: loanId, type: direction === 'lent' ? 'received' : 'paid', category: 'principal', amount: payAmount, date: today, note: 'Principal repayment'});
   }
+  if (direction === 'borrowed') {
+    state.expenses.push({id: 'exp_' + Math.random().toString(36).substr(2, 9), amount: payAmount, date: today, category: 'Loan Repayment', propertyId: '', note: 'Repayment to ' + (loan.financierName || 'Unknown')});
+  }
   saveState();
   if (getOutstandingPrincipal(loan.id, loan.principal) <= 0) {
     alert('Loan fully settled! ✅');
@@ -3201,7 +3204,7 @@ function renderBorrowing() {
     const principalPayments = loanPayments.filter(p => p.category === 'principal');
     const topupPayments = loanPayments.filter(p => p.category === 'increase');
 
-    const totalPaid = interestPayments.reduce((sum, p) => sum + Number(p.amount), 0);
+    const totalPaid = loanPayments.reduce((sum, p) => sum + Number(p.amount), 0);
     const totalRepaid = principalPayments.reduce((sum, p) => sum + Number(p.amount), 0);
     const totalTopups = topupPayments.reduce((sum, p) => sum + Number(p.amount), 0);
     const outstandingPrincipal = Math.max(0, Number(loan.principal) + totalTopups - totalRepaid);
