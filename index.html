@@ -17,9 +17,13 @@
   <link rel="apple-touch-icon" sizes="192x192" href="/icon-192.png">
   <link rel="apple-touch-icon" sizes="512x512" href="/icon-512.png">
   <link rel="stylesheet" href="style.css?v=3">
+  <style>
+    .ls-blocker { display: none; position: fixed; inset: 0; z-index: 999999; background: #080c14; }
+    @media (orientation: landscape) { .ls-blocker { display: block !important; } }
+  </style>
 </head>
 <body>
-  
+  <div class="ls-blocker"></div>
   <div class="app-container">
     
     <!-- Sidebar Navigation (Desktop) -->
