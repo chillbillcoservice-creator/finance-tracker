@@ -3263,10 +3263,10 @@ function renderBorrowing() {
       </div>
 
       <div style="font-size:0.68rem; color:var(--text-secondary); margin:0.2rem 0 0.35rem; line-height:1.5;">
-        ${loan.phone ? '<span style="color:#fff;">' + loan.phone + '</span> · ' : ''}${loan.interestRate}%/mo${loan.isEMI ? '' : ' · Paid ' + formattedPaid} · ${stats.lastPaymentDate ? 'Last ' + formatDate(stats.lastPaymentDate) : 'No payments'}<span style="float:right;">
+        ${loan.phone ? '<span style="color:#fff;">' + loan.phone + '</span> · ' : ''}${Number(loan.interestRate) > 0 ? loan.interestRate + '%/mo' : ''}${loan.isEMI ? '' : ' · Paid ' + formattedPaid} · ${stats.lastPaymentDate ? 'Last ' + formatDate(stats.lastPaymentDate) : 'No payments'}<span style="float:right;">
           ${stats.isInterestFullyPaidThisMonth
             ? '<span style="color:var(--color-success);font-weight:700;">✓</span>'
-            : (stats.statusInMonth === 'active'
+            : (stats.statusInMonth === 'active' && Number(loan.interestRate) > 0
               ? '<label style="cursor:pointer;"><input type="checkbox" onchange="if(this.checked){quickMarkInterestPaid(\'' + loan.id + '\',\'paid\',' + stats.monthlyCost + ',\'' + selectedMonthStr + '\');}" style="width:13px;height:13px;accent-color:var(--color-success);cursor:pointer;margin:0;vertical-align:middle;"> Paid</label>'
               : '')
           }
