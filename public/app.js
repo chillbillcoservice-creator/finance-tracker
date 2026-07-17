@@ -1167,7 +1167,7 @@ function quickMarkInterestPaid(loanId, type, amount, monthStr) {
     id: paymentId,
     loanId,
     type,
-    category: 'interest',
+    category: loan.isEMI ? 'principal' : 'interest',
     amount: Number(amount),
     date: paymentDate,
     note: `Recorded from Reminders (${monthStr.toUpperCase()})`
@@ -1215,7 +1215,7 @@ function quickReceiveInterest(loanId, direction) {
     id: 'p' + Math.random().toString(36).substr(2, 9),
     loanId: loanId,
     type: direction === 'lent' ? 'received' : 'paid',
-    category: 'interest',
+    category: loan.isEMI ? 'principal' : 'interest',
     amount: Number(amount),
     date: paymentDate,
     note: 'Received from Quick Collect (' + selectedMonthStr.toUpperCase() + ')' + advanceTag
@@ -6697,7 +6697,9 @@ window.markPendingCollected = function(collectionType, itemType, ids, amount, mo
         const [y, m] = monthStr.split('-').map(Number);
         paymentDate = monthStr + '-' + String(new Date(y, m, 0).getDate()).padStart(2, '0');
       }
-      state.interestPayments.push({ id: paymentId, loanId: id, type: 'received', category: 'interest', amount: amt, date: paymentDate, note: 'Marked Received from Collection' });
+      var loan = state.lent.find(l => l.id === id);
+      var cat = loan && loan.isEMI ? 'principal' : 'interest';
+      state.interestPayments.push({ id: paymentId, loanId: id, type: 'received', category: cat, amount: amt, date: paymentDate, note: 'Marked Received from Collection' });
     }
   });
   saveState();
