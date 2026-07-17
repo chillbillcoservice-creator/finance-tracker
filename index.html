@@ -935,9 +935,9 @@ Tracks non-loan expenses and income:<br><br>
             </div>
             <div class="form-group">
               <label class="form-label" for="loan-rate">Interest Rate</label>
-              <div style="position: relative;">
-                <input type="number" id="loan-rate" class="form-input" style="padding-right: 1.5rem;" min="0" max="100" step="0.01" placeholder="4" required>
-                <span style="position: absolute; right: 0.3rem; top: 50%; transform: translateY(-50%); font-weight: 600; color: var(--text-muted); font-size: 0.85rem; pointer-events: none;">%</span>
+              <div style="display:flex;align-items:stretch;">
+                <input type="number" id="loan-rate" class="form-input" style="flex:1;border-right:none;border-radius:var(--radius-sm) 0 0 var(--radius-sm);" min="0" max="100" step="0.01" placeholder="4" required>
+                <span style="display:flex;align-items:center;padding:0 0.45rem;background:var(--bg-primary);border:1px solid var(--border-color);border-left:none;border-radius:0 var(--radius-sm) var(--radius-sm) 0;color:var(--text-muted);font-weight:600;font-size:0.85rem;">%</span>
               </div>
             </div>
           </div>
@@ -1437,9 +1437,9 @@ Tracks non-loan expenses and income:<br><br>
           <!-- Interest Rate -->
           <div class="form-group" style="margin-bottom: 1rem;">
             <label class="form-label" for="quick-lend-rate">Interest Rate</label>
-            <div style="position: relative;">
-              <input type="number" id="quick-lend-rate" class="form-input" style="padding-right: 1.5rem;" min="0" max="100" step="0.01" value="4" required>
-              <span style="position: absolute; right: 0.5rem; top: 50%; transform: translateY(-50%); font-weight: 600; color: var(--text-muted); font-size: 0.85rem; pointer-events: none;">%</span>
+            <div style="display:flex;align-items:stretch;">
+              <input type="number" id="quick-lend-rate" class="form-input" style="flex:1;border-right:none;border-radius:var(--radius-sm) 0 0 var(--radius-sm);" min="0" max="100" step="0.01" value="4" required>
+              <span style="display:flex;align-items:center;padding:0 0.45rem;background:var(--bg-primary);border:1px solid var(--border-color);border-left:none;border-radius:0 var(--radius-sm) var(--radius-sm) 0;color:var(--text-muted);font-weight:600;font-size:0.85rem;">%</span>
             </div>
           </div>
           <!-- Date Issued -->
