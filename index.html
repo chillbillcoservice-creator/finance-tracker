@@ -17,9 +17,24 @@
   <link rel="apple-touch-icon" sizes="192x192" href="/icon-192.png">
   <link rel="apple-touch-icon" sizes="512x512" href="/icon-512.png">
   <link rel="stylesheet" href="style.css?v=3">
-
+  <style>
+    .orientation-lock-overlay {
+      display: none; position: fixed; inset: 0; z-index: 99999;
+      background: #080c14; color: #cdd6f4;
+      justify-content: center; align-items: center;
+      flex-direction: column; text-align: center; padding: 2rem;
+    }
+    @media (orientation: landscape) and (max-width: 768px) {
+      .orientation-lock-overlay { display: flex; }
+    }
+  </style>
 </head>
 <body>
+  <div class="orientation-lock-overlay">
+    <div style="font-size:3rem;margin-bottom:1rem;">📱</div>
+    <div style="font-size:1.2rem;font-weight:600;margin-bottom:0.5rem;">Please Rotate Your Device</div>
+    <div style="font-size:0.85rem;color:#6c7086;">This app is designed for portrait mode.</div>
+  </div>
   
   <div class="app-container">
     
@@ -1694,6 +1709,12 @@ Tracks non-loan expenses and income:<br><br>
 <script>
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('/sw.js');
+}
+if (screen.orientation && screen.orientation.lock) {
+  document.addEventListener('touchstart', function lockOrientation() {
+    screen.orientation.lock('portrait').catch(function(){});
+    document.removeEventListener('touchstart', lockOrientation);
+  }, { once: true });
 }
 </script>
 </body>
