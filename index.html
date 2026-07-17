@@ -1694,14 +1694,6 @@ Tracks non-loan expenses and income:<br><br>
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('/sw.js');
 }
-function lockPortrait() {
-  if (screen.orientation && screen.orientation.lock) {
-    screen.orientation.lock('portrait').catch(function(){});
-  }
-}
-lockPortrait();
-document.addEventListener('touchstart', lockPortrait, { once: true });
-document.addEventListener('click', lockPortrait, { once: true });
 </script>
 </body>
 </html>
