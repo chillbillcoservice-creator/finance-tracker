@@ -3204,7 +3204,7 @@ function renderBorrowing() {
     const principalPayments = loanPayments.filter(p => p.category === 'principal');
     const topupPayments = loanPayments.filter(p => p.category === 'increase');
 
-    const totalPaid = loanPayments.reduce((sum, p) => sum + Number(p.amount), 0);
+    const totalPaid = interestPayments.reduce((sum, p) => sum + Number(p.amount), 0) + principalPayments.reduce((sum, p) => sum + Number(p.amount), 0);
     const totalRepaid = principalPayments.reduce((sum, p) => sum + Number(p.amount), 0);
     const totalTopups = topupPayments.reduce((sum, p) => sum + Number(p.amount), 0);
     const outstandingPrincipal = Math.max(0, Number(loan.principal) + totalTopups - totalRepaid);
