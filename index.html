@@ -908,6 +908,7 @@ Tracks non-loan expenses and income:<br><br>
             <div class="form-group" style="flex: 1;">
               <label class="form-label" for="loan-phone">Mobile Number</label>
               <input type="tel" inputmode="numeric" id="loan-phone" class="form-input" placeholder="e.g. 9876543210">
+              <button type="button" onclick="pickFromContacts('loan-party','loan-phone')" title="Pick from Contacts" style="background:none;border:none;cursor:pointer;padding:0.25rem;font-size:1.1rem;line-height:1;">👤</button>
             </div>
           </div>
           
@@ -1088,6 +1089,7 @@ Tracks non-loan expenses and income:<br><br>
           <div class="form-group">
             <label class="form-label" for="rental-contact">Contact Details (Phone)</label>
             <input type="tel" inputmode="numeric" id="rental-contact" class="form-input" placeholder="e.g. +91 9876543210">
+            <button type="button" onclick="pickFromContacts('rental-tenant','rental-contact')" title="Pick from Contacts" style="background:none;border:none;cursor:pointer;padding:0.25rem;font-size:1.1rem;line-height:1;">👤</button>
           </div>
 
           <div class="form-group">
@@ -1414,6 +1416,7 @@ Tracks non-loan expenses and income:<br><br>
           <div class="form-group" style="margin-bottom: 1rem;">
             <label class="form-label" for="quick-lend-phone">Mobile Number</label>
             <input type="tel" inputmode="numeric" id="quick-lend-phone" class="form-input" placeholder="e.g. 9876543210">
+            <button type="button" onclick="pickFromContacts(null,'quick-lend-phone',true)" title="Pick from Contacts" style="background:none;border:none;cursor:pointer;padding:0.25rem;font-size:1.1rem;line-height:1;">👤</button>
           </div>
           <!-- Principal Amount -->
           <div class="form-group" style="margin-bottom: 1rem;">

@@ -7675,6 +7675,35 @@ window.shareCalcExpression = function() {
   window.open(url, '_blank');
 };
 
+window.pickFromContacts = function(nameInputId, phoneInputId, isQuickLend) {
+  if (!navigator.contacts || !navigator.contacts.select) {
+    showToast('Contacts not available on this browser');
+    return;
+  }
+  navigator.contacts.select(['name', 'tel']).then(function(contacts) {
+    if (contacts.length === 0) return;
+    var c = contacts[0];
+    if (c.name && c.name[0]) {
+      if (isQuickLend) {
+        var sel = document.getElementById('quick-lend-borrower-select');
+        if (sel) sel.value = '__new__';
+        var grp = document.getElementById('quick-lend-new-name-group');
+        if (grp) grp.style.display = 'block';
+        var inp = document.getElementById('quick-lend-new-name');
+        if (inp) inp.value = c.name[0];
+      } else if (nameInputId) {
+        var nameEl = document.getElementById(nameInputId);
+        if (nameEl) nameEl.value = c.name[0];
+      }
+    }
+    if (c.tel && c.tel[0] && phoneInputId) {
+      var phone = c.tel[0].replace(/[\s\-\+\(\)]/g, '').replace(/^91/, '');
+      var phoneEl = document.getElementById(phoneInputId);
+      if (phoneEl) phoneEl.value = phone;
+    }
+  }).catch(function(){});
+};
+
 window.scrollToRecentActivity = function() {
   currentReminderFilter = 'all';
   renderDashboard();
