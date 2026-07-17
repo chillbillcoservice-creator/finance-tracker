@@ -1697,6 +1697,17 @@ Tracks non-loan expenses and income:<br><br>
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('/sw.js');
 }
+function forcePortrait() {
+  if (screen.orientation && screen.orientation.lock) {
+    screen.orientation.lock('portrait').catch(function(){});
+  }
+}
+forcePortrait();
+document.addEventListener('touchstart', forcePortrait, { passive: true });
+document.addEventListener('click', forcePortrait);
+window.addEventListener('orientationchange', function() { setTimeout(forcePortrait, 50); });
+window.addEventListener('resize', function() { if (window.innerWidth > window.innerHeight) setTimeout(forcePortrait, 10); });
+window.addEventListener('pageshow', forcePortrait);
 </script>
 </body>
 </html>

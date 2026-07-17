@@ -4,6 +4,7 @@
   "description": "Personal Finance Tracker for lending, borrowing, and rental management",
   "start_url": "/",
   "display": "standalone",
+  "orientation": "portrait",
   "background_color": "#080c14",
   "theme_color": "#0ea5e9",
   "icons": [
