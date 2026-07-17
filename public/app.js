@@ -3255,7 +3255,7 @@ function renderBorrowing() {
         <div style="font-weight:700; font-size:0.9rem;">${loan.financierName}${settledBadgeB}</div>
         <div style="text-align:right;">
           <div style="font-size:1.15rem; font-weight:800; color:var(--color-danger); line-height:1.2;">${formattedOwed}</div>
-          <div style="font-size:0.6rem; color:var(--text-muted); line-height:1.2;">AMT/MO</div>
+          <div style="font-size:0.72rem; color:var(--text-secondary); line-height:1.3;">+${formattedCost}/mo</div>
         </div>
       </div>
 

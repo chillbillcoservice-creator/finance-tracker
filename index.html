@@ -896,6 +896,7 @@ Tracks non-loan expenses and income:<br><br>
     <div class="modal-container">
       <div class="modal-header">
         <h3 class="modal-title" id="loan-modal-title">Record New Transaction</h3>
+        <button type="button" onclick="pickFromContacts('loan-party','loan-phone')" title="Pick from Contacts" style="background:none;border:none;cursor:pointer;padding:0.25rem;font-size:1.1rem;line-height:1;">👤</button>
         <button class="modal-close" onclick="closeModal('modal-loan')">
           <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
         </button>
@@ -912,7 +913,6 @@ Tracks non-loan expenses and income:<br><br>
             <div class="form-group" style="flex: 1;">
               <label class="form-label" for="loan-phone">Mobile Number</label>
               <input type="tel" inputmode="numeric" id="loan-phone" class="form-input" placeholder="e.g. 9876543210">
-              <button type="button" onclick="pickFromContacts('loan-party','loan-phone')" title="Pick from Contacts" style="background:none;border:none;cursor:pointer;padding:0.25rem;font-size:1.1rem;line-height:1;">👤</button>
             </div>
           </div>
           
@@ -1078,6 +1078,7 @@ Tracks non-loan expenses and income:<br><br>
     <div class="modal-container">
       <div class="modal-header">
         <h3 class="modal-title" id="rental-modal-title">Record Tenant Lease</h3>
+        <button type="button" onclick="pickFromContacts('rental-tenant','rental-contact')" title="Pick from Contacts" style="background:none;border:none;cursor:pointer;padding:0.25rem;font-size:1.1rem;line-height:1;">👤</button>
         <button class="modal-close" onclick="closeModal('modal-rental')">
           <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
         </button>
@@ -1093,7 +1094,6 @@ Tracks non-loan expenses and income:<br><br>
           <div class="form-group">
             <label class="form-label" for="rental-contact">Contact Details (Phone)</label>
             <input type="tel" inputmode="numeric" id="rental-contact" class="form-input" placeholder="e.g. +91 9876543210">
-            <button type="button" onclick="pickFromContacts('rental-tenant','rental-contact')" title="Pick from Contacts" style="background:none;border:none;cursor:pointer;padding:0.25rem;font-size:1.1rem;line-height:1;">👤</button>
           </div>
 
           <div class="form-group">
@@ -1398,6 +1398,7 @@ Tracks non-loan expenses and income:<br><br>
     <div class="modal-container">
       <div class="modal-header">
         <h3 class="modal-title">Quick Lend Money</h3>
+        <button type="button" onclick="pickFromContacts(null,'quick-lend-phone',true)" title="Pick from Contacts" style="background:none;border:none;cursor:pointer;padding:0.25rem;font-size:1.1rem;line-height:1;">👤</button>
         <button class="modal-close" onclick="closeModal('modal-quick-lend')">
           <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
         </button>
@@ -1420,7 +1421,6 @@ Tracks non-loan expenses and income:<br><br>
           <div class="form-group" style="margin-bottom: 1rem;">
             <label class="form-label" for="quick-lend-phone">Mobile Number</label>
             <input type="tel" inputmode="numeric" id="quick-lend-phone" class="form-input" placeholder="e.g. 9876543210">
-            <button type="button" onclick="pickFromContacts(null,'quick-lend-phone',true)" title="Pick from Contacts" style="background:none;border:none;cursor:pointer;padding:0.25rem;font-size:1.1rem;line-height:1;">👤</button>
           </div>
           <!-- Principal Amount -->
           <div class="form-group" style="margin-bottom: 1rem;">
