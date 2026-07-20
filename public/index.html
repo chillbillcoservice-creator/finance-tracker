@@ -115,6 +115,7 @@
           <button class="month-nav-btn" onclick="navigateMonth(-1)">&lt;</button>
           <span id="month-selector-label">July 2026</span>
           <button class="month-nav-btn" onclick="navigateMonth(1)">&gt;</button>
+          <button class="month-nav-btn" id="btn-vault-toggle" onclick="toggleVaultView()" title="Vault" style="margin-left:auto;font-size:1.1rem;">🔐</button>
         </div>
         <div class="month-grid" id="month-grid">
           <!-- Months injected via JS -->
@@ -606,6 +607,13 @@
       <!-- VIEW: DIARY -->
       <section id="view-diary" class="tab-content">
         <div id="diary-content" style="font-family:'Courier New',Courier,monospace;font-size:0.85rem;line-height:1.7;padding:0.5rem 0;white-space:pre-wrap;color:var(--text-primary);"></div>
+        <div id="vault-content" style="display:none;">
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:0.3rem 0;margin-bottom:0.5rem;border-bottom:1px solid var(--border-color);font-family:'Courier New',Courier,monospace;">
+            <span style="font-size:0.9rem;font-weight:700;color:var(--text-primary);">🔐 VAULT</span>
+            <button class="btn btn-primary btn-sm" onclick="showAddVaultEntry()" style="font-size:0.75rem;padding:0.2rem 0.6rem;">+ Add</button>
+          </div>
+          <div id="vault-list" style="font-family:'Courier New',Courier,monospace;font-size:0.85rem;line-height:1.8;color:var(--text-primary);"></div>
+        </div>
       </section>
 
       <!-- VIEW: SETTINGS -->
@@ -1749,6 +1757,34 @@ window.addEventListener('orientationchange', function() { setTimeout(forcePortra
 window.addEventListener('resize', function() { if (window.innerWidth > window.innerHeight) setTimeout(forcePortrait, 10); });
 window.addEventListener('pageshow', forcePortrait);
 </script>
+
+<!-- VAULT ADD/EDIT MODAL -->
+<div class="modal-overlay" id="modal-vault-edit">
+  <div class="modal-container" style="max-width:400px;">
+    <div class="modal-header">
+      <h3 class="modal-title" id="vault-modal-title">Add Credential</h3>
+      <button class="modal-close" onclick="closeModal('modal-vault-edit')">
+        <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="vault-edit-id">
+      <label class="form-label">Label</label>
+      <input class="form-input" id="vault-edit-label" placeholder="e.g. PAN Card, SBI Account..." style="margin-bottom:0.75rem;">
+      <label class="form-label">Value</label>
+      <input class="form-input" id="vault-edit-value" placeholder="e.g. ABCDE1234F, 12345678901..." style="margin-bottom:0.75rem;">
+      <label class="form-label">Category</label>
+      <select class="form-input" id="vault-edit-category" style="margin-bottom:1rem;">
+        <option value="ID">ID</option>
+        <option value="Bank">Bank</option>
+        <option value="Card">Card</option>
+        <option value="Policy">Policy</option>
+        <option value="Other">Other</option>
+      </select>
+      <button class="btn btn-primary" onclick="saveVaultEntry()" style="width:100%;">Save</button>
+    </div>
+  </div>
+</div>
 
 <!-- Lock Screen Overlay -->
 <div id="lock-screen" style="display:none;position:fixed;inset:0;z-index:999998;background:var(--bg-primary,#0f172a);flex-direction:column;align-items:center;justify-content:center;padding:2rem;">

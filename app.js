@@ -29,6 +29,8 @@ let viewMode = 'month';
 // Selected date string in YYYY-MM-DD format
 let selectedDateStr = new Date().toISOString().slice(0, 10);
 
+let diaryView = 'diary'; // 'diary' | 'vault'
+
 // Month names for selector
 const MONTH_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 const MONTH_FULL_NAMES = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
@@ -75,6 +77,109 @@ function toggleYearlyMode() {
   updateHeaderDateDisplay();
   refreshActiveTab();
 }
+
+function toggleVaultView() {
+  if (diaryView === 'vault') {
+    diaryView = 'diary';
+    document.getElementById('btn-vault-toggle').textContent = '🔐';
+    document.getElementById('month-grid').style.display = '';
+    renderDiary();
+  } else {
+    diaryView = 'vault';
+    document.getElementById('btn-vault-toggle').textContent = '📋';
+    document.getElementById('month-grid').style.display = 'none';
+    renderVault();
+  }
+}
+
+function renderVault() {
+  loadState();
+  state.vault = state.vault || [];
+  document.getElementById('diary-content').style.display = 'none';
+  document.getElementById('vault-content').style.display = 'block';
+  var list = document.getElementById('vault-list');
+  if (state.vault.length === 0) {
+    list.innerHTML = '<div style="padding:0.5rem 0;opacity:0.6;">(empty — tap +Add to save credentials)</div>';
+    return;
+  }
+  var cats = { ID: [], Bank: [], Card: [], Policy: [], Other: [] };
+  state.vault.forEach(function(e) { var c = e.category || 'Other'; if (!cats[c]) cats[c] = []; cats[c].push(e); });
+  var html = '';
+  Object.keys(cats).forEach(function(cat) {
+    if (cats[cat].length === 0) return;
+    html += '<div style="font-weight:700;margin-top:0.5rem;color:var(--text-secondary);font-size:0.75rem;text-transform:uppercase;letter-spacing:0.5px;">' + cat + '</div>';
+    cats[cat].forEach(function(e) {
+      html += '<div style="display:flex;align-items:flex-start;gap:0.3rem;padding:0.3rem 0;border-bottom:1px solid var(--border-color);">';
+      html += '<div style="flex:1;min-width:0;">';
+      html += '<div style="font-weight:600;font-size:0.78rem;">' + escapeHtml(e.label) + '</div>';
+      html += '<div style="font-size:0.85rem;color:var(--text-primary);word-break:break-all;">' + escapeHtml(e.value) + '</div>';
+      html += '</div>';
+      html += '<button onclick="copyVaultEntry(\'' + e.id + '\')" data-copy="' + e.id + '" style="background:none;border:none;cursor:pointer;font-size:1rem;padding:0.2rem;color:var(--text-secondary);flex-shrink:0;" title="Copy">📋</button>';
+      html += '<button onclick="deleteVaultEntry(\'' + e.id + '\')" style="background:none;border:none;cursor:pointer;font-size:0.9rem;padding:0.2rem;color:var(--color-danger);flex-shrink:0;" title="Delete">✕</button>';
+      html += '</div>';
+    });
+  });
+  list.innerHTML = html;
+}
+
+function escapeHtml(str) {
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function showAddVaultEntry() {
+  document.getElementById('vault-edit-label').value = '';
+  document.getElementById('vault-edit-value').value = '';
+  document.getElementById('vault-edit-category').value = 'Other';
+  document.getElementById('vault-edit-id').value = '';
+  document.getElementById('vault-modal-title').textContent = 'Add Credential';
+  document.getElementById('modal-vault-edit').classList.add('active');
+}
+
+function saveVaultEntry() {
+  var label = document.getElementById('vault-edit-label').value.trim();
+  var value = document.getElementById('vault-edit-value').value.trim();
+  var category = document.getElementById('vault-edit-category').value;
+  var editId = document.getElementById('vault-edit-id').value;
+  if (!label || !value) { alert('Label and value are required.'); return; }
+  loadState();
+  state.vault = state.vault || [];
+  if (editId) {
+    var existing = state.vault.find(function(e) { return e.id === editId; });
+    if (existing) { existing.label = label; existing.value = value; existing.category = category; }
+  } else {
+    state.vault.push({ id: 'v' + Date.now(), label: label, value: value, category: category });
+  }
+  saveState();
+  document.getElementById('modal-vault-edit').classList.remove('active');
+  renderVault();
+}
+
+function deleteVaultEntry(id) {
+  if (!confirm('Delete this entry?')) return;
+  loadState();
+  state.vault = state.vault || [];
+  state.vault = state.vault.filter(function(e) { return e.id !== id; });
+  saveState();
+  renderVault();
+}
+
+function copyVaultEntry(id) {
+  loadState();
+  state.vault = state.vault || [];
+  var entry = state.vault.find(function(e) { return e.id === id; });
+  if (!entry) return;
+  navigator.clipboard.writeText(entry.value).then(function() {
+    var btn = document.querySelector('[data-copy="' + id + '"]');
+    if (btn) { btn.textContent = '✓'; setTimeout(function() { btn.textContent = '📋'; }, 1500); }
+  }).catch(function() {
+    prompt('Copy manually:', entry.value);
+  });
+}
+window.toggleVaultView = toggleVaultView;
+window.showAddVaultEntry = showAddVaultEntry;
+window.saveVaultEntry = saveVaultEntry;
+window.deleteVaultEntry = deleteVaultEntry;
+window.copyVaultEntry = copyVaultEntry;
 
 function renderMonthSelector() {
   const year = parseInt(selectedMonthStr.slice(0, 4));
@@ -1698,7 +1803,10 @@ const VIEWS = {
 };
 
 function renderDiary() {
+  if (diaryView === 'vault') { renderVault(); return; }
   loadState();
+  document.getElementById('diary-content').style.display = '';
+  document.getElementById('vault-content').style.display = 'none';
   const monthStr = selectedMonthStr;
   const [yr, mo] = monthStr.split('-').map(Number);
   const monthName = new Date(yr, mo - 1).toLocaleDateString('en-US', { month: 'long' });
@@ -1842,9 +1950,16 @@ window.setLendingFilter = setLendingFilter;
 
 function switchTab(tabId) {
   currentTab = tabId;
+  if (tabId !== 'diary' && diaryView === 'vault') {
+    diaryView = 'diary';
+    var vt = document.getElementById('btn-vault-toggle');
+    if (vt) vt.textContent = '🔐';
+    var mg = document.getElementById('month-grid');
+    if (mg) mg.style.display = '';
+  }
   window.scrollTo(0, 0);
   var qaBtn = document.getElementById('quick-actions-trigger');
-  if (qaBtn) qaBtn.style.display = (tabId === 'records' || tabId === 'settings') ? 'none' : '';
+  if (qaBtn) qaBtn.style.display = (tabId === 'records' || tabId === 'settings' || tabId === 'diary') ? 'none' : '';
   // Update Navigation Active States
   document.querySelectorAll('.nav-link, .mobile-nav-link').forEach(link => {
     if (link.getAttribute('data-tab') === tabId) {
@@ -1887,7 +2002,7 @@ function switchTab(tabId) {
       headerActions.style.display = '';
       document.getElementById('dashboard-search').style.display = 'none';
       document.getElementById('records-search-header').style.display = '';
-    } else if (tabId === 'settings') {
+    } else if (tabId === 'settings' || tabId === 'diary') {
       headerActions.style.display = 'none';
     } else {
       headerActions.style.display = '';
