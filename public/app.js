@@ -4539,7 +4539,7 @@ window.loadRealSeedData = function() {
     {id:'r5',propertyName:'23/48 3rd floor',tenantName:'Nilesh',contactInfo:'9873805638',monthlyRent:10000,securityDeposit:10000,startDate:'2025-08-24',rentDueDay:8,aadhaarImg:'',agreementImg:'',status:'active'},
     {id:'r6',propertyName:'23/48 ground floor',tenantName:'Aniket',contactInfo:'7304195700',monthlyRent:18500,securityDeposit:18500,startDate:'2025-08-24',rentDueDay:3,aadhaarImg:'',agreementImg:'',status:'active'},
     {id:'r7',propertyName:'23/48 ground floor',tenantName:'Dikshant',contactInfo:'6283007016',monthlyRent:13000,securityDeposit:13000,startDate:'2025-08-24',rentDueDay:5,aadhaarImg:'',agreementImg:'',status:'active'},
-    {id:'r8',propertyName:'23/48 ground floor',tenantName:'Anandpal',contactInfo:'9115765900',monthlyRent:15000,securityDeposit:15000,startDate:'2025-08-24',rentDueDay:5,aadhaarImg:'',agreementImg:'',status:'active'},
+      {id:'r8',propertyName:'23/48 ground floor',tenantName:'Anandpal',contactInfo:'9115765900',monthlyRent:15000,securityDeposit:0,startDate:'2025-08-24',rentDueDay:5,aadhaarImg:'',agreementImg:'',status:'active',securityAdjusted:15000},
     {id:'r9',propertyName:'1/104',tenantName:'Aryan',contactInfo:'9076923358',monthlyRent:35000,securityDeposit:35000,startDate:'2026-07-05',rentDueDay:5,aadhaarImg:'',agreementImg:'',status:'active'}
   ];
   var months = [];
@@ -4561,6 +4561,7 @@ window.loadRealSeedData = function() {
     }
     if (month === '2026-07') {
       state.rentPayments.push({id:'rp_seed_' + (pid++),rentalId:'r9',amount:35000,monthYear:'2026-07',datePaid:'2026-07-05',note:'Rent - Jul 2026'});
+      state.rentPayments.push({id:'rp_seed_' + (pid++),rentalId:'r8',amount:15000,monthYear:'2026-07',datePaid:'2026-07-20',note:'Rent - Jul 2026 (adjusted from security)'});
     }
   });
 
@@ -5515,7 +5516,7 @@ function initApp() {
       {id:'r5',propertyName:'23/48 3rd floor',tenantName:'Nilesh',contactInfo:'9873805638',monthlyRent:10000,securityDeposit:10000,startDate:'2025-08-24',rentDueDay:8,aadhaarImg:'',agreementImg:'',status:'active'},
       {id:'r6',propertyName:'23/48 ground floor',tenantName:'Aniket',contactInfo:'7304195700',monthlyRent:18500,securityDeposit:18500,startDate:'2025-08-24',rentDueDay:3,aadhaarImg:'',agreementImg:'',status:'active'},
       {id:'r7',propertyName:'23/48 ground floor',tenantName:'Dikshant',contactInfo:'6283007016',monthlyRent:13000,securityDeposit:13000,startDate:'2025-08-24',rentDueDay:5,aadhaarImg:'',agreementImg:'',status:'active'},
-      {id:'r8',propertyName:'23/48 ground floor',tenantName:'Anandpal',contactInfo:'9115765900',monthlyRent:15000,securityDeposit:15000,startDate:'2025-08-24',rentDueDay:5,aadhaarImg:'',agreementImg:'',status:'active'},
+    {id:'r8',propertyName:'23/48 ground floor',tenantName:'Anandpal',contactInfo:'9115765900',monthlyRent:15000,securityDeposit:0,startDate:'2025-08-24',rentDueDay:5,aadhaarImg:'',agreementImg:'',status:'active',securityAdjusted:15000},
       {id:'r9',propertyName:'1/104',tenantName:'Aryan',contactInfo:'9076923358',monthlyRent:35000,securityDeposit:35000,startDate:'2026-07-05',rentDueDay:5,aadhaarImg:'',agreementImg:'',status:'active'}
     ];
     state._realDataSeeded = true;
@@ -5543,6 +5544,7 @@ function initApp() {
       }
       if (month === '2026-07') {
         state.rentPayments.push({id:'rp_seed_' + (pid++),rentalId:'r9',amount:35000,monthYear:'2026-07',datePaid:'2026-07-05',note:'Rent - Jul 2026'});
+        state.rentPayments.push({id:'rp_seed_' + (pid++),rentalId:'r8',amount:15000,monthYear:'2026-07',datePaid:'2026-07-20',note:'Rent - Jul 2026 (adjusted from security)'});
       }
     });
     state._realPaymentsSeeded = true;
