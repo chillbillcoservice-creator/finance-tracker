@@ -2278,7 +2278,7 @@ function renderDashboard() {
 
     if (pBorrowers.length > 0) {
       var pendingBorrowersHTML = '<div class="pending-names-list">' + pBorrowers.map(function(b) {
-        return '<div class="pending-name-item"><span>' + b.name + '</span> (' + (b.owe % 1000 === 0 ? Math.round(b.owe / 1000) + 'K' : String(b.owe)) + ')</div>';
+        return '<div class="pending-name-item"><span>' + b.name + '</span> (' + formatCurrency(b.owe) + ')</div>';
       }).join('') + '</div>';
       document.getElementById('card-interest').insertAdjacentHTML('afterbegin', pendingBorrowersHTML);
       document.getElementById('card-interest').classList.add('has-pending-names');
