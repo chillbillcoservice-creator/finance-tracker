@@ -7183,7 +7183,11 @@ function renderGlanceWidget() {
   });
 
   var totalPending = pendingPeople.reduce(function(s, p) { return s + p.amount; }, 0);
-  var uniqueCount = pendingPeople.length;
+  var seenNames = [];
+  pendingPeople.forEach(function(p) {
+    if (seenNames.indexOf(p.name) === -1) seenNames.push(p.name);
+  });
+  var uniqueCount = seenNames.length;
 
   document.getElementById('glance-icon').textContent = icon;
   document.getElementById('glance-greeting').textContent = greeting + '!';
