@@ -1263,6 +1263,8 @@ function quickLoanPayment(loanId, direction) {
   if (outstanding <= 0) { alert('Loan is already settled.'); return; }
   if (amount > outstanding && !confirm('₹' + amount + ' exceeds outstanding of ₹' + outstanding + '. Record as full settlement?')) return;
   var today = new Date().toISOString().split('T')[0];
+  var nd = new Date(); nd.setMonth(nd.getMonth() + 1);
+  var nextMonthDate = nd.toISOString().split('T')[0];
   var payAmount = Number(amount);
   if (Number(loan.interestRate || 0) > 0) {
     var monthlyYield = outstanding * (Number(loan.interestRate) / 100);
@@ -1277,7 +1279,7 @@ function quickLoanPayment(loanId, direction) {
       state.interestPayments.push({id: 'p' + Math.random().toString(36).substr(2, 9), loanId: loanId, type: direction === 'lent' ? 'received' : 'paid', category: 'interest', amount: interestPart, date: today, note: 'Interest received'});
     }
     if (advancePart > 0) {
-      state.interestPayments.push({id: 'p' + Math.random().toString(36).substr(2, 9), loanId: loanId, type: direction === 'lent' ? 'received' : 'paid', category: 'interest', amount: advancePart, date: today, note: 'Interest received [Advance]'});
+      state.interestPayments.push({id: 'p' + Math.random().toString(36).substr(2, 9), loanId: loanId, type: direction === 'lent' ? 'received' : 'paid', category: 'interest', amount: advancePart, date: nextMonthDate, note: 'Interest received [Advance]'});
     }
   } else {
     state.interestPayments.push({id: 'p' + Math.random().toString(36).substr(2, 9), loanId: loanId, type: direction === 'lent' ? 'received' : 'paid', category: 'principal', amount: payAmount, date: today, note: 'Principal repayment'});
@@ -1309,6 +1311,8 @@ function quickGroupPayment(safeId, direction) {
   }
   var remaining = totalAmount;
   var today = new Date().toISOString().split('T')[0];
+  var d = new Date(); d.setMonth(d.getMonth() + 1);
+  var nextMonthDate = d.toISOString().split('T')[0];
   var currentMonth = today.slice(0, 7);
   var type = direction === 'lent' ? 'received' : 'paid';
 
@@ -1408,7 +1412,7 @@ function quickGroupPayment(safeId, direction) {
       type: type,
       category: p.category,
       amount: p.amount,
-      date: today,
+      date: p.isAdvance ? nextMonthDate : today,
       note: note
     });
   }
