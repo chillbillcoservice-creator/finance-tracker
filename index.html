@@ -742,13 +742,6 @@
               <button class="btn btn-danger" id="btn-remove-pin" onclick="removePin()" style="white-space:nowrap;display:none;">Remove PIN</button>
             </div>
           </div>
-          <div id="biometric-toggle-row" style="padding: 1rem 0 0 0; display: none; justify-content: space-between; align-items: center;">
-            <div>
-              <h3 style="margin: 0 0 0.25rem 0;">Use Fingerprint / Face ID</h3>
-              <p style="color: var(--text-secondary); margin: 0; font-size: 0.85rem;">Unlock with biometrics instead of PIN</p>
-            </div>
-            <input type="checkbox" id="toggle-biometric" onchange="toggleBiometric()" style="width: 20px; height: 20px; cursor: pointer;">
-          </div>
         </div>
 
         <div class="card" style="margin-bottom: 1.25rem;">
@@ -1768,9 +1761,6 @@ window.addEventListener('pageshow', forcePortrait);
       <button class="pin-btn" data-digit="clear" style="padding:0.8rem;font-size:0.75rem;font-weight:700;border:none;border-radius:12px;background:var(--bg-secondary,#1e293b);color:var(--text-secondary,#94a3b8);cursor:pointer;">Clear</button>
       <button class="pin-btn" data-digit="0" style="padding:0.8rem;font-size:1.3rem;font-weight:700;border:none;border-radius:12px;background:var(--bg-secondary,#1e293b);color:var(--text-primary,#f1f5f9);cursor:pointer;">0</button>
       <button class="pin-btn" data-digit="backspace" style="padding:0.8rem;font-size:1rem;font-weight:700;border:none;border-radius:12px;background:var(--bg-secondary,#1e293b);color:var(--text-secondary,#94a3b8);cursor:pointer;">⌫</button>
-    </div>
-    <div id="lock-biometric-area" style="margin-top:1.5rem;display:none;">
-      <button id="btn-biometric-unlock" style="padding:0.6rem 1.5rem;font-size:0.85rem;font-weight:600;border:none;border-radius:12px;background:var(--color-accent,#0ea5e9);color:#fff;cursor:pointer;">Use Fingerprint</button>
     </div>
   </div>
 </div>

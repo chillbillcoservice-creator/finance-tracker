@@ -7883,7 +7883,6 @@ function showSetPinScreen() {
   updatePinDots();
   document.getElementById('lock-title').textContent = 'Set your 4-digit PIN';
   document.getElementById('lock-error').textContent = '';
-  document.getElementById('lock-biometric-area').style.display = 'none';
   document.getElementById('lock-screen').style.display = 'flex';
   ensureLockListeners();
 }
@@ -7896,12 +7895,6 @@ function showLockScreen() {
   document.getElementById('lock-error').textContent = '';
   var ls = document.getElementById('lock-screen');
   if (ls) ls.style.display = 'flex';
-  var ba = document.getElementById('lock-biometric-area');
-  if (localStorage.getItem('app_use_biometric') === 'true' && window.PublicKeyCredential) {
-    ba.style.display = 'block';
-  } else {
-    ba.style.display = 'none';
-  }
   ensureLockListeners();
 }
 
@@ -7959,9 +7952,6 @@ function handlePinDigit(digit) {
         initNavigation();
         renderMonthSelector();
         requestNotifPermission();
-        if (window.PublicKeyCredential) {
-          document.getElementById('biometric-toggle-row').style.display = 'flex';
-        }
       });
     } else {
       sha256(_pinEntered).then(function(hash) {
@@ -7984,18 +7974,8 @@ function handlePinDigit(digit) {
 function removePin() {
   if (confirm('Remove app lock? Anyone with this phone can open the app.')) {
     localStorage.removeItem('app_pin');
-    localStorage.removeItem('app_use_biometric');
     hideLockScreen();
     updateSettingsSecurityUI();
-  }
-}
-
-function toggleBiometric() {
-  var cb = document.getElementById('toggle-biometric');
-  if (cb.checked) {
-    localStorage.setItem('app_use_biometric', 'true');
-  } else {
-    localStorage.removeItem('app_use_biometric');
   }
 }
 
@@ -8003,22 +7983,6 @@ function initLockScreenListeners() {
   document.querySelectorAll('.pin-btn').forEach(function(btn) {
     btn.addEventListener('click', function() {
       handlePinDigit(this.getAttribute('data-digit'));
-    });
-  });
-  document.getElementById('btn-biometric-unlock').addEventListener('click', function() {
-    if (!window.PublicKeyCredential) { alert('Biometric not supported on this browser.'); return; }
-    navigator.credentials.get({
-      publicKey: {
-        challenge: new Uint8Array(32),
-        timeout: 60000,
-        allowCredentials: [],
-        userVerification: 'required'
-      }
-    }).then(function() {
-      _pinEntered = '';
-      hideLockScreen();
-    }).catch(function(err) {
-      document.getElementById('lock-error').textContent = 'Biometric failed. Use PIN.';
     });
   });
   document.addEventListener('visibilitychange', function() {
@@ -8036,17 +8000,12 @@ function initLockScreenListeners() {
 function updateSettingsSecurityUI() {
   var setBtn = document.getElementById('btn-set-pin');
   var rmBtn = document.getElementById('btn-remove-pin');
-  var bioRow = document.getElementById('biometric-toggle-row');
   if (localStorage.getItem('app_pin')) {
     if (setBtn) setBtn.style.display = 'none';
     if (rmBtn) rmBtn.style.display = 'inline-block';
-    if (bioRow && window.PublicKeyCredential) bioRow.style.display = 'flex';
-    var bioCb = document.getElementById('toggle-biometric');
-    if (bioCb) bioCb.checked = localStorage.getItem('app_use_biometric') === 'true';
   } else {
     if (setBtn) setBtn.style.display = 'inline-block';
     if (rmBtn) rmBtn.style.display = 'none';
-    if (bioRow) bioRow.style.display = 'none';
   }
 }
 
