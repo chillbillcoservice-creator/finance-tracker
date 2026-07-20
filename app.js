@@ -1816,11 +1816,13 @@ function renderDiary() {
   lines.push('  ' + String('-').repeat(28));
   
   // ── RENT ──
+  var num = 0;
   lines.push('');
   lines.push('  RENT');
   lines.push('  ' + String('-').repeat(28));
   state.rentals.forEach(function(r) {
     if (r.startDate <= monthStr + '-31' && r.status === 'active') {
+      num++;
       var collected = 0;
       var secAdj = Number(r.securityAdjusted || 0);
       state.rentPayments.forEach(function(p) {
@@ -1831,13 +1833,14 @@ function renderDiary() {
       var mark = collected >= due ? ' ✓' : '   ';
       var extra = '';
       if (secAdj > 0 && collected >= due) extra += '  (adjusted from security)';
-      lines.push('  ' + mark + ' ' + r.tenantName + extra);
+      lines.push('  ' + num + '.' + mark + ' ' + r.tenantName + extra);
       if (pending > 0) lines.push('      ' + formatCurrency(collected) + ' / ' + formatCurrency(due) + '  Due: ' + formatCurrency(pending));
       else lines.push('      ' + formatCurrency(collected) + ' / ' + formatCurrency(due));
     }
   });
   
   // ── INTEREST RECEIVED ──
+  num = 0;
   lines.push('');
   lines.push('  INTEREST RECEIVED');
   lines.push('  ' + String('-').repeat(28));
@@ -1849,6 +1852,7 @@ function renderDiary() {
       });
       var outstanding = getOutstandingPrincipalAtMonth(l.id, l.principal, monthStr);
       if (outstanding > 0 || collected > 0) {
+        num++;
         var expected = l.isEMI ? Number(l.emiAmount || 0) : outstanding * (Number(l.interestRate) / 100);
         var mark = collected >= expected ? ' ✓' : '   ';
         var typeLabel = l.isEMI ? ' [EMI' : '';
@@ -1857,13 +1861,14 @@ function renderDiary() {
           var emiPaid = state.interestPayments.filter(function(p) { return p.loanId === l.id && p.type === 'received' && p.category === 'principal'; }).length;
           typeLabel += ' ' + emiPaid + '/' + emiTotal + ']';
         }
-        lines.push('  ' + mark + ' ' + l.borrowerName + typeLabel);
+        lines.push('  ' + num + '.' + mark + ' ' + l.borrowerName + typeLabel);
         lines.push('      ' + formatCurrency(collected) + ' / ' + formatCurrency(expected));
       }
     }
   });
   
   // ── INTEREST PAID (Borrowed) ──
+  num = 0;
   lines.push('');
   lines.push('  INTEREST PAID');
   lines.push('  ' + String('-').repeat(28));
@@ -1875,6 +1880,7 @@ function renderDiary() {
       });
       var outstanding = getOutstandingPrincipalAtMonth(b.id, b.principal, monthStr);
       if (outstanding > 0 || paid > 0) {
+        num++;
         var expected = b.isEMI ? Number(b.emiAmount || 0) : outstanding * (Number(b.interestRate) / 100);
         var mark = paid >= expected ? ' ✓' : '   ';
         var typeLabel = b.isEMI ? ' [EMI' : '';
@@ -1883,7 +1889,7 @@ function renderDiary() {
           var emiPaid = state.interestPayments.filter(function(p) { return p.loanId === b.id && p.type === 'paid' && p.category === 'principal'; }).length;
           typeLabel += ' ' + emiPaid + '/' + emiTotal + ']';
         }
-        lines.push('  ' + mark + ' ' + b.borrowerName + typeLabel);
+        lines.push('  ' + num + '.' + mark + ' ' + b.borrowerName + typeLabel);
         lines.push('      ' + formatCurrency(paid) + ' / ' + formatCurrency(expected));
       }
     }
