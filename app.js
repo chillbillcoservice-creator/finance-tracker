@@ -41,7 +41,6 @@ function toggleMonthlyMode() {
     selectedDateStr = new Date().toISOString().slice(0, 10);
     selectedMonthStr = selectedDateStr.slice(0, 7);
     document.getElementById('btn-mode-monthly').classList.remove('active');
-    document.getElementById('month-selector-bar').style.display = 'none';
     updateHeaderDateDisplay();
     refreshActiveTab();
     return;
@@ -50,10 +49,6 @@ function toggleMonthlyMode() {
   viewMode = 'month';
   document.getElementById('btn-mode-monthly').classList.add('active');
   document.getElementById('btn-mode-yearly').classList.remove('active');
-  
-  // Show month selector, hide year selector
-  document.getElementById('month-selector-bar').style.display = 'block';
-  document.getElementById('year-selector-bar').style.display = 'none';
   
   renderMonthSelector();
   updateHeaderDateDisplay();
@@ -67,7 +62,6 @@ function toggleYearlyMode() {
     selectedDateStr = new Date().toISOString().slice(0, 10);
     selectedMonthStr = selectedDateStr.slice(0, 7);
     document.getElementById('btn-mode-yearly').classList.remove('active');
-    document.getElementById('year-selector-bar').style.display = 'none';
     updateHeaderDateDisplay();
     refreshActiveTab();
     return;
@@ -76,10 +70,6 @@ function toggleYearlyMode() {
   viewMode = 'year';
   document.getElementById('btn-mode-yearly').classList.add('active');
   document.getElementById('btn-mode-monthly').classList.remove('active');
-  
-  // Show year selector, hide month selector
-  document.getElementById('month-selector-bar').style.display = 'none';
-  document.getElementById('year-selector-bar').style.display = 'block';
   
   renderYearSelector();
   updateHeaderDateDisplay();
@@ -1882,9 +1872,12 @@ function switchTab(tabId) {
   var monthBar = document.getElementById('month-selector-bar');
   var yearBar = document.getElementById('year-selector-bar');
   if (tabId === 'diary') {
-    if (viewMode === 'month') { if (monthBar) monthBar.style.display = 'block'; if (yearBar) yearBar.style.display = 'none'; }
-    else if (viewMode === 'year') { if (monthBar) monthBar.style.display = 'none'; if (yearBar) yearBar.style.display = 'block'; }
+    if (viewMode === 'month') { if (monthBar) monthBar.style.display = 'block'; if (yearBar) yearBar.style.display = 'none'; renderMonthSelector(); }
+    else if (viewMode === 'year') { if (monthBar) monthBar.style.display = 'none'; if (yearBar) yearBar.style.display = 'block'; renderYearSelector(); }
     else { if (monthBar) monthBar.style.display = 'none'; if (yearBar) yearBar.style.display = 'none'; }
+  } else {
+    if (monthBar) monthBar.style.display = 'none';
+    if (yearBar) yearBar.style.display = 'none';
   }
 
   // Toggle header elements per tab
