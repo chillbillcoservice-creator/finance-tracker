@@ -1003,8 +1003,8 @@ Tracks non-loan expenses and income:<br><br>
           <div style="font-weight: 600; font-size: 0.95rem; margin-bottom: 0.75rem; text-align: center;" id="emi-convert-name"></div>
           <div style="display: flex; gap: 1rem; margin-bottom: 1.25rem;">
             <div class="card" style="flex: 1; padding: 0.75rem; text-align: center;">
-              <div style="font-size: 0.65rem; text-transform: uppercase; color: var(--text-secondary);">Principal</div>
-              <div id="emi-convert-principal" style="font-weight: 700; font-size: 1rem; margin-top: 0.25rem; color: var(--color-success);">Rs. 0</div>
+              <div style="font-size: 0.65rem; text-transform: uppercase; color: var(--text-secondary);">Principal to Convert</div>
+              <input type="number" id="emi-convert-amount" class="form-input" min="1" step="any" style="width: 120px; margin: 0.25rem auto 0; text-align: center; padding: 0.25rem; min-height: auto; font-weight: 700; font-size: 1rem;" oninput="calculateEMIPreview()">
             </div>
             <div class="card" style="flex: 1; padding: 0.75rem; text-align: center;">
               <div style="font-size: 0.65rem; text-transform: uppercase; color: var(--text-secondary);">Rate (% / mo)</div>

@@ -3739,13 +3739,12 @@ function promptConvertEMI(loanId, direction) {
   document.getElementById('emi-convert-loan-id').value = loanId;
   document.getElementById('emi-convert-direction').value = direction;
   document.getElementById('emi-convert-name').textContent = loan.borrowerName;
-  document.getElementById('emi-convert-principal').textContent = formatCurrency(outstandingPrincipal);
+  document.getElementById('emi-convert-amount').value = outstandingPrincipal;
   document.getElementById('emi-convert-rate').value = loan.interestRate;
   document.getElementById('emi-convert-preview').textContent = 'Rs. 0 / mo';
   
-  window._currentEMIPrincipal = outstandingPrincipal;
-  
   openModal('modal-emi-convert');
+  calculateEMIPreview();
 }
 
 function selectTenure(btn, months) {
@@ -3762,6 +3761,7 @@ function selectTenure(btn, months) {
 }
 
 function calculateEMIPreview() {
+  const P = Number(document.getElementById('emi-convert-amount').value);
   const tenure = Number(document.getElementById('emi-convert-tenure').value);
   const rateInput = Number(document.getElementById('emi-convert-rate').value);
   if (!tenure || tenure <= 0 || !rateInput || rateInput <= 0) {
@@ -3770,7 +3770,6 @@ function calculateEMIPreview() {
     document.getElementById('emi-convert-total-amount').textContent = formatCurrency(0);
     return;
   }
-  const P = window._currentEMIPrincipal;
   const r = rateInput / 100;
   const n = tenure;
   let emi;
@@ -3790,20 +3789,55 @@ document.getElementById('form-emi-convert').addEventListener('submit', (e) => {
   const direction = document.getElementById('emi-convert-direction').value;
   const tenure = Number(document.getElementById('emi-convert-tenure').value);
   const rateInput = Number(document.getElementById('emi-convert-rate').value);
+  const emiPrincipal = Number(document.getElementById('emi-convert-amount').value);
   
   const listName = direction === 'lent' ? 'lent' : 'borrowed';
   const loan = state[listName].find(x => x.id === loanId);
   if (!loan) return;
   
-  const P = getOutstandingPrincipal(loan.id, loan.principal);
+  const outstanding = getOutstandingPrincipal(loan.id, loan.principal);
+  
+  if (!emiPrincipal || emiPrincipal <= 0) { alert('Enter a valid principal amount to convert.'); return; }
+  if (emiPrincipal > outstanding) { alert('Amount exceeds outstanding principal of ' + formatCurrency(outstanding)); return; }
+  
   const r = rateInput / 100;
   const n = tenure;
-  let emi = (r === 0) ? P / n : P * r * Math.pow(1 + r, n) / (Math.pow(1 + r, n) - 1);
+  let emi = (r === 0) ? emiPrincipal / n : emiPrincipal * r * Math.pow(1 + r, n) / (Math.pow(1 + r, n) - 1);
   
-  loan.interestRate = rateInput;
-  loan.isEMI = true;
-  loan.tenureMonths = tenure;
-  loan.emiAmount = emi;
+  if (emiPrincipal >= outstanding) {
+    // Full conversion
+    loan.interestRate = rateInput;
+    loan.isEMI = true;
+    loan.tenureMonths = tenure;
+    loan.emiAmount = emi;
+  } else {
+    // Partial conversion — record principal repayment to reduce outstanding
+    var today = new Date().toISOString().split('T')[0];
+    state.interestPayments.push({
+      id: 'p' + Math.random().toString(36).substr(2, 9),
+      loanId: loanId,
+      type: direction === 'lent' ? 'received' : 'paid',
+      category: 'principal',
+      amount: emiPrincipal,
+      date: today,
+      note: 'Principal repayment (Converted to EMI)'
+    });
+    // Create a new EMI loan for the converted amount
+    var newLoan = {
+      id: loanId + '_emi_' + Math.random().toString(36).substr(2, 4),
+      borrowerName: loan.borrowerName,
+      phone: loan.phone || loan.contactInfo || '',
+      principal: emiPrincipal,
+      interestRate: rateInput,
+      startDate: today.slice(0, 7) + '-01',
+      status: 'active',
+      isEMI: true,
+      emiAmount: emi,
+      tenureMonths: tenure,
+      emiTotal: tenure
+    };
+    state[listName].push(newLoan);
+  }
   
   saveState();
   closeModal('modal-emi-convert');
