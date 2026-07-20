@@ -1010,6 +1010,18 @@ function submitQuickLend(event) {
         note: 'Lend More (Top-up)'
       });
 
+      if (rate > 0) {
+        state.interestPayments.push({
+          id: 'p_' + Math.random().toString(36).substr(2, 9),
+          loanId: existingLoan.id,
+          type: 'received',
+          category: 'interest',
+          amount: principal * (rate / 100),
+          date: startDate || new Date().toISOString().split('T')[0],
+          note: 'Interest (top-up month)'
+        });
+      }
+
       saveState();
       closeModal('modal-quick-lend');
       renderDashboard();
@@ -1057,6 +1069,18 @@ function submitQuickLend(event) {
     date: startDate,
     note: 'Principal Disbursed (Quick Lent)'
   });
+
+  if (rate > 0) {
+    state.interestPayments.push({
+      id: 'p_' + Math.random().toString(36).substr(2, 9),
+      loanId: newId,
+      type: 'received',
+      category: 'interest',
+      amount: principal * (rate / 100),
+      date: startDate,
+      note: 'Interest (disbursement month)'
+    });
+  }
 
   saveState();
   closeModal('modal-quick-lend');
