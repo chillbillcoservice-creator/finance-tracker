@@ -7362,7 +7362,7 @@ window.addEventListener('DOMContentLoaded', () => {
   // ==========================================
   // SWIPE GESTURES FOR MOBILE NAVIGATION
   // ==========================================
-  const tabsOrder = ['dashboard', 'records', 'settings'];
+  const tabsOrder = ['dashboard', 'records', 'diary', 'settings'];
   let touchStartX = 0;
   let touchEndX = 0;
   let touchStartY = 0;
