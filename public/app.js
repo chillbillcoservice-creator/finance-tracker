@@ -1724,7 +1724,7 @@ function renderDiary() {
       var extra = '';
       if (secAdj > 0 && collected >= due) extra += '  (adjusted from security)';
       lines.push('  ' + mark + ' ' + r.tenantName + extra);
-      if (pending > 0) lines.push('      Due: ' + formatCurrency(pending));
+      if (pending > 0) lines.push('      ' + formatCurrency(collected) + ' / ' + formatCurrency(due) + '  Due: ' + formatCurrency(pending));
       else lines.push('      ' + formatCurrency(collected) + ' / ' + formatCurrency(due));
     }
   });
