@@ -3200,9 +3200,9 @@ function renderLending() {
               }
             }
             if (stats.advInterest > 0) {
-              intDisplay += ' <span style="color:var(--color-purple);font-weight:600;">· Adv Int Rcvd</span>';
+              intDisplay += ' <span style="color:var(--color-purple);font-weight:600;">· Adv Int Rcvd ' + formatCurrency(stats.advInterest) + '</span>';
             }
-            card.innerHTML += '<div style="font-size:0.82rem;"><span style="font-weight:600;">' + formattedPrincipal + '</span> <span style="color:var(--text-secondary);">+' + formatCurrency(stats.monthlyYield) + '/mo</span>' + intDisplay + (advTotal ? ' <span style="font-size:0.6rem;color:var(--color-purple);font-weight:700;">Advance ' + advTotal + '</span>' : '') + '</div>';
+            card.innerHTML += '<div style="font-size:0.82rem;"><span style="font-weight:600;">' + formattedPrincipal + '</span> <span style="color:var(--text-secondary);">+' + formatCurrency(stats.monthlyYield) + '/mo</span>' + intDisplay + (advTotal && stats.advInterest <= 0 ? ' <span style="font-size:0.6rem;color:var(--color-purple);font-weight:700;">Advance ' + advTotal + '</span>' : '') + '</div>';
         }
       });
 
