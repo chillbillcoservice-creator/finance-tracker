@@ -7096,9 +7096,8 @@ function renderGlanceWidget() {
       var outstanding = getOutstandingPrincipalAtMonth(l.id, l.principal, currentMonth);
       if (outstanding > 0) {
         var expected = l.isEMI ? Number(l.emiAmount || 0) : outstanding * (Number(l.interestRate) / 100);
-        var paidCat = l.isEMI ? 'principal' : 'interest';
         var paid = state.interestPayments
-          .filter(function(p) { return p.type === 'received' && p.category === paidCat && p.loanId === l.id && p.date.startsWith(currentMonth); })
+          .filter(function(p) { return p.type === 'received' && (p.category === 'interest' || p.category === 'principal') && p.loanId === l.id && p.date.startsWith(currentMonth); })
           .reduce(function(s, p) { return s + Number(p.amount); }, 0);
         var owe = expected - paid;
         if (owe > 0) {
