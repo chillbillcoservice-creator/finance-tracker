@@ -1987,7 +1987,7 @@ function renderDashboard() {
   var rentNode = document.getElementById('dash-monthly-rent');
   if (monthlyRent > 0 && rentPending <= 0.01) {
     var monthName = new Date(selectedMonthStr.slice(0, 7) + '-01').toLocaleDateString('en-US', { month: 'long' });
-    rentNode.innerHTML = formatCurrency(0) + ' <span style="font-size:0.78rem;font-weight:700;opacity:0.85;margin-left:0.3rem;">' + monthName + ' Rent Received</span>';
+    rentNode.innerHTML = '<span style="font-size:0.78rem;font-weight:700;opacity:0.85;">' + monthName + ' Rent Received</span>';
   } else {
     rentNode.textContent = formatCurrency(rentPending);
   }
@@ -2079,7 +2079,12 @@ function renderDashboard() {
   const interestPending = Math.max(0, expectedInterestReceived - totalInterestReceived);
   const totalInterestReceivedNode = document.getElementById('dash-total-interest-received');
   if (totalInterestReceivedNode) {
-    totalInterestReceivedNode.textContent = formatCurrency(interestPending);
+    if (expectedInterestReceived > 0 && interestPending <= 0.01) {
+      var monthName = new Date(selectedMonthStr.slice(0, 7) + '-01').toLocaleDateString('en-US', { month: 'long' });
+      totalInterestReceivedNode.innerHTML = '<span style="font-size:0.78rem;font-weight:700;opacity:0.85;">' + monthName + ' Interest Collected</span>';
+    } else {
+      totalInterestReceivedNode.textContent = formatCurrency(interestPending);
+    }
   }
 
   const interestReceivedBalanceNode = document.getElementById('dash-interest-received-balance');
@@ -2098,6 +2103,8 @@ function renderDashboard() {
       const oldList = card.querySelector('.pending-names-list');
       if(oldList) oldList.remove();
       card.classList.remove('has-pending-names');
+      const oldBadge = card.querySelector('.pending-count-badge');
+      if(oldBadge) oldBadge.remove();
     }
   });
 
@@ -2133,6 +2140,12 @@ function renderDashboard() {
         pendingTenantsHTML += '</div>';
         document.getElementById('card-rent').insertAdjacentHTML('afterbegin', pendingTenantsHTML);
         document.getElementById('card-rent').classList.add('has-pending-names');
+        var rentBadge = document.createElement('span');
+        rentBadge.className = 'pending-count-badge';
+        rentBadge.textContent = pTenants.length;
+        rentBadge.style.cssText = 'background:var(--color-warning);color:#fff;font-size:0.6rem;font-weight:800;padding:0.1rem 0.4rem;border-radius:8px;margin-left:0.3rem;vertical-align:middle;';
+        var rentHeaderSpan = document.querySelector('#card-rent .summary-card-header span');
+        if (rentHeaderSpan) rentHeaderSpan.after(rentBadge);
       }
 
     var pBorrowers = [];
@@ -2158,6 +2171,12 @@ function renderDashboard() {
       }).join('') + '</div>';
       document.getElementById('card-interest').insertAdjacentHTML('afterbegin', pendingBorrowersHTML);
       document.getElementById('card-interest').classList.add('has-pending-names');
+      var intBadge = document.createElement('span');
+      intBadge.className = 'pending-count-badge';
+      intBadge.textContent = pBorrowers.length;
+      intBadge.style.cssText = 'background:var(--color-warning);color:#fff;font-size:0.6rem;font-weight:800;padding:0.1rem 0.4rem;border-radius:8px;margin-left:0.3rem;vertical-align:middle;';
+      var intHeaderSpan = document.querySelector('#card-interest .summary-card-header span');
+      if (intHeaderSpan) intHeaderSpan.after(intBadge);
     }
     
     // Attach click-selection to all pending-name-items
@@ -7180,8 +7199,9 @@ function renderGlanceWidget() {
       var outstanding = getOutstandingPrincipalAtMonth(l.id, l.principal, currentMonth);
       if (outstanding > 0) {
         var expected = l.isEMI ? Number(l.emiAmount || 0) : outstanding * (Number(l.interestRate) / 100);
+        var cat = l.isEMI ? 'principal' : 'interest';
         var paid = state.interestPayments
-          .filter(function(p) { return p.type === 'received' && (p.category === 'interest' || p.category === 'principal') && p.loanId === l.id && p.date.startsWith(currentMonth); })
+          .filter(function(p) { return p.type === 'received' && p.category === cat && p.loanId === l.id && p.date.startsWith(currentMonth); })
           .reduce(function(s, p) { return s + Number(p.amount); }, 0);
         var owe = expected - paid;
         if (owe > 0) {
