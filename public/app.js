@@ -2131,12 +2131,8 @@ function renderDashboard() {
         pendingTenantsHTML += '</div>';
         document.getElementById('card-rent').insertAdjacentHTML('afterbegin', pendingTenantsHTML);
         document.getElementById('card-rent').classList.add('has-pending-names');
-        var rentBadge = document.createElement('span');
-        rentBadge.className = 'pending-count-badge';
-        rentBadge.textContent = pTenants.length;
-        rentBadge.style.cssText = 'background:var(--color-warning);color:#fff;font-size:0.6rem;font-weight:800;padding:0.1rem 0.4rem;border-radius:8px;margin-left:0.3rem;vertical-align:middle;';
         var rentHeaderSpan = document.querySelector('#card-rent .summary-card-header span');
-        if (rentHeaderSpan) rentHeaderSpan.after(rentBadge);
+        if (rentHeaderSpan) rentHeaderSpan.insertAdjacentHTML('beforeend', ' <span class="pending-count-badge" style="background:var(--color-warning);color:#fff;font-size:0.6rem;font-weight:800;padding:0.1rem 0.4rem;border-radius:8px;">' + pTenants.length + '</span>');
       }
 
     var pBorrowers = [];
@@ -2162,12 +2158,8 @@ function renderDashboard() {
       }).join('') + '</div>';
       document.getElementById('card-interest').insertAdjacentHTML('afterbegin', pendingBorrowersHTML);
       document.getElementById('card-interest').classList.add('has-pending-names');
-      var intBadge = document.createElement('span');
-      intBadge.className = 'pending-count-badge';
-      intBadge.textContent = pBorrowers.length;
-      intBadge.style.cssText = 'background:var(--color-warning);color:#fff;font-size:0.6rem;font-weight:800;padding:0.1rem 0.4rem;border-radius:8px;margin-left:0.3rem;vertical-align:middle;';
       var intHeaderSpan = document.querySelector('#card-interest .summary-card-header span');
-      if (intHeaderSpan) intHeaderSpan.after(intBadge);
+      if (intHeaderSpan) intHeaderSpan.insertAdjacentHTML('beforeend', ' <span class="pending-count-badge" style="background:var(--color-warning);color:#fff;font-size:0.6rem;font-weight:800;padding:0.1rem 0.4rem;border-radius:8px;">' + pBorrowers.length + '</span>');
     }
     
     // Attach click-selection to all pending-name-items
