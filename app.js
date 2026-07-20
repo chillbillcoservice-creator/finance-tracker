@@ -1995,7 +1995,7 @@ function renderDashboard() {
   var rentNode = document.getElementById('dash-monthly-rent');
   if (monthlyRent > 0 && rentPending <= 0.01) {
     var monthName = new Date(selectedMonthStr.slice(0, 7) + '-01').toLocaleDateString('en-US', { month: 'long' });
-    rentNode.innerHTML = '<span style="font-size:0.78rem;font-weight:700;opacity:0.85;">' + monthName + ' Rent Received</span>';
+    rentNode.innerHTML = '<span style="font-size:1rem;font-weight:700;opacity:0.85;">' + monthName + ' Rent Received</span>';
   } else {
     rentNode.textContent = formatCurrency(rentPending);
   }
@@ -2003,9 +2003,11 @@ function renderDashboard() {
   const rentalBalanceNode = document.getElementById('dash-rental-balance');
   if (rentalBalanceNode) {
     if (isDayMode || isYearMode) {
-      rentalBalanceNode.innerHTML = `<div style="color: var(--text-primary);">Collected: <span style="color: var(--color-warning); font-weight: 800; margin-left: 2px;">${formatCurrency(totalRentCollected)}</span></div><div style="color: var(--text-primary); font-weight: 600; margin-top: 2px;">${isYearMode ? '(Year view)' : '(Day view)'}</div>`;
+      var rentColColor = totalRentCollected >= monthlyRent ? 'var(--color-success)' : 'var(--color-warning)';
+      rentalBalanceNode.innerHTML = `<div style="color: var(--text-primary);">Collected: <span style="color: ${rentColColor}; font-weight: 800; margin-left: 2px;">${formatCurrency(totalRentCollected)}</span></div><div style="color: var(--text-primary); font-weight: 600; margin-top: 2px;">${isYearMode ? '(Year view)' : '(Day view)'}</div>`;
     } else {
-      rentalBalanceNode.innerHTML = `<div style="color: var(--text-primary);">Collected: <span style="color: var(--color-warning); font-weight: 800; margin-left: 2px;">${formatCurrency(totalRentCollected)}</span></div><div style="color: var(--text-primary); margin-top: 2px;">Monthly Total: <span style="color: var(--text-primary); font-weight: 800; margin-left: 2px;">${formatCurrency(monthlyRent)}</span></div>`;
+      var rentColColor = totalRentCollected >= monthlyRent ? 'var(--color-success)' : 'var(--color-warning)';
+      rentalBalanceNode.innerHTML = `<div style="color: var(--text-primary);">Collected: <span style="color: ${rentColColor}; font-weight: 800; margin-left: 2px;">${formatCurrency(totalRentCollected)}</span></div><div style="color: var(--text-primary); margin-top: 2px;">Monthly Total: <span style="color: var(--text-primary); font-weight: 800; margin-left: 2px;">${formatCurrency(monthlyRent)}</span></div>`;
     }
   }
   
@@ -2098,9 +2100,11 @@ function renderDashboard() {
   const interestReceivedBalanceNode = document.getElementById('dash-interest-received-balance');
   if (interestReceivedBalanceNode) {
     if (isDayMode || isYearMode) {
-      interestReceivedBalanceNode.innerHTML = `<div style="color: var(--text-primary);">Collected: <span style="color: var(--color-warning); font-weight: 800; margin-left: 2px;">${formatCurrency(totalInterestReceived)}</span></div><div style="color: var(--text-primary); font-weight: 600; margin-top: 2px;">${isYearMode ? '(Year view)' : '(Day view)'}</div>`;
+      var intColColor = totalInterestReceived >= expectedInterestReceived ? 'var(--color-success)' : 'var(--color-warning)';
+      interestReceivedBalanceNode.innerHTML = `<div style="color: var(--text-primary);">Collected: <span style="color: ${intColColor}; font-weight: 800; margin-left: 2px;">${formatCurrency(totalInterestReceived)}</span></div><div style="color: var(--text-primary); font-weight: 600; margin-top: 2px;">${isYearMode ? '(Year view)' : '(Day view)'}</div>`;
     } else {
-      interestReceivedBalanceNode.innerHTML = `<div style="color: var(--text-primary);">Collected: <span style="color: var(--color-warning); font-weight: 800; margin-left: 2px;">${formatCurrency(totalInterestReceived)}</span></div><div style="color: var(--text-primary); margin-top: 2px;">Monthly Total: <span style="color: var(--text-primary); font-weight: 800; margin-left: 2px;">${formatCurrency(expectedInterestReceived)}</span></div>`;
+      var intColColor = totalInterestReceived >= expectedInterestReceived ? 'var(--color-success)' : 'var(--color-warning)';
+      interestReceivedBalanceNode.innerHTML = `<div style="color: var(--text-primary);">Collected: <span style="color: ${intColColor}; font-weight: 800; margin-left: 2px;">${formatCurrency(totalInterestReceived)}</span></div><div style="color: var(--text-primary); margin-top: 2px;">Monthly Total: <span style="color: var(--text-primary); font-weight: 800; margin-left: 2px;">${formatCurrency(expectedInterestReceived)}</span></div>`;
     }
   }
 
@@ -5516,6 +5520,8 @@ function compressImage(file, maxDimension, quality, callback) {
 
 function initApp() {
   loadState();
+
+  // Seed data (always runs, regardless of lock)
   if (!state._realDataSeeded) {
     state.properties = ['23/48 ground floor', '23/48 3rd floor', '1/104'];
     state.rentals = [
@@ -5560,6 +5566,15 @@ function initApp() {
     state._realPaymentsSeeded = true;
     saveState();
   }
+
+  // PIN check — if set, show lock screen and delay UI init
+  if (localStorage.getItem('app_pin')) {
+    showLockScreen();
+    initLockScreenListeners();
+    updateSettingsSecurityUI();
+    return;
+  }
+
   initNavigation();
   
   // Initialize month selector (default view is monthly)
@@ -7855,6 +7870,191 @@ window.scrollToRecentActivity = function() {
     el.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 };
+
+// === LOCK SCREEN ===
+var _pinEntered = '';
+var _pinMode = 'unlock'; // 'unlock' or 'set'
+
+async function sha256(str) {
+  var buf = new TextEncoder().encode(str);
+  var hash = await crypto.subtle.digest('SHA-256', buf);
+  return Array.from(new Uint8Array(hash)).map(function(b) { return b.toString(16).padStart(2, '0'); }).join('');
+}
+
+function showSetPinScreen() {
+  _pinEntered = '';
+  _pinMode = 'set';
+  updatePinDots();
+  document.getElementById('lock-title').textContent = 'Set your 4-digit PIN';
+  document.getElementById('lock-error').textContent = '';
+  document.getElementById('lock-biometric-area').style.display = 'none';
+  document.getElementById('lock-screen').style.display = 'flex';
+}
+
+function showLockScreen() {
+  _pinEntered = '';
+  _pinMode = 'unlock';
+  updatePinDots();
+  document.getElementById('lock-title').textContent = 'Enter PIN';
+  document.getElementById('lock-error').textContent = '';
+  var ls = document.getElementById('lock-screen');
+  if (ls) ls.style.display = 'flex';
+  var ba = document.getElementById('lock-biometric-area');
+  if (localStorage.getItem('app_use_biometric') === 'true' && window.PublicKeyCredential) {
+    ba.style.display = 'block';
+  } else {
+    ba.style.display = 'none';
+  }
+}
+
+function hideLockScreen() {
+  document.getElementById('lock-screen').style.display = 'none';
+}
+
+function lockApp() {
+  if (localStorage.getItem('app_pin')) {
+    showLockScreen();
+  }
+}
+
+function checkAppLock() {
+  if (localStorage.getItem('app_pin')) {
+    showLockScreen();
+    updateSettingsSecurityUI();
+  } else {
+    hideLockScreen();
+  }
+}
+
+function updatePinDots() {
+  for (var i = 0; i < 4; i++) {
+    var dot = document.getElementById('pin-' + i);
+    if (dot) {
+      dot.style.background = i < _pinEntered.length ? 'var(--color-accent, #0ea5e9)' : 'transparent';
+      dot.style.borderColor = i < _pinEntered.length ? 'var(--color-accent, #0ea5e9)' : 'var(--text-secondary, #94a3b8)';
+    }
+  }
+}
+
+function handlePinDigit(digit) {
+  if (digit === 'clear') {
+    _pinEntered = '';
+    updatePinDots();
+    document.getElementById('lock-error').textContent = '';
+    return;
+  }
+  if (digit === 'backspace') {
+    _pinEntered = _pinEntered.slice(0, -1);
+    updatePinDots();
+    return;
+  }
+  if (_pinEntered.length >= 4) return;
+  _pinEntered += digit;
+  updatePinDots();
+  if (_pinEntered.length === 4) {
+    if (_pinMode === 'set') {
+      // First time: save PIN, then enter app
+      sha256(_pinEntered).then(function(hash) {
+        localStorage.setItem('app_pin', hash);
+        _pinEntered = '';
+        hideLockScreen();
+        updateSettingsSecurityUI();
+        initNavigation();
+        renderMonthSelector();
+        requestNotifPermission();
+        if (window.PublicKeyCredential) {
+          document.getElementById('biometric-toggle-row').style.display = 'flex';
+        }
+      });
+    } else {
+      // Unlock mode: verify PIN
+      sha256(_pinEntered).then(function(hash) {
+        if (hash === localStorage.getItem('app_pin')) {
+          _pinEntered = '';
+          hideLockScreen();
+          initNavigation();
+          renderMonthSelector();
+          requestNotifPermission();
+        } else {
+          document.getElementById('lock-error').textContent = 'Wrong PIN. Try again.';
+          _pinEntered = '';
+          updatePinDots();
+        }
+      });
+    }
+  }
+}
+
+function removePin() {
+  if (confirm('Remove app lock? Anyone with this phone can open the app.')) {
+    localStorage.removeItem('app_pin');
+    localStorage.removeItem('app_use_biometric');
+    hideLockScreen();
+    updateSettingsSecurityUI();
+  }
+}
+
+function toggleBiometric() {
+  var cb = document.getElementById('toggle-biometric');
+  if (cb.checked) {
+    localStorage.setItem('app_use_biometric', 'true');
+  } else {
+    localStorage.removeItem('app_use_biometric');
+  }
+}
+
+function initLockScreenListeners() {
+  document.querySelectorAll('.pin-btn').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      handlePinDigit(this.getAttribute('data-digit'));
+    });
+  });
+  document.getElementById('btn-biometric-unlock').addEventListener('click', function() {
+    if (!window.PublicKeyCredential) { alert('Biometric not supported on this browser.'); return; }
+    navigator.credentials.get({
+      publicKey: {
+        challenge: new Uint8Array(32),
+        timeout: 60000,
+        allowCredentials: [],
+        userVerification: 'required'
+      }
+    }).then(function() {
+      _pinEntered = '';
+      hideLockScreen();
+    }).catch(function(err) {
+      document.getElementById('lock-error').textContent = 'Biometric failed. Use PIN.';
+    });
+  });
+  // Auto-lock on visibility change
+  document.addEventListener('visibilitychange', function() {
+    if (document.visibilityState === 'visible' && localStorage.getItem('app_pin')) {
+      showLockScreen();
+    }
+  });
+  // Auto-lock on page show (back from another app)
+  window.addEventListener('pageshow', function(e) {
+    if (e.persisted && localStorage.getItem('app_pin')) {
+      showLockScreen();
+    }
+  });
+}
+
+function updateSettingsSecurityUI() {
+  var setBtn = document.getElementById('btn-set-pin');
+  var rmBtn = document.getElementById('btn-remove-pin');
+  var bioRow = document.getElementById('biometric-toggle-row');
+  if (localStorage.getItem('app_pin')) {
+    if (setBtn) setBtn.style.display = 'none';
+    if (rmBtn) rmBtn.style.display = 'inline-block';
+    if (bioRow && window.PublicKeyCredential) bioRow.style.display = 'flex';
+    var bioCb = document.getElementById('toggle-biometric');
+    if (bioCb) bioCb.checked = localStorage.getItem('app_use_biometric') === 'true';
+  } else {
+    if (setBtn) setBtn.style.display = 'inline-block';
+    if (rmBtn) rmBtn.style.display = 'none';
+    if (bioRow) bioRow.style.display = 'none';
+  }
+}
 
 
 
