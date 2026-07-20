@@ -7176,13 +7176,21 @@ function renderGlanceWidget() {
 
   // People who owe today (rent due today + active interest not yet paid this month)
   var currentMonth = todayStr.slice(0, 7);
-  var rentDueDay = today.getDate();
   var pendingPeople = [];
+  var todayBase = new Date();
+  todayBase.setHours(0, 0, 0, 0);
 
   state.rentals.forEach(function(r) {
     if (r.status === 'active' && r.startDate <= todayStr) {
-      var isPaid = state.rentPayments.some(function(p) { return p.rentalId === r.id && p.monthYear === currentMonth; });
-      if (!isPaid && Number(r.rentDueDay) === rentDueDay) {
+      var dueDay = Math.min(r.rentDueDay, new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate());
+      var dueDate = new Date(today.getFullYear(), today.getMonth(), dueDay);
+      dueDate.setHours(0, 0, 0, 0);
+      if (dueDate > todayBase) dueDate.setMonth(dueDate.getMonth() - 1);
+      var diffTime = dueDate.getTime() - todayBase.getTime();
+      var diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      var dueMonthStr = dueDate.getFullYear() + '-' + String(dueDate.getMonth() + 1).padStart(2, '0');
+      var isPaid = state.rentPayments.some(function(p) { return p.rentalId === r.id && p.monthYear === dueMonthStr; });
+      if (!isPaid && diffDays < 0) {
         pendingPeople.push({ name: r.tenantName, amount: Number(r.monthlyRent), type: 'rent' });
       }
     }
