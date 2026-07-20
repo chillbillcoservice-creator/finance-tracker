@@ -7873,7 +7873,15 @@ window.scrollToRecentActivity = function() {
 
 // === LOCK SCREEN ===
 var _pinEntered = '';
-var _pinMode = 'unlock'; // 'unlock' or 'set'
+var _pinMode = 'unlock';
+var _lockListenersInit = false;
+
+function ensureLockListeners() {
+  if (!_lockListenersInit) {
+    initLockScreenListeners();
+    _lockListenersInit = true;
+  }
+}
 
 async function sha256(str) {
   var buf = new TextEncoder().encode(str);
@@ -7889,6 +7897,7 @@ function showSetPinScreen() {
   document.getElementById('lock-error').textContent = '';
   document.getElementById('lock-biometric-area').style.display = 'none';
   document.getElementById('lock-screen').style.display = 'flex';
+  ensureLockListeners();
 }
 
 function showLockScreen() {
@@ -7905,6 +7914,7 @@ function showLockScreen() {
   } else {
     ba.style.display = 'none';
   }
+  ensureLockListeners();
 }
 
 function hideLockScreen() {
