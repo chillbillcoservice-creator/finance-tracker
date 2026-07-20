@@ -1309,69 +1309,103 @@ function quickGroupPayment(safeId, direction) {
   }
   var remaining = totalAmount;
   var today = new Date().toISOString().split('T')[0];
-  var payments = [];
+  var currentMonth = today.slice(0, 7);
+  var type = direction === 'lent' ? 'received' : 'paid';
+
+  var emiLoans = [], interestLoans = [];
   for (var i = 0; i < groupLoans.length; i++) {
     var loan = groupLoans[i];
-    if (!loan.isEMI) continue;
-    var emiAmt = Number(loan.emiAmount || 0);
-    if (emiAmt <= 0) continue;
     var outstanding = getOutstandingPrincipal(loan.id, loan.principal);
     if (outstanding <= 0) continue;
-    if (emiAmt > remaining) continue;
-    var rate = Number(loan.interestRate || 0);
-    if (rate > 0) {
-      var interestPart = outstanding * (rate / 100);
-      var principalPart = emiAmt - interestPart;
-      if (interestPart > 0) payments.push({ loanId: loan.id, amount: interestPart, category: 'interest' });
-      if (principalPart > 0) payments.push({ loanId: loan.id, amount: principalPart, category: 'principal' });
-    } else {
-      payments.push({ loanId: loan.id, amount: emiAmt, category: 'principal' });
-    }
-    remaining -= emiAmt;
-  }
-  if (remaining > 0) {
-    var currentMonth = today.slice(0, 7);
-    for (var i = 0; i < groupLoans.length; i++) {
-      var loan = groupLoans[i];
-      if (loan.isEMI) continue;
-      if (!loan.interestRate || Number(loan.interestRate) <= 0) continue;
-      var outstanding = getOutstandingPrincipal(loan.id, loan.principal);
-      if (outstanding <= 0) continue;
+    if (loan.isEMI) {
+      var emiAmt = Number(loan.emiAmount || 0);
+      if (emiAmt > 0) emiLoans.push({ loan: loan, emiAmt: emiAmt });
+    } else if (Number(loan.interestRate || 0) > 0) {
       var yieldAmt = outstanding * (Number(loan.interestRate) / 100);
-      var type = direction === 'lent' ? 'received' : 'paid';
-      var paidThisMonth = state.interestPayments.filter(function(p) { return p.loanId === loan.id && p.type === type && p.category === 'interest' && p.date && p.date.slice(0, 7) === currentMonth; }).reduce(function(s, p) { return s + Number(p.amount); }, 0);
-      if (paidThisMonth >= yieldAmt) continue;
-      var takeAmt = Math.min(yieldAmt - paidThisMonth, remaining);
-      if (takeAmt <= 0) continue;
-      payments.push({ loanId: loan.id, amount: takeAmt, category: 'interest' });
-      remaining -= takeAmt;
-      if (remaining <= 0) break;
+      if (yieldAmt > 0) interestLoans.push({ loan: loan, yieldAmt: yieldAmt });
     }
   }
+
+  emiLoans.sort(function(a, b) { return a.emiAmt - b.emiAmt; });
+
+  function paidInMonth(loanId, cat, month) {
+    return state.interestPayments.filter(function(p) { return p.loanId === loanId && p.type === type && p.category === cat && p.date && p.date.startsWith(month); }).reduce(function(s, p) { return s + Number(p.amount); }, 0);
+  }
+
+  var currentCyclePaid = true;
+  for (var i = 0; i < interestLoans.length; i++) {
+    if (paidInMonth(interestLoans[i].loan.id, 'interest', currentMonth) < interestLoans[i].yieldAmt - 0.01) { currentCyclePaid = false; break; }
+  }
+  if (currentCyclePaid) {
+    for (var i = 0; i < emiLoans.length; i++) {
+      if (paidInMonth(emiLoans[i].loan.id, 'principal', currentMonth) < emiLoans[i].emiAmt - 0.01) { currentCyclePaid = false; break; }
+    }
+  }
+
+  var payments = [], isAdvance = false;
+
+  if (!currentCyclePaid) {
+    for (var i = 0; i < interestLoans.length; i++) {
+      if (remaining <= 0) break;
+      var item = interestLoans[i];
+      var needed = Math.max(0, item.yieldAmt - paidInMonth(item.loan.id, 'interest', currentMonth));
+      if (needed <= 0) continue;
+      var take = Math.min(needed, remaining);
+      payments.push({ loanId: item.loan.id, amount: take, category: 'interest', isAdvance: false });
+      remaining -= take;
+    }
+
+    for (var i = 0; i < emiLoans.length; i++) {
+      if (remaining <= 0) break;
+      var item = emiLoans[i];
+      var needed = Math.max(0, item.emiAmt - paidInMonth(item.loan.id, 'principal', currentMonth));
+      if (needed <= 0) continue;
+      var take = Math.min(needed, remaining);
+      var isPartial = (paidInMonth(item.loan.id, 'principal', currentMonth) + take) < item.emiAmt;
+      payments.push({ loanId: item.loan.id, amount: take, category: 'principal', isAdvance: false, isPartial: isPartial });
+      remaining -= take;
+    }
+  }
+
   if (remaining > 0) {
-    for (var i = 0; i < groupLoans.length; i++) {
-      var loan = groupLoans[i];
-      var outstanding = getOutstandingPrincipal(loan.id, loan.principal);
-      if (outstanding > 0) {
-        var hasRate = Number(loan.interestRate || 0) > 0;
-        payments.push({ loanId: loan.id, amount: remaining, category: hasRate ? 'interest' : 'principal', isAdvance: hasRate });
-        remaining = 0;
-        break;
+    var cycleNowPaid = true;
+    for (var i = 0; i < interestLoans.length; i++) {
+      if (paidInMonth(interestLoans[i].loan.id, 'interest', currentMonth) + payments.filter(function(p) { return p.loanId === interestLoans[i].loan.id && p.category === 'interest'; }).reduce(function(s, p) { return s + Number(p.amount); }, 0) < interestLoans[i].yieldAmt - 0.01) { cycleNowPaid = false; break; }
+    }
+    if (cycleNowPaid) {
+      for (var i = 0; i < emiLoans.length; i++) {
+        if (paidInMonth(emiLoans[i].loan.id, 'principal', currentMonth) + payments.filter(function(p) { return p.loanId === emiLoans[i].loan.id && p.category === 'principal'; }).reduce(function(s, p) { return s + Number(p.amount); }, 0) < emiLoans[i].emiAmt - 0.01) { cycleNowPaid = false; break; }
+      }
+    }
+
+    if (cycleNowPaid) {
+      isAdvance = true;
+      for (var i = 0; i < emiLoans.length; i++) {
+        if (remaining <= 0) break;
+        var item = emiLoans[i];
+        var take = Math.min(item.emiAmt, remaining);
+        var isPartial = take < item.emiAmt;
+        payments.push({ loanId: item.loan.id, amount: take, category: 'principal', isAdvance: true, isPartial: isPartial });
+        remaining -= take;
       }
     }
   }
+
   if (payments.length === 0) { alert('No eligible loan for this amount.'); return; }
   for (var i = 0; i < payments.length; i++) {
+    var p = payments[i];
+    var note = p.category === 'interest' ? 'Interest received' : (p.isPartial ? 'Principal repayment [Partial]' : (p.isAdvance ? 'Principal repayment [Advance]' : 'Principal repayment'));
     state.interestPayments.push({
       id: 'p' + Math.random().toString(36).substr(2, 9),
-      loanId: payments[i].loanId,
-      type: direction === 'lent' ? 'received' : 'paid',
-      category: payments[i].category,
-      amount: payments[i].amount,
+      loanId: p.loanId,
+      type: type,
+      category: p.category,
+      amount: p.amount,
       date: today,
-      note: payments[i].category === 'interest' ? (payments[i].isAdvance ? 'Interest received [Advance]' : 'Interest received') : 'Principal repayment'
+      note: note
     });
   }
+
   saveState();
   var allSettled = true;
   for (var i = 0; i < groupLoans.length; i++) {
@@ -2968,12 +3002,17 @@ function renderLending() {
     
     // EMI cycle stats
     const emiTotalCount = loan.isEMI ? (loan.emiTotal || Math.ceil(Number(loan.principal) / Number(loan.emiAmount))) : 0;
-    const emiPaidCount = loan.isEMI ? principalPayments.length : 0;
+    const fullEmiPayments = principalPayments.filter(p => !p.note || p.note.indexOf('[Partial]') === -1);
+    const partialEmiPayments = principalPayments.filter(p => p.note && p.note.indexOf('[Partial]') !== -1);
+    const emiPaidCount = loan.isEMI ? fullEmiPayments.length : 0;
+    const partialEmiTotal = loan.isEMI ? partialEmiPayments.reduce((s, p) => s + Number(p.amount), 0) : 0;
+    const advanceEdis = principalPayments.filter(p => p.note && p.note.indexOf('[Advance]') !== -1);
+    const advanceEmiCount = loan.isEMI ? advanceEdis.length : 0;
 
     loan._stats = {
       outstandingPrincipal, totalReceived, totalRepaid, monthlyYield, currentMonthSum, currentMonthInterestSum,
       isInterestFullyPaidThisMonth, statusInMonth, lastPaymentDate, hasAdvance, advTotal,
-      emiTotalCount, emiPaidCount
+      emiTotalCount, emiPaidCount, partialEmiTotal, advanceEmiCount
     };
   });
 
@@ -3063,7 +3102,7 @@ function renderLending() {
           const currentRecv = formatCurrency(stats.currentMonthSum);
           card.innerHTML += '<div style="font-size:0.82rem;"><span style="font-weight:600;">' + formattedPrincipal + ' <span class="badge badge-muted">Closed</span></span> <span style="color:var(--text-secondary);">· Rcvd ' + currentRecv + '</span></div>';
         } else {
-          card.innerHTML += '<div style="font-size:0.82rem;"><span style="font-weight:600;">' + formattedPrincipal + '</span> <span style="color:var(--color-purple);font-weight:600;">EMI</span> <span style="color:var(--text-secondary);">@ ' + formatCurrency(Number(loan.emiAmount)) + '/mo · Paid ' + stats.emiPaidCount + '/' + stats.emiTotalCount + '</span></div>';
+          card.innerHTML += '<div style="font-size:0.82rem;"><span style="font-weight:600;">' + formattedPrincipal + '</span> <span style="color:var(--color-purple);font-weight:600;">EMI</span> <span style="color:var(--text-secondary);">@ ' + formatCurrency(Number(loan.emiAmount)) + '/mo </span><span style="color:' + (stats.advanceEmiCount > 0 ? 'var(--color-purple)' : 'var(--text-secondary)') + ';">· Paid ' + stats.emiPaidCount + '/' + stats.emiTotalCount + '</span>' + (stats.partialEmiTotal > 0 ? ' <span style="color:var(--color-purple);font-size:0.65rem;font-weight:600;">Partial ' + formatCurrency(stats.partialEmiTotal) + '</span>' : '') + '</div>';
           var emiPct = stats.emiTotalCount > 0 ? Math.round(stats.emiPaidCount / stats.emiTotalCount * 100) : 0;
           card.innerHTML += '<div style="width:100%;height:3px;background:var(--bg-tertiary);border-radius:2px;margin:0.15rem 0 0.2rem;"><div style="width:' + Math.min(emiPct,100) + '%;height:3px;background:var(--color-purple);border-radius:2px;"></div></div>';
         }
@@ -3128,7 +3167,7 @@ function renderLending() {
           const currentRecv = formatCurrency(stats.currentMonthSum);
           card.innerHTML += '<div style="font-size:0.82rem;"><span style="font-weight:600;">' + formattedPrincipal + ' <span class="badge badge-muted">Closed</span></span> <span style="color:var(--text-secondary);">· Rcvd ' + currentRecv + '</span></div>';
         } else if (loan.isEMI) {
-          card.innerHTML += '<div style="font-size:0.82rem;"><span style="font-weight:600;">' + formattedPrincipal + '</span> <span style="color:var(--color-purple);font-weight:600;">EMI</span> <span style="color:var(--text-secondary);">@ ' + formatCurrency(Number(loan.emiAmount)) + '/mo · Paid ' + stats.emiPaidCount + '/' + stats.emiTotalCount + '</span></div>';
+          card.innerHTML += '<div style="font-size:0.82rem;"><span style="font-weight:600;">' + formattedPrincipal + '</span> <span style="color:var(--color-purple);font-weight:600;">EMI</span> <span style="color:var(--text-secondary);">@ ' + formatCurrency(Number(loan.emiAmount)) + '/mo </span><span style="color:' + (stats.advanceEmiCount > 0 ? 'var(--color-purple)' : 'var(--text-secondary)') + ';">· Paid ' + stats.emiPaidCount + '/' + stats.emiTotalCount + '</span>' + (stats.partialEmiTotal > 0 ? ' <span style="color:var(--color-purple);font-size:0.65rem;font-weight:600;">Partial ' + formatCurrency(stats.partialEmiTotal) + '</span>' : '') + '</div>';
           var emiPct = stats.emiTotalCount > 0 ? Math.round(stats.emiPaidCount / stats.emiTotalCount * 100) : 0;
           card.innerHTML += '<div style="width:100%;height:3px;background:var(--bg-tertiary);border-radius:2px;margin:0.15rem 0 0.2rem;"><div style="width:' + Math.min(emiPct,100) + '%;height:3px;background:var(--color-purple);border-radius:2px;"></div></div>';
         } else {
