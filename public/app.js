@@ -1851,7 +1851,8 @@ function renderDiary() {
       if (outstanding > 0 || collected > 0) {
         var expected = l.isEMI ? Number(l.emiAmount || 0) : outstanding * (Number(l.interestRate) / 100);
         var mark = collected >= expected ? ' ✓' : '   ';
-        lines.push('  ' + mark + ' ' + l.borrowerName);
+        var typeLabel = l.isEMI ? ' [EMI]' : '';
+        lines.push('  ' + mark + ' ' + l.borrowerName + typeLabel);
         lines.push('      ' + formatCurrency(collected) + ' / ' + formatCurrency(expected));
       }
     }
@@ -1871,7 +1872,8 @@ function renderDiary() {
       if (outstanding > 0 || paid > 0) {
         var expected = b.isEMI ? Number(b.emiAmount || 0) : outstanding * (Number(b.interestRate) / 100);
         var mark = paid >= expected ? ' ✓' : '   ';
-        lines.push('  ' + mark + ' ' + b.borrowerName);
+        var typeLabel = b.isEMI ? ' [EMI]' : '';
+        lines.push('  ' + mark + ' ' + b.borrowerName + typeLabel);
         lines.push('      ' + formatCurrency(paid) + ' / ' + formatCurrency(expected));
       }
     }
