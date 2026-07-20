@@ -781,39 +781,57 @@
 <script>function toggleHelpSec(i,e){var c=document.getElementById(i);if(!c)return;var v=c.style.display;c.style.display=v==='none'?'':'none';var a=e.querySelector('.hch');if(a)a.style.transform=v==='none'?'rotate(90deg)':'rotate(0deg)';}</script>
 
 <div>
-<p style="font-weight:700;color:var(--text-primary);margin:0.75rem 0 0.3rem;cursor:pointer;" onclick="toggleHelpSec('h1',this)"><span class="hch" style="font-size:0.6rem;display:inline-block;transition:transform 0.2s;transform:rotate(90deg);margin-right:0.3rem;">▶</span> 📌 3 CARD TYPES</p>
+<p style="font-weight:700;color:var(--text-primary);margin:0.75rem 0 0.3rem;cursor:pointer;" onclick="toggleHelpSec('h1',this)"><span class="hch" style="font-size:0.6rem;display:inline-block;transition:transform 0.2s;transform:rotate(90deg);margin-right:0.3rem;">▶</span> 📌 DASHBOARD OVERVIEW</p>
 <div id="h1" style="padding-left:1rem;display:none;">
+<strong>Top Stats Bar:</strong><br>
+➤ <strong>Lent Outstanding</strong> — Total principal across all lending loans<br>
+➤ <strong>Borrowed</strong> — Total principal across all borrowing loans<br>
+➤ <strong>Interest /mo</strong> — Net monthly spread (lending yield − borrowing cost)<br>
+➤ <strong>Interest Rcvd</strong> — Total interest received lifetime<br>
+➤ <strong>Interest Paid</strong> — Total interest paid lifetime<br>
+➤ <strong>Expenses</strong> — Total expenses this month<br><br>
+<strong>Summary Cards (at a glance):</strong><br>
+➤ <strong>Rent</strong> — Shows pending rent amount. Fully collected → "July Rent Received" in green. Partially collected → yellow amount.<br>
+➤ <strong>Interest</strong> — Shows pending interest to collect. Fully collected → "July Interest Collected" in green. Click to expand lending/borrowing detail.<br>
+➤ <strong>Expenses</strong> — Today's + weekly + monthly totals, ongoing construction projects<br>
+➤ <strong>Net</strong> — Total collected vs total monthly income<br><br>
+<strong>Below cards:</strong> Recent activity feed with all transactions sorted by date.
+</div>
+</div>
+
+<div>
+<p style="font-weight:700;color:var(--text-primary);margin:0.75rem 0 0.3rem;cursor:pointer;" onclick="toggleHelpSec('h2',this)"><span class="hch" style="font-size:0.6rem;display:inline-block;transition:transform 0.2s;transform:rotate(90deg);margin-right:0.3rem;">▶</span> 📌 3 CARD TYPES (Lending)</p>
+<div id="h2" style="padding-left:1rem;display:none;">
 Every borrower's loans are grouped into <strong>3 types</strong> of cards:<br><br>
 <strong>1️⃣ Simple Loan</strong> — Interest-only (no EMI). Each non-EMI loan gets its own card.<br>
 &nbsp;&nbsp;→ Shows: Principal, monthly yield, interest received, Bal/Adv<br>
 &nbsp;&nbsp;→ <em>Examples:</em> Rupesh, Inder, Arjun, Sahil<br><br>
 <strong>2️⃣ EMI Only</strong> — Borrower has only EMI loans. Single grouped card.<br>
-&nbsp;&nbsp;→ Shows: Total principal across EMIs, per-EMI sub-lines with progress bars<br>
-&nbsp;&nbsp;→ Header: EMI +₹X/mo · Paid Y/Z<br>
+&nbsp;&nbsp;→ Shows: Total principal across EMIs, per-EMI sub-lines with progress<br>
 &nbsp;&nbsp;→ <em>Examples:</em> M.K.<br><br>
 <strong>3️⃣ Loan + EMI</strong> — BOTH EMI and non-EMI loans. Single grouped card.<br>
 &nbsp;&nbsp;→ Shows: Combined total, non-EMI sub-lines with interest, EMI sub-lines with progress<br>
-&nbsp;&nbsp;→ 📊 Convert to EMI button included<br>
 &nbsp;&nbsp;→ <em>Examples:</em> Chirag, Tushar, Sailesh
 </div>
 </div>
 
 <div>
-<p style="font-weight:700;color:var(--text-primary);margin:0.75rem 0 0.3rem;cursor:pointer;" onclick="toggleHelpSec('h2',this)"><span class="hch" style="font-size:0.6rem;display:inline-block;transition:transform 0.2s;transform:rotate(90deg);margin-right:0.3rem;">▶</span> 📌 ADDING A LOAN</p>
-<div id="h2" style="padding-left:1rem;display:none;">
+<p style="font-weight:700;color:var(--text-primary);margin:0.75rem 0 0.3rem;cursor:pointer;" onclick="toggleHelpSec('h3',this)"><span class="hch" style="font-size:0.6rem;display:inline-block;transition:transform 0.2s;transform:rotate(90deg);margin-right:0.3rem;">▶</span> 📌 ADDING A LOAN</p>
+<div id="h3" style="padding-left:1rem;display:none;">
 ➤ Go to <strong>Lend Money</strong> → <strong>Add Loan</strong><br>
 ➤ Enter: Name, Phone, Principal, Interest Rate (% per month)<br>
 ➤ <strong>0% interest</strong> → Every payment goes to principal (reduces loan).<br>
-➤ Check <strong>"Is EMI?"</strong> for fixed monthly payments (set EMI amount + total count).<br><br>
+➤ Check <strong>"Is EMI?"</strong> for fixed monthly payments (set EMI amount + total count).<br>
+➤ <strong>Borrow More (➕ icon):</strong> Add extra principal to an existing loan — recorded as top-up, outstanding increases.<br><br>
 <em>Example 1:</em> Rupesh ₹1,00,000 @ 2%/mo → earn ₹2,000/month interest, principal untouched<br>
 <em>Example 2:</em> Sahil ₹25,000 @ 0% → every payment reduces ₹25,000<br>
-<em>Example 3:</em> Chirag ₹2,62,500 EMI @ 4% → fixed ₹12,500/month (auto-splits interest + principal)
+<em>Example 3:</em> Chirag ₹2,62,500 EMI @ 4% → fixed ₹12,500/month
 </div>
 </div>
 
 <div>
-<p style="font-weight:700;color:var(--text-primary);margin:0.75rem 0 0.3rem;cursor:pointer;" onclick="toggleHelpSec('h3',this)"><span class="hch" style="font-size:0.6rem;display:inline-block;transition:transform 0.2s;transform:rotate(90deg);margin-right:0.3rem;">▶</span> 📌 THE SUMMARY LINE</p>
-<div id="h3" style="padding-left:1rem;display:none;">
+<p style="font-weight:700;color:var(--text-primary);margin:0.75rem 0 0.3rem;cursor:pointer;" onclick="toggleHelpSec('h4',this)"><span class="hch" style="font-size:0.6rem;display:inline-block;transition:transform 0.2s;transform:rotate(90deg);margin-right:0.3rem;">▶</span> 📌 THE SUMMARY LINE (Card Bottom)</p>
+<div id="h4" style="padding-left:1rem;display:none;">
 Every card shows this at the bottom:<br><br>
 <strong>Exp ₹X · Rcvd ₹Y · Bal ₹Z · Last &lt;date&gt;</strong> — when Rcvd ≤ Exp<br>
 <strong>Exp ₹X · Rcvd ₹Y · Adv ₹Z · Last &lt;date&gt;</strong> — when Rcvd > Exp<br><br>
@@ -828,9 +846,9 @@ Every card shows this at the bottom:<br><br>
 </div>
 
 <div>
-<p style="font-weight:700;color:var(--text-primary);margin:0.75rem 0 0.3rem;cursor:pointer;" onclick="toggleHelpSec('h4',this)"><span class="hch" style="font-size:0.6rem;display:inline-block;transition:transform 0.2s;transform:rotate(90deg);margin-right:0.3rem;">▶</span> 📌 RECEIVING PAYMENTS (Recv)</p>
-<div id="h4" style="padding-left:1rem;display:none;">
-➤ Type amount → press <strong>Recv</strong><br>
+<p style="font-weight:700;color:var(--text-primary);margin:0.75rem 0 0.3rem;cursor:pointer;" onclick="toggleHelpSec('h5',this)"><span class="hch" style="font-size:0.6rem;display:inline-block;transition:transform 0.2s;transform:rotate(90deg);margin-right:0.3rem;">▶</span> 📌 RECEIVING PAYMENTS (Quick Collect)</p>
+<div id="h5" style="padding-left:1rem;display:none;">
+➤ Type amount on any card's quick-pay input → press <strong>Recv</strong> (or <strong>Pay</strong> for borrowed)<br>
 ➤ <strong>Simple Loan (&gt;0%):</strong> Fills monthly interest first. Excess → <strong>Advance</strong> (prepaid).<br>
 ➤ <strong>Simple Loan (0%):</strong> Whole amount → principal (reduces loan).<br>
 ➤ <strong>Grouped (Loan + EMI):</strong> Auto-splits in 3 phases:<br>
@@ -846,11 +864,12 @@ Every card shows this at the bottom:<br><br>
 </div>
 
 <div>
-<p style="font-weight:700;color:var(--text-primary);margin:0.75rem 0 0.3rem;cursor:pointer;" onclick="toggleHelpSec('h5',this)"><span class="hch" style="font-size:0.6rem;display:inline-block;transition:transform 0.2s;transform:rotate(90deg);margin-right:0.3rem;">▶</span> 📌 EMI LOANS</p>
-<div id="h5" style="padding-left:1rem;display:none;">
+<p style="font-weight:700;color:var(--text-primary);margin:0.75rem 0 0.3rem;cursor:pointer;" onclick="toggleHelpSec('h6',this)"><span class="hch" style="font-size:0.6rem;display:inline-block;transition:transform 0.2s;transform:rotate(90deg);margin-right:0.3rem;">▶</span> 📌 EMI LOANS</p>
+<div id="h6" style="padding-left:1rem;display:none;">
 ➤ Fixed monthly payment, auto-splits into interest + principal.<br>
-➤ Tracked with "Paid X/Total" counter + progress bar.<br>
-➤ Interest part = outstanding × rate, Principal part = EMI amount − interest part.<br><br>
+➤ Tracked with "Paid X/Total" counter.<br>
+➤ Interest part = outstanding × rate, Principal part = EMI amount − interest part.<br>
+➤ <strong>Convert to EMI (📊):</strong> Convert any active loan to EMI. Principal amount now <strong>editable</strong> — can partially convert (part stays as regular loan, part becomes EMI).<br><br>
 <em>Example:</em> ₹2,62,500 at 4%, ₹12,500/mo. Outstanding = ₹2,50,000:<br>
 &nbsp;&nbsp;✓ Interest = ₹2,50,000 × 4% = ₹10,000<br>
 &nbsp;&nbsp;✓ Principal = ₹12,500 − ₹10,000 = ₹2,500
@@ -858,8 +877,8 @@ Every card shows this at the bottom:<br><br>
 </div>
 
 <div>
-<p style="font-weight:700;color:var(--text-primary);margin:0.75rem 0 0.3rem;cursor:pointer;" onclick="toggleHelpSec('h6',this)"><span class="hch" style="font-size:0.6rem;display:inline-block;transition:transform 0.2s;transform:rotate(90deg);margin-right:0.3rem;">▶</span> 📌 LEDGER (Click Card)</p>
-<div id="h6" style="padding-left:1rem;display:none;">
+<p style="font-weight:700;color:var(--text-primary);margin:0.75rem 0 0.3rem;cursor:pointer;" onclick="toggleHelpSec('h7',this)"><span class="hch" style="font-size:0.6rem;display:inline-block;transition:transform 0.2s;transform:rotate(90deg);margin-right:0.3rem;">▶</span> 📌 LEDGER (Click Card)</p>
+<div id="h7" style="padding-left:1rem;display:none;">
 ➤ Click anywhere on a lending card → opens <strong>Ledger</strong> for that borrower.<br>
 ➤ Shows full transaction history: interest, principal, top-up payments.<br>
 ➤ Grouped cards show group totals (combined stats for all loans with same name).<br>
@@ -868,59 +887,95 @@ Every card shows this at the bottom:<br><br>
 </div>
 
 <div>
-<p style="font-weight:700;color:var(--text-primary);margin:0.75rem 0 0.3rem;cursor:pointer;" onclick="toggleHelpSec('h7',this)"><span class="hch" style="font-size:0.6rem;display:inline-block;transition:transform 0.2s;transform:rotate(90deg);margin-right:0.3rem;">▶</span> 📌 ICONS ON CARDS</p>
-<div id="h7" style="padding-left:1rem;display:none;">
-<strong>📞💬</strong> Call / WhatsApp &nbsp; <strong>➕</strong> Lend More &nbsp; <strong>➖</strong> Record Principal<br>
-<strong>📊</strong> Convert to EMI (on Simple / Loan+EMI cards) &nbsp; <strong>✏️</strong> Edit &nbsp; <strong>🗑️</strong> Delete<br>
-📋 icon removed — just click the card to open Ledger.
+<p style="font-weight:700;color:var(--text-primary);margin:0.75rem 0 0.3rem;cursor:pointer;" onclick="toggleHelpSec('h8',this)"><span class="hch" style="font-size:0.6rem;display:inline-block;transition:transform 0.2s;transform:rotate(90deg);margin-right:0.3rem;">▶</span> 📌 ICONS ON CARDS</p>
+<div id="h8" style="padding-left:1rem;display:none;">
+<strong>📞💬</strong> Call / WhatsApp &nbsp; <strong>➕</strong> Lend More (add to principal) &nbsp; <strong>➖</strong> Record Principal Repayment<br>
+<strong>📊</strong> Convert to EMI (full or partial) &nbsp; <strong>✏️</strong> Edit &nbsp; <strong>🗑️</strong> Delete<br>
+<strong>📋</strong> Click card body → opens Ledger.
 </div>
 </div>
 
 <div>
-<p style="font-weight:700;color:var(--text-primary);margin:0.75rem 0 0.3rem;cursor:pointer;" onclick="toggleHelpSec('h8',this)"><span class="hch" style="font-size:0.6rem;display:inline-block;transition:transform 0.2s;transform:rotate(90deg);margin-right:0.3rem;">▶</span> 📌 FILTERING</p>
-<div id="h8" style="padding-left:1rem;display:none;">
+<p style="font-weight:700;color:var(--text-primary);margin:0.75rem 0 0.3rem;cursor:pointer;" onclick="toggleHelpSec('h9',this)"><span class="hch" style="font-size:0.6rem;display:inline-block;transition:transform 0.2s;transform:rotate(90deg);margin-right:0.3rem;">▶</span> 📌 FILTERING (Lending)</p>
+<div id="h9" style="padding-left:1rem;display:none;">
 ➤ Click <strong>Lent Loans</strong> stat → shows only Simple Loan cards (non-EMI)<br>
 ➤ Click <strong>EMI</strong> stat → shows only EMI cards (EMI Only + Loan+EMI)<br>
-➤ Click <strong>Total</strong> (or same filter again) → shows everything<br>
-➤ Active filter highlighted with white background.
+➤ Click <strong>Total</strong> (or same filter again) → shows everything
 </div>
 </div>
 
 <div>
-<p style="font-weight:700;color:var(--text-primary);margin:0.75rem 0 0.3rem;cursor:pointer;" onclick="toggleHelpSec('h9',this)"><span class="hch" style="font-size:0.6rem;display:inline-block;transition:transform 0.2s;transform:rotate(90deg);margin-right:0.3rem;">▶</span> 🏠 DASHBOARD</p>
-<div id="h9" style="padding-left:1rem;display:none;">
-Full financial snapshot:<br><br>
-<strong>Stats Header:</strong><br>
-➤ <strong>Lent Outstanding</strong> — Total principal across all lending loans<br>
-➤ <strong>Borrowed</strong> — Total principal across all borrowing loans<br>
-➤ <strong>Interest /mo</strong> — Net spread (lending yield − borrowing cost)<br>
-➤ <strong>Interest Rcvd</strong> — Total interest received lifetime<br>
-➤ <strong>Interest Paid</strong> — Total interest paid lifetime<br>
-➤ <strong>Expenses</strong> — Total expenses this month<br><br>
-<strong>Below stats:</strong><br>
-➤ Recent Transactions (latest payments across all loans)<br>
-➤ Overview Cards with quick-actions<br>
-➤ Upcoming reminders (rent, overdue loans, EMIs)
-</div>
-</div>
-
-<div>
-<p style="font-weight:700;color:var(--text-primary);margin:0.75rem 0 0.3rem;cursor:pointer;" onclick="toggleHelpSec('h10',this)"><span class="hch" style="font-size:0.6rem;display:inline-block;transition:transform 0.2s;transform:rotate(90deg);margin-right:0.3rem;">▶</span> 📋 RECORDS</p>
+<p style="font-weight:700;color:var(--text-primary);margin:0.75rem 0 0.3rem;cursor:pointer;" onclick="toggleHelpSec('h10',this)"><span class="hch" style="font-size:0.6rem;display:inline-block;transition:transform 0.2s;transform:rotate(90deg);margin-right:0.3rem;">▶</span> 📌 RENT MANAGEMENT</p>
 <div id="h10" style="padding-left:1rem;display:none;">
-Tracks non-loan expenses and income:<br><br>
-<strong>Expense Categories:</strong><br>
-➤ <strong>Construction</strong> — Renovation with sub-types (Plumber, Carpenter, Tiles, Painter, etc.)<br>
-➤ <strong>Personal</strong> — Groceries, Dining, Transport, Shopping, Medical<br>
-➤ <strong>Bills</strong> — Electricity, Water, Internet, Phone, Rent<br>
-➤ <strong>Travel</strong> — Flights, Hotels, Fuel, Food<br>
-➤ <strong>Health</strong> — Doctor, Pharmacy, Lab, Hospital<br>
-➤ <strong>Others</strong> — Miscellaneous<br><br>
-<strong>Features:</strong><br>
-➤ Add Record → category, amount, date, note, upload receipt<br>
-➤ Search by note or category<br>
-➤ Edit / Delete via icons<br>
-➤ Month selector filters by month<br><br>
-<em>Example:</em> ₹22,500 "Raghu Painter" Jun 18 → category:construction, laborType:Painter
+➤ <strong>Add Rental:</strong> Records → Rent Agreements → +Add. Enter tenant name, property, monthly rent, security deposit, due day.<br>
+➤ <strong>Mark Rent Paid:</strong> Dashboard → Rent card → click a tenant → check the box or use Quick Collect.<br>
+➤ <strong>Security Adjustment:</strong> Deduct from security deposit when tenant request. Shows "Security Adjusted" badge on the rental card.<br>
+➤ <strong>Quick Mark:</strong> Checkbox on each rental line in detail view marks rent paid instantly.<br>
+➤ <strong>Renewals:</strong> Set renewal date per rental. Shows renewal countdown when ≤ 30 days.<br>
+➤ <strong>Dashboard card:</strong> Shows month's total rent pending. Green = fully collected, Yellow = partial.
+</div>
+</div>
+
+<div>
+<p style="font-weight:700;color:var(--text-primary);margin:0.75rem 0 0.3rem;cursor:pointer;" onclick="toggleHelpSec('h11',this)"><span class="hch" style="font-size:0.6rem;display:inline-block;transition:transform 0.2s;transform:rotate(90deg);margin-right:0.3rem;">▶</span> 📋 RECORDS TAB</p>
+<div id="h11" style="padding-left:1rem;display:none;">
+<strong>Rent Agreements:</strong> Add/edit/view rental contracts. Upload agreement &amp; Aadhaar images.<br>
+<strong>Documents:</strong> Upload files with labels (e.g., property papers, bills).<br>
+<strong>Policies:</strong> Insurance / policy documents with expiry tracking.<br>
+<strong>Construction:</strong> Track project expenses by project name with labor sub-types (Plumber, Carpenter, Tiles, Painter, etc.). Shows ongoing projects on dashboard.<br>
+<strong>Expenses:</strong> Add personal/bill/travel/health expenses with date, note, receipt upload.<br><br>
+<em>Example:</em> ₹22,500 "Raghu Painter" Jun 18 → category:construction, laborType:Painter, project:23/48
+</div>
+</div>
+
+<div>
+<p style="font-weight:700;color:var(--text-primary);margin:0.75rem 0 0.3rem;cursor:pointer;" onclick="toggleHelpSec('h12',this)"><span class="hch" style="font-size:0.6rem;display:inline-block;transition:transform 0.2s;transform:rotate(90deg);margin-right:0.3rem;">▶</span> 📔 DIARY TAB</p>
+<div id="h12" style="padding-left:1rem;display:none;">
+➤ <strong>Monthly Summary:</strong> Opens to current month. Shows all RENT, INTEREST RECEIVED, and INTEREST PAID entries in a simple text diary format.<br>
+➤ <strong>Numbering:</strong> Each entry numbered (1, 2, 3...) like a physical diary.<br>
+➤ <strong>✓ Tick:</strong> Shows after name when fully collected/paid.<br>
+➤ <strong>EMI Progress:</strong> EMI loans show [EMI 3/24] count.<br>
+➤ <strong>Security note:</strong> Rent paid via security shows "(adjusted from security)".<br>
+➤ <strong>Month selector:</strong> Left/right arrows or month grid at top to change months.<br>
+➤ <strong>Month selector ONLY appears in Diary tab</strong> — not on other tabs.<br><br>
+<strong>🔐 Vault (inside Diary):</strong><br>
+➤ Click 🔐 icon in month selector bar → Vault opens.<br>
+➤ Store PAN, Aadhaar, bank accounts, passwords, policy numbers.<br>
+➤ <strong>📋 Copy button</strong> next to each value — one tap copies to clipboard.<br>
+➤ Search bar to filter entries by label or value.<br>
+➤ Categories: ID, Bank, Card, Policy, Other.<br>
+➤ Click 🔐 again to return to diary view.
+</div>
+</div>
+
+<div>
+<p style="font-weight:700;color:var(--text-primary);margin:0.75rem 0 0.3rem;cursor:pointer;" onclick="toggleHelpSec('h13',this)"><span class="hch" style="font-size:0.6rem;display:inline-block;transition:transform 0.2s;transform:rotate(90deg);margin-right:0.3rem;">▶</span> 🔐 APP LOCK (PIN)</p>
+<div id="h13" style="padding-left:1rem;display:none;">
+➤ <strong>Set PIN:</strong> Settings → Security → Set PIN. 4-digit numeric PIN. Hashed (SHA-256), stored locally.<br>
+➤ <strong>Auto-lock:</strong> App locks when you switch apps or screen turns off (visibility change).<br>
+➤ <strong>Numpad:</strong> Clean numeric keypad. Clear and backspace buttons. Wrong PIN shows error.<br>
+➤ <strong>Note:</strong> PIN is local only — no biometric/passkey (WebAuthn unreliable in PWA).
+</div>
+</div>
+
+<div>
+<p style="font-weight:700;color:var(--text-primary);margin:0.75rem 0 0.3rem;cursor:pointer;" onclick="toggleHelpSec('h14',this)"><span class="hch" style="font-size:0.6rem;display:inline-block;transition:transform 0.2s;transform:rotate(90deg);margin-right:0.3rem;">▶</span> 💾 BACKUP &amp; DATA</p>
+<div id="h14" style="padding-left:1rem;display:none;">
+➤ <strong>Export Backup:</strong> Settings → Export Backup. Downloads full data as .json file.<br>
+➤ <strong>Import Backup:</strong> Settings → Import Backup → choose .json file. Restores all data.<br>
+➤ <strong>Reset System:</strong> Settings → Reset System. Clears ALL data (use after exporting).<br>
+➤ <strong>Data is stored in localStorage</strong> only (phone browser). Not synced across devices.<br>
+➤ <strong>Recommendation:</strong> Export backup weekly. Save to Google Drive / laptop / email.
+</div>
+</div>
+
+<div>
+<p style="font-weight:700;color:var(--text-primary);margin:0.75rem 0 0.3rem;cursor:pointer;" onclick="toggleHelpSec('h15',this)"><span class="hch" style="font-size:0.6rem;display:inline-block;transition:transform 0.2s;transform:rotate(90deg);margin-right:0.3rem;">▶</span> 📱 VIEW MODES</p>
+<div id="h15" style="padding-left:1rem;display:none;">
+➤ <strong>Month View</strong> (default) — Shows data for the selected month. Use month selector in Diary tab.<br>
+➤ <strong>Day View</strong> — Tap date to drill down to single day. Shows only that day's transactions.<br>
+➤ <strong>Year View</strong> — Shows full year data. Controlled via year selector.<br>
+➤ Toggle modes via the view selector buttons (desktop sidebar / mobile).
 </div>
 </div>
 
