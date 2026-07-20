@@ -3494,6 +3494,7 @@ function renderRentals() {
         <div style="cursor:pointer;flex:1;" onclick="openTenantDetails('${rental.id}')">
           <div style="font-weight:700; font-size:1rem;">${rental.tenantName}
             <span style="font-size:0.72rem;color:#fff;font-weight:500;margin-left:0.3rem;">${rental.propertyName}</span>
+            ${(rental.securityAdjusted || 0) > 0 ? '<span style="font-size:0.55rem;font-weight:700;color:var(--color-accent);margin-left:0.3rem;padding:0.05rem 0.3rem;border:1px solid var(--color-accent);border-radius:4px;">Security Adjusted</span>' : ''}
             ${rental.status === 'active' ? '' : '<span class="badge badge-muted">Ended</span>'}
           </div>
           ${rental.contactInfo ? `<div style="font-size:0.82rem;color:#fff;margin-top:0.05rem;">${rental.contactInfo}</div>` : ''}
@@ -3530,6 +3531,7 @@ function renderRentals() {
           }
           ${rental.aadhaarImg ? `<span onclick="viewDocumentImage('${rental.id}', 'aadhaar')" title="Aadhaar">🪪</span>` : ''}
           ${rental.agreementImg ? `<span onclick="viewDocumentImage('${rental.id}', 'agreement')" title="Agreement">📄</span>` : ''}
+          <span onclick="deductFromSecurity('${rental.id}')" title="Deduct from Security">🔐</span>
         </div>
         <div class="icon-strip-right">
           <span onclick="editRental('${rental.id}')" title="Edit">✏️</span>
@@ -4312,6 +4314,20 @@ function deleteRental(id) {
   state.rentals = state.rentals.filter(r => r.id !== id);
   // Clean rent payments
   state.rentPayments = state.rentPayments.filter(rp => rp.rentalId !== id);
+  saveState();
+  renderRentals();
+}
+
+function deductFromSecurity(id) {
+  var amount = prompt('Enter amount to deduct from security deposit:');
+  if (!amount || isNaN(amount) || Number(amount) <= 0) return;
+  loadState();
+  var rental = state.rentals.find(function(r) { return r.id === id; });
+  if (!rental) return;
+  var deduct = Number(amount);
+  if (deduct > rental.securityDeposit) { alert('Amount exceeds security deposit!'); return; }
+  rental.securityDeposit -= deduct;
+  rental.securityAdjusted = (rental.securityAdjusted || 0) + deduct;
   saveState();
   renderRentals();
 }
