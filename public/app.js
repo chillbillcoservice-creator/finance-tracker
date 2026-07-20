@@ -111,16 +111,19 @@ function renderVault() {
   }
   var cats = { ID: [], Bank: [], Card: [], Policy: [], Other: [] };
   filtered.forEach(function(e) { var c = e.category || 'Other'; if (!cats[c]) cats[c] = []; cats[c].push(e); });
+  var hl = function(t) { return searchTerm ? t.replace(new RegExp('(' + searchTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'gi'), '<span style="background:rgba(251,191,36,0.25);color:var(--color-warning);font-weight:700;border-radius:2px;padding:0 1px;">$1</span>') : t; };
   var html = '';
   Object.keys(cats).forEach(function(cat) {
     if (cats[cat].length === 0) return;
     html += '<div style="font-weight:700;margin-top:0.5rem;color:var(--text-secondary);font-size:0.75rem;text-transform:uppercase;letter-spacing:0.5px;">' + cat + '</div>';
     cats[cat].forEach(function(e) {
+      var escapedLabel = escapeHtml(e.label);
+      var escapedValue = escapeHtml(e.value);
       html += '<div style="display:flex;align-items:center;gap:0.15rem;padding:0.3rem 0;border-bottom:1px solid var(--border-color);">';
       html += '<div style="flex:1;min-width:0;">';
-      html += '<div style="font-weight:600;font-size:0.78rem;">' + escapeHtml(e.label) + '</div>';
+      html += '<div style="font-weight:600;font-size:0.78rem;">' + hl(escapedLabel) + '</div>';
       html += '<div style="display:flex;align-items:center;gap:0.1rem;font-size:0.9rem;color:var(--text-primary);word-break:break-all;">';
-      html += '<span>' + escapeHtml(e.value) + '</span>';
+      html += '<span>' + hl(escapedValue) + '</span>';
       html += '<button onclick="copyVaultEntry(\'' + e.id + '\')" data-copy="' + e.id + '" style="background:none;border:none;cursor:pointer;font-size:1.3rem;padding:0;color:var(--color-accent);line-height:1;" title="Copy">📋</button>';
       html += '</div>';
       html += '</div>';
