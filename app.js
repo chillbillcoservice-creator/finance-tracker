@@ -1388,7 +1388,15 @@ function quickGroupPayment(safeId, direction) {
 
     if (cycleNowPaid) {
       isAdvance = true;
-      // Advance: smallest EMI first, full EMI taken if possible, partial allowed
+      // Advance: pay next month's interest first
+      for (var i = 0; i < interestLoans.length; i++) {
+        if (remaining <= 0) break;
+        var item = interestLoans[i];
+        var take = Math.min(item.yieldAmt, remaining);
+        payments.push({ loanId: item.loan.id, amount: take, category: 'interest', isAdvance: true });
+        remaining -= take;
+      }
+      // Then advance EMIs smallest first
       for (var i = 0; i < emiLoans.length; i++) {
         if (remaining <= 0) break;
         var item = emiLoans[i];
@@ -1403,7 +1411,7 @@ function quickGroupPayment(safeId, direction) {
   if (payments.length === 0) { alert('No eligible loan for this amount.'); return; }
   for (var i = 0; i < payments.length; i++) {
     var p = payments[i];
-    var note = p.category === 'interest' ? 'Interest received' : (p.isPartial ? 'Principal repayment [Partial]' : (p.isAdvance ? 'Principal repayment [Advance]' : 'Principal repayment'));
+    var note = p.category === 'interest' ? (p.isAdvance ? 'Interest received [Advance]' : 'Interest received') : (p.isPartial ? 'Principal repayment [Partial]' : (p.isAdvance ? 'Principal repayment [Advance]' : 'Principal repayment'));
     state.interestPayments.push({
       id: 'p' + Math.random().toString(36).substr(2, 9),
       loanId: p.loanId,
@@ -3028,11 +3036,12 @@ function renderLending() {
     const partialEmiTotal = loan.isEMI ? partialEmiPayments.reduce((s, p) => s + Number(p.amount), 0) : 0;
     const advanceEdis = principalPayments.filter(p => p.note && p.note.indexOf('[Advance]') !== -1);
     const advanceEmiCount = loan.isEMI ? advanceEdis.length : 0;
+    const advInterest = hasAdvance ? interestPayments.filter(function(p) { return p.category === 'interest' && p.note && p.note.indexOf('[Advance]') !== -1; }).reduce(function(s, p) { return s + Number(p.amount); }, 0) : 0;
 
     loan._stats = {
       outstandingPrincipal, totalReceived, totalRepaid, monthlyYield, currentMonthSum, currentMonthInterestSum,
       isInterestFullyPaidThisMonth, statusInMonth, lastPaymentDate, hasAdvance, advTotal,
-      emiTotalCount, emiPaidCount, partialEmiTotal, advanceEmiCount
+      emiTotalCount, emiPaidCount, partialEmiTotal, advanceEmiCount, advInterest
     };
   });
 
@@ -3199,6 +3208,9 @@ function renderLending() {
             } else {
               intDisplay = ' <span style="color:var(--text-secondary);">· Rcvd ' + formatCurrency(stats.currentMonthInterestSum) + '</span>';
             }
+          }
+          if (stats.advInterest > 0) {
+            intDisplay += ' <span style="color:var(--color-purple);font-weight:600;">· Adv Int Rcvd</span>';
           }
           card.innerHTML += '<div style="font-size:0.82rem;"><span style="font-weight:600;">' + formattedPrincipal + '</span> <span style="color:var(--text-secondary);">+' + formatCurrency(stats.monthlyYield) + '/mo</span>' + intDisplay + (advTotal ? ' <span style="font-size:0.6rem;color:var(--color-purple);font-weight:700;">Advance ' + advTotal + '</span>' : '') + '</div>';
         }
