@@ -119,14 +119,12 @@ function renderVault() {
     cats[cat].forEach(function(e) {
       var escapedLabel = escapeHtml(e.label);
       var escapedValue = escapeHtml(e.value);
-      html += '<div style="display:flex;align-items:center;gap:0.15rem;padding:0.3rem 0;border-bottom:1px solid var(--border-color);">';
-      html += '<div style="flex:1;min-width:0;">';
+      html += '<div style="display:flex;align-items:center;padding:0.3rem 0;border-bottom:1px solid var(--border-color);">';
+      html += '<div style="flex:0 1 70%;min-width:0;">';
       html += '<div style="font-weight:600;font-size:0.78rem;">' + hl(escapedLabel) + '</div>';
-      html += '<div style="display:flex;align-items:center;gap:0.1rem;font-size:0.9rem;color:var(--text-primary);word-break:break-all;">';
-      html += '<span>' + hl(escapedValue) + '</span>';
-      html += '<button onclick="copyVaultEntry(\'' + e.id + '\')" data-copy="' + e.id + '" style="background:none;border:none;cursor:pointer;font-size:1.3rem;padding:0;color:var(--color-accent);line-height:1;" title="Copy">📋</button>';
+      html += '<div style="font-size:0.9rem;color:var(--text-primary);word-break:break-all;">' + hl(escapedValue) + '</div>';
       html += '</div>';
-      html += '</div>';
+      html += '<button onclick="copyVaultEntry(\'' + e.id + '\')" data-copy="' + e.id + '" style="background:none;border:none;cursor:pointer;font-size:1.3rem;padding:0;color:var(--color-accent);line-height:1;margin:0 auto;" title="Copy">📋</button>';
       html += '<button onclick="deleteVaultEntry(\'' + e.id + '\')" style="background:none;border:none;cursor:pointer;font-size:1rem;padding:0.1rem;color:var(--color-danger);flex-shrink:0;" title="Delete">✕</button>';
       html += '</div>';
     });
