@@ -97,15 +97,20 @@ function toggleVaultView() {
 function renderVault() {
   loadState();
   state.vault = state.vault || [];
+  var searchTerm = (document.getElementById('vault-search').value || '').toLowerCase().trim();
   document.getElementById('diary-content').style.display = 'none';
   document.getElementById('vault-content').style.display = 'block';
   var list = document.getElementById('vault-list');
-  if (state.vault.length === 0) {
-    list.innerHTML = '<div style="padding:0.5rem 0;opacity:0.6;">(empty — tap +Add to save credentials)</div>';
+  var filtered = state.vault.filter(function(e) {
+    if (!searchTerm) return true;
+    return e.label.toLowerCase().includes(searchTerm) || e.value.toLowerCase().includes(searchTerm);
+  });
+  if (filtered.length === 0) {
+    list.innerHTML = searchTerm ? '<div style="padding:0.5rem 0;opacity:0.6;">No matches found</div>' : '<div style="padding:0.5rem 0;opacity:0.6;">(empty — tap +Add to save credentials)</div>';
     return;
   }
   var cats = { ID: [], Bank: [], Card: [], Policy: [], Other: [] };
-  state.vault.forEach(function(e) { var c = e.category || 'Other'; if (!cats[c]) cats[c] = []; cats[c].push(e); });
+  filtered.forEach(function(e) { var c = e.category || 'Other'; if (!cats[c]) cats[c] = []; cats[c].push(e); });
   var html = '';
   Object.keys(cats).forEach(function(cat) {
     if (cats[cat].length === 0) return;
