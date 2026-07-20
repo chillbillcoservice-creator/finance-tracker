@@ -1010,13 +1010,13 @@ function submitQuickLend(event) {
         note: 'Lend More (Top-up)'
       });
 
-      if (rate > 0) {
+      if (Number(existingLoan.interestRate) > 0) {
         state.interestPayments.push({
           id: 'p_' + Math.random().toString(36).substr(2, 9),
           loanId: existingLoan.id,
           type: 'received',
           category: 'interest',
-          amount: principal * (rate / 100),
+          amount: principal * (Number(existingLoan.interestRate) / 100),
           date: startDate || new Date().toISOString().split('T')[0],
           note: 'Interest (top-up month)'
         });
@@ -1316,6 +1316,7 @@ function quickGroupPayment(safeId, direction) {
   var currentMonth = today.slice(0, 7);
   var type = direction === 'lent' ? 'received' : 'paid';
 
+  // Collect EMI and interest loans with their cycle amounts
   var emiLoans = [], interestLoans = [];
   for (var i = 0; i < groupLoans.length; i++) {
     var loan = groupLoans[i];
@@ -1330,12 +1331,15 @@ function quickGroupPayment(safeId, direction) {
     }
   }
 
+  // Sort EMIs by amount ascending (smallest first)
   emiLoans.sort(function(a, b) { return a.emiAmt - b.emiAmt; });
 
+  // Helper: how much of this loan's category has been paid in a given month
   function paidInMonth(loanId, cat, month) {
     return state.interestPayments.filter(function(p) { return p.loanId === loanId && p.type === type && p.category === cat && p.date && p.date.startsWith(month); }).reduce(function(s, p) { return s + Number(p.amount); }, 0);
   }
 
+  // Check if current month's full cycle (interest + all EMIs) is already fully paid
   var currentCyclePaid = true;
   for (var i = 0; i < interestLoans.length; i++) {
     if (paidInMonth(interestLoans[i].loan.id, 'interest', currentMonth) < interestLoans[i].yieldAmt - 0.01) { currentCyclePaid = false; break; }
@@ -1348,6 +1352,7 @@ function quickGroupPayment(safeId, direction) {
 
   var payments = [], isAdvance = false;
 
+  // Phase A: Pay current month's interest (if not fully paid yet)
   if (!currentCyclePaid) {
     for (var i = 0; i < interestLoans.length; i++) {
       if (remaining <= 0) break;
@@ -1359,6 +1364,7 @@ function quickGroupPayment(safeId, direction) {
       remaining -= take;
     }
 
+    // Pay current month's EMIs (smallest first, allow partial)
     for (var i = 0; i < emiLoans.length; i++) {
       if (remaining <= 0) break;
       var item = emiLoans[i];
@@ -1371,7 +1377,9 @@ function quickGroupPayment(safeId, direction) {
     }
   }
 
+  // Phase B: If current month fully paid (or now fully paid), remaining is advance for next month
   if (remaining > 0) {
+    // Recheck if current month cycle is now fully covered
     var cycleNowPaid = true;
     for (var i = 0; i < interestLoans.length; i++) {
       if (paidInMonth(interestLoans[i].loan.id, 'interest', currentMonth) + payments.filter(function(p) { return p.loanId === interestLoans[i].loan.id && p.category === 'interest'; }).reduce(function(s, p) { return s + Number(p.amount); }, 0) < interestLoans[i].yieldAmt - 0.01) { cycleNowPaid = false; break; }
@@ -1384,6 +1392,7 @@ function quickGroupPayment(safeId, direction) {
 
     if (cycleNowPaid) {
       isAdvance = true;
+      // Advance: pay next month's interest first
       for (var i = 0; i < interestLoans.length; i++) {
         if (remaining <= 0) break;
         var item = interestLoans[i];
@@ -1391,6 +1400,7 @@ function quickGroupPayment(safeId, direction) {
         payments.push({ loanId: item.loan.id, amount: take, category: 'interest', isAdvance: true });
         remaining -= take;
       }
+      // Then advance EMIs smallest first
       for (var i = 0; i < emiLoans.length; i++) {
         if (remaining <= 0) break;
         var item = emiLoans[i];
@@ -1693,8 +1703,102 @@ function renderRecords() {
 
 const VIEWS = {
   dashboard: { title: 'Status', subtitle: 'Your aggregated financial overview at a glance.', render: renderDashboard },
-  records: { title: 'Records', subtitle: 'Rent Agreements, documents, construction, and settings.', render: renderRecords }
+  records: { title: 'Records', subtitle: 'Rent Agreements, documents, construction, and settings.', render: renderRecords },
+  diary: { title: 'Diary', subtitle: '', render: renderDiary }
 };
+
+function renderDiary() {
+  loadState();
+  const monthStr = selectedMonthStr;
+  const [yr, mo] = monthStr.split('-').map(Number);
+  const monthName = new Date(yr, mo - 1).toLocaleDateString('en-US', { month: 'long' });
+  let lines = [];
+  lines.push('');
+  lines.push('  ' + monthName + ' ' + yr);
+  lines.push('  ' + String('-').repeat(28));
+  
+  // ── RENT ──
+  lines.push('');
+  lines.push('  RENT');
+  lines.push('  ' + String('-').repeat(28));
+  state.rentals.forEach(function(r) {
+    if (r.startDate <= monthStr + '-31' && r.status === 'active') {
+      var collected = 0;
+      state.rentPayments.forEach(function(p) {
+        if (p.rentalId === r.id && p.monthYear === monthStr) collected += Number(p.amount);
+      });
+      var due = Number(r.monthlyRent);
+      var mark = collected >= due ? ' ✓' : '   ';
+      lines.push('  ' + mark + ' ' + r.tenantName);
+      lines.push('      ' + formatCurrency(collected) + ' / ' + formatCurrency(due));
+    }
+  });
+  
+  // ── INTEREST RECEIVED ──
+  lines.push('');
+  lines.push('  INTEREST RECEIVED');
+  lines.push('  ' + String('-').repeat(28));
+  state.lent.forEach(function(l) {
+    if (l.startDate <= monthStr + '-31') {
+      var collected = 0;
+      state.interestPayments.forEach(function(p) {
+        if (p.loanId === l.id && p.type === 'received' && p.date.startsWith(monthStr)) collected += Number(p.amount);
+      });
+      var outstanding = getOutstandingPrincipalAtMonth(l.id, l.principal, monthStr);
+      if (outstanding > 0 || collected > 0) {
+        var expected = l.isEMI ? Number(l.emiAmount || 0) : outstanding * (Number(l.interestRate) / 100);
+        var mark = collected >= expected ? ' ✓' : '   ';
+        lines.push('  ' + mark + ' ' + l.borrowerName);
+        lines.push('      ' + formatCurrency(collected) + ' / ' + formatCurrency(expected));
+      }
+    }
+  });
+  
+  // ── INTEREST PAID (Borrowed) ──
+  lines.push('');
+  lines.push('  INTEREST PAID');
+  lines.push('  ' + String('-').repeat(28));
+  state.borrowed.forEach(function(b) {
+    if (b.startDate <= monthStr + '-31') {
+      var paid = 0;
+      state.interestPayments.forEach(function(p) {
+        if (p.loanId === b.id && p.type === 'paid' && p.date.startsWith(monthStr)) paid += Number(p.amount);
+      });
+      var outstanding = getOutstandingPrincipalAtMonth(b.id, b.principal, monthStr);
+      if (outstanding > 0 || paid > 0) {
+        var expected = b.isEMI ? Number(b.emiAmount || 0) : outstanding * (Number(b.interestRate) / 100);
+        var mark = paid >= expected ? ' ✓' : '   ';
+        lines.push('  ' + mark + ' ' + b.borrowerName);
+        lines.push('      ' + formatCurrency(paid) + ' / ' + formatCurrency(expected));
+      }
+    }
+  });
+  
+  // ── SUMMARY ──
+  var totalExpected = 0;
+  var totalCollected = 0;
+  state.rentals.forEach(function(r) {
+    if (r.startDate <= monthStr + '-31' && r.status === 'active') {
+      totalExpected += Number(r.monthlyRent);
+    }
+  });
+  state.lent.forEach(function(l) {
+    if (l.startDate <= monthStr + '-31') {
+      var o = getOutstandingPrincipalAtMonth(l.id, l.principal, monthStr);
+      if (o > 0) totalExpected += l.isEMI ? Number(l.emiAmount || 0) : o * (Number(l.interestRate) / 100);
+    }
+  });
+  state.rentPayments.filter(function(p) { return p.monthYear === monthStr; }).forEach(function(p) { totalCollected += Number(p.amount); });
+  state.interestPayments.filter(function(p) { return p.type === 'received' && p.date.startsWith(monthStr); }).forEach(function(p) { totalCollected += Number(p.amount); });
+  
+  lines.push('');
+  lines.push('  ' + String('-').repeat(28));
+  lines.push('  Collected: ' + formatCurrency(totalCollected));
+  lines.push('  Expected:  ' + formatCurrency(totalExpected));
+  lines.push('  Pending:   ' + formatCurrency(Math.max(0, totalExpected - totalCollected)));
+  
+  document.getElementById('diary-content').textContent = lines.join('\n');
+}
 
 function selectRecordsTab(event, tab, projectName) {
   if (typeof event === 'string' || event == null) {
@@ -1765,10 +1869,17 @@ function switchTab(tabId) {
     viewContent.classList.add('active');
   }
 
-  // Show/hide inline calendar based on tab
+  // Show/hide inline calendar and month selector based on tab
   var inlineCal = document.getElementById('inline-calendar');
   if (inlineCal) {
     inlineCal.style.display = tabId === 'dashboard' ? 'block' : 'none';
+  }
+  var monthBar = document.getElementById('month-selector-bar');
+  var yearBar = document.getElementById('year-selector-bar');
+  if (tabId === 'diary') {
+    if (viewMode === 'month') { if (monthBar) monthBar.style.display = 'block'; if (yearBar) yearBar.style.display = 'none'; }
+    else if (viewMode === 'year') { if (monthBar) monthBar.style.display = 'none'; if (yearBar) yearBar.style.display = 'block'; }
+    else { if (monthBar) monthBar.style.display = 'none'; if (yearBar) yearBar.style.display = 'none'; }
   }
 
   // Toggle header elements per tab
@@ -3197,20 +3308,20 @@ function renderLending() {
           card.innerHTML += '<div style="font-size:0.82rem;"><span style="font-weight:600;">' + formattedPrincipal + '</span> <span style="color:var(--color-purple);font-weight:600;">EMI</span> <span style="color:var(--text-secondary);">@ ' + formatCurrency(Number(loan.emiAmount)) + '/mo </span><span style="color:' + (stats.advanceEmiCount > 0 ? 'var(--color-purple)' : 'var(--text-secondary)') + ';">· Paid ' + stats.emiPaidCount + '/' + stats.emiTotalCount + '</span>' + (stats.partialEmiTotal > 0 ? ' <span style="color:var(--color-purple);font-size:0.65rem;font-weight:600;">Partial ' + formatCurrency(stats.partialEmiTotal) + '</span>' : '') + '</div>';
           var emiPct = stats.emiTotalCount > 0 ? Math.round(stats.emiPaidCount / stats.emiTotalCount * 100) : 0;
           card.innerHTML += '<div style="width:100%;height:3px;background:var(--bg-tertiary);border-radius:2px;margin:0.15rem 0 0.2rem;"><div style="width:' + Math.min(emiPct,100) + '%;height:3px;background:var(--color-purple);border-radius:2px;"></div></div>';
-          } else {
-            const advTotal = stats.advTotal > 0 ? formatCurrency(stats.advTotal) : '';
-            var intDisplay = '';
-            if (stats.monthlyYield > 0 && stats.currentMonthInterestSum > 0) {
-              if (stats.currentMonthInterestSum >= stats.monthlyYield - 0.01) {
-                intDisplay = ' <span style="color:var(--color-success);font-weight:600;">· Int Rcvd ✅</span>';
-              } else {
-                intDisplay = ' <span style="color:var(--text-secondary);">· Rcvd ' + formatCurrency(stats.currentMonthInterestSum) + '</span>';
-              }
+        } else {
+          const advTotal = stats.advTotal > 0 ? formatCurrency(stats.advTotal) : '';
+          var intDisplay = '';
+          if (stats.monthlyYield > 0 && stats.currentMonthInterestSum > 0) {
+            if (stats.currentMonthInterestSum >= stats.monthlyYield - 0.01) {
+              intDisplay = ' <span style="color:var(--color-success);font-weight:600;">· Int Rcvd ✅</span>';
+            } else {
+              intDisplay = ' <span style="color:var(--text-secondary);">· Rcvd ' + formatCurrency(stats.currentMonthInterestSum) + '</span>';
             }
-            if (stats.advInterest > 0) {
-              intDisplay += ' <span style="color:var(--color-purple);font-weight:600;">· Adv Int Rcvd ' + formatCurrency(stats.advInterest) + '</span>';
-            }
-            card.innerHTML += '<div style="font-size:0.82rem;"><span style="font-weight:600;">' + formattedPrincipal + '</span> <span style="color:var(--text-secondary);">+' + formatCurrency(stats.monthlyYield) + '/mo</span>' + intDisplay + (advTotal && stats.advInterest <= 0 ? ' <span style="font-size:0.6rem;color:var(--color-purple);font-weight:700;">Advance ' + advTotal + '</span>' : '') + '</div>';
+          }
+          if (stats.advInterest > 0) {
+            intDisplay += ' <span style="color:var(--color-purple);font-weight:600;">· Adv Int Rcvd ' + formatCurrency(stats.advInterest) + '</span>';
+          }
+          card.innerHTML += '<div style="font-size:0.82rem;"><span style="font-weight:600;">' + formattedPrincipal + '</span> <span style="color:var(--text-secondary);">+' + formatCurrency(stats.monthlyYield) + '/mo</span>' + intDisplay + (advTotal && stats.advInterest <= 0 ? ' <span style="font-size:0.6rem;color:var(--color-purple);font-weight:700;">Advance ' + advTotal + '</span>' : '') + '</div>';
         }
       });
 
@@ -3801,7 +3912,7 @@ document.getElementById('form-emi-convert').addEventListener('submit', (e) => {
     loan.tenureMonths = tenure;
     loan.emiAmount = emi;
   } else {
-    // Partial conversion
+    // Partial conversion — record principal repayment to reduce outstanding
     var today = new Date().toISOString().split('T')[0];
     state.interestPayments.push({
       id: 'p' + Math.random().toString(36).substr(2, 9),
@@ -3812,6 +3923,7 @@ document.getElementById('form-emi-convert').addEventListener('submit', (e) => {
       date: today,
       note: 'Principal repayment (Converted to EMI)'
     });
+    // Create a new EMI loan for the converted amount
     var newLoan = {
       id: loanId + '_emi_' + Math.random().toString(36).substr(2, 4),
       borrowerName: loan.borrowerName,
@@ -4580,7 +4692,7 @@ window.loadRealSeedData = function() {
     {id:'r5',propertyName:'23/48 3rd floor',tenantName:'Nilesh',contactInfo:'9873805638',monthlyRent:10000,securityDeposit:10000,startDate:'2025-08-24',rentDueDay:8,aadhaarImg:'',agreementImg:'',status:'active'},
     {id:'r6',propertyName:'23/48 ground floor',tenantName:'Aniket',contactInfo:'7304195700',monthlyRent:18500,securityDeposit:18500,startDate:'2025-08-24',rentDueDay:3,aadhaarImg:'',agreementImg:'',status:'active'},
     {id:'r7',propertyName:'23/48 ground floor',tenantName:'Dikshant',contactInfo:'6283007016',monthlyRent:13000,securityDeposit:13000,startDate:'2025-08-24',rentDueDay:5,aadhaarImg:'',agreementImg:'',status:'active'},
-      {id:'r8',propertyName:'23/48 ground floor',tenantName:'Anandpal',contactInfo:'9115765900',monthlyRent:15000,securityDeposit:0,startDate:'2025-08-24',rentDueDay:5,aadhaarImg:'',agreementImg:'',status:'active',securityAdjusted:15000},
+    {id:'r8',propertyName:'23/48 ground floor',tenantName:'Anandpal',contactInfo:'9115765900',monthlyRent:15000,securityDeposit:15000,startDate:'2025-08-24',rentDueDay:5,aadhaarImg:'',agreementImg:'',status:'active'},
     {id:'r9',propertyName:'1/104',tenantName:'Aryan',contactInfo:'9076923358',monthlyRent:35000,securityDeposit:35000,startDate:'2026-07-05',rentDueDay:5,aadhaarImg:'',agreementImg:'',status:'active'}
   ];
   var months = [];
@@ -5547,6 +5659,8 @@ function compressImage(file, maxDimension, quality, callback) {
 
 function initApp() {
   loadState();
+
+  // Seed data (always runs, regardless of lock)
   if (!state._realDataSeeded) {
     state.properties = ['23/48 ground floor', '23/48 3rd floor', '1/104'];
     state.rentals = [
@@ -7980,6 +8094,7 @@ function handlePinDigit(digit) {
   updatePinDots();
   if (_pinEntered.length === 4) {
     if (_pinMode === 'set') {
+      // First time: save PIN, then enter app
       sha256(_pinEntered).then(function(hash) {
         localStorage.setItem('app_pin', hash);
         _pinEntered = '';
@@ -7990,6 +8105,7 @@ function handlePinDigit(digit) {
         requestNotifPermission();
       });
     } else {
+      // Unlock mode: verify PIN
       sha256(_pinEntered).then(function(hash) {
         if (hash === localStorage.getItem('app_pin')) {
           _pinEntered = '';
@@ -8026,6 +8142,7 @@ function initLockScreenListeners() {
       showLockScreen();
     }
   });
+  // Auto-lock on page show (back from another app)
   window.addEventListener('pageshow', function(e) {
     if (e.persisted && localStorage.getItem('app_pin')) {
       showLockScreen();
