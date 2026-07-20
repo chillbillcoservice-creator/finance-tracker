@@ -1724,13 +1724,18 @@ function renderDiary() {
   state.rentals.forEach(function(r) {
     if (r.startDate <= monthStr + '-31' && r.status === 'active') {
       var collected = 0;
+      var secAdj = Number(r.securityAdjusted || 0);
       state.rentPayments.forEach(function(p) {
         if (p.rentalId === r.id && p.monthYear === monthStr) collected += Number(p.amount);
       });
       var due = Number(r.monthlyRent);
+      var pending = Math.max(0, due - collected);
       var mark = collected >= due ? ' ✓' : '   ';
-      lines.push('  ' + mark + ' ' + r.tenantName);
-      lines.push('      ' + formatCurrency(collected) + ' / ' + formatCurrency(due));
+      var extra = '';
+      if (secAdj > 0 && collected >= due) extra += '  (adjusted from security)';
+      lines.push('  ' + mark + ' ' + r.tenantName + extra);
+      if (pending > 0) lines.push('      Due: ' + formatCurrency(pending));
+      else lines.push('      ' + formatCurrency(collected) + ' / ' + formatCurrency(due));
     }
   });
   
