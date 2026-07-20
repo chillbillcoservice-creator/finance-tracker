@@ -83,11 +83,13 @@ function toggleVaultView() {
     diaryView = 'diary';
     document.getElementById('btn-vault-toggle').textContent = '🔐';
     document.getElementById('month-grid').style.display = '';
+    document.getElementById('month-selector-bar').style.display = viewMode === 'month' ? 'block' : 'none';
     renderDiary();
   } else {
     diaryView = 'vault';
     document.getElementById('btn-vault-toggle').textContent = '📋';
-    document.getElementById('month-grid').style.display = 'none';
+    document.getElementById('month-selector-bar').style.display = 'none';
+    document.getElementById('year-selector-bar').style.display = 'none';
     renderVault();
   }
 }
@@ -109,13 +111,15 @@ function renderVault() {
     if (cats[cat].length === 0) return;
     html += '<div style="font-weight:700;margin-top:0.5rem;color:var(--text-secondary);font-size:0.75rem;text-transform:uppercase;letter-spacing:0.5px;">' + cat + '</div>';
     cats[cat].forEach(function(e) {
-      html += '<div style="display:flex;align-items:flex-start;gap:0.3rem;padding:0.3rem 0;border-bottom:1px solid var(--border-color);">';
+      html += '<div style="display:flex;align-items:center;gap:0.15rem;padding:0.3rem 0;border-bottom:1px solid var(--border-color);">';
       html += '<div style="flex:1;min-width:0;">';
       html += '<div style="font-weight:600;font-size:0.78rem;">' + escapeHtml(e.label) + '</div>';
-      html += '<div style="font-size:0.85rem;color:var(--text-primary);word-break:break-all;">' + escapeHtml(e.value) + '</div>';
+      html += '<div style="display:flex;align-items:center;gap:0.1rem;font-size:0.9rem;color:var(--text-primary);word-break:break-all;">';
+      html += '<span>' + escapeHtml(e.value) + '</span>';
+      html += '<button onclick="copyVaultEntry(\'' + e.id + '\')" data-copy="' + e.id + '" style="background:none;border:none;cursor:pointer;font-size:1.3rem;padding:0;color:var(--color-accent);line-height:1;" title="Copy">📋</button>';
       html += '</div>';
-      html += '<button onclick="copyVaultEntry(\'' + e.id + '\')" data-copy="' + e.id + '" style="background:none;border:none;cursor:pointer;font-size:1rem;padding:0.2rem;color:var(--text-secondary);flex-shrink:0;" title="Copy">📋</button>';
-      html += '<button onclick="deleteVaultEntry(\'' + e.id + '\')" style="background:none;border:none;cursor:pointer;font-size:0.9rem;padding:0.2rem;color:var(--color-danger);flex-shrink:0;" title="Delete">✕</button>';
+      html += '</div>';
+      html += '<button onclick="deleteVaultEntry(\'' + e.id + '\')" style="background:none;border:none;cursor:pointer;font-size:1rem;padding:0.1rem;color:var(--color-danger);flex-shrink:0;" title="Delete">✕</button>';
       html += '</div>';
     });
   });
