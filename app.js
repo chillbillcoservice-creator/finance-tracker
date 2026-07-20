@@ -5570,7 +5570,6 @@ function initApp() {
   // PIN check — if set, show lock screen and delay UI init
   if (localStorage.getItem('app_pin')) {
     showLockScreen();
-    initLockScreenListeners();
     updateSettingsSecurityUI();
     return;
   }
@@ -7895,7 +7894,6 @@ function showSetPinScreen() {
   updatePinDots();
   document.getElementById('lock-title').textContent = 'Set your 4-digit PIN';
   document.getElementById('lock-error').textContent = '';
-  document.getElementById('lock-biometric-area').style.display = 'none';
   document.getElementById('lock-screen').style.display = 'flex';
   ensureLockListeners();
 }

@@ -1737,30 +1737,30 @@ window.addEventListener('pageshow', forcePortrait);
 
 <!-- Lock Screen Overlay -->
 <div id="lock-screen" style="display:none;position:fixed;inset:0;z-index:999998;background:var(--bg-primary,#0f172a);flex-direction:column;align-items:center;justify-content:center;padding:2rem;">
-  <div style="text-align:center;width:100%;max-width:320px;">
+  <div style="text-align:center;width:100%;max-width:360px;">
     <div style="font-size:2rem;font-weight:800;color:var(--color-accent,#0ea5e9);margin-bottom:0.25rem;">CapitalFlow</div>
     <div style="font-size:0.8rem;color:var(--text-secondary,#94a3b8);margin-bottom:2rem;">Personal Finance Tracker</div>
-    <div id="lock-title" style="font-size:1rem;font-weight:700;color:var(--text-primary,#f1f5f9);margin-bottom:1.5rem;">Enter PIN</div>
-    <div style="display:flex;gap:0.75rem;justify-content:center;margin-bottom:2rem;">
-      <div class="pin-dot" id="pin-0" style="width:16px;height:16px;border-radius:50%;border:2px solid var(--text-secondary,#94a3b8);background:transparent;"></div>
-      <div class="pin-dot" id="pin-1" style="width:16px;height:16px;border-radius:50%;border:2px solid var(--text-secondary,#94a3b8);background:transparent;"></div>
-      <div class="pin-dot" id="pin-2" style="width:16px;height:16px;border-radius:50%;border:2px solid var(--text-secondary,#94a3b8);background:transparent;"></div>
-      <div class="pin-dot" id="pin-3" style="width:16px;height:16px;border-radius:50%;border:2px solid var(--text-secondary,#94a3b8);background:transparent;"></div>
+    <div id="lock-title" style="font-size:1.1rem;font-weight:700;color:var(--text-primary,#f1f5f9);margin-bottom:1.5rem;">Enter PIN</div>
+    <div style="display:flex;gap:1rem;justify-content:center;margin-bottom:2rem;">
+      <div class="pin-dot" id="pin-0" style="width:20px;height:20px;border-radius:50%;border:3px solid var(--text-secondary,#94a3b8);background:transparent;"></div>
+      <div class="pin-dot" id="pin-1" style="width:20px;height:20px;border-radius:50%;border:3px solid var(--text-secondary,#94a3b8);background:transparent;"></div>
+      <div class="pin-dot" id="pin-2" style="width:20px;height:20px;border-radius:50%;border:3px solid var(--text-secondary,#94a3b8);background:transparent;"></div>
+      <div class="pin-dot" id="pin-3" style="width:20px;height:20px;border-radius:50%;border:3px solid var(--text-secondary,#94a3b8);background:transparent;"></div>
     </div>
-    <div id="lock-error" style="font-size:0.8rem;color:var(--color-danger,#ef4444);min-height:1.5rem;margin-bottom:1rem;"></div>
-    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:0.5rem;max-width:240px;margin:0 auto;">
-      <button class="pin-btn" data-digit="1" style="padding:0.8rem;font-size:1.3rem;font-weight:700;border:none;border-radius:12px;background:var(--bg-secondary,#1e293b);color:var(--text-primary,#f1f5f9);cursor:pointer;">1</button>
-      <button class="pin-btn" data-digit="2" style="padding:0.8rem;font-size:1.3rem;font-weight:700;border:none;border-radius:12px;background:var(--bg-secondary,#1e293b);color:var(--text-primary,#f1f5f9);cursor:pointer;">2</button>
-      <button class="pin-btn" data-digit="3" style="padding:0.8rem;font-size:1.3rem;font-weight:700;border:none;border-radius:12px;background:var(--bg-secondary,#1e293b);color:var(--text-primary,#f1f5f9);cursor:pointer;">3</button>
-      <button class="pin-btn" data-digit="4" style="padding:0.8rem;font-size:1.3rem;font-weight:700;border:none;border-radius:12px;background:var(--bg-secondary,#1e293b);color:var(--text-primary,#f1f5f9);cursor:pointer;">4</button>
-      <button class="pin-btn" data-digit="5" style="padding:0.8rem;font-size:1.3rem;font-weight:700;border:none;border-radius:12px;background:var(--bg-secondary,#1e293b);color:var(--text-primary,#1e293b);cursor:pointer;">5</button>
-      <button class="pin-btn" data-digit="6" style="padding:0.8rem;font-size:1.3rem;font-weight:700;border:none;border-radius:12px;background:var(--bg-secondary,#1e293b);color:var(--text-primary,#f1f5f9);cursor:pointer;">6</button>
-      <button class="pin-btn" data-digit="7" style="padding:0.8rem;font-size:1.3rem;font-weight:700;border:none;border-radius:12px;background:var(--bg-secondary,#1e293b);color:var(--text-primary,#f1f5f9);cursor:pointer;">7</button>
-      <button class="pin-btn" data-digit="8" style="padding:0.8rem;font-size:1.3rem;font-weight:700;border:none;border-radius:12px;background:var(--bg-secondary,#1e293b);color:var(--text-primary,#f1f5f9);cursor:pointer;">8</button>
-      <button class="pin-btn" data-digit="9" style="padding:0.8rem;font-size:1.3rem;font-weight:700;border:none;border-radius:12px;background:var(--bg-secondary,#1e293b);color:var(--text-primary,#f1f5f9);cursor:pointer;">9</button>
-      <button class="pin-btn" data-digit="clear" style="padding:0.8rem;font-size:0.75rem;font-weight:700;border:none;border-radius:12px;background:var(--bg-secondary,#1e293b);color:var(--text-secondary,#94a3b8);cursor:pointer;">Clear</button>
-      <button class="pin-btn" data-digit="0" style="padding:0.8rem;font-size:1.3rem;font-weight:700;border:none;border-radius:12px;background:var(--bg-secondary,#1e293b);color:var(--text-primary,#f1f5f9);cursor:pointer;">0</button>
-      <button class="pin-btn" data-digit="backspace" style="padding:0.8rem;font-size:1rem;font-weight:700;border:none;border-radius:12px;background:var(--bg-secondary,#1e293b);color:var(--text-secondary,#94a3b8);cursor:pointer;">⌫</button>
+    <div id="lock-error" style="font-size:0.85rem;color:var(--color-danger,#ef4444);min-height:1.5rem;margin-bottom:1rem;"></div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:0.6rem;max-width:280px;margin:0 auto;">
+      <button class="pin-btn" data-digit="1" style="padding:1rem;font-size:1.5rem;font-weight:700;border:none;border-radius:14px;background:var(--bg-secondary,#1e293b);color:var(--text-primary,#f1f5f9);cursor:pointer;min-height:60px;">1</button>
+      <button class="pin-btn" data-digit="2" style="padding:1rem;font-size:1.5rem;font-weight:700;border:none;border-radius:14px;background:var(--bg-secondary,#1e293b);color:var(--text-primary,#f1f5f9);cursor:pointer;min-height:60px;">2</button>
+      <button class="pin-btn" data-digit="3" style="padding:1rem;font-size:1.5rem;font-weight:700;border:none;border-radius:14px;background:var(--bg-secondary,#1e293b);color:var(--text-primary,#f1f5f9);cursor:pointer;min-height:60px;">3</button>
+      <button class="pin-btn" data-digit="4" style="padding:1rem;font-size:1.5rem;font-weight:700;border:none;border-radius:14px;background:var(--bg-secondary,#1e293b);color:var(--text-primary,#f1f5f9);cursor:pointer;min-height:60px;">4</button>
+      <button class="pin-btn" data-digit="5" style="padding:1rem;font-size:1.5rem;font-weight:700;border:none;border-radius:14px;background:var(--bg-secondary,#1e293b);color:var(--text-primary,#f1f5f9);cursor:pointer;min-height:60px;">5</button>
+      <button class="pin-btn" data-digit="6" style="padding:1rem;font-size:1.5rem;font-weight:700;border:none;border-radius:14px;background:var(--bg-secondary,#1e293b);color:var(--text-primary,#f1f5f9);cursor:pointer;min-height:60px;">6</button>
+      <button class="pin-btn" data-digit="7" style="padding:1rem;font-size:1.5rem;font-weight:700;border:none;border-radius:14px;background:var(--bg-secondary,#1e293b);color:var(--text-primary,#f1f5f9);cursor:pointer;min-height:60px;">7</button>
+      <button class="pin-btn" data-digit="8" style="padding:1rem;font-size:1.5rem;font-weight:700;border:none;border-radius:14px;background:var(--bg-secondary,#1e293b);color:var(--text-primary,#f1f5f9);cursor:pointer;min-height:60px;">8</button>
+      <button class="pin-btn" data-digit="9" style="padding:1rem;font-size:1.5rem;font-weight:700;border:none;border-radius:14px;background:var(--bg-secondary,#1e293b);color:var(--text-primary,#f1f5f9);cursor:pointer;min-height:60px;">9</button>
+      <button class="pin-btn" data-digit="clear" style="padding:1rem;font-size:0.85rem;font-weight:700;border:none;border-radius:14px;background:var(--bg-secondary,#1e293b);color:var(--text-secondary,#94a3b8);cursor:pointer;min-height:60px;">Clear</button>
+      <button class="pin-btn" data-digit="0" style="padding:1rem;font-size:1.5rem;font-weight:700;border:none;border-radius:14px;background:var(--bg-secondary,#1e293b);color:var(--text-primary,#f1f5f9);cursor:pointer;min-height:60px;">0</button>
+      <button class="pin-btn" data-digit="backspace" style="padding:1rem;font-size:1.2rem;font-weight:700;border:none;border-radius:14px;background:var(--bg-secondary,#1e293b);color:var(--text-secondary,#94a3b8);cursor:pointer;min-height:60px;">⌫</button>
     </div>
   </div>
 </div>

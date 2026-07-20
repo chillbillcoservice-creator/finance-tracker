@@ -5558,7 +5558,6 @@ function initApp() {
   // PIN check — if set, show lock screen and delay UI init
   if (localStorage.getItem('app_pin')) {
     showLockScreen();
-    initLockScreenListeners();
     updateSettingsSecurityUI();
     return;
   }
