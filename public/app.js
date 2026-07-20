@@ -1851,7 +1851,12 @@ function renderDiary() {
       if (outstanding > 0 || collected > 0) {
         var expected = l.isEMI ? Number(l.emiAmount || 0) : outstanding * (Number(l.interestRate) / 100);
         var mark = collected >= expected ? ' ✓' : '   ';
-        var typeLabel = l.isEMI ? ' [EMI]' : '';
+        var typeLabel = l.isEMI ? ' [EMI' : '';
+        if (l.isEMI) {
+          var emiTotal = l.emiTotal || Math.ceil(Number(l.principal) / Number(l.emiAmount));
+          var emiPaid = state.interestPayments.filter(function(p) { return p.loanId === l.id && p.type === 'received' && p.category === 'principal'; }).length;
+          typeLabel += ' ' + emiPaid + '/' + emiTotal + ']';
+        }
         lines.push('  ' + mark + ' ' + l.borrowerName + typeLabel);
         lines.push('      ' + formatCurrency(collected) + ' / ' + formatCurrency(expected));
       }
@@ -1872,7 +1877,12 @@ function renderDiary() {
       if (outstanding > 0 || paid > 0) {
         var expected = b.isEMI ? Number(b.emiAmount || 0) : outstanding * (Number(b.interestRate) / 100);
         var mark = paid >= expected ? ' ✓' : '   ';
-        var typeLabel = b.isEMI ? ' [EMI]' : '';
+        var typeLabel = b.isEMI ? ' [EMI' : '';
+        if (b.isEMI) {
+          var emiTotal = b.emiTotal || Math.ceil(Number(b.principal) / Number(b.emiAmount));
+          var emiPaid = state.interestPayments.filter(function(p) { return p.loanId === b.id && p.type === 'paid' && p.category === 'principal'; }).length;
+          typeLabel += ' ' + emiPaid + '/' + emiTotal + ']';
+        }
         lines.push('  ' + mark + ' ' + b.borrowerName + typeLabel);
         lines.push('      ' + formatCurrency(paid) + ' / ' + formatCurrency(expected));
       }
