@@ -7194,7 +7194,7 @@ window.window.openCollectionDetails = function(type, event) {
   const endDateOfSelectedMonth = `${selectedMonthStr}-${String(new Date(selYear, selMonth, 0).getDate()).padStart(2, '0')}`;
 
   if (type === 'rent') {
-    title = 'Rent Collections';
+    title = 'Rent Collections - ' + ['January','February','March','April','May','June','July','August','September','October','November','December'][selMonth - 1].toUpperCase();
     const rawPayments = state.rentPayments.filter(filterPayment);
     const groupedCol = {};
     const groupedIds = {};
@@ -7217,7 +7217,8 @@ window.window.openCollectionDetails = function(type, event) {
       });
     }
   } else if (type === 'interest') {
-    title = 'Interest Collections';
+    var monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+    title = 'Interest Collections - ' + monthNames[selMonth - 1].toUpperCase();
     const rawPayments = state.interestPayments.filter(p => p.type === 'received' && p.category !== 'issuance' && filterPayment(p));
     const groupedCol = {};
     const groupedIds = {};
@@ -7230,11 +7231,15 @@ window.window.openCollectionDetails = function(type, event) {
       if (p.note && p.note.indexOf('[Advance]') !== -1) groupedAdv[name] += Number(p.amount);
       if (l && !groupedIds[name].includes(l.id)) groupedIds[name].push(l.id);
     });
+    state.interestPayments.filter(p => p.type === 'received' && p.note && p.note.indexOf('[Advance]') !== -1).forEach(p => {
+      const l = state.lent.find(x => x.id === p.loanId);
+      const name = l ? l.borrowerName : 'Unknown';
+      if (groupedCol[name] !== undefined) groupedAdv[name] = (groupedAdv[name] || 0) + Number(p.amount);
+    });
     collected = Object.keys(groupedCol).map(name => {
       const normName = name.toLowerCase().trim();
       const groupId = 'group-' + btoa(encodeURIComponent(normName)).replace(/[^a-zA-Z0-9]/g, '');
-      const advLabel = groupedAdv[name] > 0 ? ' (Advance ' + formatCurrency(groupedAdv[name]) + ')' : '';
-      return {name: name + advLabel, amount: groupedCol[name], ids: [groupId], type: 'interest'};
+      return {name: name, amount: groupedCol[name], adv: groupedAdv[name], ids: [groupId], type: 'interest'};
     });
     
     if (!isDayMode && !isYearMode) {
@@ -7372,12 +7377,14 @@ window.window.openCollectionDetails = function(type, event) {
       if (navAttrCol) clickAttr = ` style="cursor: pointer;" onclick="${navAttrCol}"`;
       return `
       <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 0; border-bottom: 1px solid var(--border-color);"${clickAttr}>
-        <div style="display: flex; align-items: center; gap: 0.4rem;">
-          <span style="font-weight: 500; color: ${p.renewalDue ? 'var(--color-warning)' : 'var(--text-primary)'};${navAttrCol ? ' cursor: pointer;' : ''}">${p.name}</span>${p.propertyName ? ' <span style="font-size:0.65rem;color:var(--text-secondary)">' + p.propertyName + (p.renewalDue && p.renewalDate ? ' <span style="color:var(--color-danger);font-weight:700">' + p.renewalDate + '</span>' : '') + '</span>' : ''}
-          ${type === 'all' ? `<span style="font-size: 0.6rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; padding: 0.1rem 0.35rem; border-radius: 4px; background: ${p.type === 'rent' ? 'rgba(34,197,94,0.15)' : 'rgba(59,130,246,0.15)'}; color: ${p.type === 'rent' ? 'var(--color-success)' : 'var(--color-accent)'};">${p.type === 'rent' ? 'RENT' : 'INTEREST'}</span>` : ''}
-          <span style="font-size: 0.8em;">✅</span>
+        <div style="display: flex; align-items: center; gap: 0.35rem;">
+          <span style="color:var(--color-success);font-weight:600;">✅</span>
+          <span style="font-weight:500;">${p.name}</span>
         </div>
-        <span style="color: var(--text-primary); font-weight: 600;">${formatCurrency(p.amount)}</span>
+        <div style="display: flex; align-items: center; gap: 0.75rem;">
+          <span style="font-weight:600;">${formatCurrency(p.amount)}</span>
+          ${p.adv > 0 ? '<span style="font-size:0.75rem;color:var(--color-purple);font-weight:600;">Adv ' + formatCurrency(p.adv) + '</span>' : ''}
+        </div>
       </div>`;
     }).join('');
     const collTotal = collected.reduce((s, p) => s + p.amount, 0);
