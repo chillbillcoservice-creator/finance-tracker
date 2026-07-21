@@ -719,7 +719,7 @@ function numberToIndianWords(num) {
 }
 
 function getOutstandingPrincipal(loanId, originalPrincipal) {
-  const repayments = state.interestPayments.filter(p => p.loanId === loanId && p.category === 'principal');
+  const repayments = state.interestPayments.filter(p => p.loanId === loanId && p.category === 'principal' && (!p.note || p.note.indexOf('[Advance]') === -1));
   const totalRepaid = repayments.reduce((sum, p) => sum + Number(p.amount), 0);
   return Math.max(0, Number(originalPrincipal) - totalRepaid);
 }
@@ -733,7 +733,7 @@ function getOutstandingPrincipalAtMonth(loanId, originalPrincipal, monthStr) {
     .reduce((sum, p) => sum + Number(p.amount), 0);
     
   const repayments = payments
-    .filter(p => p.category === 'principal')
+    .filter(p => p.category === 'principal' && (!p.note || p.note.indexOf('[Advance]') === -1))
     .reduce((sum, p) => sum + Number(p.amount), 0);
     
   return Math.max(0, Number(originalPrincipal) + topups - repayments);
@@ -1330,16 +1330,21 @@ function quickReceiveInterest(loanId, direction) {
     isAdvance = true;
   }
 
-  var today = new Date();
-  var isCurrentMonth = today.toISOString().slice(0, 7) === selectedMonthStr;
-  var paymentDate = today.toISOString().split('T')[0];
+  var d = new Date();
+  var todayLocal = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+  var isCurrentMonth = todayLocal.slice(0, 7) === selectedMonthStr;
+  var paymentDate = todayLocal;
   if (!isCurrentMonth) {
     var parts = selectedMonthStr.split('-').map(Number);
     paymentDate = selectedMonthStr + '-' + String(new Date(parts[0], parts[1], 0).getDate()).padStart(2, '0');
   }
 
+  if (isAdvance) {
+    var nm = new Date(d.getFullYear(), d.getMonth() + 1, 1);
+    paymentDate = nm.getFullYear() + '-' + String(nm.getMonth() + 1).padStart(2, '0') + '-01';
+  }
+
   var amount = monthlyYield;
-  var advanceTag = isAdvance ? ' [Advance]' : '';
   state.interestPayments.push({
     id: 'p' + Math.random().toString(36).substr(2, 9),
     loanId: loanId,
@@ -1347,7 +1352,7 @@ function quickReceiveInterest(loanId, direction) {
     category: loan.isEMI ? 'principal' : 'interest',
     amount: Number(amount),
     date: paymentDate,
-    note: 'Received from Quick Collect (' + selectedMonthStr.toUpperCase() + ')' + advanceTag
+    note: 'Received from Quick Collect (' + selectedMonthStr.toUpperCase() + ')' + (isAdvance ? ' [Advance]' : '')
   });
   saveState();
   refreshActiveTab();
@@ -1370,27 +1375,53 @@ function quickLoanPayment(loanId, direction) {
   var today = new Date().toISOString().split('T')[0];
   var nd = new Date(); nd.setMonth(nd.getMonth() + 1);
   var nextMonthDate = nd.toISOString().split('T')[0];
-  var payAmount = Number(amount);
-  if (Number(loan.interestRate || 0) > 0) {
-    var monthlyYield = outstanding * (Number(loan.interestRate) / 100);
-    var currentMonth = today.slice(0, 7);
-    var paidThisMonth = state.interestPayments.filter(function(p) {
-      return p.loanId === loan.id && p.type === (direction === 'lent' ? 'received' : 'paid') && p.category === 'interest' && p.date && p.date.slice(0, 7) === currentMonth;
-    }).reduce(function(s, p) { return s + Number(p.amount); }, 0);
-    var remainingYield = Math.max(0, monthlyYield - paidThisMonth);
-    var interestPart = Math.min(remainingYield, payAmount);
-    var advancePart = payAmount - interestPart;
-    if (interestPart > 0) {
-      state.interestPayments.push({id: 'p' + Math.random().toString(36).substr(2, 9), loanId: loanId, type: direction === 'lent' ? 'received' : 'paid', category: 'interest', amount: interestPart, date: today, note: 'Interest received'});
-    }
-    if (advancePart > 0) {
-      state.interestPayments.push({id: 'p' + Math.random().toString(36).substr(2, 9), loanId: loanId, type: direction === 'lent' ? 'received' : 'paid', category: 'interest', amount: advancePart, date: nextMonthDate, note: 'Interest received [Advance]'});
-    }
-  } else {
-    state.interestPayments.push({id: 'p' + Math.random().toString(36).substr(2, 9), loanId: loanId, type: direction === 'lent' ? 'received' : 'paid', category: 'principal', amount: payAmount, date: today, note: 'Principal repayment'});
+  var remaining = Number(amount);
+  var currentMonth = today.slice(0, 7);
+  var type = direction === 'lent' ? 'received' : 'paid';
+
+  // Step 1: Pay current month's pending interest
+  var monthlyYield = Number(loan.interestRate || 0) > 0 ? outstanding * (Number(loan.interestRate) / 100) : 0;
+  var interestPaidThisMonth = state.interestPayments.filter(function(p) { return p.loanId === loan.id && p.type === type && p.category === 'interest' && p.date && p.date.slice(0, 7) === currentMonth && (!p.note || p.note.indexOf('[Advance]') === -1); }).reduce(function(s, p) { return s + Number(p.amount); }, 0);
+  var pendingInterest = Math.max(0, monthlyYield - interestPaidThisMonth);
+  var interestPart = Math.min(pendingInterest, remaining);
+  if (interestPart > 0) {
+    state.interestPayments.push({id: 'p' + Math.random().toString(36).substr(2, 9), loanId: loanId, type: type, category: 'interest', amount: interestPart, date: today, note: 'Interest received'});
+    remaining -= interestPart;
   }
+
+  // Step 2: If EMI loan, pay current month's pending EMI
+  if (loan.isEMI && remaining > 0) {
+    var emiAmt = Number(loan.emiAmount || 0);
+    var emiPaidThisMonth = state.interestPayments.filter(function(p) { return p.loanId === loan.id && p.type === type && p.category === 'principal' && p.date && p.date.slice(0, 7) === currentMonth; }).reduce(function(s, p) { return s + Number(p.amount); }, 0);
+    var pendingEmi = Math.max(0, emiAmt - emiPaidThisMonth);
+    var emiPart = Math.min(pendingEmi, remaining);
+    if (emiPart > 0) {
+      var isPartial = (emiPaidThisMonth + emiPart) < emiAmt;
+      state.interestPayments.push({id: 'p' + Math.random().toString(36).substr(2, 9), loanId: loanId, type: type, category: 'principal', amount: emiPart, date: today, note: isPartial ? 'Principal repayment [Partial]' : 'Principal repayment'});
+      remaining -= emiPart;
+    }
+  }
+
+  // Step 3: Advance — pay next month's interest first
+  if (remaining > 0 && monthlyYield > 0) {
+    var advanceInt = Math.min(monthlyYield, remaining);
+    state.interestPayments.push({id: 'p' + Math.random().toString(36).substr(2, 9), loanId: loanId, type: type, category: 'interest', amount: advanceInt, date: nextMonthDate, note: 'Interest received [Advance]'});
+    remaining -= advanceInt;
+  }
+
+  // Step 4: Advance — remaining to EMI principal (next month)
+  if (remaining > 0 && loan.isEMI) {
+    state.interestPayments.push({id: 'p' + Math.random().toString(36).substr(2, 9), loanId: loanId, type: type, category: 'principal', amount: remaining, date: nextMonthDate, note: 'Principal repayment [Advance]'});
+    remaining = 0;
+  }
+
+  // Step 5: If still remaining and no EMI, put as advance interest
+  if (remaining > 0) {
+    state.interestPayments.push({id: 'p' + Math.random().toString(36).substr(2, 9), loanId: loanId, type: type, category: 'interest', amount: remaining, date: nextMonthDate, note: 'Interest received [Advance]'});
+  }
+
   if (direction === 'borrowed') {
-    state.expenses.push({id: 'exp_' + Math.random().toString(36).substr(2, 9), amount: payAmount, date: today, category: 'Loan Repayment', propertyId: '', note: 'Repayment to ' + (loan.financierName || 'Unknown')});
+    state.expenses.push({id: 'exp_' + Math.random().toString(36).substr(2, 9), amount: amount, date: today, category: 'Loan Repayment', propertyId: '', note: 'Repayment to ' + (loan.financierName || 'Unknown')});
   }
   saveState();
   if (getOutstandingPrincipal(loan.id, loan.principal) <= 0) {
@@ -1421,7 +1452,6 @@ function quickGroupPayment(safeId, direction) {
   var currentMonth = today.slice(0, 7);
   var type = direction === 'lent' ? 'received' : 'paid';
 
-  // Collect EMI and interest loans with their cycle amounts
   var emiLoans = [], interestLoans = [];
   for (var i = 0; i < groupLoans.length; i++) {
     var loan = groupLoans[i];
@@ -1436,15 +1466,12 @@ function quickGroupPayment(safeId, direction) {
     }
   }
 
-  // Sort EMIs by amount ascending (smallest first)
   emiLoans.sort(function(a, b) { return a.emiAmt - b.emiAmt; });
 
-  // Helper: how much of this loan's category has been paid in a given month
   function paidInMonth(loanId, cat, month) {
-    return state.interestPayments.filter(function(p) { return p.loanId === loanId && p.type === type && p.category === cat && p.date && p.date.startsWith(month); }).reduce(function(s, p) { return s + Number(p.amount); }, 0);
+    return state.interestPayments.filter(function(p) { return p.loanId === loanId && p.type === type && p.category === cat && p.date && p.date.startsWith(month) && (!p.note || p.note.indexOf('[Advance]') === -1); }).reduce(function(s, p) { return s + Number(p.amount); }, 0);
   }
 
-  // Check if current month's full cycle (interest + all EMIs) is already fully paid
   var currentCyclePaid = true;
   for (var i = 0; i < interestLoans.length; i++) {
     if (paidInMonth(interestLoans[i].loan.id, 'interest', currentMonth) < interestLoans[i].yieldAmt - 0.01) { currentCyclePaid = false; break; }
@@ -1457,7 +1484,6 @@ function quickGroupPayment(safeId, direction) {
 
   var payments = [], isAdvance = false;
 
-  // Phase A: Pay current month's interest (if not fully paid yet)
   if (!currentCyclePaid) {
     for (var i = 0; i < interestLoans.length; i++) {
       if (remaining <= 0) break;
@@ -1469,7 +1495,6 @@ function quickGroupPayment(safeId, direction) {
       remaining -= take;
     }
 
-    // Pay current month's EMIs (smallest first, allow partial)
     for (var i = 0; i < emiLoans.length; i++) {
       if (remaining <= 0) break;
       var item = emiLoans[i];
@@ -1482,9 +1507,7 @@ function quickGroupPayment(safeId, direction) {
     }
   }
 
-  // Phase B: If current month fully paid (or now fully paid), remaining is advance for next month
   if (remaining > 0) {
-    // Recheck if current month cycle is now fully covered
     var cycleNowPaid = true;
     for (var i = 0; i < interestLoans.length; i++) {
       if (paidInMonth(interestLoans[i].loan.id, 'interest', currentMonth) + payments.filter(function(p) { return p.loanId === interestLoans[i].loan.id && p.category === 'interest'; }).reduce(function(s, p) { return s + Number(p.amount); }, 0) < interestLoans[i].yieldAmt - 0.01) { cycleNowPaid = false; break; }
@@ -1497,7 +1520,6 @@ function quickGroupPayment(safeId, direction) {
 
     if (cycleNowPaid) {
       isAdvance = true;
-      // Advance: pay next month's interest first
       for (var i = 0; i < interestLoans.length; i++) {
         if (remaining <= 0) break;
         var item = interestLoans[i];
@@ -1505,7 +1527,6 @@ function quickGroupPayment(safeId, direction) {
         payments.push({ loanId: item.loan.id, amount: take, category: 'interest', isAdvance: true });
         remaining -= take;
       }
-      // Then advance EMIs smallest first
       for (var i = 0; i < emiLoans.length; i++) {
         if (remaining <= 0) break;
         var item = emiLoans[i];
@@ -1531,13 +1552,12 @@ function quickGroupPayment(safeId, direction) {
       note: note
     });
   }
-
   saveState();
   var allSettled = true;
   for (var i = 0; i < groupLoans.length; i++) {
     if (getOutstandingPrincipal(groupLoans[i].id, groupLoans[i].principal) > 0) { allSettled = false; break; }
   }
-  if (allSettled) alert('All loans fully settled! ✅');
+  if (allSettled) alert('All loans fully settled!');
   refreshActiveTab();
   renderDashboard();
 }
@@ -2130,7 +2150,7 @@ function renderDashboard() {
       if (outstanding > 0) {
         var cat = loan.isEMI ? 'principal' : 'interest';
         totalInterestReceived += state.interestPayments
-          .filter(function(p) { return p.type === 'received' && p.category === cat && p.loanId === loan.id && p.date === selectedDateStr; })
+          .filter(function(p) { return p.type === 'received' && p.category === cat && p.loanId === loan.id && p.date === selectedDateStr && (!p.note || p.note.indexOf('[Advance]') === -1); })
           .reduce(function(sum, p) { return sum + Number(p.amount); }, 0);
       }
     });
@@ -2140,7 +2160,7 @@ function renderDashboard() {
       if (outstanding > 0) {
         var cat = loan.isEMI ? 'principal' : 'interest';
         totalInterestReceived += state.interestPayments
-          .filter(function(p) { return p.type === 'received' && p.category === cat && p.loanId === loan.id && p.date && p.date.startsWith(selectedYear); })
+          .filter(function(p) { return p.type === 'received' && p.category === cat && p.loanId === loan.id && p.date && p.date.startsWith(selectedYear) && (!p.note || p.note.indexOf('[Advance]') === -1); })
           .reduce(function(sum, p) { return sum + Number(p.amount); }, 0);
       }
     });
@@ -2150,7 +2170,7 @@ function renderDashboard() {
       if (outstanding > 0) {
         var cat = loan.isEMI ? 'principal' : 'interest';
         totalInterestReceived += state.interestPayments
-          .filter(function(p) { return p.type === 'received' && p.category === cat && p.loanId === loan.id && p.date.startsWith(selectedMonthStr); })
+          .filter(function(p) { return p.type === 'received' && p.category === cat && p.loanId === loan.id && p.date.startsWith(selectedMonthStr) && (!p.note || p.note.indexOf('[Advance]') === -1); })
           .reduce(function(sum, p) { return sum + Number(p.amount); }, 0);
       }
     });
@@ -2402,13 +2422,20 @@ function renderDashboard() {
         if (rentHeaderSpan) rentHeaderSpan.insertAdjacentHTML('beforeend', ' <span class="pending-count-badge" style="background:var(--color-warning);color:#fff;font-size:0.6rem;font-weight:800;padding:0.1rem 0.4rem;border-radius:8px;">' + pTenants.length + '</span>');
       }
 
-    var pBorrowers = [];
+    var parts = selectedMonthStr.split('-');
+    var nextM = parseInt(parts[1]);
+    var nextY = parseInt(parts[0]);
+    nextM++;
+    if (nextM > 12) { nextM = 1; nextY++; }
+    var nextMonthStr = nextY + '-' + String(nextM).padStart(2, '0');
+    var nextMonthName = new Date(nextMonthStr + '-01').toLocaleDateString('en-US', { month: 'short' });
+    var pBorrowers = [], aBorrowers = [];
     activeLendingLoans.forEach(function(l) {
       var outstanding = getOutstandingPrincipalAtMonth(l.id, l.principal, selectedMonthStr);
       if (outstanding > 0) {
         var expected = l.isEMI ? Number(l.emiAmount || 0) : outstanding * (Number(l.interestRate) / 100);
         var cat = l.isEMI ? 'principal' : 'interest';
-        var pPaid = state.interestPayments.filter(function(p) { return p.type === 'received' && p.category === cat && p.loanId === l.id && p.date.startsWith(selectedMonthStr); }).reduce(function(sum, p) { return sum + Number(p.amount); }, 0);
+        var pPaid = state.interestPayments.filter(function(p) { return p.type === 'received' && p.category === cat && p.loanId === l.id && p.date.startsWith(selectedMonthStr) && (!p.note || p.note.indexOf('[Advance]') === -1); }).reduce(function(sum, p) { return sum + Number(p.amount); }, 0);
         var pOwe = expected - pPaid;
         if (pOwe > 0) pBorrowers.push({name: l.borrowerName, owe: pOwe});
       }
@@ -3224,7 +3251,7 @@ function renderLending() {
   const totalEl = document.getElementById('lent-total-outstanding');
   function calcOutstanding(loan) {
     var payments = state.interestPayments.filter(function(p) {
-      return p.loanId === loan.id && p.type === 'received' && p.category === 'principal' && p.date <= endDateOfSelectedMonth;
+      return p.loanId === loan.id && p.type === 'received' && p.category === 'principal' && p.date <= endDateOfSelectedMonth && (!p.note || p.note.indexOf('[Advance]') === -1);
     });
     var topups = state.interestPayments.filter(function(p) {
       return p.loanId === loan.id && p.type === 'received' && p.category === 'increase' && p.date <= endDateOfSelectedMonth;
@@ -3257,7 +3284,7 @@ function renderLending() {
 
   // Compute per-loan stats
   visibleLoans.forEach(loan => {
-    const loanPayments = state.interestPayments.filter(p => p.loanId === loan.id && p.type === 'received' && p.date <= endDateOfSelectedMonth);
+    const loanPayments = state.interestPayments.filter(p => p.loanId === loan.id && p.type === 'received' && (p.date <= endDateOfSelectedMonth || (p.note && p.note.indexOf('[Advance]') !== -1)));
     const interestPayments = loanPayments.filter(p => p.category === 'interest');
     const principalPayments = loanPayments.filter(p => p.category === 'principal');
     const topupPayments = loanPayments.filter(p => p.category === 'increase');
@@ -3269,7 +3296,7 @@ function renderLending() {
     
     const lastPaymentDate = loanPayments.length > 0 ? loanPayments.reduce((max, p) => p.date > max ? p.date : max, loanPayments[0].date) : null;
     const monthlyYield = loan.isEMI ? Number(loan.emiAmount) : outstandingPrincipal * (Number(loan.interestRate) / 100);
-    const currentMonthPayments = loanPayments.filter(p => p.date.startsWith(selectedMonthStr) && p.category !== 'increase' && p.category !== 'issuance');
+    const currentMonthPayments = loanPayments.filter(p => (p.date.startsWith(selectedMonthStr) || (p.note && p.note.indexOf('[Advance]') !== -1)) && p.category !== 'increase' && p.category !== 'issuance');
     const currentMonthSum = currentMonthPayments.reduce((sum, p) => sum + Number(p.amount), 0);
     const currentMonthInterest = interestPayments.filter(p => p.date.startsWith(selectedMonthStr));
     const currentMonthInterestSum = currentMonthInterest.reduce((sum, p) => sum + Number(p.amount), 0);
@@ -5854,6 +5881,10 @@ function initApp() {
     return;
   }
 
+  initAppListeners();
+}
+
+function initAppListeners() {
   initNavigation();
   
   // Initialize month selector (default view is monthly)
@@ -7182,17 +7213,20 @@ window.window.openCollectionDetails = function(type, event) {
     const rawPayments = state.interestPayments.filter(p => p.type === 'received' && p.category !== 'issuance' && filterPayment(p));
     const groupedCol = {};
     const groupedIds = {};
+    const groupedAdv = {};
     rawPayments.forEach(p => {
       const l = state.lent.find(x => x.id === p.loanId);
       const name = l ? l.borrowerName : 'Unknown';
-      if(!groupedCol[name]) { groupedCol[name] = 0; groupedIds[name] = []; }
+      if(!groupedCol[name]) { groupedCol[name] = 0; groupedIds[name] = []; groupedAdv[name] = 0; }
       groupedCol[name] += Number(p.amount);
+      if (p.note && p.note.indexOf('[Advance]') !== -1) groupedAdv[name] += Number(p.amount);
       if (l && !groupedIds[name].includes(l.id)) groupedIds[name].push(l.id);
     });
     collected = Object.keys(groupedCol).map(name => {
       const normName = name.toLowerCase().trim();
       const groupId = 'group-' + btoa(encodeURIComponent(normName)).replace(/[^a-zA-Z0-9]/g, '');
-      return {name, amount: groupedCol[name], ids: [groupId], type: 'interest'};
+      const advLabel = groupedAdv[name] > 0 ? ' (Advance ' + formatCurrency(groupedAdv[name]) + ')' : '';
+      return {name: name + advLabel, amount: groupedCol[name], ids: [groupId], type: 'interest'};
     });
     
     if (!isDayMode && !isYearMode) {
@@ -7201,7 +7235,7 @@ window.window.openCollectionDetails = function(type, event) {
         const outstanding = getOutstandingPrincipalAtMonth(l.id, l.principal, selectedMonthStr);
         if (outstanding > 0) {
           const expected = l.isEMI ? Number(l.emiAmount || 0) : outstanding * (Number(l.interestRate) / 100);
-          const pPaid = state.interestPayments.filter(p => p.type === 'received' && p.category !== 'issuance' && p.loanId === l.id && p.date.startsWith(selectedMonthStr)).reduce((sum, p) => sum + Number(p.amount), 0);
+          const pPaid = state.interestPayments.filter(p => p.type === 'received' && p.category !== 'issuance' && p.loanId === l.id && p.date.startsWith(selectedMonthStr) && (!p.note || p.note.indexOf('[Advance]') === -1)).reduce((sum, p) => sum + Number(p.amount), 0);
           const pOwe = expected - pPaid;
           if (pOwe > 0) {
             const normName = (l.borrowerName || '').toLowerCase().trim();
@@ -7250,7 +7284,7 @@ window.window.openCollectionDetails = function(type, event) {
         const outstanding = getOutstandingPrincipalAtMonth(l.id, l.principal, selectedMonthStr);
         if (outstanding > 0) {
           const expected = l.isEMI ? Number(l.emiAmount || 0) : outstanding * (Number(l.interestRate) / 100);
-          const pPaid = state.interestPayments.filter(p => p.type === 'received' && p.category !== 'issuance' && p.loanId === l.id && p.date.startsWith(selectedMonthStr)).reduce((sum, p) => sum + Number(p.amount), 0);
+          const pPaid = state.interestPayments.filter(p => p.type === 'received' && p.category !== 'issuance' && p.loanId === l.id && p.date.startsWith(selectedMonthStr) && (!p.note || p.note.indexOf('[Advance]') === -1)).reduce((sum, p) => sum + Number(p.amount), 0);
           const pOwe = expected - pPaid;
           if (pOwe > 0) {
             const normName = (l.borrowerName || '').toLowerCase().trim();
@@ -8244,6 +8278,7 @@ function handlePinDigit(digit) {
         initNavigation();
         renderMonthSelector();
         requestNotifPermission();
+        initAppListeners();
       });
     } else {
       // Unlock mode: verify PIN
@@ -8254,6 +8289,7 @@ function handlePinDigit(digit) {
           initNavigation();
           renderMonthSelector();
           requestNotifPermission();
+          initAppListeners();
         } else {
           document.getElementById('lock-error').textContent = 'Wrong PIN. Try again.';
           _pinEntered = '';
@@ -8302,6 +8338,8 @@ function updateSettingsSecurityUI() {
     if (rmBtn) rmBtn.style.display = 'none';
   }
 }
+
+
 
 
 

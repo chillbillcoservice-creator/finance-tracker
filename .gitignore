@@ -5,3 +5,6 @@ dist/
 .vercel
 
 .vercel
+
+desktop.ini
+.env*

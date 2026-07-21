@@ -1,5 +1,5 @@
-const CACHE = 'capitalflow-v1';
-const ASSETS = ['/', '/style.css?v=3', '/app.js?v=5', '/icon-192.png', '/icon-512.png'];
+const CACHE = 'capitalflow-v4';
+const ASSETS = ['/', '/style.css?v=4', '/app.js?v=7', '/icon-192.png', '/icon-512.png'];
 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS)));
