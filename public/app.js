@@ -1146,10 +1146,8 @@ function submitQuickLend(event) {
       renderDashboard();
       setTimeout(function() {
         switchTab('dashboard');
-        if (currentReminderFilter === 'interest') currentReminderFilter = 'all';
-        toggleReminderFilter('interest');
-        var card = document.getElementById('card-interest');
-        if (card) card.classList.add('highlight-card');
+        currentReminderFilter = 'all';
+        refreshActiveTab();
         setTimeout(function() {
           var newCard = document.querySelector('[data-loan-id="' + existingLoan.id + '"]');
           if (newCard) { newCard.scrollIntoView({ behavior: 'smooth', block: 'center' }); newCard.classList.add('new-entry-highlight'); }
@@ -1206,10 +1204,8 @@ function submitQuickLend(event) {
   renderDashboard();
   setTimeout(function() {
     switchTab('dashboard');
-    if (currentReminderFilter === 'interest') currentReminderFilter = 'all';
-    toggleReminderFilter('interest');
-    var card = document.getElementById('card-interest');
-    if (card) card.classList.add('highlight-card');
+    currentReminderFilter = 'all';
+    refreshActiveTab();
     setTimeout(function() {
       var newCard = document.querySelector('[data-loan-id="' + newId + '"]');
       if (newCard) { newCard.scrollIntoView({ behavior: 'smooth', block: 'center' }); newCard.classList.add('new-entry-highlight'); }
