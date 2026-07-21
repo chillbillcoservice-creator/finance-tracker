@@ -627,6 +627,20 @@ function loadState() {
         if (_fileDataCache[f.id]) f.data = _fileDataCache[f.id];
       });
     }
+    // One-time migration: fix 0% loan payments mis-categorized as advance interest
+    if (!state._migratedZeroPct) {
+      var zeroPctIds = (state.lent || []).filter(function(l) { return Number(l.interestRate) === 0; }).map(function(l) { return l.id; });
+      if (zeroPctIds.length > 0) {
+        state.interestPayments = state.interestPayments.map(function(p) {
+          if (zeroPctIds.indexOf(p.loanId) !== -1 && p.category === 'interest' && p.note && p.note.indexOf('[Advance]') !== -1) {
+            return { id: p.id, loanId: p.loanId, type: p.type, category: 'principal', amount: p.amount, date: p.date, note: 'Principal repayment' };
+          }
+          return p;
+        });
+      }
+      state._migratedZeroPct = true;
+      saveState();
+    }
   } else {
     // Fresh start with empty data
     localStorage.removeItem(STORAGE_KEY);
@@ -1138,7 +1152,7 @@ function submitQuickLend(event) {
         if (card) card.classList.add('highlight-card');
         setTimeout(function() {
           var newCard = document.querySelector('[data-loan-id="' + existingLoan.id + '"]');
-          if (newCard) newCard.classList.add('new-entry-highlight');
+          if (newCard) { newCard.scrollIntoView({ behavior: 'smooth', block: 'center' }); newCard.classList.add('new-entry-highlight'); }
         }, 100);
       }, 150);
       _isSubmittingQuickLend = false;
@@ -1198,7 +1212,7 @@ function submitQuickLend(event) {
     if (card) card.classList.add('highlight-card');
     setTimeout(function() {
       var newCard = document.querySelector('[data-loan-id="' + newId + '"]');
-      if (newCard) newCard.classList.add('new-entry-highlight');
+      if (newCard) { newCard.scrollIntoView({ behavior: 'smooth', block: 'center' }); newCard.classList.add('new-entry-highlight'); }
     }, 100);
   }, 150);
   _isSubmittingQuickLend = false;
@@ -1400,6 +1414,12 @@ function quickLoanPayment(loanId, direction) {
       state.interestPayments.push({id: 'p' + Math.random().toString(36).substr(2, 9), loanId: loanId, type: type, category: 'principal', amount: emiPart, date: today, note: isPartial ? 'Principal repayment [Partial]' : 'Principal repayment'});
       remaining -= emiPart;
     }
+  }
+
+  // Step 2.5: For 0% loans, remaining amount directly reduces principal
+  if (remaining > 0 && Number(loan.interestRate) == 0) {
+    state.interestPayments.push({id: 'p' + Math.random().toString(36).substr(2, 9), loanId: loanId, type: type, category: 'principal', amount: remaining, date: today, note: 'Principal repayment'});
+    remaining = 0;
   }
 
   // Step 3: Advance — pay next month's interest first
@@ -2000,6 +2020,10 @@ function setLendingFilter(mode) {
     if (el) el.style.background = (mode !== 'all' && m === mode) ? 'rgba(255,255,255,0.08)' : 'transparent';
   });
   renderLending();
+  setTimeout(function() {
+    var container = document.getElementById('lent-loans-list');
+    if (container && container.children.length) container.scrollIntoView({ behavior:'smooth', block:'start' });
+  }, 50);
 }
 window.setLendingFilter = setLendingFilter;
 
@@ -3356,7 +3380,7 @@ function renderLending() {
         const currentBal = formatCurrency(Math.max(0, stats.monthlyYield - stats.currentMonthSum));
         const recvDisplay = stats.monthlyYield === 0 ? 'Exp 0 · Rcvd ' + currentRecv : (stats.isInterestFullyPaidThisMonth ? 'Exp ' + formattedYield + ' · Rcvd ' + currentRecv + ' ✅' : 'Exp ' + formattedYield + ' · Rcvd ' + currentRecv + (stats.monthlyYield - stats.currentMonthSum > 0 && stats.currentMonthSum > 0 ? ' · Bal ' + currentBal : ''));
         const settledBadge = stats.statusInMonth !== 'active' ? ' <span class="badge badge-muted">Settled</span>' : '';
-        const advBadge = stats.hasAdvance ? ' <span style="font-size:0.55rem;color:var(--color-purple);font-weight:600;margin-left:0.2rem;">Adv ' + formatCurrency(stats.advTotal) + '</span>' : '';
+        const advBadge = (stats.hasAdvance && Number(loan.interestRate) > 0) ? ' <span style="font-size:0.55rem;color:var(--color-purple);font-weight:600;margin-left:0.2rem;">Adv ' + formatCurrency(stats.advTotal) + '</span>' : '';
 
         var html = '<div style="display:flex;justify-content:space-between;align-items:center;">' +
           '<div><div style="font-weight:700;font-size:1rem;">' + loan.borrowerName + settledBadge + advBadge + '</div>' +
@@ -7639,7 +7663,7 @@ function renderGlanceWidget() {
     if (r.status === 'active') {
       var info = getNextRenewal(r.startDate, r.nextRenewalDate);
       if (info && info.daysLeft <= 30) {
-        renewalItems.push({ text: '\uD83D\uDCCB <strong>' + r.tenantName + '\'s</strong> rent agreement renewal in <strong>' + info.daysLeft + '</strong> ' + (info.daysLeft === 1 ? 'day' : 'days'), daysLeft: info.daysLeft });
+        renewalItems.push({ text: '\uD83D\uDCCB <strong>' + r.tenantName + '\'s</strong> rent agreement renewal in <strong>' + info.daysLeft + '</strong> ' + (info.daysLeft === 1 ? 'day' : 'days'), daysLeft: info.daysLeft, rentalId: r.id });
       }
     }
   });
@@ -7653,7 +7677,10 @@ function renderGlanceWidget() {
     if (typeof _glanceRenewalDismissIdx === 'undefined') _glanceRenewalDismissIdx = 0;
     if (_glanceRenewalDismissIdx >= rotationItems.length) _glanceRenewalDismissIdx = 0;
     var item = rotationItems[_glanceRenewalDismissIdx];
-    setGlanceDetails(item.text + ' <span onclick="event.stopPropagation();dismissGlanceRenewal()" style="cursor:pointer;margin-left:0.5rem;opacity:0.5;font-size:0.82rem;">\u2715</span>');
+    var clickableText = item.rentalId
+      ? '<span onclick="event.stopPropagation();navigateAndHighlightCard(\'rental\',\'' + item.rentalId + '\')" style="cursor:pointer;">' + item.text + '</span>'
+      : item.text;
+    setGlanceDetails(clickableText + ' <span onclick="event.stopPropagation();dismissGlanceRenewal()" style="cursor:pointer;margin-left:0.5rem;opacity:0.5;font-size:0.82rem;">\u2715</span>');
     _glanceRenewalTimer = setTimeout(function() {
       _glanceRenewalDismissIdx++;
       renderGlanceWidget();
