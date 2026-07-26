@@ -1454,28 +1454,22 @@ Every card shows this at the bottom:<br><br>
   </div>
 
   <!-- MODAL: LEDGER HISTORY DETAILS -->
-  <div class="modal-overlay" id="modal-ledger">
-    <div class="modal-container">
-      <div class="modal-header">
-        <h3 class="modal-title" id="ledger-title">Payment History Ledger</h3>
-        <button class="modal-close" onclick="closeModal('modal-ledger')">
-          <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-        </button>
-      </div>
-      <div class="modal-body">
-        <div class="loan-stats-grid" id="ledger-stats">
-          <!-- Injected dynamically -->
-        </div>
-        <h4 style="margin-top: 1.5rem; font-size: 0.95rem; font-weight: 700;">Recorded Transactions</h4>
-        <div class="ledger-list" id="ledger-list-container">
-          <!-- List of payments injected via JS -->
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button class="btn btn-secondary" onclick="closeModal('modal-ledger')">Close</button>
+<div class="modal-overlay" id="modal-ledger">
+  <div class="modal-container">
+    <div class="modal-header">
+      <h3 class="modal-title" id="ledger-title">Payment History Ledger</h3>
+      <button class="modal-close" onclick="closeModal('modal-ledger')">
+        <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body" style="padding-top:0.5rem;">
+      <div id="ledger-stats" style="display:flex;gap:0.5rem;margin-bottom:0.75rem;"></div>
+      <div class="ledger-list" id="ledger-list-container">
+        <!-- List of payments injected via JS -->
       </div>
     </div>
   </div>
+</div>
 
   <!-- MODAL: QUICK COLLECT (Rent / Interest) -->
   <div class="modal-overlay" id="modal-quick-collect">
@@ -1816,7 +1810,7 @@ Every card shows this at the bottom:<br><br>
   </div>
 
   <!-- JavaScript Modules -->
-  <script src="app.js?v=9"></script>
+  <script src="app.js?v=10"></script>
 <script>
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('/sw.js');

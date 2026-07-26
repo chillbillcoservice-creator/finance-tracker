@@ -4460,19 +4460,20 @@ function showLedger(loanId, direction) {
 
   const statsContainer = document.getElementById('ledger-stats');
   statsContainer.innerHTML = `
-    <div class="loan-stat-box">
-      <span class="loan-stat-val">${formatCurrency(remainingPrincipal)}</span>
-      <span class="loan-stat-lbl">Remaining Principal</span>
+    <div class="card" style="flex:1;padding:0.6rem;text-align:center;">
+      <div style="font-size:0.6rem;text-transform:uppercase;color:var(--text-muted);letter-spacing:0.5px;">Outstanding</div>
+      <div style="font-weight:800;font-size:1rem;margin-top:0.15rem;color:var(--color-warning);">${formatCurrency(displayPrincipal)}</div>
     </div>
-    <div class="loan-stat-box">
-      <span class="loan-stat-val" style="color: var(--color-success);">${formatCurrency(totalPrincipalRepaid)}</span>
-      <span class="loan-stat-lbl">Total Repaid</span>
+    <div class="card" style="flex:1;padding:0.6rem;text-align:center;">
+      <div style="font-size:0.6rem;text-transform:uppercase;color:var(--text-muted);letter-spacing:0.5px;">${direction === 'lent' ? 'Int Rcvd' : 'Int Paid'}</div>
+      <div style="font-weight:800;font-size:1rem;margin-top:0.15rem;color:var(--color-success);">${formatCurrency(totalInterest)}</div>
     </div>
-    <div class="loan-stat-box">
-      <span class="loan-stat-val" style="color: ${direction === 'lent' ? 'var(--color-accent)' : 'var(--color-purple)'};">${formatCurrency(totalInterest)}</span>
-      <span class="loan-stat-lbl">Total Interest ${direction === 'lent' ? 'Earned' : 'Paid'}</span>
+    <div class="card" style="flex:1;padding:0.6rem;text-align:center;">
+      <div style="font-size:0.6rem;text-transform:uppercase;color:var(--text-muted);letter-spacing:0.5px;">${direction === 'lent' ? 'Repaid' : 'Paid'}</div>
+      <div style="font-weight:800;font-size:1rem;margin-top:0.15rem;color:var(--color-accent);">${formatCurrency(totalPrincipalRepaid)}</div>
     </div>
   `;
+  statsContainer.style.cssText = 'display:flex;gap:0.5rem;margin-bottom:0.75rem;';
 
   // Build List
   const listContainer = document.getElementById('ledger-list-container');
@@ -4481,44 +4482,30 @@ function showLedger(loanId, direction) {
   if (history.length === 0) {
     listContainer.innerHTML = `<p style="text-align: center; color: var(--text-muted); font-size: 0.85rem; padding: 1rem 0;">No transaction records logged.</p>`;
   } else {
-    // Sort reverse chronological
+    var h = '<div style="font-size:0.65rem;text-transform:uppercase;color:var(--text-muted);letter-spacing:0.5px;margin-bottom:0.35rem;">Transaction History</div>';
+    h += '<div style="display:flex;flex-direction:column;gap:0.3rem;">';
     const sortedHistory = [...history].sort((a,b) => new Date(b.date) - new Date(a.date));
     sortedHistory.forEach(item => {
-      const div = document.createElement('div');
-      div.className = 'ledger-item';
-      
-      let categoryBadge = '';
-      if (item.category === 'issuance') {
-        categoryBadge = `<span class="badge" style="font-size: 0.65rem; padding: 0.15rem 0.4rem; margin-left: 0.5rem; background-color: rgba(168, 85, 247, 0.15); color: var(--color-purple); border: 1px solid rgba(168, 85, 247, 0.25);">Disbursed</span>`;
-      } else if (item.category === 'increase') {
-        categoryBadge = `<span class="badge" style="font-size: 0.65rem; padding: 0.15rem 0.4rem; margin-left: 0.5rem; background-color: rgba(14, 165, 233, 0.15); color: var(--color-accent); border: 1px solid rgba(14, 165, 233, 0.25);">Lend More (Top-up)</span>`;
-      } else if (item.category === 'principal') {
-        categoryBadge = `<span class="badge badge-success" style="font-size: 0.65rem; padding: 0.15rem 0.4rem; margin-left: 0.5rem; background-color: rgba(16, 185, 129, 0.15); color: var(--color-success); border: 1px solid rgba(16, 185, 129, 0.25);">Principal Repayment</span>`;
-      } else {
-        categoryBadge = `<span class="badge badge-accent" style="font-size: 0.65rem; padding: 0.15rem 0.4rem; margin-left: 0.5rem; background-color: rgba(14, 165, 233, 0.15); color: var(--color-accent); border: 1px solid rgba(14, 165, 233, 0.25);">Interest</span>`;
-      }
-      
-      // Hide delete button for original issuance
+      let catLabel = '', catColor = 'var(--text-secondary)';
+      if (item.category === 'issuance') { catLabel = 'Disbursed'; catColor = 'var(--color-purple)'; }
+      else if (item.category === 'increase') { catLabel = 'Top-up'; catColor = 'var(--color-accent)'; }
+      else if (item.category === 'principal') { catLabel = 'Principal'; catColor = 'var(--color-success)'; }
+      else { catLabel = 'Interest'; catColor = direction === 'lent' ? 'var(--color-accent)' : 'var(--color-purple)'; }
+
       const canDelete = item.category !== 'issuance';
-      const deleteBtnHtml = canDelete
-        ? `<button class="ledger-delete" onclick="deleteLedgerPayment('${item.id}', '${loanId}', '${direction}')">
-            <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/></svg>
-           </button>`
+      const deleteBtn = canDelete
+        ? '<span onclick="event.stopPropagation();deleteLedgerPayment(\'' + item.id + '\',\'' + loanId + '\',\'' + direction + '\')" style="cursor:pointer;font-size:0.7rem;padding:0.15rem 0.3rem;border-radius:4px;color:var(--text-muted);flex-shrink:0;" onmouseenter="this.style.color=\'var(--color-danger)\'" onmouseleave="this.style.color=\'var(--text-muted)\'">🗑️</span>'
         : '';
 
-      div.innerHTML = `
-        <div class="ledger-info">
-          <div style="display: flex; align-items: center; gap: 0.25rem;">
-            <span class="ledger-amount" style="color: ${item.category === 'issuance' || item.category === 'increase' ? 'var(--text-primary)' : 'inherit'}">${formatCurrency(item.amount)}</span>
-            ${categoryBadge}
-          </div>
-          <span class="ledger-date">${formatDate(item.date)}</span>
-          ${item.note ? `<span class="ledger-note">${item.note.replace('[Advance]', '<span style="color:var(--color-purple);font-weight:600;">[Advance]</span>')}</span>` : ''}
-        </div>
-        ${deleteBtnHtml}
-      `;
-      listContainer.appendChild(div);
+      h += '<div style="display:flex;justify-content:space-between;align-items:center;padding:0.45rem 0.5rem;border-radius:6px;background:rgba(255,255,255,0.02);border:1px solid var(--border-color);">';
+      h += '<span style="font-size:0.75rem;color:var(--text-secondary);min-width:60px;">' + formatDate(item.date) + '</span>';
+      h += '<span style="font-weight:700;font-size:0.85rem;flex:1;text-align:right;margin:0 0.5rem;">' + formatCurrency(Number(item.amount)) + '</span>';
+      h += '<span style="font-size:0.6rem;padding:0.12rem 0.35rem;border-radius:4px;background:' + catColor + '18;color:' + catColor + ';flex-shrink:0;min-width:52px;text-align:center;">' + catLabel + '</span>';
+      h += deleteBtn;
+      h += '</div>';
     });
+    h += '</div>';
+    listContainer.innerHTML = h;
   }
 
   openModal('modal-ledger');
@@ -4672,9 +4659,7 @@ function openLoanDetail(loanId, direction) {
       h += '<button class="btn btn-primary" style="flex:1;min-height:40px;" onclick="closeModal(\'modal-loan-detail\');quickLoanPayment(\'' + loanId + '\',\'' + direction + '\')">✅ Receive</button>';
     }
   }
-  h += '<button class="btn btn-secondary" style="flex:1;min-height:40px;" onclick="closeModal(\'modal-loan-detail\');editLoan(\'' + loanId + '\',\'' + direction + '\')">✏️ Edit</button>';
   h += '</div>';
-  h += '<button class="btn btn-secondary" style="width:100%;margin-top:0.5rem;min-height:36px;font-size:0.8rem;" onclick="closeModal(\'modal-loan-detail\');showLedger(\'' + loanId + '\',\'' + direction + '\')">📋 View Full Ledger</button>';
 
   body.innerHTML = h;
   openModal('modal-loan-detail');
