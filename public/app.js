@@ -5042,6 +5042,9 @@ window.deleteRentPayment = deleteRentPayment;
 window.loadRealSeedData = function() {
   if (!confirm('Load demo data? This will replace all existing data with sample entries.')) return;
   loadState();
+  // Auto-backup real data before overwriting
+  var backup = { lent: state.lent, borrowed: state.borrowed, rentals: state.rentals, rentPayments: state.rentPayments, interestPayments: state.interestPayments, expenses: state.expenses, renewals: state.renewals, files: state.files, properties: state.properties };
+  localStorage.setItem('capitalflow_backup', JSON.stringify(backup));
   state.rentals = [];
   state.rentPayments = [];
   state.lent = [];
@@ -5207,6 +5210,38 @@ window.loadRealSeedData = function() {
   renderDashboard();
   renderRentals();
   showToast('Demo data loaded!', 'success');
+  // Show restore banner if backup exists
+  if (localStorage.getItem('capitalflow_backup')) {
+    var rb = document.getElementById('restore-banner');
+    if (rb) rb.style.display = 'flex';
+  }
+};
+
+window.restoreRealData = function() {
+  var raw = localStorage.getItem('capitalflow_backup');
+  if (!raw) { showToast('No backup found', 'error'); return; }
+  if (!confirm('Restore your real data? Demo data will be replaced.')) return;
+  var backup = JSON.parse(raw);
+  loadState();
+  state.lent = backup.lent || [];
+  state.borrowed = backup.borrowed || [];
+  state.rentals = backup.rentals || [];
+  state.rentPayments = backup.rentPayments || [];
+  state.interestPayments = backup.interestPayments || [];
+  state.expenses = backup.expenses || [];
+  state.renewals = backup.renewals || [];
+  state.files = backup.files || [];
+  state.properties = backup.properties || [];
+  saveState();
+  localStorage.removeItem('capitalflow_backup');
+  var rb = document.getElementById('restore-banner');
+  if (rb) rb.style.display = 'none';
+  switchTab('dashboard');
+  renderDashboard();
+  renderRentals();
+  renderLending();
+  renderBorrowing();
+  showToast('Real data restored!', 'success');
 };
 
 // Hard system reset
@@ -7608,6 +7643,11 @@ window.addEventListener('DOMContentLoaded', () => {
   initFileDB(function() {
     initApp();
     setTheme(state.theme || 'black-and-colored-plain');
+    // Show restore banner if demo data is active with backup
+    if (localStorage.getItem('capitalflow_backup')) {
+      var rb = document.getElementById('restore-banner');
+      if (rb) rb.style.display = 'flex';
+    }
 
   // ==========================================
   // SWIPE GESTURES FOR MOBILE NAVIGATION

@@ -25,6 +25,11 @@
 <body>
   <div class="ls-blocker"></div>
   <div class="app-container">
+    <!-- Restore Data Banner (shown after loading demo data) -->
+    <div id="restore-banner" style="display:none;position:sticky;top:0;z-index:9999;background:rgba(251,191,36,0.15);border-bottom:1px solid rgba(251,191,36,0.3);padding:0.6rem 1rem;align-items:center;justify-content:space-between;gap:0.5rem;">
+      <span style="font-size:0.82rem;color:var(--color-warning);font-weight:600;">⚠️ Demo data active — your real data is backed up</span>
+      <button class="btn btn-primary" onclick="restoreRealData()" style="min-height:32px;font-size:0.78rem;padding:0.3rem 0.8rem;white-space:nowrap;">Restore My Data</button>
+    </div>
     
     <!-- Sidebar Navigation (Desktop) -->
     <aside class="sidebar">
@@ -1810,7 +1815,7 @@ Every card shows this at the bottom:<br><br>
   </div>
 
   <!-- JavaScript Modules -->
-  <script src="app.js?v=10"></script>
+  <script src="app.js?v=11"></script>
 <script>
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('/sw.js');
