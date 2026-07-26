@@ -1329,6 +1329,13 @@ body::before {
   position: relative;
 }
 
+.loan-sub-row {
+  transition: background 0.15s ease;
+}
+.loan-sub-row:hover {
+  background: rgba(148, 163, 184, 0.08);
+}
+
 .item-row {
   display: flex;
   justify-content: space-between;

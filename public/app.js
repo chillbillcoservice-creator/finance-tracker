@@ -3448,11 +3448,11 @@ function renderLending() {
 
         if (stats.statusInMonth !== 'active') {
           const currentRecv = formatCurrency(stats.currentMonthSum);
-          card.innerHTML += '<div style="font-size:0.82rem;"><span style="font-weight:600;">' + formattedPrincipal + ' <span class="badge badge-muted">Closed</span></span> <span style="color:var(--text-secondary);">· Rcvd ' + currentRecv + '</span></div>';
+          card.innerHTML += '<div class="loan-sub-row" onclick="event.stopPropagation();openLoanDetail(\'' + loan.id + '\',\'lent\')" style="font-size:0.82rem;cursor:pointer;padding:0.25rem 0.3rem;border-radius:4px;"><span style="font-weight:600;">' + formattedPrincipal + ' <span class="badge badge-muted">Closed</span></span> <span style="color:var(--text-secondary);">· Rcvd ' + currentRecv + '</span></div>';
         } else {
-          card.innerHTML += '<div style="font-size:0.82rem;"><span style="font-weight:600;">' + formattedPrincipal + '</span> <span style="color:var(--color-purple);font-weight:600;">EMI</span> <span style="color:var(--text-secondary);">@ ' + formatCurrency(Number(loan.emiAmount)) + '/mo </span><span style="color:' + (stats.advanceEmiCount > 0 ? 'var(--color-purple)' : 'var(--text-secondary)') + ';">· Paid ' + stats.emiPaidCount + '/' + stats.emiTotalCount + '</span>' + (stats.advEmiAmount > 0 ? ' <span style="color:var(--color-purple);font-size:0.65rem;font-weight:600;">Adv ' + formatCurrency(stats.advEmiAmount) + '</span>' : '') + '</div>';
+          card.innerHTML += '<div class="loan-sub-row" onclick="event.stopPropagation();openLoanDetail(\'' + loan.id + '\',\'lent\')" style="font-size:0.82rem;cursor:pointer;padding:0.25rem 0.3rem;border-radius:4px;"><span style="font-weight:600;">' + formattedPrincipal + '</span> <span style="color:var(--color-purple);font-weight:600;">EMI</span> <span style="color:var(--text-secondary);">@ ' + formatCurrency(Number(loan.emiAmount)) + '/mo </span><span style="color:' + (stats.advanceEmiCount > 0 ? 'var(--color-purple)' : 'var(--text-secondary)') + ';">· Paid ' + stats.emiPaidCount + '/' + stats.emiTotalCount + '</span>' + (stats.advEmiAmount > 0 ? ' <span style="color:var(--color-purple);font-size:0.65rem;font-weight:600;">Adv ' + formatCurrency(stats.advEmiAmount) + '</span>' : '') + '</div>';
           var emiPct = stats.emiTotalCount > 0 ? Math.round(stats.emiPaidCount / stats.emiTotalCount * 100) : 0;
-          card.innerHTML += '<div style="width:100%;height:3px;background:var(--bg-tertiary);border-radius:2px;margin:0.15rem 0 0.2rem;"><div style="width:' + Math.min(emiPct,100) + '%;height:3px;background:var(--color-purple);border-radius:2px;"></div></div>';
+          card.innerHTML += '<div class="loan-sub-row" onclick="event.stopPropagation();openLoanDetail(\'' + loan.id + '\',\'lent\')" style="width:100%;height:6px;background:var(--bg-tertiary);border-radius:3px;margin:0.15rem 0 0.2rem;cursor:pointer;"><div style="width:' + Math.min(emiPct,100) + '%;height:6px;background:var(--color-purple);border-radius:3px;"></div></div>';
         }
       });
 
@@ -3513,11 +3513,11 @@ function renderLending() {
 
         if (stats.statusInMonth !== 'active') {
           const currentRecv = formatCurrency(stats.currentMonthSum);
-          card.innerHTML += '<div style="font-size:0.82rem;"><span style="font-weight:600;">' + formattedPrincipal + ' <span class="badge badge-muted">Closed</span></span> <span style="color:var(--text-secondary);">· Rcvd ' + currentRecv + '</span></div>';
+          card.innerHTML += '<div class="loan-sub-row" onclick="event.stopPropagation();openLoanDetail(\'' + loan.id + '\',\'lent\')" style="font-size:0.82rem;cursor:pointer;padding:0.25rem 0.3rem;border-radius:4px;"><span style="font-weight:600;">' + formattedPrincipal + ' <span class="badge badge-muted">Closed</span></span> <span style="color:var(--text-secondary);">· Rcvd ' + currentRecv + '</span></div>';
         } else if (loan.isEMI) {
-          card.innerHTML += '<div style="font-size:0.82rem;"><span style="font-weight:600;">' + formattedPrincipal + '</span> <span style="color:var(--color-purple);font-weight:600;">EMI</span> <span style="color:var(--text-secondary);">@ ' + formatCurrency(Number(loan.emiAmount)) + '/mo </span><span style="color:' + (stats.advanceEmiCount > 0 ? 'var(--color-purple)' : 'var(--text-secondary)') + ';">· Paid ' + stats.emiPaidCount + '/' + stats.emiTotalCount + '</span>' + (stats.advEmiAmount > 0 ? ' <span style="color:var(--color-purple);font-size:0.65rem;font-weight:600;">Adv ' + formatCurrency(stats.advEmiAmount) + '</span>' : '') + '</div>';
+          card.innerHTML += '<div class="loan-sub-row" onclick="event.stopPropagation();openLoanDetail(\'' + loan.id + '\',\'lent\')" style="font-size:0.82rem;cursor:pointer;padding:0.25rem 0.3rem;border-radius:4px;"><span style="font-weight:600;">' + formattedPrincipal + '</span> <span style="color:var(--color-purple);font-weight:600;">EMI</span> <span style="color:var(--text-secondary);">@ ' + formatCurrency(Number(loan.emiAmount)) + '/mo </span><span style="color:' + (stats.advanceEmiCount > 0 ? 'var(--color-purple)' : 'var(--text-secondary)') + ';">· Paid ' + stats.emiPaidCount + '/' + stats.emiTotalCount + '</span>' + (stats.advEmiAmount > 0 ? ' <span style="color:var(--color-purple);font-size:0.65rem;font-weight:600;">Adv ' + formatCurrency(stats.advEmiAmount) + '</span>' : '') + '</div>';
           var emiPct = stats.emiTotalCount > 0 ? Math.round(stats.emiPaidCount / stats.emiTotalCount * 100) : 0;
-          card.innerHTML += '<div style="width:100%;height:3px;background:var(--bg-tertiary);border-radius:2px;margin:0.15rem 0 0.2rem;"><div style="width:' + Math.min(emiPct,100) + '%;height:3px;background:var(--color-purple);border-radius:2px;"></div></div>';
+          card.innerHTML += '<div class="loan-sub-row" onclick="event.stopPropagation();openLoanDetail(\'' + loan.id + '\',\'lent\')" style="width:100%;height:6px;background:var(--bg-tertiary);border-radius:3px;margin:0.15rem 0 0.2rem;cursor:pointer;"><div style="width:' + Math.min(emiPct,100) + '%;height:6px;background:var(--color-purple);border-radius:3px;"></div></div>';
         } else {
           const advTotal = stats.advTotal > 0 ? formatCurrency(stats.advTotal) : '';
           var intDisplay = '';
@@ -3531,7 +3531,7 @@ function renderLending() {
           if (stats.advInterest > 0) {
             intDisplay += ' <span style="color:var(--color-purple);font-weight:600;">· Adv Int Rcvd ' + formatCurrency(stats.advInterest) + '</span>';
           }
-          card.innerHTML += '<div style="font-size:0.82rem;"><span style="font-weight:600;">' + formattedPrincipal + '</span> <span style="color:var(--text-secondary);">+' + formatCurrency(stats.monthlyYield) + '/mo</span>' + intDisplay + (advTotal && stats.advInterest <= 0 ? ' <span style="font-size:0.6rem;color:var(--color-purple);font-weight:700;">Advance ' + advTotal + '</span>' : '') + '</div>';
+          card.innerHTML += '<div class="loan-sub-row" onclick="event.stopPropagation();openLoanDetail(\'' + loan.id + '\',\'lent\')" style="font-size:0.82rem;cursor:pointer;padding:0.25rem 0.3rem;border-radius:4px;"><span style="font-weight:600;">' + formattedPrincipal + '</span> <span style="color:var(--text-secondary);">+' + formatCurrency(stats.monthlyYield) + '/mo</span>' + intDisplay + (advTotal && stats.advInterest <= 0 ? ' <span style="font-size:0.6rem;color:var(--color-purple);font-weight:700;">Advance ' + advTotal + '</span>' : '') + '</div>';
         }
       });
 
@@ -3713,6 +3713,11 @@ function renderBorrowing() {
       </div>
     `;
 
+    card.style.cursor = 'pointer';
+    card.onclick = function(e) {
+      if (e.target.closest('[onclick]') || e.target.closest('button') || e.target.closest('input') || e.target.closest('label')) return;
+      openLoanDetail(loan.id, 'borrowed');
+    };
     listContainer.appendChild(card);
     });
   });
@@ -4550,6 +4555,130 @@ window.deleteLoan = deleteLoan;
 window.promptPayment = promptPayment;
 window.showLedger = showLedger;
 window.deleteLedgerPayment = deleteLedgerPayment;
+window.openLoanDetail = openLoanDetail;
+
+function openLoanDetail(loanId, direction) {
+  loadState();
+  const list = direction === 'lent' ? state.lent : state.borrowed;
+  const loan = list.find(l => l.id === loanId);
+  if (!loan) return;
+
+  const type = direction === 'lent' ? 'received' : 'paid';
+  const name = direction === 'lent' ? (loan.borrowerName || 'Unknown') : (loan.financierName || 'Unknown');
+  const phone = loan.phone || '';
+  const outstanding = getOutstandingPrincipal(loanId, loan.principal);
+
+  const allPayments = state.interestPayments.filter(p => p.loanId === loanId && p.type === type);
+  const interestPayments = allPayments.filter(p => p.category === 'interest');
+  const principalPayments = allPayments.filter(p => p.category === 'principal');
+  const totalInterest = interestPayments.reduce((s, p) => s + Number(p.amount), 0);
+  const totalRepaid = principalPayments.reduce((s, p) => s + Number(p.amount), 0);
+
+  const isEMI = loan.isEMI;
+  const emiAmount = Number(loan.emiAmount) || 0;
+  const emiTotalCount = isEMI ? (loan.emiTotal || Math.ceil(Number(loan.principal) / emiAmount)) : 0;
+  const fullEmiPayments = principalPayments.filter(p => !p.note || p.note.indexOf('[Partial]') === -1);
+  const emiPaidCount = isEMI ? fullEmiPayments.length : 0;
+  const emiPct = emiTotalCount > 0 ? Math.round(emiPaidCount / emiTotalCount * 100) : 0;
+  const nextEmi = (outstanding > 0 && isEMI) ? emiAmount : 0;
+  const monthlyYield = isEMI ? emiAmount : outstanding * (Number(loan.interestRate) / 100);
+
+  const title = document.getElementById('loan-detail-title');
+  title.innerHTML = name + (phone ? ' <span style="font-size:0.7rem;color:var(--text-secondary);font-weight:400;">' + phone + '</span>' : '');
+
+  const body = document.getElementById('loan-detail-body');
+  var h = '';
+
+  // Top stats row
+  h += '<div style="display:flex;gap:0.5rem;margin-bottom:0.75rem;">';
+  h += '<div class="card" style="flex:1;padding:0.6rem;text-align:center;">';
+  h += '<div style="font-size:0.6rem;text-transform:uppercase;color:var(--text-muted);letter-spacing:0.5px;">Outstanding</div>';
+  h += '<div style="font-weight:800;font-size:1.1rem;margin-top:0.15rem;color:var(--color-warning);">' + formatCurrency(outstanding) + '</div>';
+  h += '</div>';
+  h += '<div class="card" style="flex:1;padding:0.6rem;text-align:center;">';
+  h += '<div style="font-size:0.6rem;text-transform:uppercase;color:var(--text-muted);letter-spacing:0.5px;">Interest ' + (direction === 'lent' ? 'Rcvd' : 'Paid') + '</div>';
+  h += '<div style="font-weight:800;font-size:1.1rem;margin-top:0.15rem;color:var(--color-success);">' + formatCurrency(totalInterest) + '</div>';
+  h += '</div>';
+  h += '</div>';
+
+  // Loan info
+  h += '<div class="card" style="padding:0.6rem;margin-bottom:0.75rem;">';
+  h += '<div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:0.3rem;font-size:0.78rem;color:var(--text-secondary);">';
+  h += '<span>Start: <b style="color:var(--text-primary);">' + formatDate(loan.startDate) + '</b></span>';
+  h += '<span>Rate: <b style="color:var(--text-primary);">' + loan.interestRate + '%/mo</b></span>';
+  h += '<span>Principal: <b style="color:var(--text-primary);">' + formatCurrency(loan.principal) + '</b></span>';
+  h += '<span>Monthly: <b style="color:var(--text-primary);">' + formatCurrency(monthlyYield) + '</b></span>';
+  if (loan.notes) h += '<span style="width:100%;font-style:italic;margin-top:0.15rem;">"' + loan.notes + '"</span>';
+  h += '</div></div>';
+
+  // EMI Progress (only for EMI loans)
+  if (isEMI) {
+    h += '<div class="card" style="padding:0.6rem;margin-bottom:0.75rem;">';
+    h += '<div style="font-size:0.65rem;text-transform:uppercase;color:var(--text-muted);letter-spacing:0.5px;margin-bottom:0.3rem;">EMI Progress</div>';
+    h += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.3rem;">';
+    h += '<span style="font-weight:700;font-size:1rem;color:var(--color-purple);">' + formatCurrency(emiAmount) + '/mo</span>';
+    h += '<span style="font-size:0.8rem;color:var(--text-secondary);">Paid <b style="color:var(--text-primary);">' + emiPaidCount + '/' + emiTotalCount + '</b></span>';
+    h += '</div>';
+    h += '<div style="width:100%;height:6px;background:var(--bg-tertiary);border-radius:3px;overflow:hidden;">';
+    h += '<div style="width:' + Math.min(emiPct, 100) + '%;height:6px;background:var(--color-purple);border-radius:3px;transition:width 0.3s;"></div>';
+    h += '</div>';
+    h += '<div style="display:flex;justify-content:space-between;font-size:0.65rem;color:var(--text-muted);margin-top:0.2rem;">';
+    h += '<span>' + emiPct + '% done</span>';
+    h += '<span>' + (emiTotalCount - emiPaidCount) + ' remaining</span>';
+    h += '</div>';
+    if (nextEmi > 0) {
+      h += '<div style="margin-top:0.4rem;padding:0.4rem;background:rgba(168,85,247,0.1);border-radius:6px;text-align:center;font-size:0.78rem;">';
+      h += 'Next EMI: <b style="color:var(--color-purple);">' + formatCurrency(nextEmi) + '</b>';
+      h += '</div>';
+    }
+    h += '</div>';
+  }
+
+  // Repayment summary (non-EMI)
+  if (!isEMI && totalRepaid > 0) {
+    h += '<div class="card" style="padding:0.6rem;margin-bottom:0.75rem;">';
+    h += '<div style="font-size:0.65rem;text-transform:uppercase;color:var(--text-muted);letter-spacing:0.5px;margin-bottom:0.2rem;">Principal Repaid</div>';
+    h += '<div style="font-weight:700;font-size:1rem;color:var(--color-success);">' + formatCurrency(totalRepaid) + '</div>';
+    h += '</div>';
+  }
+
+  // Recent payments (last 5)
+  var recentPayments = [...allPayments].sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 5);
+  if (recentPayments.length > 0) {
+    h += '<div style="margin-bottom:0.75rem;">';
+    h += '<div style="font-size:0.65rem;text-transform:uppercase;color:var(--text-muted);letter-spacing:0.5px;margin-bottom:0.35rem;">Recent Payments</div>';
+    recentPayments.forEach(function(p) {
+      var catLabel = '';
+      var catColor = 'var(--text-secondary)';
+      if (p.category === 'interest') { catLabel = 'Interest'; catColor = direction === 'lent' ? 'var(--color-accent)' : 'var(--color-purple)'; }
+      else if (p.category === 'principal') { catLabel = 'Principal'; catColor = 'var(--color-success)'; }
+      else if (p.category === 'increase') { catLabel = 'Top-up'; catColor = 'var(--color-accent)'; }
+      else if (p.category === 'issuance') { catLabel = 'Disbursed'; catColor = 'var(--color-purple)'; }
+      h += '<div style="display:flex;justify-content:space-between;align-items:center;padding:0.35rem 0;border-bottom:1px solid var(--border-color);font-size:0.78rem;">';
+      h += '<span style="color:var(--text-secondary);">' + formatDate(p.date) + '</span>';
+      h += '<span style="font-weight:600;">' + formatCurrency(Number(p.amount)) + '</span>';
+      h += '<span style="font-size:0.65rem;padding:0.1rem 0.35rem;border-radius:4px;background:' + catColor + '22;color:' + catColor + ';">' + catLabel + '</span>';
+      h += '</div>';
+    });
+    h += '</div>';
+  }
+
+  // Action buttons
+  h += '<div style="display:flex;gap:0.5rem;flex-wrap:wrap;">';
+  if (outstanding > 0) {
+    if (isEMI) {
+      h += '<button class="btn btn-primary" style="flex:1;min-height:40px;" onclick="closeModal(\'modal-loan-detail\');promptRecordEMI(\'' + loanId + '\',\'' + (direction === 'lent' ? 'received' : 'paid') + '\')">✅ Receive EMI</button>';
+    } else {
+      h += '<button class="btn btn-primary" style="flex:1;min-height:40px;" onclick="closeModal(\'modal-loan-detail\');quickLoanPayment(\'' + loanId + '\',\'' + direction + '\')">✅ Receive</button>';
+    }
+  }
+  h += '<button class="btn btn-secondary" style="flex:1;min-height:40px;" onclick="closeModal(\'modal-loan-detail\');editLoan(\'' + loanId + '\',\'' + direction + '\')">✏️ Edit</button>';
+  h += '</div>';
+  h += '<button class="btn btn-secondary" style="width:100%;margin-top:0.5rem;min-height:36px;font-size:0.8rem;" onclick="closeModal(\'modal-loan-detail\');showLedger(\'' + loanId + '\',\'' + direction + '\')">📋 View Full Ledger</button>';
+
+  body.innerHTML = h;
+  openModal('modal-loan-detail');
+}
 
 // 11. RENTALS TAB CONTROLLERS & ACTIONS
 
