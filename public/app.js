@@ -3130,13 +3130,27 @@ function renderRecentActivity() {
     if (currentActivityFilter === 'month' && d < monthStart) return;
     const isReceived = p.type === 'received';
     const name = isReceived ? state.lent.find(l => l.id === p.loanId) : state.borrowed.find(l => l.id === p.loanId);
+    var actLabel, actIcon, actType;
+    if (p.category === 'increase') {
+      actLabel = isReceived ? 'Principal Disbursed' : 'Principal Received';
+      actIcon = '📤';
+      actType = 'principal-disbursed';
+    } else if (p.category === 'principal') {
+      actLabel = isReceived ? 'Principal Repayment' : 'Principal Paid';
+      actIcon = '💵';
+      actType = 'principal-repayment';
+    } else {
+      actLabel = isReceived ? 'Interest Received' : 'Interest Paid';
+      actIcon = '💰';
+      actType = 'interest-paid';
+    }
     activities.push({
       _order: actOrder++,
       date: date,
-      type: 'interest-paid',
-      label: isReceived ? 'Interest Received' : 'Interest Paid',
+      type: actType,
+      label: actLabel,
       detail: `${name ? name.borrowerName || name.financierName : 'Unknown'} — ${formatCurrency(p.amount)}`,
-      icon: '💰'
+      icon: actIcon
     });
   });
   
@@ -7239,7 +7253,7 @@ window.window.openCollectionDetails = function(type, event) {
   } else if (type === 'interest') {
     var monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
     title = 'Interest Collections - ' + monthNames[selMonth - 1].toUpperCase();
-    const rawPayments = state.interestPayments.filter(p => p.type === 'received' && p.category !== 'issuance' && filterPayment(p));
+    const rawPayments = state.interestPayments.filter(p => p.type === 'received' && p.category !== 'issuance' && p.category !== 'increase' && p.category !== 'principal' && filterPayment(p));
     const groupedCol = {};
     const groupedIds = {};
     const groupedAdv = {};
@@ -7268,7 +7282,7 @@ window.window.openCollectionDetails = function(type, event) {
         const outstanding = getOutstandingPrincipalAtMonth(l.id, l.principal, selectedMonthStr);
         if (outstanding > 0) {
           const expected = l.isEMI ? Number(l.emiAmount || 0) : outstanding * (Number(l.interestRate) / 100);
-          const pPaid = state.interestPayments.filter(p => p.type === 'received' && p.category !== 'issuance' && p.loanId === l.id && p.date.startsWith(selectedMonthStr) && (!p.note || p.note.indexOf('[Advance]') === -1)).reduce((sum, p) => sum + Number(p.amount), 0);
+          const pPaid = state.interestPayments.filter(p => p.type === 'received' && p.category !== 'issuance' && p.category !== 'increase' && p.category !== 'principal' && p.loanId === l.id && p.date.startsWith(selectedMonthStr) && (!p.note || p.note.indexOf('[Advance]') === -1)).reduce((sum, p) => sum + Number(p.amount), 0);
           const pOwe = expected - pPaid;
           if (pOwe > 0) {
             const normName = (l.borrowerName || '').toLowerCase().trim();
@@ -7317,7 +7331,7 @@ window.window.openCollectionDetails = function(type, event) {
         const outstanding = getOutstandingPrincipalAtMonth(l.id, l.principal, selectedMonthStr);
         if (outstanding > 0) {
           const expected = l.isEMI ? Number(l.emiAmount || 0) : outstanding * (Number(l.interestRate) / 100);
-          const pPaid = state.interestPayments.filter(p => p.type === 'received' && p.category !== 'issuance' && p.loanId === l.id && p.date.startsWith(selectedMonthStr) && (!p.note || p.note.indexOf('[Advance]') === -1)).reduce((sum, p) => sum + Number(p.amount), 0);
+          const pPaid = state.interestPayments.filter(p => p.type === 'received' && p.category !== 'issuance' && p.category !== 'increase' && p.category !== 'principal' && p.loanId === l.id && p.date.startsWith(selectedMonthStr) && (!p.note || p.note.indexOf('[Advance]') === -1)).reduce((sum, p) => sum + Number(p.amount), 0);
           const pOwe = expected - pPaid;
           if (pOwe > 0) {
             const normName = (l.borrowerName || '').toLowerCase().trim();
