@@ -3106,6 +3106,7 @@ function renderRecentActivity() {
     const date = p.datePaid || p.date;
     if (!date) return;
     const d = new Date(date);
+    if (d > now) return;
     if (currentActivityFilter === 'today' && d < todayStart) return;
     if (currentActivityFilter === 'week' && d < weekStart) return;
     if (currentActivityFilter === 'month' && d < monthStart) return;
@@ -3125,6 +3126,7 @@ function renderRecentActivity() {
     const date = p.date;
     if (!date) return;
     const d = new Date(date);
+    if (d > now) return;
     if (currentActivityFilter === 'today' && d < todayStart) return;
     if (currentActivityFilter === 'week' && d < weekStart) return;
     if (currentActivityFilter === 'month' && d < monthStart) return;
@@ -3158,6 +3160,7 @@ function renderRecentActivity() {
     const date = e.date;
     if (!date) return;
     const d = new Date(date);
+    if (d > now) return;
     if (currentActivityFilter === 'today' && d < todayStart) return;
     if (currentActivityFilter === 'week' && d < weekStart) return;
     if (currentActivityFilter === 'month' && d < monthStart) return;
@@ -3179,6 +3182,7 @@ function renderRecentActivity() {
     const date = l.startDate;
     if (!date) return;
     const d = new Date(date);
+    if (d > now) return;
     if (currentActivityFilter === 'today' && d < todayStart) return;
     if (currentActivityFilter === 'week' && d < weekStart) return;
     if (currentActivityFilter === 'month' && d < monthStart) return;
@@ -3196,6 +3200,7 @@ function renderRecentActivity() {
     const date = b.startDate;
     if (!date) return;
     const d = new Date(date);
+    if (d > now) return;
     if (currentActivityFilter === 'today' && d < todayStart) return;
     if (currentActivityFilter === 'week' && d < weekStart) return;
     if (currentActivityFilter === 'month' && d < monthStart) return;
@@ -3213,6 +3218,7 @@ function renderRecentActivity() {
     const date = r.startDate;
     if (!date) return;
     const d = new Date(date);
+    if (d > now) return;
     if (currentActivityFilter === 'today' && d < todayStart) return;
     if (currentActivityFilter === 'week' && d < weekStart) return;
     if (currentActivityFilter === 'month' && d < monthStart) return;
@@ -5108,7 +5114,7 @@ window.loadRealSeedData = function() {
     {id:'l9',borrowerName:'Tushar',phone:'9999366827',principal:400000,interestRate:4,startDate:'2026-06-20',status:'active',isEMI:false},
     {id:'l10',borrowerName:'Tushar',phone:'9999366827',principal:240000,interestRate:0,startDate:'2026-06-20',status:'active',isEMI:true,emiAmount:10000,emiTotal:24},
     {id:'l11',borrowerName:'M.K',phone:'9999315929',principal:900000,interestRate:0,startDate:'2024-01-20',status:'active',isEMI:true,emiAmount:15000,emiTotal:60},
-    {id:'l12',borrowerName:'M.K',phone:'9999315929',principal:300000,interestRate:0,startDate:'2026-08-01',status:'active',isEMI:false},
+    {id:'l12',borrowerName:'M.K',phone:'9999315929',principal:300000,interestRate:0,startDate:'2026-07-01',status:'active',isEMI:false},
     {id:'l13',borrowerName:'Sailesh',phone:'9899551694',principal:200000,interestRate:0,startDate:'2025-09-25',status:'active',isEMI:true,emiAmount:4000,emiTotal:50},
     {id:'l14',borrowerName:'Sailesh',phone:'9899551694',principal:25000,interestRate:3,startDate:'2026-06-25',status:'active',isEMI:false},
     {id:'l15',borrowerName:'Sailesh',phone:'9899551694',principal:150000,interestRate:4,startDate:'2026-06-25',status:'active',isEMI:false}
