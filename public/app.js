@@ -5042,9 +5042,11 @@ window.deleteRentPayment = deleteRentPayment;
 window.loadRealSeedData = function() {
   if (!confirm('Load demo data? This will replace all existing data with sample entries.')) return;
   loadState();
-  // Auto-backup real data before overwriting
-  var backup = { lent: state.lent, borrowed: state.borrowed, rentals: state.rentals, rentPayments: state.rentPayments, interestPayments: state.interestPayments, expenses: state.expenses, renewals: state.renewals, files: state.files, properties: state.properties };
-  localStorage.setItem('capitalflow_backup', JSON.stringify(backup));
+  // Auto-backup real data before overwriting (skip files — stored in IndexedDB)
+  try {
+    var backup = { lent: state.lent, borrowed: state.borrowed, rentals: state.rentals, rentPayments: state.rentPayments, interestPayments: state.interestPayments, expenses: state.expenses, renewals: state.renewals, properties: state.properties };
+    localStorage.setItem('capitalflow_backup', JSON.stringify(backup));
+  } catch(e) { console.warn('Backup failed:', e); }
   state.rentals = [];
   state.rentPayments = [];
   state.lent = [];
@@ -5230,7 +5232,6 @@ window.restoreRealData = function() {
   state.interestPayments = backup.interestPayments || [];
   state.expenses = backup.expenses || [];
   state.renewals = backup.renewals || [];
-  state.files = backup.files || [];
   state.properties = backup.properties || [];
   saveState();
   localStorage.removeItem('capitalflow_backup');
