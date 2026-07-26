@@ -4052,10 +4052,11 @@ function promptConvertEMI(loanId, direction) {
   document.getElementById('emi-convert-name').textContent = loan.borrowerName;
   document.getElementById('emi-convert-amount').value = outstandingPrincipal;
   document.getElementById('emi-convert-rate').value = loan.interestRate;
+  document.getElementById('emi-convert-emi-amount').value = '';
   document.getElementById('emi-convert-preview').textContent = 'Rs. 0 / mo';
   
   openModal('modal-emi-convert');
-  calculateEMIPreview();
+  calculateEMIPreview('tenure');
 }
 
 function selectTenure(btn, months) {
@@ -4071,23 +4072,59 @@ function selectTenure(btn, months) {
   calculateEMIPreview();
 }
 
-function calculateEMIPreview() {
+function calculateEMIPreview(source) {
   const P = Number(document.getElementById('emi-convert-amount').value);
-  const tenure = Number(document.getElementById('emi-convert-tenure').value);
+  const tenureInput = document.getElementById('emi-convert-tenure');
+  const emiInput = document.getElementById('emi-convert-emi-amount');
   const rateInput = Number(document.getElementById('emi-convert-rate').value);
+  const tenure = Number(tenureInput.value);
+  const manualEmi = Number(emiInput.value);
+  const r = rateInput / 100;
+
+  if (source === 'emi' && manualEmi > 0 && P > 0 && r > 0) {
+    // User set EMI manually — calculate tenure from EMI
+    // EMI formula: EMI = P * r * (1+r)^n / ((1+r)^n - 1)
+    // Solve for n: n = -ln(1 - P*r/EMI) / ln(1+r)
+    const val = 1 - (P * r) / manualEmi;
+    if (val > 0) {
+      const n = Math.ceil(-Math.log(val) / Math.log(1 + r));
+      tenureInput.value = n;
+      document.querySelectorAll('#tenure-shortcuts .btn').forEach(b => { b.style.background = ''; b.style.color = ''; b.style.borderColor = ''; });
+      const totalInterest = manualEmi * n - P;
+      document.getElementById('emi-convert-preview').textContent = `${formatCurrency(manualEmi)} / mo`;
+      document.getElementById('emi-convert-total-interest').textContent = formatCurrency(totalInterest);
+      document.getElementById('emi-convert-total-amount').textContent = formatCurrency(P + totalInterest);
+      return;
+    }
+  }
+
+  if (source === 'emi' && manualEmi > 0 && P > 0 && r === 0) {
+    // 0% interest — tenure = P / EMI
+    const n = Math.ceil(P / manualEmi);
+    tenureInput.value = n;
+    document.querySelectorAll('#tenure-shortcuts .btn').forEach(b => { b.style.background = ''; b.style.color = ''; b.style.borderColor = ''; });
+    const totalInterest = 0;
+    document.getElementById('emi-convert-preview').textContent = `${formatCurrency(manualEmi)} / mo`;
+    document.getElementById('emi-convert-total-interest').textContent = formatCurrency(totalInterest);
+    document.getElementById('emi-convert-total-amount').textContent = formatCurrency(P + totalInterest);
+    return;
+  }
+
   if (!tenure || tenure <= 0 || !rateInput || rateInput <= 0) {
     document.getElementById('emi-convert-preview').textContent = 'Rs. 0 / mo';
     document.getElementById('emi-convert-total-interest').textContent = formatCurrency(0);
     document.getElementById('emi-convert-total-amount').textContent = formatCurrency(0);
+    if (source === 'tenure' || source === undefined) emiInput.value = '';
     return;
   }
-  const r = rateInput / 100;
-  const n = tenure;
+
+  // Default: auto-calculate EMI from tenure
   let emi;
-  if (r === 0) emi = P / n;
-  else emi = P * r * Math.pow(1 + r, n) / (Math.pow(1 + r, n) - 1);
-  const totalInterest = emi * n - P;
-  
+  if (r === 0) emi = P / tenure;
+  else emi = P * r * Math.pow(1 + r, tenure) / (Math.pow(1 + r, tenure) - 1);
+  const totalInterest = emi * tenure - P;
+
+  emiInput.value = Math.round(emi);
   document.getElementById('emi-convert-preview').textContent = `${formatCurrency(emi)} / mo`;
   document.getElementById('emi-convert-total-interest').textContent = formatCurrency(totalInterest);
   document.getElementById('emi-convert-total-amount').textContent = formatCurrency(P + totalInterest);
@@ -4101,6 +4138,7 @@ document.getElementById('form-emi-convert').addEventListener('submit', (e) => {
   const tenure = Number(document.getElementById('emi-convert-tenure').value);
   const rateInput = Number(document.getElementById('emi-convert-rate').value);
   const emiPrincipal = Number(document.getElementById('emi-convert-amount').value);
+  const manualEmi = Number(document.getElementById('emi-convert-emi-amount').value);
   
   const listName = direction === 'lent' ? 'lent' : 'borrowed';
   const loan = state[listName].find(x => x.id === loanId);
@@ -4113,7 +4151,12 @@ document.getElementById('form-emi-convert').addEventListener('submit', (e) => {
   
   const r = rateInput / 100;
   const n = tenure;
-  let emi = (r === 0) ? emiPrincipal / n : emiPrincipal * r * Math.pow(1 + r, n) / (Math.pow(1 + r, n) - 1);
+  let emi;
+  if (manualEmi > 0) {
+    emi = manualEmi;
+  } else {
+    emi = (r === 0) ? emiPrincipal / n : emiPrincipal * r * Math.pow(1 + r, n) / (Math.pow(1 + r, n) - 1);
+  }
   
   if (emiPrincipal >= outstanding) {
     // Full conversion

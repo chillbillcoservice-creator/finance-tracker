@@ -1092,7 +1092,7 @@ Every card shows this at the bottom:<br><br>
           </div>
           <div class="form-group">
             <label class="form-label" for="emi-convert-tenure">Tenure (Months)</label>
-            <input type="number" id="emi-convert-tenure" class="form-input" min="1" max="360" placeholder="e.g. 12" oninput="calculateEMIPreview()" required>
+            <input type="number" id="emi-convert-tenure" class="form-input" min="1" max="360" placeholder="e.g. 12" oninput="calculateEMIPreview('tenure')">
             <div id="tenure-shortcuts" style="display: flex; gap: 0.4rem; margin-top: 0.5rem; flex-wrap: wrap;">
               <button type="button" class="btn btn-sm btn-secondary" onclick="selectTenure(this,6)" style="padding: 0.25rem 0.6rem; font-size: 0.75rem;">6m</button>
               <button type="button" class="btn btn-sm btn-secondary" onclick="selectTenure(this,12)" style="padding: 0.25rem 0.6rem; font-size: 0.75rem;">12m</button>
@@ -1101,6 +1101,11 @@ Every card shows this at the bottom:<br><br>
               <button type="button" class="btn btn-sm btn-secondary" onclick="selectTenure(this,24)" style="padding: 0.25rem 0.6rem; font-size: 0.75rem;">24m</button>
               <button type="button" class="btn btn-sm btn-secondary" onclick="selectTenure(this,30)" style="padding: 0.25rem 0.6rem; font-size: 0.75rem;">30m</button>
             </div>
+          </div>
+          <div style="text-align: center; margin: 0.5rem 0; font-size: 0.75rem; color: var(--text-muted);">— OR set EMI manually —</div>
+          <div class="card" style="padding: 0.75rem; text-align: center;">
+            <div style="font-size: 0.65rem; text-transform: uppercase; color: var(--text-secondary);">EMI Amount (₹ / mo)</div>
+            <input type="number" id="emi-convert-emi-amount" class="form-input" min="1" step="any" placeholder="e.g. 10000" style="width: 120px; margin: 0.25rem auto 0; text-align: center; padding: 0.25rem; min-height: auto; font-weight: 700; font-size: 1rem;" oninput="calculateEMIPreview('emi')">
           </div>
           <div class="card" style="padding: 0.75rem; text-align: center; margin-top: 0.75rem;">
             <div style="font-size: 0.65rem; text-transform: uppercase; color: var(--text-secondary);">EMI Preview</div>
@@ -1796,7 +1801,7 @@ Every card shows this at the bottom:<br><br>
   </div>
 
   <!-- JavaScript Modules -->
-  <script src="app.js?v=7"></script>
+  <script src="app.js?v=8"></script>
 <script>
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('/sw.js');
