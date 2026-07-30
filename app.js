@@ -29,7 +29,8 @@ let viewMode = 'month';
 // Selected date string in YYYY-MM-DD format
 let selectedDateStr = new Date().toISOString().slice(0, 10);
 
-let diaryView = 'diary'; // 'diary' | 'vault'
+let vaultVisible = false;
+let diaryModeActive = false;
 
 // Month names for selector
 const MONTH_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -79,28 +80,45 @@ function toggleYearlyMode() {
 }
 
 function toggleVaultView() {
-  if (diaryView === 'vault') {
-    diaryView = 'diary';
-    document.getElementById('btn-vault-toggle').textContent = '🔐';
-    document.getElementById('month-grid').style.display = '';
-    document.getElementById('month-selector-bar').style.display = viewMode === 'month' ? 'block' : 'none';
-    renderDiary();
-  } else {
-    diaryView = 'vault';
-    document.getElementById('btn-vault-toggle').textContent = '📋';
-    document.getElementById('month-selector-bar').style.display = 'none';
-    document.getElementById('year-selector-bar').style.display = 'none';
-    renderVault();
+  if (currentTab !== 'records') {
+    switchTab('records');
+    vaultVisible = true;
+    setTimeout(function() {
+      var btn = document.getElementById('btn-vault-toggle');
+      if (btn) btn.textContent = '📋';
+      var vc = document.getElementById('vault-content');
+      if (vc) vc.style.display = 'block';
+      renderVault();
+    }, 100);
+    return;
   }
+  vaultVisible = !vaultVisible;
+  var btn = document.getElementById('btn-vault-toggle');
+  if (btn) btn.textContent = vaultVisible ? '📋' : '🔐';
+  var vc = document.getElementById('vault-content');
+  if (vc) vc.style.display = vaultVisible ? 'block' : 'none';
+  if (vaultVisible) renderVault();
+}
+
+function toggleDiaryMode() {
+  diaryModeActive = !diaryModeActive;
+  var btn = document.getElementById('btn-diary-mode');
+  if (btn) btn.textContent = diaryModeActive ? '📖' : '📖';
+  refreshActiveTab();
+}
+
+function renderDiaryMode() {
+  var containerId = currentTab === 'tenants' ? 'tenants-diary-content' : 'finances-diary-content';
+  var mode = currentTab === 'tenants' ? 'rent' : 'interest';
+  renderDiary(document.getElementById(containerId), mode);
 }
 
 function renderVault() {
   loadState();
   state.vault = state.vault || [];
   var searchTerm = (document.getElementById('vault-search').value || '').toLowerCase().trim();
-  document.getElementById('diary-content').style.display = 'none';
-  document.getElementById('vault-content').style.display = 'block';
   var list = document.getElementById('vault-list');
+  if (!list) return;
   var filtered = state.vault.filter(function(e) {
     if (!searchTerm) return true;
     return e.label.toLowerCase().includes(searchTerm) || e.value.toLowerCase().includes(searchTerm);
@@ -186,10 +204,68 @@ function copyVaultEntry(id) {
   });
 }
 window.toggleVaultView = toggleVaultView;
+window.toggleDiaryMode = toggleDiaryMode;
 window.showAddVaultEntry = showAddVaultEntry;
 window.saveVaultEntry = saveVaultEntry;
 window.deleteVaultEntry = deleteVaultEntry;
 window.copyVaultEntry = copyVaultEntry;
+
+function showAddRental() {
+  document.getElementById('form-rental').reset();
+  document.getElementById('rental-id').value = '';
+  document.getElementById('rental-start-date').value = new Date().toISOString().split('T')[0];
+  document.getElementById('rental-aadhaar-base64').value = '';
+  document.getElementById('rental-agreement-base64').value = '';
+  document.getElementById('rental-aadhaar-file').value = '';
+  document.getElementById('rental-agreement-file').value = '';
+  document.getElementById('rental-aadhaar-status').style.display = 'none';
+  document.getElementById('rental-agreement-status').style.display = 'none';
+  document.getElementById('rental-modal-title').textContent = 'Add Tenant Agreement';
+  updateRentalRenewalDate();
+  openModal('modal-rental');
+}
+
+function showAddLoanLent() {
+  document.getElementById('form-loan').reset();
+  document.getElementById('loan-id').value = '';
+  document.getElementById('loan-direction').value = 'lent';
+  document.getElementById('loan-rate').value = '4.00';
+  var today = new Date();
+  var dueDate = new Date(today);
+  dueDate.setMonth(dueDate.getMonth() + 1);
+  var todayStr = today.toISOString().split('T')[0];
+  var dueDateStr = dueDate.toISOString().split('T')[0];
+  document.getElementById('loan-start-date').value = todayStr;
+  document.getElementById('loan-due-date').value = dueDateStr;
+  document.getElementById('loan-modal-title').textContent = 'Lend Money';
+  document.getElementById('loan-party-label').textContent = 'Borrower Name';
+  document.getElementById('loan-party').placeholder = 'e.g. John Doe';
+  updatePrincipalPresets('lent');
+  openModal('modal-loan');
+}
+
+function showAddLoanBorrowed() {
+  document.getElementById('form-loan').reset();
+  document.getElementById('loan-id').value = '';
+  document.getElementById('loan-direction').value = 'borrowed';
+  document.getElementById('loan-rate').value = '3.00';
+  var today = new Date();
+  var dueDate = new Date(today);
+  dueDate.setMonth(dueDate.getMonth() + 1);
+  var todayStr = today.toISOString().split('T')[0];
+  var dueDateStr = dueDate.toISOString().split('T')[0];
+  document.getElementById('loan-start-date').value = todayStr;
+  document.getElementById('loan-due-date').value = dueDateStr;
+  document.getElementById('loan-modal-title').textContent = 'Record Borrowed Money';
+  document.getElementById('loan-party-label').textContent = 'Lender Name';
+  document.getElementById('loan-party').placeholder = 'e.g. Apex Bank';
+  updatePrincipalPresets('borrowed');
+  openModal('modal-loan');
+}
+
+window.showAddRental = showAddRental;
+window.showAddLoanLent = showAddLoanLent;
+window.showAddLoanBorrowed = showAddLoanBorrowed;
 
 function renderMonthSelector() {
   const year = parseInt(selectedMonthStr.slice(0, 4));
@@ -627,6 +703,20 @@ function loadState() {
         if (_fileDataCache[f.id]) f.data = _fileDataCache[f.id];
       });
     }
+    // One-time migration: fix 0% loan payments mis-categorized as advance interest
+    if (!state._migratedZeroPct) {
+      var zeroPctIds = (state.lent || []).filter(function(l) { return Number(l.interestRate) === 0; }).map(function(l) { return l.id; });
+      if (zeroPctIds.length > 0) {
+        state.interestPayments = state.interestPayments.map(function(p) {
+          if (zeroPctIds.indexOf(p.loanId) !== -1 && p.category === 'interest' && p.note && p.note.indexOf('[Advance]') !== -1) {
+            return { id: p.id, loanId: p.loanId, type: p.type, category: 'principal', amount: p.amount, date: p.date, note: 'Principal repayment' };
+          }
+          return p;
+        });
+      }
+      state._migratedZeroPct = true;
+      saveState();
+    }
   } else {
     // Fresh start with empty data
     localStorage.removeItem(STORAGE_KEY);
@@ -719,7 +809,7 @@ function numberToIndianWords(num) {
 }
 
 function getOutstandingPrincipal(loanId, originalPrincipal) {
-  const repayments = state.interestPayments.filter(p => p.loanId === loanId && p.category === 'principal');
+  const repayments = state.interestPayments.filter(p => p.loanId === loanId && p.category === 'principal' && (!p.note || p.note.indexOf('[Advance]') === -1));
   const totalRepaid = repayments.reduce((sum, p) => sum + Number(p.amount), 0);
   return Math.max(0, Number(originalPrincipal) - totalRepaid);
 }
@@ -733,7 +823,7 @@ function getOutstandingPrincipalAtMonth(loanId, originalPrincipal, monthStr) {
     .reduce((sum, p) => sum + Number(p.amount), 0);
     
   const repayments = payments
-    .filter(p => p.category === 'principal')
+    .filter(p => p.category === 'principal' && (!p.note || p.note.indexOf('[Advance]') === -1))
     .reduce((sum, p) => sum + Number(p.amount), 0);
     
   return Math.max(0, Number(originalPrincipal) + topups - repayments);
@@ -1132,13 +1222,11 @@ function submitQuickLend(event) {
       renderDashboard();
       setTimeout(function() {
         switchTab('dashboard');
-        if (currentReminderFilter === 'interest') currentReminderFilter = 'all';
-        toggleReminderFilter('interest');
-        var card = document.getElementById('card-interest');
-        if (card) card.classList.add('highlight-card');
+        currentReminderFilter = 'all';
+        refreshActiveTab();
         setTimeout(function() {
           var newCard = document.querySelector('[data-loan-id="' + existingLoan.id + '"]');
-          if (newCard) newCard.classList.add('new-entry-highlight');
+          if (newCard) { newCard.scrollIntoView({ behavior: 'smooth', block: 'center' }); newCard.classList.add('new-entry-highlight'); }
         }, 100);
       }, 150);
       _isSubmittingQuickLend = false;
@@ -1192,13 +1280,11 @@ function submitQuickLend(event) {
   renderDashboard();
   setTimeout(function() {
     switchTab('dashboard');
-    if (currentReminderFilter === 'interest') currentReminderFilter = 'all';
-    toggleReminderFilter('interest');
-    var card = document.getElementById('card-interest');
-    if (card) card.classList.add('highlight-card');
+    currentReminderFilter = 'all';
+    refreshActiveTab();
     setTimeout(function() {
       var newCard = document.querySelector('[data-loan-id="' + newId + '"]');
-      if (newCard) newCard.classList.add('new-entry-highlight');
+      if (newCard) { newCard.scrollIntoView({ behavior: 'smooth', block: 'center' }); newCard.classList.add('new-entry-highlight'); }
     }, 100);
   }, 150);
   _isSubmittingQuickLend = false;
@@ -1303,8 +1389,12 @@ function quickMarkInterestPaid(loanId, type, amount, monthStr) {
   });
   
   saveState();
+  var _msg = '✓ Interest of ' + formatCurrency(amount) + ' recorded as ' + (type === 'received' ? 'collected' : 'paid') + ' for ' + (type === 'received' ? loan.borrowerName : loan.financierName) + '!';
+  setTimeout(function() {
+    alert(_msg);
+    renderDashboard();
+  }, 80);
   refreshActiveTab();
-  alert(`✓ Interest of ${formatCurrency(amount)} recorded as ${type === 'received' ? 'collected' : 'paid'} for ${type === 'received' ? loan.borrowerName : loan.financierName}!`);
 }
 
 window.quickMarkInterestPaid = quickMarkInterestPaid;
@@ -1361,44 +1451,73 @@ function quickReceiveInterest(loanId, direction) {
 window.quickReceiveInterest = quickReceiveInterest;
 
 function quickLoanPayment(loanId, direction) {
-  try {
   loadState();
   var input = document.getElementById('quick-pay-' + loanId);
-  if (!input) { console.log('QLP: input not found'); return; }
+  if (!input) return;
   var amount = Number(input.value);
   if (!amount || amount <= 0) { alert('Enter an amount'); return; }
   input.value = '';
   var loan = state[direction === 'lent' ? 'lent' : 'borrowed'].find(function(l) { return l.id === loanId; });
-  if (!loan) { console.log('QLP: loan not found'); return; }
+  if (!loan) return;
   var outstanding = getOutstandingPrincipal(loan.id, loan.principal);
   if (outstanding <= 0) { alert('Loan is already settled.'); return; }
   if (amount > outstanding && !confirm('₹' + amount + ' exceeds outstanding of ₹' + outstanding + '. Record as full settlement?')) return;
-  var d = new Date(); var today = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
-  console.log('QLP: recording payment', {loanId, amount, today, outstanding});
-  var payAmount = Number(amount);
-  if (Number(loan.interestRate || 0) > 0) {
-    var monthlyYield = outstanding * (Number(loan.interestRate) / 100);
-    var currentMonth = today.slice(0, 7);
-    var paidThisMonth = state.interestPayments.filter(function(p) {
-      return p.loanId === loan.id && p.type === (direction === 'lent' ? 'received' : 'paid') && p.category === 'interest' && p.date && p.date.slice(0, 7) === currentMonth;
-    }).reduce(function(s, p) { return s + Number(p.amount); }, 0);
-    var remainingYield = Math.max(0, monthlyYield - paidThisMonth);
-    var interestPart = Math.min(remainingYield, payAmount);
-    var advancePart = payAmount - interestPart;
-    console.log('QLP: split', {monthlyYield, paidThisMonth, remainingYield, interestPart, advancePart});
-    if (interestPart > 0) {
-      state.interestPayments.push({id: 'p' + Math.random().toString(36).substr(2, 9), loanId: loanId, type: direction === 'lent' ? 'received' : 'paid', category: 'interest', amount: interestPart, date: today, note: 'Interest received'});
-    }
-    if (advancePart > 0) {
-      var dd = new Date();
-      var nm = new Date(dd.getFullYear(), dd.getMonth() + 1, 1); var nextMonthDate = nm.getFullYear() + '-' + String(nm.getMonth() + 1).padStart(2, '0') + '-01';
-      state.interestPayments.push({id: 'p' + Math.random().toString(36).substr(2, 9), loanId: loanId, type: direction === 'lent' ? 'received' : 'paid', category: 'interest', amount: advancePart, date: nextMonthDate, note: 'Interest received [Advance]'});
-    }
-  } else {
-    state.interestPayments.push({id: 'p' + Math.random().toString(36).substr(2, 9), loanId: loanId, type: direction === 'lent' ? 'received' : 'paid', category: 'principal', amount: payAmount, date: today, note: 'Principal repayment'});
+  var today = new Date().toISOString().split('T')[0];
+  var nd = new Date(); nd.setMonth(nd.getMonth() + 1);
+  var nextMonthDate = nd.toISOString().split('T')[0];
+  var remaining = Number(amount);
+  var currentMonth = today.slice(0, 7);
+  var type = direction === 'lent' ? 'received' : 'paid';
+
+  // Step 1: Pay current month's pending interest
+  var monthlyYield = Number(loan.interestRate || 0) > 0 ? outstanding * (Number(loan.interestRate) / 100) : 0;
+  var interestPaidThisMonth = state.interestPayments.filter(function(p) { return p.loanId === loan.id && p.type === type && p.category === 'interest' && p.date && p.date.slice(0, 7) === currentMonth && (!p.note || p.note.indexOf('[Advance]') === -1); }).reduce(function(s, p) { return s + Number(p.amount); }, 0);
+  var pendingInterest = Math.max(0, monthlyYield - interestPaidThisMonth);
+  var interestPart = Math.min(pendingInterest, remaining);
+  if (interestPart > 0) {
+    state.interestPayments.push({id: 'p' + Math.random().toString(36).substr(2, 9), loanId: loanId, type: type, category: 'interest', amount: interestPart, date: today, note: 'Interest received'});
+    remaining -= interestPart;
   }
+
+  // Step 2: If EMI loan, pay current month's pending EMI
+  if (loan.isEMI && remaining > 0) {
+    var emiAmt = Number(loan.emiAmount || 0);
+    var emiPaidThisMonth = state.interestPayments.filter(function(p) { return p.loanId === loan.id && p.type === type && p.category === 'principal' && p.date && p.date.slice(0, 7) === currentMonth; }).reduce(function(s, p) { return s + Number(p.amount); }, 0);
+    var pendingEmi = Math.max(0, emiAmt - emiPaidThisMonth);
+    var emiPart = Math.min(pendingEmi, remaining);
+    if (emiPart > 0) {
+      var isPartial = (emiPaidThisMonth + emiPart) < emiAmt;
+      state.interestPayments.push({id: 'p' + Math.random().toString(36).substr(2, 9), loanId: loanId, type: type, category: 'principal', amount: emiPart, date: today, note: isPartial ? 'Principal repayment [Partial]' : 'Principal repayment'});
+      remaining -= emiPart;
+    }
+  }
+
+  // Step 2.5: For 0% loans, remaining amount directly reduces principal
+  if (remaining > 0 && Number(loan.interestRate) == 0) {
+    state.interestPayments.push({id: 'p' + Math.random().toString(36).substr(2, 9), loanId: loanId, type: type, category: 'principal', amount: remaining, date: today, note: 'Principal repayment'});
+    remaining = 0;
+  }
+
+  // Step 3: Advance — pay next month's interest first
+  if (remaining > 0 && monthlyYield > 0) {
+    var advanceInt = Math.min(monthlyYield, remaining);
+    state.interestPayments.push({id: 'p' + Math.random().toString(36).substr(2, 9), loanId: loanId, type: type, category: 'interest', amount: advanceInt, date: nextMonthDate, note: 'Interest received [Advance]'});
+    remaining -= advanceInt;
+  }
+
+  // Step 4: Advance — remaining to EMI principal (next month)
+  if (remaining > 0 && loan.isEMI) {
+    state.interestPayments.push({id: 'p' + Math.random().toString(36).substr(2, 9), loanId: loanId, type: type, category: 'principal', amount: remaining, date: nextMonthDate, note: 'Principal repayment [Advance]'});
+    remaining = 0;
+  }
+
+  // Step 5: If still remaining and no EMI, put as advance interest
+  if (remaining > 0) {
+    state.interestPayments.push({id: 'p' + Math.random().toString(36).substr(2, 9), loanId: loanId, type: type, category: 'interest', amount: remaining, date: nextMonthDate, note: 'Interest received [Advance]'});
+  }
+
   if (direction === 'borrowed') {
-    state.expenses.push({id: 'exp_' + Math.random().toString(36).substr(2, 9), amount: payAmount, date: today, category: 'Loan Repayment', propertyId: '', note: 'Repayment to ' + (loan.financierName || 'Unknown')});
+    state.expenses.push({id: 'exp_' + Math.random().toString(36).substr(2, 9), amount: amount, date: today, category: 'Loan Repayment', propertyId: '', note: 'Repayment to ' + (loan.financierName || 'Unknown')});
   }
   saveState();
   if (getOutstandingPrincipal(loan.id, loan.principal) <= 0) {
@@ -1406,7 +1525,6 @@ function quickLoanPayment(loanId, direction) {
   }
   refreshActiveTab();
   renderDashboard();
-  } catch(e) { console.log('QLP error:', e); alert('Error: ' + e.message); }
 }
 window.quickLoanPayment = quickLoanPayment;
 
@@ -1425,69 +1543,116 @@ function quickGroupPayment(safeId, direction) {
   }
   var remaining = totalAmount;
   var today = new Date().toISOString().split('T')[0];
-  var payments = [];
+  var d = new Date(); d.setMonth(d.getMonth() + 1);
+  var nextMonthDate = d.toISOString().split('T')[0];
+  var currentMonth = today.slice(0, 7);
+  var type = direction === 'lent' ? 'received' : 'paid';
+
+  var emiLoans = [], interestLoans = [];
   for (var i = 0; i < groupLoans.length; i++) {
     var loan = groupLoans[i];
-    if (!loan.isEMI) continue;
-    var emiAmt = Number(loan.emiAmount || 0);
-    if (emiAmt <= 0) continue;
     var outstanding = getOutstandingPrincipal(loan.id, loan.principal);
     if (outstanding <= 0) continue;
-    if (emiAmt > remaining) continue;
-    var rate = Number(loan.interestRate || 0);
-    if (rate > 0) {
-      var interestPart = outstanding * (rate / 100);
-      var principalPart = emiAmt - interestPart;
-      if (interestPart > 0) payments.push({ loanId: loan.id, amount: interestPart, category: 'interest' });
-      if (principalPart > 0) payments.push({ loanId: loan.id, amount: principalPart, category: 'principal' });
-    } else {
-      payments.push({ loanId: loan.id, amount: emiAmt, category: 'principal' });
-    }
-    remaining -= emiAmt;
-  }
-  if (remaining > 0) {
-    var currentMonth = today.slice(0, 7);
-    for (var i = 0; i < groupLoans.length; i++) {
-      var loan = groupLoans[i];
-      if (loan.isEMI) continue;
-      if (!loan.interestRate || Number(loan.interestRate) <= 0) continue;
-      var outstanding = getOutstandingPrincipal(loan.id, loan.principal);
-      if (outstanding <= 0) continue;
+    if (loan.isEMI) {
+      var emiAmt = Number(loan.emiAmount || 0);
+      if (emiAmt > 0) emiLoans.push({ loan: loan, emiAmt: emiAmt });
+    } else if (Number(loan.interestRate || 0) > 0) {
       var yieldAmt = outstanding * (Number(loan.interestRate) / 100);
-      var type = direction === 'lent' ? 'received' : 'paid';
-      var paidThisMonth = state.interestPayments.filter(function(p) { return p.loanId === loan.id && p.type === type && p.category === 'interest' && p.date && p.date.slice(0, 7) === currentMonth; }).reduce(function(s, p) { return s + Number(p.amount); }, 0);
-      if (paidThisMonth >= yieldAmt) continue;
-      var takeAmt = Math.min(yieldAmt - paidThisMonth, remaining);
-      if (takeAmt <= 0) continue;
-      payments.push({ loanId: loan.id, amount: takeAmt, category: 'interest' });
-      remaining -= takeAmt;
-      if (remaining <= 0) break;
+      if (yieldAmt > 0) interestLoans.push({ loan: loan, yieldAmt: yieldAmt });
     }
   }
+
+  emiLoans.sort(function(a, b) { return a.emiAmt - b.emiAmt; });
+
+  function paidInMonth(loanId, cat, month) {
+    return state.interestPayments.filter(function(p) { return p.loanId === loanId && p.type === type && p.category === cat && p.date && p.date.startsWith(month) && (!p.note || p.note.indexOf('[Advance]') === -1); }).reduce(function(s, p) { return s + Number(p.amount); }, 0);
+  }
+
+  var currentCyclePaid = true;
+  for (var i = 0; i < interestLoans.length; i++) {
+    if (paidInMonth(interestLoans[i].loan.id, 'interest', currentMonth) < interestLoans[i].yieldAmt - 0.01) { currentCyclePaid = false; break; }
+  }
+  if (currentCyclePaid) {
+    for (var i = 0; i < emiLoans.length; i++) {
+      if (paidInMonth(emiLoans[i].loan.id, 'principal', currentMonth) < emiLoans[i].emiAmt - 0.01) { currentCyclePaid = false; break; }
+    }
+  }
+
+  var payments = [], isAdvance = false;
+
+  if (!currentCyclePaid) {
+    for (var i = 0; i < interestLoans.length; i++) {
+      if (remaining <= 0) break;
+      var item = interestLoans[i];
+      var needed = Math.max(0, item.yieldAmt - paidInMonth(item.loan.id, 'interest', currentMonth));
+      if (needed <= 0) continue;
+      var take = Math.min(needed, remaining);
+      payments.push({ loanId: item.loan.id, amount: take, category: 'interest', isAdvance: false });
+      remaining -= take;
+    }
+
+    for (var i = 0; i < emiLoans.length; i++) {
+      if (remaining <= 0) break;
+      var item = emiLoans[i];
+      var needed = Math.max(0, item.emiAmt - paidInMonth(item.loan.id, 'principal', currentMonth));
+      if (needed <= 0) continue;
+      var take = Math.min(needed, remaining);
+      var isPartial = (paidInMonth(item.loan.id, 'principal', currentMonth) + take) < item.emiAmt;
+      payments.push({ loanId: item.loan.id, amount: take, category: 'principal', isAdvance: false, isPartial: isPartial });
+      remaining -= take;
+    }
+  }
+
   if (remaining > 0) {
-    for (var i = 0; i < groupLoans.length; i++) {
-      var loan = groupLoans[i];
-      var outstanding = getOutstandingPrincipal(loan.id, loan.principal);
-      if (outstanding > 0) {
-        var hasRate = Number(loan.interestRate || 0) > 0;
-        payments.push({ loanId: loan.id, amount: remaining, category: hasRate ? 'interest' : 'principal', isAdvance: hasRate });
-        remaining = 0;
-        break;
+    var cycleNowPaid = true;
+    for (var i = 0; i < interestLoans.length; i++) {
+      if (paidInMonth(interestLoans[i].loan.id, 'interest', currentMonth) + payments.filter(function(p) { return p.loanId === interestLoans[i].loan.id && p.category === 'interest'; }).reduce(function(s, p) { return s + Number(p.amount); }, 0) < interestLoans[i].yieldAmt - 0.01) { cycleNowPaid = false; break; }
+    }
+    if (cycleNowPaid) {
+      for (var i = 0; i < emiLoans.length; i++) {
+        if (paidInMonth(emiLoans[i].loan.id, 'principal', currentMonth) + payments.filter(function(p) { return p.loanId === emiLoans[i].loan.id && p.category === 'principal'; }).reduce(function(s, p) { return s + Number(p.amount); }, 0) < emiLoans[i].emiAmt - 0.01) { cycleNowPaid = false; break; }
+      }
+    }
+
+    if (cycleNowPaid) {
+      isAdvance = true;
+      var advanceMonth = nextMonthDate.slice(0, 7);
+      for (var i = 0; i < interestLoans.length; i++) {
+        if (remaining <= 0) break;
+        var item = interestLoans[i];
+        var alreadyAdv = state.interestPayments.filter(function(p) { return p.loanId === item.loan.id && p.type === type && p.category === 'interest' && p.date && p.date.startsWith(advanceMonth); }).reduce(function(s, p) { return s + Number(p.amount); }, 0) + payments.filter(function(p) { return p.loanId === item.loan.id && p.category === 'interest' && p.isAdvance; }).reduce(function(s, p) { return s + Number(p.amount); }, 0);
+        var needed = Math.max(0, item.yieldAmt - alreadyAdv);
+        if (needed <= 0) continue;
+        var take = Math.min(needed, remaining);
+        payments.push({ loanId: item.loan.id, amount: take, category: 'interest', isAdvance: true });
+        remaining -= take;
+      }
+      for (var i = 0; i < emiLoans.length; i++) {
+        if (remaining <= 0) break;
+        var item = emiLoans[i];
+        var alreadyAdv = state.interestPayments.filter(function(p) { return p.loanId === item.loan.id && p.type === type && p.category === 'principal' && p.date && p.date.startsWith(advanceMonth); }).reduce(function(s, p) { return s + Number(p.amount); }, 0) + payments.filter(function(p) { return p.loanId === item.loan.id && p.category === 'principal' && p.isAdvance; }).reduce(function(s, p) { return s + Number(p.amount); }, 0);
+        var needed = Math.max(0, item.emiAmt - alreadyAdv);
+        if (needed <= 0) continue;
+        var take = Math.min(needed, remaining);
+        var isPartial = (alreadyAdv + take) < item.emiAmt;
+        payments.push({ loanId: item.loan.id, amount: take, category: 'principal', isAdvance: true, isPartial: isPartial });
+        remaining -= take;
       }
     }
   }
+
   if (payments.length === 0) { alert('No eligible loan for this amount.'); return; }
-  var d = new Date();
-  var nm = new Date(d.getFullYear(), d.getMonth() + 1, 1); var nextMonthDate = nm.getFullYear() + '-' + String(nm.getMonth() + 1).padStart(2, '0') + '-01';
   for (var i = 0; i < payments.length; i++) {
+    var p = payments[i];
+    var note = p.category === 'interest' ? (p.isAdvance ? 'Interest received [Advance]' : 'Interest received') : (p.isAdvance && p.isPartial ? 'Principal repayment [Advance][Partial]' : (p.isAdvance ? 'Principal repayment [Advance]' : (p.isPartial ? 'Principal repayment [Partial]' : 'Principal repayment')));
     state.interestPayments.push({
       id: 'p' + Math.random().toString(36).substr(2, 9),
-      loanId: payments[i].loanId,
-      type: direction === 'lent' ? 'received' : 'paid',
-      category: payments[i].category,
-      amount: payments[i].amount,
-      date: payments[i].isAdvance ? nextMonthDate : today,
-      note: payments[i].category === 'interest' ? (payments[i].isAdvance ? 'Interest received [Advance]' : 'Interest received') : 'Principal repayment'
+      loanId: p.loanId,
+      type: type,
+      category: p.category,
+      amount: p.amount,
+      date: p.isAdvance ? nextMonthDate : today,
+      note: note
     });
   }
   saveState();
@@ -1495,7 +1660,7 @@ function quickGroupPayment(safeId, direction) {
   for (var i = 0; i < groupLoans.length; i++) {
     if (getOutstandingPrincipal(groupLoans[i].id, groupLoans[i].principal) > 0) { allSettled = false; break; }
   }
-  if (allSettled) alert('All loans fully settled! ✅');
+  if (allSettled) alert('All loans fully settled!');
   refreshActiveTab();
   renderDashboard();
 }
@@ -1759,22 +1924,93 @@ function applyRecordsFilter() {
 }
 
 function renderRecords() {
-  _recordsFilter = 'construction';
-  renderConstruction();
-  if (typeof renderFiles === 'function') renderFiles();
+  renderVault();
 }
 
 const VIEWS = {
   dashboard: { title: 'Status', subtitle: 'Your aggregated financial overview at a glance.', render: renderDashboard },
-  records: { title: 'Records', subtitle: 'Rent Agreements, documents, construction, and settings.', render: renderRecords },
-  diary: { title: 'Diary', subtitle: '', render: renderDiary }
+  tenants: { title: 'Tenants', subtitle: 'Rental management — leases, payments, and tenant details.', render: renderTenantsDashboard },
+  finances: { title: 'Finances', subtitle: 'Lending, borrowing, and interest tracking.', render: renderFinancesDashboard },
+  records: { title: 'Vault', subtitle: 'Credentials, documents, construction, and settings.', render: renderRecords },
+  expenses: { title: 'Expenses', subtitle: 'Track expenses, upload documents, manage construction.', render: renderExpensesDashboard }
 };
 
-function renderDiary() {
-  if (diaryView === 'vault') { renderVault(); return; }
+function renderExpensesDashboard() {
   loadState();
-  document.getElementById('diary-content').style.display = '';
-  document.getElementById('vault-content').style.display = 'none';
+  _recordsFilter = null;
+  var todayExp = state.expenses.filter(function(e) { return e.date === selectedDateStr && !isFinalisedConst(e); }).reduce(function(s, e) { return s + (Number(e.amount) || 0); }, 0);
+  var expNode = document.getElementById('dash-total-expenses');
+  if (expNode) expNode.textContent = formatCurrency(todayExp);
+  var weekStart = new Date(selectedDateStr);
+  weekStart.setDate(weekStart.getDate() - weekStart.getDay() + (weekStart.getDay() === 0 ? -6 : 1));
+  var weekEnd = new Date(weekStart);
+  weekEnd.setDate(weekEnd.getDate() + 6);
+  var pad = function(n) { return String(n).padStart(2, '0'); };
+  var weekStartStr = weekStart.getFullYear() + '-' + pad(weekStart.getMonth()+1) + '-' + pad(weekStart.getDate());
+  var weekEndStr = weekEnd.getFullYear() + '-' + pad(weekEnd.getMonth()+1) + '-' + pad(weekEnd.getDate());
+  var weekExp = state.expenses.filter(function(e) { return e.date >= weekStartStr && e.date <= weekEndStr && !isFinalisedConst(e); }).reduce(function(s, e) { return s + (Number(e.amount) || 0); }, 0);
+  var monthExp = state.expenses.filter(function(e) { return e.date.startsWith(selectedMonthStr) && !isFinalisedConst(e); }).reduce(function(s, e) { return s + (Number(e.amount) || 0); }, 0);
+  var wNode = document.getElementById('dash-weekly-expenses');
+  if (wNode) wNode.innerHTML = 'This Week: <span style="color: var(--color-danger); font-weight: 800;">' + formatCurrency(weekExp) + '</span>';
+  var mNode = document.getElementById('dash-monthly-expenses');
+  if (mNode) mNode.innerHTML = 'This Month: <span style="color: var(--color-danger); font-weight: 800;">' + formatCurrency(monthExp) + '</span>';
+  var detailNode = document.getElementById('expense-card-details');
+  if (detailNode) {
+    var todayItems = state.expenses.filter(function(e) { return e.date === selectedDateStr && !isFinalisedConst(e); }).slice(0, 5);
+    if (todayItems.length > 0) {
+      var h = '';
+      todayItems.forEach(function(exp) {
+        var txt = exp.note || exp.category;
+        if (exp.category === 'construction') txt = 'Construction - ' + (exp.laborType || 'General') + ' - ' + (exp.project || '');
+        h += '<div style="display: flex; align-items: center; padding: 0.2rem 0.4rem; background: var(--input-bg); border-radius: 4px; font-size: 0.7rem;">' +
+          '<span style="flex: 1; font-weight: 600; color: var(--text-primary);">' + txt + '</span>' +
+          '<span style="flex: 1; text-align: right; font-weight: 700; color: var(--color-danger);">' + formatCurrency(exp.amount) + '</span></div>';
+      });
+      detailNode.innerHTML = h;
+      detailNode.style.display = 'flex';
+    } else {
+      detailNode.style.display = 'none';
+    }
+  }
+  renderConstruction();
+  if (typeof renderFiles === 'function') renderFiles();
+}
+
+function renderTenantsDashboard() {
+  loadState();
+  var normal = document.getElementById('tenants-normal');
+  var diaryContainer = document.getElementById('tenants-diary-container');
+  if (diaryModeActive) {
+    if (normal) normal.style.display = 'none';
+    if (diaryContainer) diaryContainer.style.display = '';
+    renderDiaryMode();
+    return;
+  }
+  if (normal) normal.style.display = '';
+  if (diaryContainer) diaryContainer.style.display = 'none';
+  renderRentals();
+}
+
+function renderFinancesDashboard() {
+  loadState();
+  var normal = document.getElementById('finances-normal');
+  var diaryContainer = document.getElementById('finances-diary-container');
+  if (diaryModeActive) {
+    if (normal) normal.style.display = 'none';
+    if (diaryContainer) diaryContainer.style.display = '';
+    renderDiaryMode();
+    return;
+  }
+  if (normal) normal.style.display = '';
+  if (diaryContainer) diaryContainer.style.display = 'none';
+  renderLending();
+  renderBorrowing();
+}
+
+function renderDiary(container, mode) {
+  loadState();
+  var diaryEl = container;
+  if (!diaryEl) return;
   const monthStr = selectedMonthStr;
   const [yr, mo] = monthStr.split('-').map(Number);
   const monthName = new Date(yr, mo - 1).toLocaleDateString('en-US', { month: 'long' });
@@ -1784,101 +2020,109 @@ function renderDiary() {
   lines.push('  ' + String('-').repeat(28));
   
   // ── RENT ──
-  var num = 0;
-  lines.push('');
-  lines.push('  RENT');
-  lines.push('  ' + String('-').repeat(28));
-  state.rentals.forEach(function(r) {
-    if (r.startDate <= monthStr + '-31' && r.status === 'active') {
-      num++;
-      var collected = 0;
-      var secAdj = Number(r.securityAdjusted || 0);
-      state.rentPayments.forEach(function(p) {
-        if (p.rentalId === r.id && p.monthYear === monthStr) collected += Number(p.amount);
-      });
-      var due = Number(r.monthlyRent);
-      var pending = Math.max(0, due - collected);
-      var extra = '';
-      if (secAdj > 0 && collected >= due) extra += '  (adjusted from security)';
-      var suffix = collected >= due ? ' ✓' : '';
-      lines.push('  ' + num + '. ' + r.tenantName + extra + suffix);
-      if (pending > 0) lines.push('      ' + formatCurrency(collected) + ' / ' + formatCurrency(due) + '  Due: ' + formatCurrency(pending));
-      else lines.push('      ' + formatCurrency(collected) + ' / ' + formatCurrency(due));
-    }
-  });
+  if (!mode || mode === 'rent' || mode === 'all') {
+    var num = 0;
+    lines.push('');
+    lines.push('  RENT');
+    lines.push('  ' + String('-').repeat(28));
+    state.rentals.forEach(function(r) {
+      if (r.startDate <= monthStr + '-31' && r.status === 'active') {
+        num++;
+        var collected = 0;
+        var secAdj = Number(r.securityAdjusted || 0);
+        state.rentPayments.forEach(function(p) {
+          if (p.rentalId === r.id && p.monthYear === monthStr) collected += Number(p.amount);
+        });
+        var due = Number(r.monthlyRent);
+        var pending = Math.max(0, due - collected);
+        var extra = '';
+        if (secAdj > 0 && collected >= due) extra += '  (adjusted from security)';
+        lines.push('  ' + num + '. ' + r.tenantName + extra);
+        var suffix = collected >= due ? ' ✓' : '';
+        if (pending > 0) lines.push('      ' + formatCurrency(due) + suffix + '  Due: ' + formatCurrency(pending));
+        else lines.push('      ' + formatCurrency(due) + suffix);
+      }
+    });
+  }
   
   // ── INTEREST RECEIVED ──
-  num = 0;
-  lines.push('');
-  lines.push('  INTEREST RECEIVED');
-  lines.push('  ' + String('-').repeat(28));
-  state.lent.forEach(function(l) {
-    if (l.startDate <= monthStr + '-31') {
-      var collected = 0;
-      state.interestPayments.forEach(function(p) {
-        if (p.loanId === l.id && p.type === 'received' && p.date.startsWith(monthStr)) collected += Number(p.amount);
-      });
-      var outstanding = getOutstandingPrincipalAtMonth(l.id, l.principal, monthStr);
-      if (outstanding > 0 || collected > 0) {
-        num++;
-        var expected = l.isEMI ? Number(l.emiAmount || 0) : outstanding * (Number(l.interestRate) / 100);
-        var suffix = collected >= expected ? ' ✓' : '';
-        var typeLabel = l.isEMI ? ' [EMI' : '';
-        if (l.isEMI) {
-          var emiTotal = l.emiTotal || Math.ceil(Number(l.principal) / Number(l.emiAmount));
-          var emiPaid = state.interestPayments.filter(function(p) { return p.loanId === l.id && p.type === 'received' && p.category === 'principal'; }).length;
-          typeLabel += ' ' + emiPaid + '/' + emiTotal + ']';
+  if (!mode || mode === 'interest' || mode === 'all') {
+    var num = 0;
+    lines.push('');
+    lines.push('  INTEREST RECEIVED');
+    lines.push('  ' + String('-').repeat(28));
+    state.lent.forEach(function(l) {
+      if (l.startDate <= monthStr + '-31') {
+        var collected = 0;
+        state.interestPayments.forEach(function(p) {
+          if (p.loanId === l.id && p.type === 'received' && p.date.startsWith(monthStr)) collected += Number(p.amount);
+        });
+        var outstanding = getOutstandingPrincipalAtMonth(l.id, l.principal, monthStr);
+        if (outstanding > 0 || collected > 0) {
+          num++;
+          var expected = l.isEMI ? Number(l.emiAmount || 0) : outstanding * (Number(l.interestRate) / 100);
+          var suffix = collected >= expected ? ' ✓' : '';
+          var typeLabel = l.isEMI ? ' [EMI' : '';
+          if (l.isEMI) {
+            var emiTotal = l.emiTotal || Math.ceil(Number(l.principal) / Number(l.emiAmount));
+            var emiPaid = state.interestPayments.filter(function(p) { return p.loanId === l.id && p.type === 'received' && p.category === 'principal'; }).length;
+            typeLabel += ' ' + emiPaid + '/' + emiTotal + ']';
+          }
+          lines.push('  ' + num + '. ' + l.borrowerName + typeLabel + suffix);
+          lines.push('      ' + formatCurrency(collected) + ' / ' + formatCurrency(expected));
         }
-        lines.push('  ' + num + '. ' + l.borrowerName + typeLabel + suffix);
-        lines.push('      ' + formatCurrency(collected) + ' / ' + formatCurrency(expected));
       }
-    }
-  });
-  
-  // ── INTEREST PAID (Borrowed) ──
-  num = 0;
-  lines.push('');
-  lines.push('  INTEREST PAID');
-  lines.push('  ' + String('-').repeat(28));
-  state.borrowed.forEach(function(b) {
-    if (b.startDate <= monthStr + '-31') {
-      var paid = 0;
-      state.interestPayments.forEach(function(p) {
-        if (p.loanId === b.id && p.type === 'paid' && p.date.startsWith(monthStr)) paid += Number(p.amount);
-      });
-      var outstanding = getOutstandingPrincipalAtMonth(b.id, b.principal, monthStr);
-      if (outstanding > 0 || paid > 0) {
-        num++;
-        var expected = b.isEMI ? Number(b.emiAmount || 0) : outstanding * (Number(b.interestRate) / 100);
-        var suffix = paid >= expected ? ' ✓' : '';
-        var typeLabel = b.isEMI ? ' [EMI' : '';
-        if (b.isEMI) {
-          var emiTotal = b.emiTotal || Math.ceil(Number(b.principal) / Number(b.emiAmount));
-          var emiPaid = state.interestPayments.filter(function(p) { return p.loanId === b.id && p.type === 'paid' && p.category === 'principal'; }).length;
-          typeLabel += ' ' + emiPaid + '/' + emiTotal + ']';
+    });
+    
+    // ── INTEREST PAID (Borrowed) ──
+    num = 0;
+    lines.push('');
+    lines.push('  INTEREST PAID');
+    lines.push('  ' + String('-').repeat(28));
+    state.borrowed.forEach(function(b) {
+      if (b.startDate <= monthStr + '-31') {
+        var paid = 0;
+        state.interestPayments.forEach(function(p) {
+          if (p.loanId === b.id && p.type === 'paid' && p.date.startsWith(monthStr)) paid += Number(p.amount);
+        });
+        var outstanding = getOutstandingPrincipalAtMonth(b.id, b.principal, monthStr);
+        if (outstanding > 0 || paid > 0) {
+          num++;
+          var expected = b.isEMI ? Number(b.emiAmount || 0) : outstanding * (Number(b.interestRate) / 100);
+          var suffix = paid >= expected ? ' ✓' : '';
+          var typeLabel = b.isEMI ? ' [EMI' : '';
+          if (b.isEMI) {
+            var emiTotal = b.emiTotal || Math.ceil(Number(b.principal) / Number(b.emiAmount));
+            var emiPaid = state.interestPayments.filter(function(p) { return p.loanId === b.id && p.type === 'paid' && p.category === 'principal'; }).length;
+            typeLabel += ' ' + emiPaid + '/' + emiTotal + ']';
+          }
+          lines.push('  ' + num + '. ' + b.borrowerName + typeLabel + suffix);
+          lines.push('      ' + formatCurrency(paid) + ' / ' + formatCurrency(expected));
         }
-        lines.push('  ' + num + '. ' + b.borrowerName + typeLabel + suffix);
-        lines.push('      ' + formatCurrency(paid) + ' / ' + formatCurrency(expected));
       }
-    }
-  });
+    });
+  }
   
   // ── SUMMARY ──
   var totalExpected = 0;
   var totalCollected = 0;
-  state.rentals.forEach(function(r) {
-    if (r.startDate <= monthStr + '-31' && r.status === 'active') {
-      totalExpected += Number(r.monthlyRent);
-    }
-  });
-  state.lent.forEach(function(l) {
-    if (l.startDate <= monthStr + '-31') {
-      var o = getOutstandingPrincipalAtMonth(l.id, l.principal, monthStr);
-      if (o > 0) totalExpected += l.isEMI ? Number(l.emiAmount || 0) : o * (Number(l.interestRate) / 100);
-    }
-  });
-  state.rentPayments.filter(function(p) { return p.monthYear === monthStr; }).forEach(function(p) { totalCollected += Number(p.amount); });
-  state.interestPayments.filter(function(p) { return p.type === 'received' && p.date.startsWith(monthStr); }).forEach(function(p) { totalCollected += Number(p.amount); });
+  if (!mode || mode === 'rent' || mode === 'all') {
+    state.rentals.forEach(function(r) {
+      if (r.startDate <= monthStr + '-31' && r.status === 'active') {
+        totalExpected += Number(r.monthlyRent);
+      }
+    });
+    state.rentPayments.filter(function(p) { return p.monthYear === monthStr; }).forEach(function(p) { totalCollected += Number(p.amount); });
+  }
+  if (!mode || mode === 'interest' || mode === 'all') {
+    state.lent.forEach(function(l) {
+      if (l.startDate <= monthStr + '-31') {
+        var o = getOutstandingPrincipalAtMonth(l.id, l.principal, monthStr);
+        if (o > 0) totalExpected += l.isEMI ? Number(l.emiAmount || 0) : o * (Number(l.interestRate) / 100);
+      }
+    });
+    state.interestPayments.filter(function(p) { return p.type === 'received' && p.date.startsWith(monthStr); }).forEach(function(p) { totalCollected += Number(p.amount); });
+  }
   
   lines.push('');
   lines.push('  ' + String('-').repeat(28));
@@ -1886,7 +2130,7 @@ function renderDiary() {
   lines.push('  Expected:  ' + formatCurrency(totalExpected));
   lines.push('  Pending:   ' + formatCurrency(Math.max(0, totalExpected - totalCollected)));
   
-  document.getElementById('diary-content').textContent = lines.join('\n');
+  diaryEl.textContent = lines.join('\n');
 }
 
 function selectRecordsTab(event, tab, projectName) {
@@ -1921,7 +2165,7 @@ function selectRecordsTab(event, tab, projectName) {
 window.selectRecordsTab = selectRecordsTab;
 window.selectRecordsTab = selectRecordsTab;
 
-let currentTab = 'dashboard';
+let currentTab = 'tenants';
 
 function setLendingFilter(mode) {
   if (currentLendingFilter === mode) mode = 'all';
@@ -1931,21 +2175,18 @@ function setLendingFilter(mode) {
     if (el) el.style.background = (mode !== 'all' && m === mode) ? 'rgba(255,255,255,0.08)' : 'transparent';
   });
   renderLending();
+  setTimeout(function() {
+    var container = document.getElementById('lent-loans-list');
+    if (container && container.children.length) container.scrollIntoView({ behavior:'smooth', block:'start' });
+  }, 50);
 }
 window.setLendingFilter = setLendingFilter;
 
 function switchTab(tabId) {
   currentTab = tabId;
-  if (tabId !== 'diary' && diaryView === 'vault') {
-    diaryView = 'diary';
-    var vt = document.getElementById('btn-vault-toggle');
-    if (vt) vt.textContent = '🔐';
-    var mg = document.getElementById('month-grid');
-    if (mg) mg.style.display = '';
-  }
   window.scrollTo(0, 0);
-  var qaBtn = document.getElementById('quick-actions-trigger');
-  if (qaBtn) qaBtn.style.display = (tabId === 'records' || tabId === 'settings' || tabId === 'diary') ? 'none' : '';
+  var vaultBtn = document.getElementById('btn-vault-toggle');
+  if (vaultBtn) vaultBtn.style.display = (tabId === 'records') ? '' : 'none';
   // Update Navigation Active States
   document.querySelectorAll('.nav-link, .mobile-nav-link').forEach(link => {
     if (link.getAttribute('data-tab') === tabId) {
@@ -1968,11 +2209,11 @@ function switchTab(tabId) {
   // Show/hide inline calendar and month selector based on tab
   var inlineCal = document.getElementById('inline-calendar');
   if (inlineCal) {
-    inlineCal.style.display = tabId === 'dashboard' ? 'block' : 'none';
+    inlineCal.style.display = (tabId === 'dashboard' || tabId === 'tenants' || tabId === 'finances') ? 'block' : 'none';
   }
   var monthBar = document.getElementById('month-selector-bar');
   var yearBar = document.getElementById('year-selector-bar');
-  if (tabId === 'diary') {
+  if (tabId === 'tenants' || tabId === 'finances') {
     if (viewMode === 'month') { if (monthBar) monthBar.style.display = 'block'; if (yearBar) yearBar.style.display = 'none'; renderMonthSelector(); }
     else if (viewMode === 'year') { if (monthBar) monthBar.style.display = 'none'; if (yearBar) yearBar.style.display = 'block'; renderYearSelector(); }
     else { if (monthBar) monthBar.style.display = 'none'; if (yearBar) yearBar.style.display = 'none'; }
@@ -1988,7 +2229,7 @@ function switchTab(tabId) {
       headerActions.style.display = '';
       document.getElementById('dashboard-search').style.display = 'none';
       document.getElementById('records-search-header').style.display = '';
-    } else if (tabId === 'settings' || tabId === 'diary') {
+    } else if (tabId === 'settings') {
       headerActions.style.display = 'none';
     } else {
       headerActions.style.display = '';
@@ -2165,14 +2406,7 @@ function renderDashboard() {
   }, 0);
 
   const totalPendingRent = Math.max(0, monthlyRent - totalRentCollected);
-  const totalPendingInterest = activeLendingLoans.reduce(function(sum, loan) {
-    var os = getOutstandingPrincipalAtMonth(loan.id, loan.principal, selectedMonthStr);
-    if (os <= 0) return sum;
-    var exp = loan.isEMI ? Number(loan.emiAmount || 0) : os * (Number(loan.interestRate) / 100);
-    var cat = loan.isEMI ? 'principal' : 'interest';
-    var paid = state.interestPayments.filter(function(p) { return p.type === 'received' && p.category === cat && p.loanId === loan.id && p.date.startsWith(selectedMonthStr) && (!p.note || p.note.indexOf('[Advance]') === -1); }).reduce(function(s, p) { return s + Number(p.amount); }, 0);
-    return sum + Math.max(0, exp - paid);
-  }, 0);
+  const totalPendingInterest = Math.max(0, expectedInterestReceived - totalInterestReceived);
   const netBalance = totalPendingRent + totalPendingInterest;
 
   // Update Summary DOM elements
@@ -2298,10 +2532,6 @@ function renderDashboard() {
   // expectedInterestReceived is calculated above
 
   const interestPending = Math.max(0, expectedInterestReceived - totalInterestReceived);
-  try { console.log('%c=== CARD DEBUG ===', 'font-weight:bold;color:green;font-size:14px');
-  console.log('Expected:', expectedInterestReceived, '| Collected:', totalInterestReceived, '| Pending:', interestPending, '| Month:', selectedMonthStr);
-  console.log('All received payments:', JSON.parse(JSON.stringify(state.interestPayments.filter(function(p) { return p.type === 'received'; }).map(function(p) { return {id: (p.id||'').slice(0,6), loanId: p.loanId, cat: p.category, amt: p.amount, date: p.date, adv: p.note && p.note.indexOf('[Advance]') !== -1, note: (p.note||'').slice(0,60)}; }))));
-  } catch(e){};
   const totalInterestReceivedNode = document.getElementById('dash-total-interest-received');
   if (totalInterestReceivedNode) {
     if (expectedInterestReceived > 0 && interestPending <= 0.01) {
@@ -2387,8 +2617,6 @@ function renderDashboard() {
         var pPaid = state.interestPayments.filter(function(p) { return p.type === 'received' && p.category === cat && p.loanId === l.id && p.date.startsWith(selectedMonthStr) && (!p.note || p.note.indexOf('[Advance]') === -1); }).reduce(function(sum, p) { return sum + Number(p.amount); }, 0);
         var pOwe = expected - pPaid;
         if (pOwe > 0) pBorrowers.push({name: l.borrowerName, owe: pOwe});
-        var pAdvance = state.interestPayments.filter(function(p) { return p.type === 'received' && p.loanId === l.id && p.date.startsWith(nextMonthStr) && p.note && p.note.indexOf('[Advance]') !== -1; }).reduce(function(sum, p) { return sum + Number(p.amount); }, 0);
-        if (pAdvance > 0) aBorrowers.push({name: l.borrowerName, advance: pAdvance});
       }
     });
 
@@ -2396,10 +2624,6 @@ function renderDashboard() {
     var merged = {};
     pBorrowers.forEach(function(b) { merged[b.name] = (merged[b.name] || 0) + b.owe; });
     pBorrowers = Object.keys(merged).map(function(name) { return {name: name, owe: merged[name]}; });
-
-    var mergedAdv = {};
-    aBorrowers.forEach(function(b) { mergedAdv[b.name] = (mergedAdv[b.name] || 0) + b.advance; });
-    aBorrowers = Object.keys(mergedAdv).map(function(name) { return {name: name, advance: mergedAdv[name]}; });
 
     if (pBorrowers.length > 0) {
       var pendingBorrowersHTML = '<div class="pending-names-list">' + pBorrowers.map(function(b) {
@@ -2409,14 +2633,6 @@ function renderDashboard() {
       document.getElementById('card-interest').classList.add('has-pending-names');
       var intHeaderSpan = document.querySelector('#card-interest .summary-card-header span');
       if (intHeaderSpan) intHeaderSpan.insertAdjacentHTML('beforeend', ' <span class="pending-count-badge" style="background:var(--color-warning);color:#fff;font-size:0.6rem;font-weight:800;padding:0.1rem 0.4rem;border-radius:8px;">' + pBorrowers.length + '</span>');
-    }
-    if (aBorrowers.length > 0) {
-      var advHTML = '<div class="pending-names-list" style="margin-top:0.3rem;border-top:1px dashed var(--border-color);padding-top:0.3rem;">';
-      aBorrowers.forEach(function(b) {
-        advHTML += '<div class="pending-name-item" style="color:var(--color-purple);font-weight:600;"><span>' + b.name + '</span> Adv for ' + nextMonthName + ' ' + formatCurrency(b.advance) + '</div>';
-      });
-      advHTML += '</div>';
-      document.getElementById('card-interest').insertAdjacentHTML('beforeend', advHTML);
     }
     
     // Attach click-selection to all pending-name-items
@@ -3042,6 +3258,7 @@ function renderRecentActivity() {
     const date = p.datePaid || p.date;
     if (!date) return;
     const d = new Date(date);
+    if (d > now) return;
     if (currentActivityFilter === 'today' && d < todayStart) return;
     if (currentActivityFilter === 'week' && d < weekStart) return;
     if (currentActivityFilter === 'month' && d < monthStart) return;
@@ -3061,18 +3278,33 @@ function renderRecentActivity() {
     const date = p.date;
     if (!date) return;
     const d = new Date(date);
+    if (d > now) return;
     if (currentActivityFilter === 'today' && d < todayStart) return;
     if (currentActivityFilter === 'week' && d < weekStart) return;
     if (currentActivityFilter === 'month' && d < monthStart) return;
     const isReceived = p.type === 'received';
     const name = isReceived ? state.lent.find(l => l.id === p.loanId) : state.borrowed.find(l => l.id === p.loanId);
+    var actLabel, actIcon, actType;
+    if (p.category === 'increase') {
+      actLabel = isReceived ? 'Principal Disbursed' : 'Principal Received';
+      actIcon = '📤';
+      actType = 'principal-disbursed';
+    } else if (p.category === 'principal') {
+      actLabel = isReceived ? 'Principal Repayment' : 'Principal Paid';
+      actIcon = '💵';
+      actType = 'principal-repayment';
+    } else {
+      actLabel = isReceived ? 'Interest Received' : 'Interest Paid';
+      actIcon = '💰';
+      actType = 'interest-paid';
+    }
     activities.push({
       _order: actOrder++,
       date: date,
-      type: 'interest-paid',
-      label: isReceived ? 'Interest Received' : 'Interest Paid',
+      type: actType,
+      label: actLabel,
       detail: `${name ? name.borrowerName || name.financierName : 'Unknown'} — ${formatCurrency(p.amount)}`,
-      icon: '💰'
+      icon: actIcon
     });
   });
   
@@ -3080,6 +3312,7 @@ function renderRecentActivity() {
     const date = e.date;
     if (!date) return;
     const d = new Date(date);
+    if (d > now) return;
     if (currentActivityFilter === 'today' && d < todayStart) return;
     if (currentActivityFilter === 'week' && d < weekStart) return;
     if (currentActivityFilter === 'month' && d < monthStart) return;
@@ -3101,6 +3334,7 @@ function renderRecentActivity() {
     const date = l.startDate;
     if (!date) return;
     const d = new Date(date);
+    if (d > now) return;
     if (currentActivityFilter === 'today' && d < todayStart) return;
     if (currentActivityFilter === 'week' && d < weekStart) return;
     if (currentActivityFilter === 'month' && d < monthStart) return;
@@ -3118,6 +3352,7 @@ function renderRecentActivity() {
     const date = b.startDate;
     if (!date) return;
     const d = new Date(date);
+    if (d > now) return;
     if (currentActivityFilter === 'today' && d < todayStart) return;
     if (currentActivityFilter === 'week' && d < weekStart) return;
     if (currentActivityFilter === 'month' && d < monthStart) return;
@@ -3135,6 +3370,7 @@ function renderRecentActivity() {
     const date = r.startDate;
     if (!date) return;
     const d = new Date(date);
+    if (d > now) return;
     if (currentActivityFilter === 'today' && d < todayStart) return;
     if (currentActivityFilter === 'week' && d < weekStart) return;
     if (currentActivityFilter === 'month' && d < monthStart) return;
@@ -3214,7 +3450,7 @@ function renderLending() {
   const totalEl = document.getElementById('lent-total-outstanding');
   function calcOutstanding(loan) {
     var payments = state.interestPayments.filter(function(p) {
-      return p.loanId === loan.id && p.type === 'received' && p.category === 'principal' && p.date <= endDateOfSelectedMonth;
+      return p.loanId === loan.id && p.type === 'received' && p.category === 'principal' && p.date <= endDateOfSelectedMonth && (!p.note || p.note.indexOf('[Advance]') === -1);
     });
     var topups = state.interestPayments.filter(function(p) {
       return p.loanId === loan.id && p.type === 'received' && p.category === 'increase' && p.date <= endDateOfSelectedMonth;
@@ -3247,7 +3483,7 @@ function renderLending() {
 
   // Compute per-loan stats
   visibleLoans.forEach(loan => {
-    const loanPayments = state.interestPayments.filter(p => p.loanId === loan.id && p.type === 'received' && p.date <= endDateOfSelectedMonth);
+    const loanPayments = state.interestPayments.filter(p => p.loanId === loan.id && p.type === 'received' && (p.date <= endDateOfSelectedMonth || (p.note && p.note.indexOf('[Advance]') !== -1)));
     const interestPayments = loanPayments.filter(p => p.category === 'interest');
     const principalPayments = loanPayments.filter(p => p.category === 'principal');
     const topupPayments = loanPayments.filter(p => p.category === 'increase');
@@ -3259,7 +3495,7 @@ function renderLending() {
     
     const lastPaymentDate = loanPayments.length > 0 ? loanPayments.reduce((max, p) => p.date > max ? p.date : max, loanPayments[0].date) : null;
     const monthlyYield = loan.isEMI ? Number(loan.emiAmount) : outstandingPrincipal * (Number(loan.interestRate) / 100);
-    const currentMonthPayments = loanPayments.filter(p => p.date.startsWith(selectedMonthStr) && p.category !== 'increase' && p.category !== 'issuance');
+    const currentMonthPayments = loanPayments.filter(p => (p.date.startsWith(selectedMonthStr) || (p.note && p.note.indexOf('[Advance]') !== -1)) && p.category !== 'increase' && p.category !== 'issuance');
     const currentMonthSum = currentMonthPayments.reduce((sum, p) => sum + Number(p.amount), 0);
     const currentMonthInterest = interestPayments.filter(p => p.date.startsWith(selectedMonthStr));
     const currentMonthInterestSum = currentMonthInterest.reduce((sum, p) => sum + Number(p.amount), 0);
@@ -3274,14 +3510,15 @@ function renderLending() {
     const partialEmiPayments = principalPayments.filter(p => p.note && p.note.indexOf('[Partial]') !== -1);
     const emiPaidCount = loan.isEMI ? fullEmiPayments.length : 0;
     const partialEmiTotal = loan.isEMI ? partialEmiPayments.reduce((s, p) => s + Number(p.amount), 0) : 0;
-    const advanceEdis = principalPayments.filter(p => p.note && p.note.indexOf('[Advance]') !== -1);
-    const advanceEmiCount = loan.isEMI ? advanceEdis.length : 0;
+    const advanceEmiPayments = principalPayments.filter(p => p.note && p.note.indexOf('[Advance]') !== -1);
+    const advanceEmiCount = loan.isEMI ? advanceEmiPayments.length : 0;
+    const advEmiAmount = loan.isEMI ? advanceEmiPayments.reduce(function(s, p) { return s + Number(p.amount); }, 0) : 0;
     const advInterest = hasAdvance ? interestPayments.filter(function(p) { return p.category === 'interest' && p.note && p.note.indexOf('[Advance]') !== -1; }).reduce(function(s, p) { return s + Number(p.amount); }, 0) : 0;
 
     loan._stats = {
       outstandingPrincipal, totalReceived, totalRepaid, monthlyYield, currentMonthSum, currentMonthInterestSum,
       isInterestFullyPaidThisMonth, statusInMonth, lastPaymentDate, hasAdvance, advTotal,
-      emiTotalCount, emiPaidCount, partialEmiTotal, advanceEmiCount, advInterest
+      emiTotalCount, emiPaidCount, partialEmiTotal, advanceEmiCount, advEmiAmount, advInterest
     };
   });
 
@@ -3311,7 +3548,7 @@ function renderLending() {
         const currentBal = formatCurrency(Math.max(0, stats.monthlyYield - stats.currentMonthSum));
         const recvDisplay = stats.monthlyYield === 0 ? 'Exp 0 · Rcvd ' + currentRecv : (stats.isInterestFullyPaidThisMonth ? 'Exp ' + formattedYield + ' · Rcvd ' + currentRecv + ' ✅' : 'Exp ' + formattedYield + ' · Rcvd ' + currentRecv + (stats.monthlyYield - stats.currentMonthSum > 0 && stats.currentMonthSum > 0 ? ' · Bal ' + currentBal : ''));
         const settledBadge = stats.statusInMonth !== 'active' ? ' <span class="badge badge-muted">Settled</span>' : '';
-        const advBadge = stats.hasAdvance ? ' <span style="font-size:0.55rem;color:var(--color-purple);font-weight:600;margin-left:0.2rem;">Adv ' + formatCurrency(stats.advTotal) + '</span>' : '';
+        const advBadge = (stats.hasAdvance && Number(loan.interestRate) > 0) ? ' <span style="font-size:0.55rem;color:var(--color-purple);font-weight:600;margin-left:0.2rem;">Adv ' + formatCurrency(stats.advTotal) + '</span>' : '';
 
         var html = '<div style="display:flex;justify-content:space-between;align-items:center;">' +
           '<div><div style="font-weight:700;font-size:1rem;">' + loan.borrowerName + settledBadge + advBadge + '</div>' +
@@ -3369,11 +3606,11 @@ function renderLending() {
 
         if (stats.statusInMonth !== 'active') {
           const currentRecv = formatCurrency(stats.currentMonthSum);
-          card.innerHTML += '<div style="font-size:0.82rem;"><span style="font-weight:600;">' + formattedPrincipal + ' <span class="badge badge-muted">Closed</span></span> <span style="color:var(--text-secondary);">· Rcvd ' + currentRecv + '</span></div>';
+          card.innerHTML += '<div class="loan-sub-row" onclick="event.stopPropagation();openLoanDetail(\'' + loan.id + '\',\'lent\')" style="font-size:0.82rem;cursor:pointer;padding:0.25rem 0.3rem;border-radius:4px;"><span style="font-weight:600;">' + formattedPrincipal + ' <span class="badge badge-muted">Closed</span></span> <span style="color:var(--text-secondary);">· Rcvd ' + currentRecv + '</span></div>';
         } else {
-          card.innerHTML += '<div style="font-size:0.82rem;"><span style="font-weight:600;">' + formattedPrincipal + '</span> <span style="color:var(--color-purple);font-weight:600;">EMI</span> <span style="color:var(--text-secondary);">@ ' + formatCurrency(Number(loan.emiAmount)) + '/mo </span><span style="color:' + (stats.advanceEmiCount > 0 ? 'var(--color-purple)' : 'var(--text-secondary)') + ';">· Paid ' + stats.emiPaidCount + '/' + stats.emiTotalCount + '</span>' + (stats.partialEmiTotal > 0 ? ' <span style="color:var(--color-purple);font-size:0.65rem;font-weight:600;">Partial ' + formatCurrency(stats.partialEmiTotal) + '</span>' : '') + '</div>';
+          card.innerHTML += '<div class="loan-sub-row" onclick="event.stopPropagation();openLoanDetail(\'' + loan.id + '\',\'lent\')" style="font-size:0.82rem;cursor:pointer;padding:0.25rem 0.3rem;border-radius:4px;"><span style="font-weight:600;">' + formattedPrincipal + '</span> <span style="color:var(--color-purple);font-weight:600;">EMI</span> <span style="color:var(--text-secondary);">@ ' + formatCurrency(Number(loan.emiAmount)) + '/mo </span><span style="color:' + (stats.advanceEmiCount > 0 ? 'var(--color-purple)' : 'var(--text-secondary)') + ';">· Paid ' + stats.emiPaidCount + '/' + stats.emiTotalCount + '</span>' + (stats.advEmiAmount > 0 ? ' <span style="color:var(--color-purple);font-size:0.65rem;font-weight:600;">Adv ' + formatCurrency(stats.advEmiAmount) + '</span>' : '') + '</div>';
           var emiPct = stats.emiTotalCount > 0 ? Math.round(stats.emiPaidCount / stats.emiTotalCount * 100) : 0;
-          card.innerHTML += '<div style="width:100%;height:3px;background:var(--bg-tertiary);border-radius:2px;margin:0.15rem 0 0.2rem;"><div style="width:' + Math.min(emiPct,100) + '%;height:3px;background:var(--color-purple);border-radius:2px;"></div></div>';
+          card.innerHTML += '<div class="loan-sub-row" onclick="event.stopPropagation();openLoanDetail(\'' + loan.id + '\',\'lent\')" style="width:100%;height:6px;background:var(--bg-tertiary);border-radius:3px;margin:0.15rem 0 0.2rem;cursor:pointer;"><div style="width:' + Math.min(emiPct,100) + '%;height:6px;background:var(--color-purple);border-radius:3px;"></div></div>';
         }
       });
 
@@ -3434,11 +3671,11 @@ function renderLending() {
 
         if (stats.statusInMonth !== 'active') {
           const currentRecv = formatCurrency(stats.currentMonthSum);
-          card.innerHTML += '<div style="font-size:0.82rem;"><span style="font-weight:600;">' + formattedPrincipal + ' <span class="badge badge-muted">Closed</span></span> <span style="color:var(--text-secondary);">· Rcvd ' + currentRecv + '</span></div>';
+          card.innerHTML += '<div class="loan-sub-row" onclick="event.stopPropagation();openLoanDetail(\'' + loan.id + '\',\'lent\')" style="font-size:0.82rem;cursor:pointer;padding:0.25rem 0.3rem;border-radius:4px;"><span style="font-weight:600;">' + formattedPrincipal + ' <span class="badge badge-muted">Closed</span></span> <span style="color:var(--text-secondary);">· Rcvd ' + currentRecv + '</span></div>';
         } else if (loan.isEMI) {
-          card.innerHTML += '<div style="font-size:0.82rem;"><span style="font-weight:600;">' + formattedPrincipal + '</span> <span style="color:var(--color-purple);font-weight:600;">EMI</span> <span style="color:var(--text-secondary);">@ ' + formatCurrency(Number(loan.emiAmount)) + '/mo </span><span style="color:' + (stats.advanceEmiCount > 0 ? 'var(--color-purple)' : 'var(--text-secondary)') + ';">· Paid ' + stats.emiPaidCount + '/' + stats.emiTotalCount + '</span>' + (stats.partialEmiTotal > 0 ? ' <span style="color:var(--color-purple);font-size:0.65rem;font-weight:600;">Partial ' + formatCurrency(stats.partialEmiTotal) + '</span>' : '') + '</div>';
+          card.innerHTML += '<div class="loan-sub-row" onclick="event.stopPropagation();openLoanDetail(\'' + loan.id + '\',\'lent\')" style="font-size:0.82rem;cursor:pointer;padding:0.25rem 0.3rem;border-radius:4px;"><span style="font-weight:600;">' + formattedPrincipal + '</span> <span style="color:var(--color-purple);font-weight:600;">EMI</span> <span style="color:var(--text-secondary);">@ ' + formatCurrency(Number(loan.emiAmount)) + '/mo </span><span style="color:' + (stats.advanceEmiCount > 0 ? 'var(--color-purple)' : 'var(--text-secondary)') + ';">· Paid ' + stats.emiPaidCount + '/' + stats.emiTotalCount + '</span>' + (stats.advEmiAmount > 0 ? ' <span style="color:var(--color-purple);font-size:0.65rem;font-weight:600;">Adv ' + formatCurrency(stats.advEmiAmount) + '</span>' : '') + '</div>';
           var emiPct = stats.emiTotalCount > 0 ? Math.round(stats.emiPaidCount / stats.emiTotalCount * 100) : 0;
-          card.innerHTML += '<div style="width:100%;height:3px;background:var(--bg-tertiary);border-radius:2px;margin:0.15rem 0 0.2rem;"><div style="width:' + Math.min(emiPct,100) + '%;height:3px;background:var(--color-purple);border-radius:2px;"></div></div>';
+          card.innerHTML += '<div class="loan-sub-row" onclick="event.stopPropagation();openLoanDetail(\'' + loan.id + '\',\'lent\')" style="width:100%;height:6px;background:var(--bg-tertiary);border-radius:3px;margin:0.15rem 0 0.2rem;cursor:pointer;"><div style="width:' + Math.min(emiPct,100) + '%;height:6px;background:var(--color-purple);border-radius:3px;"></div></div>';
         } else {
           const advTotal = stats.advTotal > 0 ? formatCurrency(stats.advTotal) : '';
           var intDisplay = '';
@@ -3452,7 +3689,7 @@ function renderLending() {
           if (stats.advInterest > 0) {
             intDisplay += ' <span style="color:var(--color-purple);font-weight:600;">· Adv Int Rcvd ' + formatCurrency(stats.advInterest) + '</span>';
           }
-          card.innerHTML += '<div style="font-size:0.82rem;"><span style="font-weight:600;">' + formattedPrincipal + '</span> <span style="color:var(--text-secondary);">+' + formatCurrency(stats.monthlyYield) + '/mo</span>' + intDisplay + (advTotal && stats.advInterest <= 0 ? ' <span style="font-size:0.6rem;color:var(--color-purple);font-weight:700;">Advance ' + advTotal + '</span>' : '') + '</div>';
+          card.innerHTML += '<div class="loan-sub-row" onclick="event.stopPropagation();openLoanDetail(\'' + loan.id + '\',\'lent\')" style="font-size:0.82rem;cursor:pointer;padding:0.25rem 0.3rem;border-radius:4px;"><span style="font-weight:600;">' + formattedPrincipal + '</span> <span style="color:var(--text-secondary);">+' + formatCurrency(stats.monthlyYield) + '/mo</span>' + intDisplay + (advTotal && stats.advInterest <= 0 ? ' <span style="font-size:0.6rem;color:var(--color-purple);font-weight:700;">Advance ' + advTotal + '</span>' : '') + '</div>';
         }
       });
 
@@ -3634,6 +3871,11 @@ function renderBorrowing() {
       </div>
     `;
 
+    card.style.cursor = 'pointer';
+    card.onclick = function(e) {
+      if (e.target.closest('[onclick]') || e.target.closest('button') || e.target.closest('input') || e.target.closest('label')) return;
+      openLoanDetail(loan.id, 'borrowed');
+    };
     listContainer.appendChild(card);
     });
   });
@@ -3965,18 +4207,45 @@ function promptConvertEMI(loanId, direction) {
   const loan = state[listName].find(x => x.id === loanId);
   if (!loan) return;
 
-  const outstandingPrincipal = getOutstandingPrincipal(loan.id, loan.principal);
+  // Match card calculation: principal + topups - repayments
+  const loanPayments = state.interestPayments.filter(p => p.loanId === loan.id && p.type === 'received');
+  const totalRepaid = loanPayments.filter(p => p.category === 'principal').reduce((s, p) => s + Number(p.amount), 0);
+  const totalTopups = loanPayments.filter(p => p.category === 'increase').reduce((s, p) => s + Number(p.amount), 0);
+  const outstandingPrincipal = Math.max(0, Number(loan.principal) + totalTopups - totalRepaid);
+  
+  var pendingInterest = 0;
+  var totalAmount = outstandingPrincipal;
+  var outstandingM = getOutstandingPrincipalAtMonth(loan.id, loan.principal, selectedMonthStr);
+  if (outstandingM > 0 && Number(loan.interestRate) > 0) {
+    var expected = outstandingM * (Number(loan.interestRate) / 100);
+    var paid = state.interestPayments.filter(function(p) {
+      return p.type === 'received' && p.category === 'interest' && p.loanId === loan.id && p.date.startsWith(selectedMonthStr) && (!p.note || p.note.indexOf('[Advance]') === -1);
+    }).reduce(function(s, p) { return s + Number(p.amount); }, 0);
+    pendingInterest = Math.max(0, expected - paid);
+    totalAmount = outstandingPrincipal + pendingInterest;
+  }
   
   document.getElementById('form-emi-convert').reset();
   document.getElementById('emi-convert-loan-id').value = loanId;
   document.getElementById('emi-convert-direction').value = direction;
   document.getElementById('emi-convert-name').textContent = loan.borrowerName;
-  document.getElementById('emi-convert-amount').value = outstandingPrincipal;
+  document.getElementById('emi-convert-amount').value = totalAmount;
   document.getElementById('emi-convert-rate').value = loan.interestRate;
+  document.getElementById('emi-convert-emi-amount').value = '';
   document.getElementById('emi-convert-preview').textContent = 'Rs. 0 / mo';
   
+  var noteEl = document.getElementById('emi-convert-note');
+  if (noteEl) {
+    if (pendingInterest > 0) {
+      noteEl.innerHTML = 'Principal <span style="color:var(--color-warning);font-weight:600">' + formatCurrency(outstandingPrincipal) + '</span> + Pending Interest <span style="color:var(--color-accent);font-weight:600">' + formatCurrency(pendingInterest) + '</span>';
+      noteEl.style.display = 'block';
+    } else {
+      noteEl.style.display = 'none';
+    }
+  }
+  
   openModal('modal-emi-convert');
-  calculateEMIPreview();
+  calculateEMIPreview('tenure');
 }
 
 function selectTenure(btn, months) {
@@ -3992,23 +4261,59 @@ function selectTenure(btn, months) {
   calculateEMIPreview();
 }
 
-function calculateEMIPreview() {
+function calculateEMIPreview(source) {
   const P = Number(document.getElementById('emi-convert-amount').value);
-  const tenure = Number(document.getElementById('emi-convert-tenure').value);
+  const tenureInput = document.getElementById('emi-convert-tenure');
+  const emiInput = document.getElementById('emi-convert-emi-amount');
   const rateInput = Number(document.getElementById('emi-convert-rate').value);
+  const tenure = Number(tenureInput.value);
+  const manualEmi = Number(emiInput.value);
+  const r = rateInput / 100;
+
+  if (source === 'emi' && manualEmi > 0 && P > 0 && r > 0) {
+    // User set EMI manually — calculate tenure from EMI
+    // EMI formula: EMI = P * r * (1+r)^n / ((1+r)^n - 1)
+    // Solve for n: n = -ln(1 - P*r/EMI) / ln(1+r)
+    const val = 1 - (P * r) / manualEmi;
+    if (val > 0) {
+      const n = Math.ceil(-Math.log(val) / Math.log(1 + r));
+      tenureInput.value = n;
+      document.querySelectorAll('#tenure-shortcuts .btn').forEach(b => { b.style.background = ''; b.style.color = ''; b.style.borderColor = ''; });
+      const totalInterest = manualEmi * n - P;
+      document.getElementById('emi-convert-preview').textContent = `${formatCurrency(manualEmi)} / mo`;
+      document.getElementById('emi-convert-total-interest').textContent = formatCurrency(totalInterest);
+      document.getElementById('emi-convert-total-amount').textContent = formatCurrency(P + totalInterest);
+      return;
+    }
+  }
+
+  if (source === 'emi' && manualEmi > 0 && P > 0 && r === 0) {
+    // 0% interest — tenure = P / EMI
+    const n = Math.ceil(P / manualEmi);
+    tenureInput.value = n;
+    document.querySelectorAll('#tenure-shortcuts .btn').forEach(b => { b.style.background = ''; b.style.color = ''; b.style.borderColor = ''; });
+    const totalInterest = 0;
+    document.getElementById('emi-convert-preview').textContent = `${formatCurrency(manualEmi)} / mo`;
+    document.getElementById('emi-convert-total-interest').textContent = formatCurrency(totalInterest);
+    document.getElementById('emi-convert-total-amount').textContent = formatCurrency(P + totalInterest);
+    return;
+  }
+
   if (!tenure || tenure <= 0 || !rateInput || rateInput <= 0) {
     document.getElementById('emi-convert-preview').textContent = 'Rs. 0 / mo';
     document.getElementById('emi-convert-total-interest').textContent = formatCurrency(0);
     document.getElementById('emi-convert-total-amount').textContent = formatCurrency(0);
+    if (source === 'tenure' || source === undefined) emiInput.value = '';
     return;
   }
-  const r = rateInput / 100;
-  const n = tenure;
+
+  // Default: auto-calculate EMI from tenure
   let emi;
-  if (r === 0) emi = P / n;
-  else emi = P * r * Math.pow(1 + r, n) / (Math.pow(1 + r, n) - 1);
-  const totalInterest = emi * n - P;
-  
+  if (r === 0) emi = P / tenure;
+  else emi = P * r * Math.pow(1 + r, tenure) / (Math.pow(1 + r, tenure) - 1);
+  const totalInterest = emi * tenure - P;
+
+  emiInput.value = Math.round(emi);
   document.getElementById('emi-convert-preview').textContent = `${formatCurrency(emi)} / mo`;
   document.getElementById('emi-convert-total-interest').textContent = formatCurrency(totalInterest);
   document.getElementById('emi-convert-total-amount').textContent = formatCurrency(P + totalInterest);
@@ -4022,29 +4327,67 @@ document.getElementById('form-emi-convert').addEventListener('submit', (e) => {
   const tenure = Number(document.getElementById('emi-convert-tenure').value);
   const rateInput = Number(document.getElementById('emi-convert-rate').value);
   const emiPrincipal = Number(document.getElementById('emi-convert-amount').value);
+  const manualEmi = Number(document.getElementById('emi-convert-emi-amount').value);
   
   const listName = direction === 'lent' ? 'lent' : 'borrowed';
   const loan = state[listName].find(x => x.id === loanId);
   if (!loan) return;
   
-  const outstanding = getOutstandingPrincipal(loan.id, loan.principal);
+  // Match card calculation: principal + topups - repayments
+  const loanPmts = state.interestPayments.filter(p => p.loanId === loan.id && p.type === 'received');
+  const totalRepaidP = loanPmts.filter(p => p.category === 'principal').reduce((s, p) => s + Number(p.amount), 0);
+  const totalTopupsP = loanPmts.filter(p => p.category === 'increase').reduce((s, p) => s + Number(p.amount), 0);
+  const outstandingP = Math.max(0, Number(loan.principal) + totalTopupsP - totalRepaidP);
   
-  if (!emiPrincipal || emiPrincipal <= 0) { alert('Enter a valid principal amount to convert.'); return; }
-  if (emiPrincipal > outstanding) { alert('Amount exceeds outstanding principal of ' + formatCurrency(outstanding)); return; }
+  // Calculate pending interest (for all-in-one EMI conversion)
+  var pendingInt = 0;
+  var outstandingM = getOutstandingPrincipalAtMonth(loan.id, loan.principal, selectedMonthStr);
+  if (outstandingM > 0 && Number(loan.interestRate) > 0) {
+    var expectedM = outstandingM * (Number(loan.interestRate) / 100);
+    var paidM = state.interestPayments.filter(function(p) {
+      return p.type === 'received' && p.category === 'interest' && p.loanId === loan.id && p.date.startsWith(selectedMonthStr) && (!p.note || p.note.indexOf('[Advance]') === -1);
+    }).reduce(function(s, p) { return s + Number(p.amount); }, 0);
+    pendingInt = Math.max(0, expectedM - paidM);
+  }
+  
+  var totalEffectivePrincipal = outstandingP + pendingInt;
+  
+  if (!emiPrincipal || emiPrincipal <= 0) { alert('Enter a valid amount to convert.'); return; }
+  if (emiPrincipal > totalEffectivePrincipal) { alert('Amount exceeds outstanding principal + pending interest of ' + formatCurrency(totalEffectivePrincipal)); return; }
   
   const r = rateInput / 100;
   const n = tenure;
-  let emi = (r === 0) ? emiPrincipal / n : emiPrincipal * r * Math.pow(1 + r, n) / (Math.pow(1 + r, n) - 1);
+  let emi;
+  if (manualEmi > 0) {
+    emi = manualEmi;
+  } else {
+    emi = (r === 0) ? emiPrincipal / n : emiPrincipal * r * Math.pow(1 + r, n) / (Math.pow(1 + r, n) - 1);
+  }
   
-  if (emiPrincipal >= outstanding) {
-    // Full conversion
+  // Record pending interest as paid (rolled into principal)
+  if (pendingInt > 0) {
+    var todayPI = new Date().toISOString().split('T')[0];
+    state.interestPayments.push({
+      id: 'p' + Math.random().toString(36).substr(2, 9),
+      loanId: loanId,
+      type: direction === 'lent' ? 'received' : 'paid',
+      category: 'interest',
+      amount: pendingInt,
+      date: todayPI,
+      note: 'Interest rolled into principal (EMI conversion)'
+    });
+  }
+  
+  if (emiPrincipal >= totalEffectivePrincipal) {
+    // Full conversion — increase principal by pending interest
+    if (pendingInt > 0) loan.principal = Number(loan.principal) + pendingInt;
     loan.interestRate = rateInput;
     loan.isEMI = true;
     loan.tenureMonths = tenure;
     loan.emiAmount = emi;
   } else {
     // Partial conversion — record principal repayment to reduce outstanding
-  var d = new Date(); var today = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+    var today = new Date().toISOString().split('T')[0];
     state.interestPayments.push({
       id: 'p' + Math.random().toString(36).substr(2, 9),
       loanId: loanId,
@@ -4333,19 +4676,20 @@ function showLedger(loanId, direction) {
 
   const statsContainer = document.getElementById('ledger-stats');
   statsContainer.innerHTML = `
-    <div class="loan-stat-box">
-      <span class="loan-stat-val">${formatCurrency(remainingPrincipal)}</span>
-      <span class="loan-stat-lbl">Remaining Principal</span>
+    <div class="card" style="flex:1;padding:0.6rem;text-align:center;">
+      <div style="font-size:0.6rem;text-transform:uppercase;color:var(--text-muted);letter-spacing:0.5px;">Outstanding</div>
+      <div style="font-weight:800;font-size:1rem;margin-top:0.15rem;color:var(--color-warning);">${formatCurrency(displayPrincipal)}</div>
     </div>
-    <div class="loan-stat-box">
-      <span class="loan-stat-val" style="color: var(--color-success);">${formatCurrency(totalPrincipalRepaid)}</span>
-      <span class="loan-stat-lbl">Total Repaid</span>
+    <div class="card" style="flex:1;padding:0.6rem;text-align:center;">
+      <div style="font-size:0.6rem;text-transform:uppercase;color:var(--text-muted);letter-spacing:0.5px;">${direction === 'lent' ? 'Int Rcvd' : 'Int Paid'}</div>
+      <div style="font-weight:800;font-size:1rem;margin-top:0.15rem;color:var(--color-success);">${formatCurrency(totalInterest)}</div>
     </div>
-    <div class="loan-stat-box">
-      <span class="loan-stat-val" style="color: ${direction === 'lent' ? 'var(--color-accent)' : 'var(--color-purple)'};">${formatCurrency(totalInterest)}</span>
-      <span class="loan-stat-lbl">Total Interest ${direction === 'lent' ? 'Earned' : 'Paid'}</span>
+    <div class="card" style="flex:1;padding:0.6rem;text-align:center;">
+      <div style="font-size:0.6rem;text-transform:uppercase;color:var(--text-muted);letter-spacing:0.5px;">${direction === 'lent' ? 'Repaid' : 'Paid'}</div>
+      <div style="font-weight:800;font-size:1rem;margin-top:0.15rem;color:var(--color-accent);">${formatCurrency(totalPrincipalRepaid)}</div>
     </div>
   `;
+  statsContainer.style.cssText = 'display:flex;gap:0.5rem;margin-bottom:0.75rem;';
 
   // Build List
   const listContainer = document.getElementById('ledger-list-container');
@@ -4354,44 +4698,30 @@ function showLedger(loanId, direction) {
   if (history.length === 0) {
     listContainer.innerHTML = `<p style="text-align: center; color: var(--text-muted); font-size: 0.85rem; padding: 1rem 0;">No transaction records logged.</p>`;
   } else {
-    // Sort reverse chronological
+    var h = '<div style="font-size:0.65rem;text-transform:uppercase;color:var(--text-muted);letter-spacing:0.5px;margin-bottom:0.35rem;">Transaction History</div>';
+    h += '<div style="display:flex;flex-direction:column;gap:0.3rem;">';
     const sortedHistory = [...history].sort((a,b) => new Date(b.date) - new Date(a.date));
     sortedHistory.forEach(item => {
-      const div = document.createElement('div');
-      div.className = 'ledger-item';
-      
-      let categoryBadge = '';
-      if (item.category === 'issuance') {
-        categoryBadge = `<span class="badge" style="font-size: 0.65rem; padding: 0.15rem 0.4rem; margin-left: 0.5rem; background-color: rgba(168, 85, 247, 0.15); color: var(--color-purple); border: 1px solid rgba(168, 85, 247, 0.25);">Disbursed</span>`;
-      } else if (item.category === 'increase') {
-        categoryBadge = `<span class="badge" style="font-size: 0.65rem; padding: 0.15rem 0.4rem; margin-left: 0.5rem; background-color: rgba(14, 165, 233, 0.15); color: var(--color-accent); border: 1px solid rgba(14, 165, 233, 0.25);">Lend More (Top-up)</span>`;
-      } else if (item.category === 'principal') {
-        categoryBadge = `<span class="badge badge-success" style="font-size: 0.65rem; padding: 0.15rem 0.4rem; margin-left: 0.5rem; background-color: rgba(16, 185, 129, 0.15); color: var(--color-success); border: 1px solid rgba(16, 185, 129, 0.25);">Principal Repayment</span>`;
-      } else {
-        categoryBadge = `<span class="badge badge-accent" style="font-size: 0.65rem; padding: 0.15rem 0.4rem; margin-left: 0.5rem; background-color: rgba(14, 165, 233, 0.15); color: var(--color-accent); border: 1px solid rgba(14, 165, 233, 0.25);">Interest</span>`;
-      }
-      
-      // Hide delete button for original issuance
+      let catLabel = '', catColor = 'var(--text-secondary)';
+      if (item.category === 'issuance') { catLabel = 'Disbursed'; catColor = 'var(--color-purple)'; }
+      else if (item.category === 'increase') { catLabel = 'Top-up'; catColor = 'var(--color-accent)'; }
+      else if (item.category === 'principal') { catLabel = 'Principal'; catColor = 'var(--color-success)'; }
+      else { catLabel = 'Interest'; catColor = direction === 'lent' ? 'var(--color-accent)' : 'var(--color-purple)'; }
+
       const canDelete = item.category !== 'issuance';
-      const deleteBtnHtml = canDelete
-        ? `<button class="ledger-delete" onclick="deleteLedgerPayment('${item.id}', '${loanId}', '${direction}')">
-            <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/></svg>
-           </button>`
+      const deleteBtn = canDelete
+        ? '<span onclick="event.stopPropagation();deleteLedgerPayment(\'' + item.id + '\',\'' + loanId + '\',\'' + direction + '\')" style="cursor:pointer;font-size:0.7rem;padding:0.15rem 0.3rem;border-radius:4px;color:var(--text-muted);flex-shrink:0;" onmouseenter="this.style.color=\'var(--color-danger)\'" onmouseleave="this.style.color=\'var(--text-muted)\'">🗑️</span>'
         : '';
 
-      div.innerHTML = `
-        <div class="ledger-info">
-          <div style="display: flex; align-items: center; gap: 0.25rem;">
-            <span class="ledger-amount" style="color: ${item.category === 'issuance' || item.category === 'increase' ? 'var(--text-primary)' : 'inherit'}">${formatCurrency(item.amount)}</span>
-            ${categoryBadge}
-          </div>
-          <span class="ledger-date">${formatDate(item.date)}</span>
-          ${item.note ? `<span class="ledger-note">${item.note.replace('[Advance]', '<span style="color:var(--color-purple);font-weight:600;">[Advance]</span>')}</span>` : ''}
-        </div>
-        ${deleteBtnHtml}
-      `;
-      listContainer.appendChild(div);
+      h += '<div style="display:flex;justify-content:space-between;align-items:center;padding:0.45rem 0.5rem;border-radius:6px;background:rgba(255,255,255,0.02);border:1px solid var(--border-color);">';
+      h += '<span style="font-size:0.75rem;color:var(--text-secondary);min-width:60px;">' + formatDate(item.date) + '</span>';
+      h += '<span style="font-weight:700;font-size:0.85rem;flex:1;text-align:right;margin:0 0.5rem;">' + formatCurrency(Number(item.amount)) + '</span>';
+      h += '<span style="font-size:0.6rem;padding:0.12rem 0.35rem;border-radius:4px;background:' + catColor + '18;color:' + catColor + ';flex-shrink:0;min-width:52px;text-align:center;">' + catLabel + '</span>';
+      h += deleteBtn;
+      h += '</div>';
     });
+    h += '</div>';
+    listContainer.innerHTML = h;
   }
 
   openModal('modal-ledger');
@@ -4428,6 +4758,128 @@ window.deleteLoan = deleteLoan;
 window.promptPayment = promptPayment;
 window.showLedger = showLedger;
 window.deleteLedgerPayment = deleteLedgerPayment;
+window.openLoanDetail = openLoanDetail;
+
+function openLoanDetail(loanId, direction) {
+  loadState();
+  const list = direction === 'lent' ? state.lent : state.borrowed;
+  const loan = list.find(l => l.id === loanId);
+  if (!loan) return;
+
+  const type = direction === 'lent' ? 'received' : 'paid';
+  const name = direction === 'lent' ? (loan.borrowerName || 'Unknown') : (loan.financierName || 'Unknown');
+  const phone = loan.phone || '';
+  const outstanding = getOutstandingPrincipal(loanId, loan.principal);
+
+  const allPayments = state.interestPayments.filter(p => p.loanId === loanId && p.type === type);
+  const interestPayments = allPayments.filter(p => p.category === 'interest');
+  const principalPayments = allPayments.filter(p => p.category === 'principal');
+  const totalInterest = interestPayments.reduce((s, p) => s + Number(p.amount), 0);
+  const totalRepaid = principalPayments.reduce((s, p) => s + Number(p.amount), 0);
+
+  const isEMI = loan.isEMI;
+  const emiAmount = Number(loan.emiAmount) || 0;
+  const emiTotalCount = isEMI ? (loan.emiTotal || Math.ceil(Number(loan.principal) / emiAmount)) : 0;
+  const fullEmiPayments = principalPayments.filter(p => !p.note || p.note.indexOf('[Partial]') === -1);
+  const emiPaidCount = isEMI ? fullEmiPayments.length : 0;
+  const emiPct = emiTotalCount > 0 ? Math.round(emiPaidCount / emiTotalCount * 100) : 0;
+  const nextEmi = (outstanding > 0 && isEMI) ? emiAmount : 0;
+  const monthlyYield = isEMI ? emiAmount : outstanding * (Number(loan.interestRate) / 100);
+
+  const title = document.getElementById('loan-detail-title');
+  title.innerHTML = name + (phone ? ' <span style="font-size:0.7rem;color:var(--text-secondary);font-weight:400;">' + phone + '</span>' : '');
+
+  const body = document.getElementById('loan-detail-body');
+  var h = '';
+
+  // Top stats row
+  h += '<div style="display:flex;gap:0.5rem;margin-bottom:0.75rem;">';
+  h += '<div class="card" style="flex:1;padding:0.6rem;text-align:center;">';
+  h += '<div style="font-size:0.6rem;text-transform:uppercase;color:var(--text-muted);letter-spacing:0.5px;">Outstanding</div>';
+  h += '<div style="font-weight:800;font-size:1.1rem;margin-top:0.15rem;color:var(--color-warning);">' + formatCurrency(outstanding) + '</div>';
+  h += '</div>';
+  h += '<div class="card" style="flex:1;padding:0.6rem;text-align:center;">';
+  h += '<div style="font-size:0.6rem;text-transform:uppercase;color:var(--text-muted);letter-spacing:0.5px;">Interest ' + (direction === 'lent' ? 'Rcvd' : 'Paid') + '</div>';
+  h += '<div style="font-weight:800;font-size:1.1rem;margin-top:0.15rem;color:var(--color-success);">' + formatCurrency(totalInterest) + '</div>';
+  h += '</div>';
+  h += '</div>';
+
+  // Loan info
+  h += '<div class="card" style="padding:0.6rem;margin-bottom:0.75rem;">';
+  h += '<div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:0.3rem;font-size:0.78rem;color:var(--text-secondary);">';
+  h += '<span>Start: <b style="color:var(--text-primary);">' + formatDate(loan.startDate) + '</b></span>';
+  h += '<span>Rate: <b style="color:var(--text-primary);">' + loan.interestRate + '%/mo</b></span>';
+  h += '<span>Principal: <b style="color:var(--text-primary);">' + formatCurrency(loan.principal) + '</b></span>';
+  h += '<span>Monthly: <b style="color:var(--text-primary);">' + formatCurrency(monthlyYield) + '</b></span>';
+  if (loan.notes) h += '<span style="width:100%;font-style:italic;margin-top:0.15rem;">"' + loan.notes + '"</span>';
+  h += '</div></div>';
+
+  // EMI Progress (only for EMI loans)
+  if (isEMI) {
+    h += '<div class="card" style="padding:0.6rem;margin-bottom:0.75rem;">';
+    h += '<div style="font-size:0.65rem;text-transform:uppercase;color:var(--text-muted);letter-spacing:0.5px;margin-bottom:0.3rem;">EMI Progress</div>';
+    h += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.3rem;">';
+    h += '<span style="font-weight:700;font-size:1rem;color:var(--color-purple);">' + formatCurrency(emiAmount) + '/mo</span>';
+    h += '<span style="font-size:0.8rem;color:var(--text-secondary);">Paid <b style="color:var(--text-primary);">' + emiPaidCount + '/' + emiTotalCount + '</b></span>';
+    h += '</div>';
+    h += '<div style="width:100%;height:6px;background:var(--bg-tertiary);border-radius:3px;overflow:hidden;">';
+    h += '<div style="width:' + Math.min(emiPct, 100) + '%;height:6px;background:var(--color-purple);border-radius:3px;transition:width 0.3s;"></div>';
+    h += '</div>';
+    h += '<div style="display:flex;justify-content:space-between;font-size:0.65rem;color:var(--text-muted);margin-top:0.2rem;">';
+    h += '<span>' + emiPct + '% done</span>';
+    h += '<span>' + (emiTotalCount - emiPaidCount) + ' remaining</span>';
+    h += '</div>';
+    if (nextEmi > 0) {
+      h += '<div style="margin-top:0.4rem;padding:0.4rem;background:rgba(168,85,247,0.1);border-radius:6px;text-align:center;font-size:0.78rem;">';
+      h += 'Next EMI: <b style="color:var(--color-purple);">' + formatCurrency(nextEmi) + '</b>';
+      h += '</div>';
+    }
+    h += '</div>';
+  }
+
+  // Repayment summary (non-EMI)
+  if (!isEMI && totalRepaid > 0) {
+    h += '<div class="card" style="padding:0.6rem;margin-bottom:0.75rem;">';
+    h += '<div style="font-size:0.65rem;text-transform:uppercase;color:var(--text-muted);letter-spacing:0.5px;margin-bottom:0.2rem;">Principal Repaid</div>';
+    h += '<div style="font-weight:700;font-size:1rem;color:var(--color-success);">' + formatCurrency(totalRepaid) + '</div>';
+    h += '</div>';
+  }
+
+  // Recent payments (last 5)
+  var recentPayments = [...allPayments].sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 5);
+  if (recentPayments.length > 0) {
+    h += '<div style="margin-bottom:0.75rem;">';
+    h += '<div style="font-size:0.65rem;text-transform:uppercase;color:var(--text-muted);letter-spacing:0.5px;margin-bottom:0.35rem;">Recent Payments</div>';
+    recentPayments.forEach(function(p) {
+      var catLabel = '';
+      var catColor = 'var(--text-secondary)';
+      if (p.category === 'interest') { catLabel = 'Interest'; catColor = direction === 'lent' ? 'var(--color-accent)' : 'var(--color-purple)'; }
+      else if (p.category === 'principal') { catLabel = 'Principal'; catColor = 'var(--color-success)'; }
+      else if (p.category === 'increase') { catLabel = 'Top-up'; catColor = 'var(--color-accent)'; }
+      else if (p.category === 'issuance') { catLabel = 'Disbursed'; catColor = 'var(--color-purple)'; }
+      h += '<div style="display:flex;justify-content:space-between;align-items:center;padding:0.35rem 0;border-bottom:1px solid var(--border-color);font-size:0.78rem;">';
+      h += '<span style="color:var(--text-secondary);">' + formatDate(p.date) + '</span>';
+      h += '<span style="font-weight:600;">' + formatCurrency(Number(p.amount)) + '</span>';
+      h += '<span style="font-size:0.65rem;padding:0.1rem 0.35rem;border-radius:4px;background:' + catColor + '22;color:' + catColor + ';">' + catLabel + '</span>';
+      h += '</div>';
+    });
+    h += '</div>';
+  }
+
+  // Action buttons
+  h += '<div style="display:flex;gap:0.5rem;flex-wrap:wrap;">';
+  if (outstanding > 0) {
+    if (isEMI) {
+      h += '<button class="btn btn-primary" style="flex:1;min-height:40px;" onclick="closeModal(\'modal-loan-detail\');promptRecordEMI(\'' + loanId + '\',\'' + (direction === 'lent' ? 'received' : 'paid') + '\')">✅ Receive EMI</button>';
+    } else {
+      h += '<button class="btn btn-primary" style="flex:1;min-height:40px;" onclick="closeModal(\'modal-loan-detail\');quickLoanPayment(\'' + loanId + '\',\'' + direction + '\')">✅ Receive</button>';
+    }
+  }
+  h += '</div>';
+
+  body.innerHTML = h;
+  openModal('modal-loan-detail');
+}
 
 // 11. RENTALS TAB CONTROLLERS & ACTIONS
 
@@ -4806,6 +5258,16 @@ window.deleteRentPayment = deleteRentPayment;
 window.loadRealSeedData = function() {
   if (!confirm('Load demo data? This will replace all existing data with sample entries.')) return;
   loadState();
+  // Auto-backup ONLY if there's real data to preserve
+  var hasRealData = (state.lent && state.lent.length > 0) || (state.borrowed && state.borrowed.length > 0) || (state.rentals && state.rentals.length > 0);
+  if (hasRealData) {
+    try {
+      var backup = { lent: state.lent, borrowed: state.borrowed, rentals: state.rentals, rentPayments: state.rentPayments, interestPayments: state.interestPayments, expenses: state.expenses, renewals: state.renewals, properties: state.properties };
+      localStorage.setItem('capitalflow_backup', JSON.stringify(backup));
+    } catch(e) { console.warn('Backup failed:', e); }
+  } else {
+    localStorage.removeItem('capitalflow_backup');
+  }
   state.rentals = [];
   state.rentPayments = [];
   state.lent = [];
@@ -4862,7 +5324,7 @@ window.loadRealSeedData = function() {
     {id:'l9',borrowerName:'Tushar',phone:'9999366827',principal:400000,interestRate:4,startDate:'2026-06-20',status:'active',isEMI:false},
     {id:'l10',borrowerName:'Tushar',phone:'9999366827',principal:240000,interestRate:0,startDate:'2026-06-20',status:'active',isEMI:true,emiAmount:10000,emiTotal:24},
     {id:'l11',borrowerName:'M.K',phone:'9999315929',principal:900000,interestRate:0,startDate:'2024-01-20',status:'active',isEMI:true,emiAmount:15000,emiTotal:60},
-    {id:'l12',borrowerName:'M.K',phone:'9999315929',principal:300000,interestRate:0,startDate:'2026-08-01',status:'active',isEMI:false},
+    {id:'l12',borrowerName:'M.K',phone:'9999315929',principal:300000,interestRate:0,startDate:'2026-07-01',status:'active',isEMI:false},
     {id:'l13',borrowerName:'Sailesh',phone:'9899551694',principal:200000,interestRate:0,startDate:'2025-09-25',status:'active',isEMI:true,emiAmount:4000,emiTotal:50},
     {id:'l14',borrowerName:'Sailesh',phone:'9899551694',principal:25000,interestRate:3,startDate:'2026-06-25',status:'active',isEMI:false},
     {id:'l15',borrowerName:'Sailesh',phone:'9899551694',principal:150000,interestRate:4,startDate:'2026-06-25',status:'active',isEMI:false}
@@ -4971,6 +5433,37 @@ window.loadRealSeedData = function() {
   renderDashboard();
   renderRentals();
   showToast('Demo data loaded!', 'success');
+  // Show restore banner if backup exists
+  if (localStorage.getItem('capitalflow_backup')) {
+    var rb = document.getElementById('restore-banner');
+    if (rb) rb.style.display = 'flex';
+  }
+};
+
+window.restoreRealData = function() {
+  var raw = localStorage.getItem('capitalflow_backup');
+  if (!raw) { showToast('No backup found', 'error'); return; }
+  if (!confirm('Restore your real data? Demo data will be replaced.')) return;
+  var backup = JSON.parse(raw);
+  loadState();
+  state.lent = backup.lent || [];
+  state.borrowed = backup.borrowed || [];
+  state.rentals = backup.rentals || [];
+  state.rentPayments = backup.rentPayments || [];
+  state.interestPayments = backup.interestPayments || [];
+  state.expenses = backup.expenses || [];
+  state.renewals = backup.renewals || [];
+  state.properties = backup.properties || [];
+  saveState();
+  localStorage.removeItem('capitalflow_backup');
+  var rb = document.getElementById('restore-banner');
+  if (rb) rb.style.display = 'none';
+  switchTab('dashboard');
+  renderDashboard();
+  renderRentals();
+  renderLending();
+  renderBorrowing();
+  showToast('Real data restored!', 'success');
 };
 
 // Hard system reset
@@ -5742,6 +6235,8 @@ function updateFileSummaryCards() {
     var files = state.files.filter(function(f) { return f.type === fileType; });
     var countEl = document.getElementById('count-' + fileType);
     if (countEl) countEl.textContent = files.length;
+    var vaultCountEl = document.getElementById('vault-count-' + fileType);
+    if (vaultCountEl) vaultCountEl.textContent = files.length;
   });
 }
 
@@ -5904,28 +6399,11 @@ function initAppListeners() {
   }
   
   // Set default lending rates for new entries (4%)
-  document.getElementById('btn-add-loan-lent').addEventListener('click', () => {
-    document.getElementById('form-loan').reset();
-    document.getElementById('loan-id').value = '';
-    document.getElementById('loan-direction').value = 'lent';
-    document.getElementById('loan-rate').value = '4.00';
-    var today = new Date();
-    var dueDate = new Date(today);
-    dueDate.setMonth(dueDate.getMonth() + 1);
-    var todayStr = today.toISOString().split('T')[0];
-    var dueDateStr = dueDate.toISOString().split('T')[0];
-    document.getElementById('loan-start-date').value = todayStr;
-    document.getElementById('loan-due-date').value = dueDateStr;
-    
-    document.getElementById('loan-modal-title').textContent = 'Lend Money';
-    document.getElementById('loan-party-label').textContent = 'Borrower Name';
-    document.getElementById('loan-party').placeholder = 'e.g. John Doe';
-    
-    updatePrincipalPresets('lent');
-    openModal('modal-loan');
-  });
+  var btnLoanLent = document.getElementById('btn-add-loan-lent');
+  if (btnLoanLent) btnLoanLent.addEventListener('click', showAddLoanLent);
 
-  document.getElementById('btn-add-loan-borrowed').addEventListener('click', () => {
+  var btnLoanBorrowed = document.getElementById('btn-add-loan-borrowed');
+  if (btnLoanBorrowed) btnLoanBorrowed.addEventListener('click', () => {
     document.getElementById('form-loan').reset();
     document.getElementById('loan-id').value = '';
     document.getElementById('loan-direction').value = 'borrowed';
@@ -5951,7 +6429,8 @@ function initAppListeners() {
   document.getElementById('quick-lend-principal').addEventListener('input', updateQuickLendWords);
 
   // Add rentals trigger
-  document.getElementById('btn-add-rental').addEventListener('click', () => {
+  var btnAddRental = document.getElementById('btn-add-rental');
+  if (btnAddRental) btnAddRental.addEventListener('click', () => {
     document.getElementById('form-rental').reset();
     document.getElementById('rental-id').value = '';
     document.getElementById('rental-start-date').value = new Date().toISOString().split('T')[0];
@@ -6707,7 +7186,7 @@ function checkAndNotifyDueItems() {
     if (annDay !== todayDateNum) return;
     var expected = l.isEMI ? Number(l.emiAmount || 0) : outstanding * (Number(l.interestRate) / 100);
     var cat = l.isEMI ? 'principal' : 'interest';
-    var paid = state.interestPayments.filter(function(p) { return p.type === 'received' && p.category === cat && p.loanId === l.id && p.date.startsWith(currentMonth) && (!p.note || p.note.indexOf('[Advance]') === -1); }).reduce(function(s, p) { return s + Number(p.amount); }, 0);
+    var paid = state.interestPayments.filter(function(p) { return p.type === 'received' && p.category === cat && p.loanId === l.id && p.date.startsWith(currentMonth); }).reduce(function(s, p) { return s + Number(p.amount); }, 0);
     if (paid < expected - 0.01) {
       notifs.push({ icon: '\uD83D\uDCB0', title: 'Interest Due', body: l.borrowerName + ' \u00B7 ' + formatCurrency(expected - paid) });
     }
@@ -7131,7 +7610,6 @@ window.window.openCollectionDetails = function(type, event) {
   if (event) event.stopPropagation();
   let collected = [];
   let pending = [];
-  let advanceAmounts = {};
   let title = '';
 
   const isDayMode = viewMode === 'day';
@@ -7150,7 +7628,7 @@ window.window.openCollectionDetails = function(type, event) {
   const endDateOfSelectedMonth = `${selectedMonthStr}-${String(new Date(selYear, selMonth, 0).getDate()).padStart(2, '0')}`;
 
   if (type === 'rent') {
-    title = 'Rent Collections';
+    title = 'Rent Collections - ' + ['January','February','March','April','May','June','July','August','September','October','November','December'][selMonth - 1].toUpperCase();
     const rawPayments = state.rentPayments.filter(filterPayment);
     const groupedCol = {};
     const groupedIds = {};
@@ -7173,37 +7651,29 @@ window.window.openCollectionDetails = function(type, event) {
       });
     }
   } else if (type === 'interest') {
-    title = 'Interest Collections - ' + new Date(selectedMonthStr + '-01').toLocaleDateString('en-US', { month: 'short', year: 'numeric' }).toUpperCase();
-    const rawPayments = state.interestPayments.filter(p => p.type === 'received' && p.category !== 'issuance' && filterPayment(p));
+    var monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+    title = 'Interest Collections - ' + monthNames[selMonth - 1].toUpperCase();
+    const rawPayments = state.interestPayments.filter(function(p) { if (p.type !== 'received' || !filterPayment(p)) return false; if (p.category === 'issuance' || p.category === 'increase') return false; if (p.category === 'principal') { var _pl = state.lent.find(function(x) { return x.id === p.loanId; }); return _pl && _pl.isEMI; } return true; });
     const groupedCol = {};
     const groupedIds = {};
-    advanceAmounts = {};
+    const groupedAdv = {};
     rawPayments.forEach(p => {
       const l = state.lent.find(x => x.id === p.loanId);
       const name = l ? l.borrowerName : 'Unknown';
-      if (p.note && p.note.indexOf('[Advance]') !== -1) {
-        advanceAmounts[name] = (advanceAmounts[name] || 0) + Number(p.amount);
-        return;
-      }
-      if(!groupedCol[name]) { groupedCol[name] = 0; groupedIds[name] = []; }
+      if(!groupedCol[name]) { groupedCol[name] = 0; groupedIds[name] = []; groupedAdv[name] = 0; }
       groupedCol[name] += Number(p.amount);
+      if (p.note && p.note.indexOf('[Advance]') !== -1) groupedAdv[name] += Number(p.amount);
       if (l && !groupedIds[name].includes(l.id)) groupedIds[name].push(l.id);
     });
-    // Collect advances with next month date too
-    var nextM2 = selMonth === 12 ? 1 : selMonth + 1;
-    var nextY2 = selMonth === 12 ? selYear + 1 : selYear;
-    var nextMS2 = nextY2 + '-' + String(nextM2).padStart(2, '0');
-    state.interestPayments.forEach(function(p) {
-      if (p.type === 'received' && p.note && p.note.indexOf('[Advance]') !== -1 && p.date && p.date.startsWith(nextMS2)) {
-        var l2 = state.lent.find(function(x) { return x.id === p.loanId; });
-        var n2 = l2 ? l2.borrowerName : 'Unknown';
-        advanceAmounts[n2] = (advanceAmounts[n2] || 0) + Number(p.amount);
-      }
+    state.interestPayments.filter(p => p.type === 'received' && p.note && p.note.indexOf('[Advance]') !== -1).forEach(p => {
+      const l = state.lent.find(x => x.id === p.loanId);
+      const name = l ? l.borrowerName : 'Unknown';
+      if (groupedCol[name] !== undefined) groupedAdv[name] = (groupedAdv[name] || 0) + Number(p.amount);
     });
     collected = Object.keys(groupedCol).map(name => {
       const normName = name.toLowerCase().trim();
       const groupId = 'group-' + btoa(encodeURIComponent(normName)).replace(/[^a-zA-Z0-9]/g, '');
-      return {name, amount: groupedCol[name], ids: [groupId], type: 'interest'};
+      return {name: name, amount: groupedCol[name], adv: groupedAdv[name], ids: [groupId], type: 'interest'};
     });
     
     if (!isDayMode && !isYearMode) {
@@ -7212,7 +7682,8 @@ window.window.openCollectionDetails = function(type, event) {
         const outstanding = getOutstandingPrincipalAtMonth(l.id, l.principal, selectedMonthStr);
         if (outstanding > 0) {
           const expected = l.isEMI ? Number(l.emiAmount || 0) : outstanding * (Number(l.interestRate) / 100);
-          const pPaid = state.interestPayments.filter(p => p.type === 'received' && p.category !== 'issuance' && p.loanId === l.id && p.date.startsWith(selectedMonthStr)).reduce((sum, p) => sum + Number(p.amount), 0);
+          var catFilter = function(p) { return (p.category === 'interest' || (p.category === 'principal' && l.isEMI)); };
+          const pPaid = state.interestPayments.filter(p => p.type === 'received' && p.loanId === l.id && p.date.startsWith(selectedMonthStr) && (!p.note || p.note.indexOf('[Advance]') === -1) && catFilter(p)).reduce((sum, p) => sum + Number(p.amount), 0);
           const pOwe = expected - pPaid;
           if (pOwe > 0) {
             const normName = (l.borrowerName || '').toLowerCase().trim();
@@ -7261,7 +7732,8 @@ window.window.openCollectionDetails = function(type, event) {
         const outstanding = getOutstandingPrincipalAtMonth(l.id, l.principal, selectedMonthStr);
         if (outstanding > 0) {
           const expected = l.isEMI ? Number(l.emiAmount || 0) : outstanding * (Number(l.interestRate) / 100);
-          const pPaid = state.interestPayments.filter(p => p.type === 'received' && p.category !== 'issuance' && p.loanId === l.id && p.date.startsWith(selectedMonthStr)).reduce((sum, p) => sum + Number(p.amount), 0);
+          var catFilter2 = function(p) { return (p.category === 'interest' || (p.category === 'principal' && l.isEMI)); };
+          const pPaid = state.interestPayments.filter(p => p.type === 'received' && p.loanId === l.id && p.date.startsWith(selectedMonthStr) && (!p.note || p.note.indexOf('[Advance]') === -1) && catFilter2(p)).reduce((sum, p) => sum + Number(p.amount), 0);
           const pOwe = expected - pPaid;
           if (pOwe > 0) {
             const normName = (l.borrowerName || '').toLowerCase().trim();
@@ -7341,12 +7813,14 @@ window.window.openCollectionDetails = function(type, event) {
       if (navAttrCol) clickAttr = ` style="cursor: pointer;" onclick="${navAttrCol}"`;
       return `
       <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 0; border-bottom: 1px solid var(--border-color);"${clickAttr}>
-        <div style="display: flex; align-items: center; gap: 0.4rem;">
-          <span style="font-weight: 500; color: ${p.renewalDue ? 'var(--color-warning)' : 'var(--text-primary)'};${navAttrCol ? ' cursor: pointer;' : ''}">${p.name}</span>${p.propertyName ? ' <span style="font-size:0.65rem;color:var(--text-secondary)">' + p.propertyName + (p.renewalDue && p.renewalDate ? ' <span style="color:var(--color-danger);font-weight:700">' + p.renewalDate + '</span>' : '') + '</span>' : ''}
-          ${type === 'all' ? `<span style="font-size: 0.6rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; padding: 0.1rem 0.35rem; border-radius: 4px; background: ${p.type === 'rent' ? 'rgba(34,197,94,0.15)' : 'rgba(59,130,246,0.15)'}; color: ${p.type === 'rent' ? 'var(--color-success)' : 'var(--color-accent)'};">${p.type === 'rent' ? 'RENT' : 'INTEREST'}</span>` : ''}
-          <span style="font-size: 0.8em;">✅</span>
+        <div style="display: flex; align-items: center; gap: 0.35rem;">
+          <span style="color:var(--color-success);font-weight:600;">✅</span>
+          <span style="font-weight:500;">${p.name}</span>
         </div>
-        <span>${(() => { const aa = advanceAmounts[p.name]; return `<span style="color:var(--text-primary);font-weight:600;">${formatCurrency(p.amount)}</span>${aa ? `<span style="color:var(--color-purple);font-weight:600;margin-left:0.3rem;">+${formatCurrency(aa)}</span>` : ''}`; })()}</span>
+        <div style="display: flex; align-items: center; gap: 0.75rem;">
+          <span style="font-weight:600;">${formatCurrency(p.amount)}</span>
+          ${p.adv > 0 ? '<span style="font-size:0.75rem;color:var(--color-purple);font-weight:600;">Adv ' + formatCurrency(p.adv) + '</span>' : ''}
+        </div>
       </div>`;
     }).join('');
     const collTotal = collected.reduce((s, p) => s + p.amount, 0);
@@ -7379,11 +7853,17 @@ window.addEventListener('DOMContentLoaded', () => {
   initFileDB(function() {
     initApp();
     setTheme(state.theme || 'black-and-colored-plain');
+    switchTab(currentTab);
+    // Show restore banner if demo data is active with backup
+    if (localStorage.getItem('capitalflow_backup')) {
+      var rb = document.getElementById('restore-banner');
+      if (rb) rb.style.display = 'flex';
+    }
 
   // ==========================================
   // SWIPE GESTURES FOR MOBILE NAVIGATION
   // ==========================================
-  const tabsOrder = ['dashboard', 'records', 'diary', 'settings'];
+  const tabsOrder = ['tenants', 'finances', 'dashboard', 'records', 'settings'];
   let touchStartX = 0;
   let touchEndX = 0;
   let touchStartY = 0;
@@ -7536,7 +8016,7 @@ function renderGlanceWidget() {
         var expected = l.isEMI ? Number(l.emiAmount || 0) : outstanding * (Number(l.interestRate) / 100);
         var cat = l.isEMI ? 'principal' : 'interest';
         var paid = state.interestPayments
-          .filter(function(p) { return p.type === 'received' && p.category === cat && p.loanId === l.id && p.date.startsWith(currentMonth) && (!p.note || p.note.indexOf('[Advance]') === -1); })
+          .filter(function(p) { return p.type === 'received' && p.category === cat && p.loanId === l.id && p.date.startsWith(currentMonth); })
           .reduce(function(s, p) { return s + Number(p.amount); }, 0);
         var owe = expected - paid;
         if (owe > 0) {
@@ -7601,7 +8081,7 @@ function renderGlanceWidget() {
     if (r.status === 'active') {
       var info = getNextRenewal(r.startDate, r.nextRenewalDate);
       if (info && info.daysLeft <= 30) {
-        renewalItems.push({ text: '\uD83D\uDCCB <strong>' + r.tenantName + '\'s</strong> rent agreement renewal in <strong>' + info.daysLeft + '</strong> ' + (info.daysLeft === 1 ? 'day' : 'days'), daysLeft: info.daysLeft });
+        renewalItems.push({ text: '\uD83D\uDCCB <strong>' + r.tenantName + '\'s</strong> rent agreement renewal in <strong>' + info.daysLeft + '</strong> ' + (info.daysLeft === 1 ? 'day' : 'days'), daysLeft: info.daysLeft, rentalId: r.id });
       }
     }
   });
@@ -7615,7 +8095,10 @@ function renderGlanceWidget() {
     if (typeof _glanceRenewalDismissIdx === 'undefined') _glanceRenewalDismissIdx = 0;
     if (_glanceRenewalDismissIdx >= rotationItems.length) _glanceRenewalDismissIdx = 0;
     var item = rotationItems[_glanceRenewalDismissIdx];
-    setGlanceDetails(item.text + ' <span onclick="event.stopPropagation();dismissGlanceRenewal()" style="cursor:pointer;margin-left:0.5rem;opacity:0.5;font-size:0.82rem;">\u2715</span>');
+    var clickableText = item.rentalId
+      ? '<span onclick="event.stopPropagation();navigateAndHighlightCard(\'rental\',\'' + item.rentalId + '\')" style="cursor:pointer;">' + item.text + '</span>'
+      : item.text;
+    setGlanceDetails(clickableText + ' <span onclick="event.stopPropagation();dismissGlanceRenewal()" style="cursor:pointer;margin-left:0.5rem;opacity:0.5;font-size:0.82rem;">\u2715</span>');
     _glanceRenewalTimer = setTimeout(function() {
       _glanceRenewalDismissIdx++;
       renderGlanceWidget();
@@ -8256,17 +8739,7 @@ function handlePinDigit(digit) {
         renderMonthSelector();
         requestNotifPermission();
         initAppListeners();
-      });
-    } else {
-      // Unlock mode: verify PIN
-      sha256(_pinEntered).then(function(hash) {
-        if (hash === localStorage.getItem('app_pin')) {
-          _pinEntered = '';
-          hideLockScreen();
-          initNavigation();
-          renderMonthSelector();
-          requestNotifPermission();
-          initAppListeners();
+        switchTab(currentTab);
         } else {
           document.getElementById('lock-error').textContent = 'Wrong PIN. Try again.';
           _pinEntered = '';

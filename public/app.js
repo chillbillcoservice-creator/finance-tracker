@@ -29,7 +29,8 @@ let viewMode = 'month';
 // Selected date string in YYYY-MM-DD format
 let selectedDateStr = new Date().toISOString().slice(0, 10);
 
-let diaryView = 'diary'; // 'diary' | 'vault'
+let vaultVisible = false;
+let diaryModeActive = false;
 
 // Month names for selector
 const MONTH_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -79,28 +80,33 @@ function toggleYearlyMode() {
 }
 
 function toggleVaultView() {
-  if (diaryView === 'vault') {
-    diaryView = 'diary';
-    document.getElementById('btn-vault-toggle').textContent = '🔐';
-    document.getElementById('month-grid').style.display = '';
-    document.getElementById('month-selector-bar').style.display = viewMode === 'month' ? 'block' : 'none';
-    renderDiary();
-  } else {
-    diaryView = 'vault';
-    document.getElementById('btn-vault-toggle').textContent = '📋';
-    document.getElementById('month-selector-bar').style.display = 'none';
-    document.getElementById('year-selector-bar').style.display = 'none';
-    renderVault();
-  }
+  vaultVisible = !vaultVisible;
+  var btn = document.getElementById('btn-vault-toggle');
+  if (btn) btn.textContent = vaultVisible ? '📋' : '🔐';
+  var vc = document.getElementById('vault-content');
+  if (vc) vc.style.display = vaultVisible ? 'block' : 'none';
+  if (vaultVisible) renderVault();
+}
+
+function toggleDiaryMode() {
+  diaryModeActive = !diaryModeActive;
+  var btn = document.getElementById('btn-diary-mode');
+  if (btn) btn.textContent = diaryModeActive ? '📖' : '📖';
+  refreshActiveTab();
+}
+
+function renderDiaryMode() {
+  var containerId = currentTab === 'tenants' ? 'tenants-diary-content' : 'finances-diary-content';
+  var mode = currentTab === 'tenants' ? 'rent' : 'interest';
+  renderDiary(document.getElementById(containerId), mode);
 }
 
 function renderVault() {
   loadState();
   state.vault = state.vault || [];
   var searchTerm = (document.getElementById('vault-search').value || '').toLowerCase().trim();
-  document.getElementById('diary-content').style.display = 'none';
-  document.getElementById('vault-content').style.display = 'block';
   var list = document.getElementById('vault-list');
+  if (!list) return;
   var filtered = state.vault.filter(function(e) {
     if (!searchTerm) return true;
     return e.label.toLowerCase().includes(searchTerm) || e.value.toLowerCase().includes(searchTerm);
@@ -186,10 +192,68 @@ function copyVaultEntry(id) {
   });
 }
 window.toggleVaultView = toggleVaultView;
+window.toggleDiaryMode = toggleDiaryMode;
 window.showAddVaultEntry = showAddVaultEntry;
 window.saveVaultEntry = saveVaultEntry;
 window.deleteVaultEntry = deleteVaultEntry;
 window.copyVaultEntry = copyVaultEntry;
+
+function showAddRental() {
+  document.getElementById('form-rental').reset();
+  document.getElementById('rental-id').value = '';
+  document.getElementById('rental-start-date').value = new Date().toISOString().split('T')[0];
+  document.getElementById('rental-aadhaar-base64').value = '';
+  document.getElementById('rental-agreement-base64').value = '';
+  document.getElementById('rental-aadhaar-file').value = '';
+  document.getElementById('rental-agreement-file').value = '';
+  document.getElementById('rental-aadhaar-status').style.display = 'none';
+  document.getElementById('rental-agreement-status').style.display = 'none';
+  document.getElementById('rental-modal-title').textContent = 'Add Tenant Agreement';
+  updateRentalRenewalDate();
+  openModal('modal-rental');
+}
+
+function showAddLoanLent() {
+  document.getElementById('form-loan').reset();
+  document.getElementById('loan-id').value = '';
+  document.getElementById('loan-direction').value = 'lent';
+  document.getElementById('loan-rate').value = '4.00';
+  var today = new Date();
+  var dueDate = new Date(today);
+  dueDate.setMonth(dueDate.getMonth() + 1);
+  var todayStr = today.toISOString().split('T')[0];
+  var dueDateStr = dueDate.toISOString().split('T')[0];
+  document.getElementById('loan-start-date').value = todayStr;
+  document.getElementById('loan-due-date').value = dueDateStr;
+  document.getElementById('loan-modal-title').textContent = 'Lend Money';
+  document.getElementById('loan-party-label').textContent = 'Borrower Name';
+  document.getElementById('loan-party').placeholder = 'e.g. John Doe';
+  updatePrincipalPresets('lent');
+  openModal('modal-loan');
+}
+
+function showAddLoanBorrowed() {
+  document.getElementById('form-loan').reset();
+  document.getElementById('loan-id').value = '';
+  document.getElementById('loan-direction').value = 'borrowed';
+  document.getElementById('loan-rate').value = '3.00';
+  var today = new Date();
+  var dueDate = new Date(today);
+  dueDate.setMonth(dueDate.getMonth() + 1);
+  var todayStr = today.toISOString().split('T')[0];
+  var dueDateStr = dueDate.toISOString().split('T')[0];
+  document.getElementById('loan-start-date').value = todayStr;
+  document.getElementById('loan-due-date').value = dueDateStr;
+  document.getElementById('loan-modal-title').textContent = 'Record Borrowed Money';
+  document.getElementById('loan-party-label').textContent = 'Lender Name';
+  document.getElementById('loan-party').placeholder = 'e.g. Apex Bank';
+  updatePrincipalPresets('borrowed');
+  openModal('modal-loan');
+}
+
+window.showAddRental = showAddRental;
+window.showAddLoanLent = showAddLoanLent;
+window.showAddLoanBorrowed = showAddLoanBorrowed;
 
 function renderMonthSelector() {
   const year = parseInt(selectedMonthStr.slice(0, 4));
@@ -1313,8 +1377,12 @@ function quickMarkInterestPaid(loanId, type, amount, monthStr) {
   });
   
   saveState();
+  var _msg = '✓ Interest of ' + formatCurrency(amount) + ' recorded as ' + (type === 'received' ? 'collected' : 'paid') + ' for ' + (type === 'received' ? loan.borrowerName : loan.financierName) + '!';
+  setTimeout(function() {
+    alert(_msg);
+    renderDashboard();
+  }, 80);
   refreshActiveTab();
-  alert(`✓ Interest of ${formatCurrency(amount)} recorded as ${type === 'received' ? 'collected' : 'paid'} for ${type === 'received' ? loan.borrowerName : loan.financierName}!`);
 }
 
 window.quickMarkInterestPaid = quickMarkInterestPaid;
@@ -1844,22 +1912,93 @@ function applyRecordsFilter() {
 }
 
 function renderRecords() {
-  _recordsFilter = 'construction';
-  renderConstruction();
-  if (typeof renderFiles === 'function') renderFiles();
+  renderVault();
 }
 
 const VIEWS = {
   dashboard: { title: 'Status', subtitle: 'Your aggregated financial overview at a glance.', render: renderDashboard },
-  records: { title: 'Records', subtitle: 'Rent Agreements, documents, construction, and settings.', render: renderRecords },
-  diary: { title: 'Diary', subtitle: '', render: renderDiary }
+  tenants: { title: 'Tenants', subtitle: 'Rental management — leases, payments, and tenant details.', render: renderTenantsDashboard },
+  finances: { title: 'Finances', subtitle: 'Lending, borrowing, and interest tracking.', render: renderFinancesDashboard },
+  records: { title: 'Vault', subtitle: 'Credentials, documents, construction, and settings.', render: renderRecords },
+  expenses: { title: 'Expenses', subtitle: 'Track expenses, upload documents, manage construction.', render: renderExpensesDashboard }
 };
 
-function renderDiary() {
-  if (diaryView === 'vault') { renderVault(); return; }
+function renderExpensesDashboard() {
   loadState();
-  document.getElementById('diary-content').style.display = '';
-  document.getElementById('vault-content').style.display = 'none';
+  _recordsFilter = null;
+  var todayExp = state.expenses.filter(function(e) { return e.date === selectedDateStr && !isFinalisedConst(e); }).reduce(function(s, e) { return s + (Number(e.amount) || 0); }, 0);
+  var expNode = document.getElementById('dash-total-expenses');
+  if (expNode) expNode.textContent = formatCurrency(todayExp);
+  var weekStart = new Date(selectedDateStr);
+  weekStart.setDate(weekStart.getDate() - weekStart.getDay() + (weekStart.getDay() === 0 ? -6 : 1));
+  var weekEnd = new Date(weekStart);
+  weekEnd.setDate(weekEnd.getDate() + 6);
+  var pad = function(n) { return String(n).padStart(2, '0'); };
+  var weekStartStr = weekStart.getFullYear() + '-' + pad(weekStart.getMonth()+1) + '-' + pad(weekStart.getDate());
+  var weekEndStr = weekEnd.getFullYear() + '-' + pad(weekEnd.getMonth()+1) + '-' + pad(weekEnd.getDate());
+  var weekExp = state.expenses.filter(function(e) { return e.date >= weekStartStr && e.date <= weekEndStr && !isFinalisedConst(e); }).reduce(function(s, e) { return s + (Number(e.amount) || 0); }, 0);
+  var monthExp = state.expenses.filter(function(e) { return e.date.startsWith(selectedMonthStr) && !isFinalisedConst(e); }).reduce(function(s, e) { return s + (Number(e.amount) || 0); }, 0);
+  var wNode = document.getElementById('dash-weekly-expenses');
+  if (wNode) wNode.innerHTML = 'This Week: <span style="color: var(--color-danger); font-weight: 800;">' + formatCurrency(weekExp) + '</span>';
+  var mNode = document.getElementById('dash-monthly-expenses');
+  if (mNode) mNode.innerHTML = 'This Month: <span style="color: var(--color-danger); font-weight: 800;">' + formatCurrency(monthExp) + '</span>';
+  var detailNode = document.getElementById('expense-card-details');
+  if (detailNode) {
+    var todayItems = state.expenses.filter(function(e) { return e.date === selectedDateStr && !isFinalisedConst(e); }).slice(0, 5);
+    if (todayItems.length > 0) {
+      var h = '';
+      todayItems.forEach(function(exp) {
+        var txt = exp.note || exp.category;
+        if (exp.category === 'construction') txt = 'Construction - ' + (exp.laborType || 'General') + ' - ' + (exp.project || '');
+        h += '<div style="display: flex; align-items: center; padding: 0.2rem 0.4rem; background: var(--input-bg); border-radius: 4px; font-size: 0.7rem;">' +
+          '<span style="flex: 1; font-weight: 600; color: var(--text-primary);">' + txt + '</span>' +
+          '<span style="flex: 1; text-align: right; font-weight: 700; color: var(--color-danger);">' + formatCurrency(exp.amount) + '</span></div>';
+      });
+      detailNode.innerHTML = h;
+      detailNode.style.display = 'flex';
+    } else {
+      detailNode.style.display = 'none';
+    }
+  }
+  renderConstruction();
+  if (typeof renderFiles === 'function') renderFiles();
+}
+
+function renderTenantsDashboard() {
+  loadState();
+  var normal = document.getElementById('tenants-normal');
+  var diaryContainer = document.getElementById('tenants-diary-container');
+  if (diaryModeActive) {
+    if (normal) normal.style.display = 'none';
+    if (diaryContainer) diaryContainer.style.display = '';
+    renderDiaryMode();
+    return;
+  }
+  if (normal) normal.style.display = '';
+  if (diaryContainer) diaryContainer.style.display = 'none';
+  renderRentals();
+}
+
+function renderFinancesDashboard() {
+  loadState();
+  var normal = document.getElementById('finances-normal');
+  var diaryContainer = document.getElementById('finances-diary-container');
+  if (diaryModeActive) {
+    if (normal) normal.style.display = 'none';
+    if (diaryContainer) diaryContainer.style.display = '';
+    renderDiaryMode();
+    return;
+  }
+  if (normal) normal.style.display = '';
+  if (diaryContainer) diaryContainer.style.display = 'none';
+  renderLending();
+  renderBorrowing();
+}
+
+function renderDiary(container, mode) {
+  loadState();
+  var diaryEl = container;
+  if (!diaryEl) return;
   const monthStr = selectedMonthStr;
   const [yr, mo] = monthStr.split('-').map(Number);
   const monthName = new Date(yr, mo - 1).toLocaleDateString('en-US', { month: 'long' });
@@ -1869,101 +2008,109 @@ function renderDiary() {
   lines.push('  ' + String('-').repeat(28));
   
   // ── RENT ──
-  var num = 0;
-  lines.push('');
-  lines.push('  RENT');
-  lines.push('  ' + String('-').repeat(28));
-  state.rentals.forEach(function(r) {
-    if (r.startDate <= monthStr + '-31' && r.status === 'active') {
-      num++;
-      var collected = 0;
-      var secAdj = Number(r.securityAdjusted || 0);
-      state.rentPayments.forEach(function(p) {
-        if (p.rentalId === r.id && p.monthYear === monthStr) collected += Number(p.amount);
-      });
-      var due = Number(r.monthlyRent);
-      var pending = Math.max(0, due - collected);
-      var extra = '';
-      if (secAdj > 0 && collected >= due) extra += '  (adjusted from security)';
-      var suffix = collected >= due ? ' ✓' : '';
-      lines.push('  ' + num + '. ' + r.tenantName + extra + suffix);
-      if (pending > 0) lines.push('      ' + formatCurrency(collected) + ' / ' + formatCurrency(due) + '  Due: ' + formatCurrency(pending));
-      else lines.push('      ' + formatCurrency(collected) + ' / ' + formatCurrency(due));
-    }
-  });
+  if (!mode || mode === 'rent' || mode === 'all') {
+    var num = 0;
+    lines.push('');
+    lines.push('  RENT');
+    lines.push('  ' + String('-').repeat(28));
+    state.rentals.forEach(function(r) {
+      if (r.startDate <= monthStr + '-31' && r.status === 'active') {
+        num++;
+        var collected = 0;
+        var secAdj = Number(r.securityAdjusted || 0);
+        state.rentPayments.forEach(function(p) {
+          if (p.rentalId === r.id && p.monthYear === monthStr) collected += Number(p.amount);
+        });
+        var due = Number(r.monthlyRent);
+        var pending = Math.max(0, due - collected);
+        var extra = '';
+        if (secAdj > 0 && collected >= due) extra += '  (adjusted from security)';
+        lines.push('  ' + num + '. ' + r.tenantName + extra);
+        var suffix = collected >= due ? ' ✓' : '';
+        if (pending > 0) lines.push('      ' + formatCurrency(due) + suffix + '  Due: ' + formatCurrency(pending));
+        else lines.push('      ' + formatCurrency(due) + suffix);
+      }
+    });
+  }
   
   // ── INTEREST RECEIVED ──
-  num = 0;
-  lines.push('');
-  lines.push('  INTEREST RECEIVED');
-  lines.push('  ' + String('-').repeat(28));
-  state.lent.forEach(function(l) {
-    if (l.startDate <= monthStr + '-31') {
-      var collected = 0;
-      state.interestPayments.forEach(function(p) {
-        if (p.loanId === l.id && p.type === 'received' && p.date.startsWith(monthStr)) collected += Number(p.amount);
-      });
-      var outstanding = getOutstandingPrincipalAtMonth(l.id, l.principal, monthStr);
-      if (outstanding > 0 || collected > 0) {
-        num++;
-        var expected = l.isEMI ? Number(l.emiAmount || 0) : outstanding * (Number(l.interestRate) / 100);
-        var suffix = collected >= expected ? ' ✓' : '';
-        var typeLabel = l.isEMI ? ' [EMI' : '';
-        if (l.isEMI) {
-          var emiTotal = l.emiTotal || Math.ceil(Number(l.principal) / Number(l.emiAmount));
-          var emiPaid = state.interestPayments.filter(function(p) { return p.loanId === l.id && p.type === 'received' && p.category === 'principal'; }).length;
-          typeLabel += ' ' + emiPaid + '/' + emiTotal + ']';
+  if (!mode || mode === 'interest' || mode === 'all') {
+    var num = 0;
+    lines.push('');
+    lines.push('  INTEREST RECEIVED');
+    lines.push('  ' + String('-').repeat(28));
+    state.lent.forEach(function(l) {
+      if (l.startDate <= monthStr + '-31') {
+        var collected = 0;
+        state.interestPayments.forEach(function(p) {
+          if (p.loanId === l.id && p.type === 'received' && p.date.startsWith(monthStr)) collected += Number(p.amount);
+        });
+        var outstanding = getOutstandingPrincipalAtMonth(l.id, l.principal, monthStr);
+        if (outstanding > 0 || collected > 0) {
+          num++;
+          var expected = l.isEMI ? Number(l.emiAmount || 0) : outstanding * (Number(l.interestRate) / 100);
+          var suffix = collected >= expected ? ' ✓' : '';
+          var typeLabel = l.isEMI ? ' [EMI' : '';
+          if (l.isEMI) {
+            var emiTotal = l.emiTotal || Math.ceil(Number(l.principal) / Number(l.emiAmount));
+            var emiPaid = state.interestPayments.filter(function(p) { return p.loanId === l.id && p.type === 'received' && p.category === 'principal'; }).length;
+            typeLabel += ' ' + emiPaid + '/' + emiTotal + ']';
+          }
+          lines.push('  ' + num + '. ' + l.borrowerName + typeLabel + suffix);
+          lines.push('      ' + formatCurrency(collected) + ' / ' + formatCurrency(expected));
         }
-        lines.push('  ' + num + '. ' + l.borrowerName + typeLabel + suffix);
-        lines.push('      ' + formatCurrency(collected) + ' / ' + formatCurrency(expected));
       }
-    }
-  });
-  
-  // ── INTEREST PAID (Borrowed) ──
-  num = 0;
-  lines.push('');
-  lines.push('  INTEREST PAID');
-  lines.push('  ' + String('-').repeat(28));
-  state.borrowed.forEach(function(b) {
-    if (b.startDate <= monthStr + '-31') {
-      var paid = 0;
-      state.interestPayments.forEach(function(p) {
-        if (p.loanId === b.id && p.type === 'paid' && p.date.startsWith(monthStr)) paid += Number(p.amount);
-      });
-      var outstanding = getOutstandingPrincipalAtMonth(b.id, b.principal, monthStr);
-      if (outstanding > 0 || paid > 0) {
-        num++;
-        var expected = b.isEMI ? Number(b.emiAmount || 0) : outstanding * (Number(b.interestRate) / 100);
-        var suffix = paid >= expected ? ' ✓' : '';
-        var typeLabel = b.isEMI ? ' [EMI' : '';
-        if (b.isEMI) {
-          var emiTotal = b.emiTotal || Math.ceil(Number(b.principal) / Number(b.emiAmount));
-          var emiPaid = state.interestPayments.filter(function(p) { return p.loanId === b.id && p.type === 'paid' && p.category === 'principal'; }).length;
-          typeLabel += ' ' + emiPaid + '/' + emiTotal + ']';
+    });
+    
+    // ── INTEREST PAID (Borrowed) ──
+    num = 0;
+    lines.push('');
+    lines.push('  INTEREST PAID');
+    lines.push('  ' + String('-').repeat(28));
+    state.borrowed.forEach(function(b) {
+      if (b.startDate <= monthStr + '-31') {
+        var paid = 0;
+        state.interestPayments.forEach(function(p) {
+          if (p.loanId === b.id && p.type === 'paid' && p.date.startsWith(monthStr)) paid += Number(p.amount);
+        });
+        var outstanding = getOutstandingPrincipalAtMonth(b.id, b.principal, monthStr);
+        if (outstanding > 0 || paid > 0) {
+          num++;
+          var expected = b.isEMI ? Number(b.emiAmount || 0) : outstanding * (Number(b.interestRate) / 100);
+          var suffix = paid >= expected ? ' ✓' : '';
+          var typeLabel = b.isEMI ? ' [EMI' : '';
+          if (b.isEMI) {
+            var emiTotal = b.emiTotal || Math.ceil(Number(b.principal) / Number(b.emiAmount));
+            var emiPaid = state.interestPayments.filter(function(p) { return p.loanId === b.id && p.type === 'paid' && p.category === 'principal'; }).length;
+            typeLabel += ' ' + emiPaid + '/' + emiTotal + ']';
+          }
+          lines.push('  ' + num + '. ' + b.borrowerName + typeLabel + suffix);
+          lines.push('      ' + formatCurrency(paid) + ' / ' + formatCurrency(expected));
         }
-        lines.push('  ' + num + '. ' + b.borrowerName + typeLabel + suffix);
-        lines.push('      ' + formatCurrency(paid) + ' / ' + formatCurrency(expected));
       }
-    }
-  });
+    });
+  }
   
   // ── SUMMARY ──
   var totalExpected = 0;
   var totalCollected = 0;
-  state.rentals.forEach(function(r) {
-    if (r.startDate <= monthStr + '-31' && r.status === 'active') {
-      totalExpected += Number(r.monthlyRent);
-    }
-  });
-  state.lent.forEach(function(l) {
-    if (l.startDate <= monthStr + '-31') {
-      var o = getOutstandingPrincipalAtMonth(l.id, l.principal, monthStr);
-      if (o > 0) totalExpected += l.isEMI ? Number(l.emiAmount || 0) : o * (Number(l.interestRate) / 100);
-    }
-  });
-  state.rentPayments.filter(function(p) { return p.monthYear === monthStr; }).forEach(function(p) { totalCollected += Number(p.amount); });
-  state.interestPayments.filter(function(p) { return p.type === 'received' && p.date.startsWith(monthStr); }).forEach(function(p) { totalCollected += Number(p.amount); });
+  if (!mode || mode === 'rent' || mode === 'all') {
+    state.rentals.forEach(function(r) {
+      if (r.startDate <= monthStr + '-31' && r.status === 'active') {
+        totalExpected += Number(r.monthlyRent);
+      }
+    });
+    state.rentPayments.filter(function(p) { return p.monthYear === monthStr; }).forEach(function(p) { totalCollected += Number(p.amount); });
+  }
+  if (!mode || mode === 'interest' || mode === 'all') {
+    state.lent.forEach(function(l) {
+      if (l.startDate <= monthStr + '-31') {
+        var o = getOutstandingPrincipalAtMonth(l.id, l.principal, monthStr);
+        if (o > 0) totalExpected += l.isEMI ? Number(l.emiAmount || 0) : o * (Number(l.interestRate) / 100);
+      }
+    });
+    state.interestPayments.filter(function(p) { return p.type === 'received' && p.date.startsWith(monthStr); }).forEach(function(p) { totalCollected += Number(p.amount); });
+  }
   
   lines.push('');
   lines.push('  ' + String('-').repeat(28));
@@ -1971,7 +2118,7 @@ function renderDiary() {
   lines.push('  Expected:  ' + formatCurrency(totalExpected));
   lines.push('  Pending:   ' + formatCurrency(Math.max(0, totalExpected - totalCollected)));
   
-  document.getElementById('diary-content').textContent = lines.join('\n');
+  diaryEl.textContent = lines.join('\n');
 }
 
 function selectRecordsTab(event, tab, projectName) {
@@ -2025,16 +2172,9 @@ window.setLendingFilter = setLendingFilter;
 
 function switchTab(tabId) {
   currentTab = tabId;
-  if (tabId !== 'diary' && diaryView === 'vault') {
-    diaryView = 'diary';
-    var vt = document.getElementById('btn-vault-toggle');
-    if (vt) vt.textContent = '🔐';
-    var mg = document.getElementById('month-grid');
-    if (mg) mg.style.display = '';
-  }
   window.scrollTo(0, 0);
-  var qaBtn = document.getElementById('quick-actions-trigger');
-  if (qaBtn) qaBtn.style.display = (tabId === 'records' || tabId === 'settings' || tabId === 'diary') ? 'none' : '';
+  var vaultBtn = document.getElementById('btn-vault-toggle');
+  if (vaultBtn) vaultBtn.style.display = (tabId === 'records') ? '' : 'none';
   // Update Navigation Active States
   document.querySelectorAll('.nav-link, .mobile-nav-link').forEach(link => {
     if (link.getAttribute('data-tab') === tabId) {
@@ -2057,11 +2197,11 @@ function switchTab(tabId) {
   // Show/hide inline calendar and month selector based on tab
   var inlineCal = document.getElementById('inline-calendar');
   if (inlineCal) {
-    inlineCal.style.display = tabId === 'dashboard' ? 'block' : 'none';
+    inlineCal.style.display = (tabId === 'dashboard' || tabId === 'tenants' || tabId === 'finances') ? 'block' : 'none';
   }
   var monthBar = document.getElementById('month-selector-bar');
   var yearBar = document.getElementById('year-selector-bar');
-  if (tabId === 'diary') {
+  if (tabId === 'tenants' || tabId === 'finances') {
     if (viewMode === 'month') { if (monthBar) monthBar.style.display = 'block'; if (yearBar) yearBar.style.display = 'none'; renderMonthSelector(); }
     else if (viewMode === 'year') { if (monthBar) monthBar.style.display = 'none'; if (yearBar) yearBar.style.display = 'block'; renderYearSelector(); }
     else { if (monthBar) monthBar.style.display = 'none'; if (yearBar) yearBar.style.display = 'none'; }
@@ -2077,7 +2217,7 @@ function switchTab(tabId) {
       headerActions.style.display = '';
       document.getElementById('dashboard-search').style.display = 'none';
       document.getElementById('records-search-header').style.display = '';
-    } else if (tabId === 'settings' || tabId === 'diary') {
+    } else if (tabId === 'settings') {
       headerActions.style.display = 'none';
     } else {
       headerActions.style.display = '';
@@ -2367,7 +2507,7 @@ function renderDashboard() {
       projHtml += '<div style="font-size: 0.6rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-secondary); margin-bottom: 0.2rem;">Ongoing Projects</div>';
       activeProjects.forEach(function(p) {
         var total = projectTotals[p];
-        projHtml += '<div style="cursor: pointer; font-size: 0.78rem; font-weight: 600; color: var(--color-accent); padding: 0.15rem 0; display: flex; justify-content: space-between; align-items: center;" onclick="event.stopPropagation(); switchTab(\'records\'); setTimeout(function(){ selectRecordsTab(\'construction\', \'' + p.replace(/'/g, "\\'") + '\'); }, 100);"><span>🏗 ' + p + '</span><span style="color: var(--color-danger); font-weight: 700;">' + formatCurrency(total) + '</span></div>';
+        projHtml += '<div style="cursor: pointer; font-size: 0.78rem; font-weight: 600; color: var(--color-accent); padding: 0.15rem 0; display: flex; justify-content: space-between; align-items: center;" onclick="event.stopPropagation(); switchTab(\'expenses\'); setTimeout(function(){ selectRecordsTab(\'construction\', \'' + p.replace(/'/g, "\\'") + '\'); }, 100);"><span>🏗 ' + p + '</span><span style="color: var(--color-danger); font-weight: 700;">' + formatCurrency(total) + '</span></div>';
       });
       projHtml += '</div>';
       constProjectsDiv.innerHTML = projHtml;
@@ -4055,16 +4195,42 @@ function promptConvertEMI(loanId, direction) {
   const loan = state[listName].find(x => x.id === loanId);
   if (!loan) return;
 
-  const outstandingPrincipal = getOutstandingPrincipal(loan.id, loan.principal);
+  // Match card calculation: principal + topups - repayments
+  const loanPayments = state.interestPayments.filter(p => p.loanId === loan.id && p.type === 'received');
+  const totalRepaid = loanPayments.filter(p => p.category === 'principal').reduce((s, p) => s + Number(p.amount), 0);
+  const totalTopups = loanPayments.filter(p => p.category === 'increase').reduce((s, p) => s + Number(p.amount), 0);
+  const outstandingPrincipal = Math.max(0, Number(loan.principal) + totalTopups - totalRepaid);
+  
+  var pendingInterest = 0;
+  var totalAmount = outstandingPrincipal;
+  var outstandingM = getOutstandingPrincipalAtMonth(loan.id, loan.principal, selectedMonthStr);
+  if (outstandingM > 0 && Number(loan.interestRate) > 0) {
+    var expected = outstandingM * (Number(loan.interestRate) / 100);
+    var paid = state.interestPayments.filter(function(p) {
+      return p.type === 'received' && p.category === 'interest' && p.loanId === loan.id && p.date.startsWith(selectedMonthStr) && (!p.note || p.note.indexOf('[Advance]') === -1);
+    }).reduce(function(s, p) { return s + Number(p.amount); }, 0);
+    pendingInterest = Math.max(0, expected - paid);
+    totalAmount = outstandingPrincipal + pendingInterest;
+  }
   
   document.getElementById('form-emi-convert').reset();
   document.getElementById('emi-convert-loan-id').value = loanId;
   document.getElementById('emi-convert-direction').value = direction;
   document.getElementById('emi-convert-name').textContent = loan.borrowerName;
-  document.getElementById('emi-convert-amount').value = outstandingPrincipal;
+  document.getElementById('emi-convert-amount').value = totalAmount;
   document.getElementById('emi-convert-rate').value = loan.interestRate;
   document.getElementById('emi-convert-emi-amount').value = '';
   document.getElementById('emi-convert-preview').textContent = 'Rs. 0 / mo';
+  
+  var noteEl = document.getElementById('emi-convert-note');
+  if (noteEl) {
+    if (pendingInterest > 0) {
+      noteEl.innerHTML = 'Principal <span style="color:var(--color-warning);font-weight:600">' + formatCurrency(outstandingPrincipal) + '</span> + Pending Interest <span style="color:var(--color-accent);font-weight:600">' + formatCurrency(pendingInterest) + '</span>';
+      noteEl.style.display = 'block';
+    } else {
+      noteEl.style.display = 'none';
+    }
+  }
   
   openModal('modal-emi-convert');
   calculateEMIPreview('tenure');
@@ -4155,10 +4321,27 @@ document.getElementById('form-emi-convert').addEventListener('submit', (e) => {
   const loan = state[listName].find(x => x.id === loanId);
   if (!loan) return;
   
-  const outstanding = getOutstandingPrincipal(loan.id, loan.principal);
+  // Match card calculation: principal + topups - repayments
+  const loanPmts = state.interestPayments.filter(p => p.loanId === loan.id && p.type === 'received');
+  const totalRepaidP = loanPmts.filter(p => p.category === 'principal').reduce((s, p) => s + Number(p.amount), 0);
+  const totalTopupsP = loanPmts.filter(p => p.category === 'increase').reduce((s, p) => s + Number(p.amount), 0);
+  const outstandingP = Math.max(0, Number(loan.principal) + totalTopupsP - totalRepaidP);
   
-  if (!emiPrincipal || emiPrincipal <= 0) { alert('Enter a valid principal amount to convert.'); return; }
-  if (emiPrincipal > outstanding) { alert('Amount exceeds outstanding principal of ' + formatCurrency(outstanding)); return; }
+  // Calculate pending interest (for all-in-one EMI conversion)
+  var pendingInt = 0;
+  var outstandingM = getOutstandingPrincipalAtMonth(loan.id, loan.principal, selectedMonthStr);
+  if (outstandingM > 0 && Number(loan.interestRate) > 0) {
+    var expectedM = outstandingM * (Number(loan.interestRate) / 100);
+    var paidM = state.interestPayments.filter(function(p) {
+      return p.type === 'received' && p.category === 'interest' && p.loanId === loan.id && p.date.startsWith(selectedMonthStr) && (!p.note || p.note.indexOf('[Advance]') === -1);
+    }).reduce(function(s, p) { return s + Number(p.amount); }, 0);
+    pendingInt = Math.max(0, expectedM - paidM);
+  }
+  
+  var totalEffectivePrincipal = outstandingP + pendingInt;
+  
+  if (!emiPrincipal || emiPrincipal <= 0) { alert('Enter a valid amount to convert.'); return; }
+  if (emiPrincipal > totalEffectivePrincipal) { alert('Amount exceeds outstanding principal + pending interest of ' + formatCurrency(totalEffectivePrincipal)); return; }
   
   const r = rateInput / 100;
   const n = tenure;
@@ -4169,8 +4352,23 @@ document.getElementById('form-emi-convert').addEventListener('submit', (e) => {
     emi = (r === 0) ? emiPrincipal / n : emiPrincipal * r * Math.pow(1 + r, n) / (Math.pow(1 + r, n) - 1);
   }
   
-  if (emiPrincipal >= outstanding) {
-    // Full conversion
+  // Record pending interest as paid (rolled into principal)
+  if (pendingInt > 0) {
+    var todayPI = new Date().toISOString().split('T')[0];
+    state.interestPayments.push({
+      id: 'p' + Math.random().toString(36).substr(2, 9),
+      loanId: loanId,
+      type: direction === 'lent' ? 'received' : 'paid',
+      category: 'interest',
+      amount: pendingInt,
+      date: todayPI,
+      note: 'Interest rolled into principal (EMI conversion)'
+    });
+  }
+  
+  if (emiPrincipal >= totalEffectivePrincipal) {
+    // Full conversion — increase principal by pending interest
+    if (pendingInt > 0) loan.principal = Number(loan.principal) + pendingInt;
     loan.interestRate = rateInput;
     loan.isEMI = true;
     loan.tenureMonths = tenure;
@@ -6025,6 +6223,8 @@ function updateFileSummaryCards() {
     var files = state.files.filter(function(f) { return f.type === fileType; });
     var countEl = document.getElementById('count-' + fileType);
     if (countEl) countEl.textContent = files.length;
+    var vaultCountEl = document.getElementById('vault-count-' + fileType);
+    if (vaultCountEl) vaultCountEl.textContent = files.length;
   });
 }
 
@@ -6187,28 +6387,11 @@ function initAppListeners() {
   }
   
   // Set default lending rates for new entries (4%)
-  document.getElementById('btn-add-loan-lent').addEventListener('click', () => {
-    document.getElementById('form-loan').reset();
-    document.getElementById('loan-id').value = '';
-    document.getElementById('loan-direction').value = 'lent';
-    document.getElementById('loan-rate').value = '4.00';
-    var today = new Date();
-    var dueDate = new Date(today);
-    dueDate.setMonth(dueDate.getMonth() + 1);
-    var todayStr = today.toISOString().split('T')[0];
-    var dueDateStr = dueDate.toISOString().split('T')[0];
-    document.getElementById('loan-start-date').value = todayStr;
-    document.getElementById('loan-due-date').value = dueDateStr;
-    
-    document.getElementById('loan-modal-title').textContent = 'Lend Money';
-    document.getElementById('loan-party-label').textContent = 'Borrower Name';
-    document.getElementById('loan-party').placeholder = 'e.g. John Doe';
-    
-    updatePrincipalPresets('lent');
-    openModal('modal-loan');
-  });
+  var btnLoanLent = document.getElementById('btn-add-loan-lent');
+  if (btnLoanLent) btnLoanLent.addEventListener('click', showAddLoanLent);
 
-  document.getElementById('btn-add-loan-borrowed').addEventListener('click', () => {
+  var btnLoanBorrowed = document.getElementById('btn-add-loan-borrowed');
+  if (btnLoanBorrowed) btnLoanBorrowed.addEventListener('click', () => {
     document.getElementById('form-loan').reset();
     document.getElementById('loan-id').value = '';
     document.getElementById('loan-direction').value = 'borrowed';
@@ -6234,7 +6417,8 @@ function initAppListeners() {
   document.getElementById('quick-lend-principal').addEventListener('input', updateQuickLendWords);
 
   // Add rentals trigger
-  document.getElementById('btn-add-rental').addEventListener('click', () => {
+  var btnAddRental = document.getElementById('btn-add-rental');
+  if (btnAddRental) btnAddRental.addEventListener('click', () => {
     document.getElementById('form-rental').reset();
     document.getElementById('rental-id').value = '';
     document.getElementById('rental-start-date').value = new Date().toISOString().split('T')[0];
@@ -7457,7 +7641,7 @@ window.window.openCollectionDetails = function(type, event) {
   } else if (type === 'interest') {
     var monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
     title = 'Interest Collections - ' + monthNames[selMonth - 1].toUpperCase();
-    const rawPayments = state.interestPayments.filter(p => p.type === 'received' && p.category !== 'issuance' && p.category !== 'increase' && p.category !== 'principal' && filterPayment(p));
+    const rawPayments = state.interestPayments.filter(function(p) { if (p.type !== 'received' || !filterPayment(p)) return false; if (p.category === 'issuance' || p.category === 'increase') return false; if (p.category === 'principal') { var _pl = state.lent.find(function(x) { return x.id === p.loanId; }); return _pl && _pl.isEMI; } return true; });
     const groupedCol = {};
     const groupedIds = {};
     const groupedAdv = {};
@@ -7486,7 +7670,8 @@ window.window.openCollectionDetails = function(type, event) {
         const outstanding = getOutstandingPrincipalAtMonth(l.id, l.principal, selectedMonthStr);
         if (outstanding > 0) {
           const expected = l.isEMI ? Number(l.emiAmount || 0) : outstanding * (Number(l.interestRate) / 100);
-          const pPaid = state.interestPayments.filter(p => p.type === 'received' && p.category !== 'issuance' && p.category !== 'increase' && p.category !== 'principal' && p.loanId === l.id && p.date.startsWith(selectedMonthStr) && (!p.note || p.note.indexOf('[Advance]') === -1)).reduce((sum, p) => sum + Number(p.amount), 0);
+          var catFilter = function(p) { return (p.category === 'interest' || (p.category === 'principal' && l.isEMI)); };
+          const pPaid = state.interestPayments.filter(p => p.type === 'received' && p.loanId === l.id && p.date.startsWith(selectedMonthStr) && (!p.note || p.note.indexOf('[Advance]') === -1) && catFilter(p)).reduce((sum, p) => sum + Number(p.amount), 0);
           const pOwe = expected - pPaid;
           if (pOwe > 0) {
             const normName = (l.borrowerName || '').toLowerCase().trim();
@@ -7535,7 +7720,8 @@ window.window.openCollectionDetails = function(type, event) {
         const outstanding = getOutstandingPrincipalAtMonth(l.id, l.principal, selectedMonthStr);
         if (outstanding > 0) {
           const expected = l.isEMI ? Number(l.emiAmount || 0) : outstanding * (Number(l.interestRate) / 100);
-          const pPaid = state.interestPayments.filter(p => p.type === 'received' && p.category !== 'issuance' && p.category !== 'increase' && p.category !== 'principal' && p.loanId === l.id && p.date.startsWith(selectedMonthStr) && (!p.note || p.note.indexOf('[Advance]') === -1)).reduce((sum, p) => sum + Number(p.amount), 0);
+          var catFilter2 = function(p) { return (p.category === 'interest' || (p.category === 'principal' && l.isEMI)); };
+          const pPaid = state.interestPayments.filter(p => p.type === 'received' && p.loanId === l.id && p.date.startsWith(selectedMonthStr) && (!p.note || p.note.indexOf('[Advance]') === -1) && catFilter2(p)).reduce((sum, p) => sum + Number(p.amount), 0);
           const pOwe = expected - pPaid;
           if (pOwe > 0) {
             const normName = (l.borrowerName || '').toLowerCase().trim();
@@ -7655,6 +7841,7 @@ window.addEventListener('DOMContentLoaded', () => {
   initFileDB(function() {
     initApp();
     setTheme(state.theme || 'black-and-colored-plain');
+    switchTab(currentTab);
     // Show restore banner if demo data is active with backup
     if (localStorage.getItem('capitalflow_backup')) {
       var rb = document.getElementById('restore-banner');
@@ -7664,7 +7851,7 @@ window.addEventListener('DOMContentLoaded', () => {
   // ==========================================
   // SWIPE GESTURES FOR MOBILE NAVIGATION
   // ==========================================
-  const tabsOrder = ['dashboard', 'records', 'diary', 'settings'];
+  const tabsOrder = ['tenants', 'finances', 'dashboard', 'records', 'settings'];
   let touchStartX = 0;
   let touchEndX = 0;
   let touchStartY = 0;
@@ -7923,9 +8110,6 @@ window.dismissGlanceRenewal = function() {
   _glanceRenewalDismissIdx++;
   renderGlanceWidget();
 };
-
-// Quick Actions modal
-window.openQuickActions = function() { openModal('modal-quick-actions'); };
 
 // Notes Diary
 window.openNotesDiary = function() {
@@ -8530,7 +8714,6 @@ function handlePinDigit(digit) {
   updatePinDots();
   if (_pinEntered.length === 4) {
     if (_pinMode === 'set') {
-      // First time: save PIN, then enter app
       sha256(_pinEntered).then(function(hash) {
         localStorage.setItem('app_pin', hash);
         _pinEntered = '';
@@ -8540,9 +8723,9 @@ function handlePinDigit(digit) {
         renderMonthSelector();
         requestNotifPermission();
         initAppListeners();
+        switchTab(currentTab);
       });
     } else {
-      // Unlock mode: verify PIN
       sha256(_pinEntered).then(function(hash) {
         if (hash === localStorage.getItem('app_pin')) {
           _pinEntered = '';
@@ -8551,6 +8734,7 @@ function handlePinDigit(digit) {
           renderMonthSelector();
           requestNotifPermission();
           initAppListeners();
+          switchTab(currentTab);
         } else {
           document.getElementById('lock-error').textContent = 'Wrong PIN. Try again.';
           _pinEntered = '';

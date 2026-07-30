@@ -39,6 +39,18 @@
       <nav style="flex: 1;">
         <ul class="nav-list">
           <li class="nav-item">
+            <a class="nav-link" data-tab="tenants">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+              <span>Tenants</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" data-tab="finances">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+              <span>Finances</span>
+            </a>
+          </li>
+          <li class="nav-item">
             <a class="nav-link active" data-tab="dashboard">
               <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>
               <span>Status</span>
@@ -46,23 +58,16 @@
           </li>
           <li class="nav-item">
             <a class="nav-link" data-tab="records">
-              <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
-              <span>Records</span>
+              <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+              <span>Vault</span>
             </a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" data-tab="diary">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/><line x1="8" y1="7" x2="16" y2="7"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
-              <span>Diary</span>
+            <a class="nav-link" data-tab="expenses">
+              <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M12 4v16M2 12h20"/></svg>
+              <span>Expenses</span>
             </a>
           </li>
-          <li class="nav-item">
-            <a class="nav-link" data-tab="settings">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-              <span>Settings</span>
-            </a>
-          </li>
-
         </ul>
       </nav>
 
@@ -74,23 +79,26 @@
     
     <!-- Mobile Bottom Navigation -->
     <nav class="mobile-nav">
+      <a class="mobile-nav-link" data-tab="tenants">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        <span>Tenants</span>
+      </a>
+      <a class="mobile-nav-link" data-tab="finances">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        <span>Finances</span>
+      </a>
       <a class="mobile-nav-link active" data-tab="dashboard">
         <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>
         <span>Status</span>
       </a>
       <a class="mobile-nav-link" data-tab="records">
-        <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
-        <span>Records</span>
+        <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+        <span>Vault</span>
       </a>
-      <a class="mobile-nav-link" data-tab="diary">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/><line x1="8" y1="7" x2="16" y2="7"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
-        <span>Diary</span>
+      <a class="mobile-nav-link" data-tab="expenses">
+        <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M12 4v16M2 12h20"/></svg>
+        <span>Expenses</span>
       </a>
-      <a class="mobile-nav-link" data-tab="settings">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-        <span>Settings</span>
-      </a>
-
     </nav>
 
     <!-- Main Content -->
@@ -105,9 +113,10 @@
             <input type="text" id="records-search-header" class="form-input" placeholder="Search records..." style="border: none; background: transparent; padding: 0; margin: 0; box-shadow: none; display: none;">
           </div>
         </div>
-        <div class="page-title" style="flex: 0 0 auto;">
-          <div id="quick-actions-trigger" onclick="event.stopPropagation(); openQuickActions()" title="Quick Actions" style="display:flex;align-items:center;cursor:pointer;padding:0.3rem 0.5rem;background:var(--bg-secondary);border-radius:4px;color:var(--text-secondary);">
-            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/><circle cx="5" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="5" r="1"/><circle cx="19" cy="5" r="1"/><circle cx="5" cy="19" r="1"/><circle cx="19" cy="19" r="1"/></svg>
+        <div class="page-title" style="flex: 0 0 auto; display: flex; align-items: center; gap: 0.35rem;">
+          <button id="btn-vault-toggle" onclick="toggleVaultView()" title="Vault" style="background:none;border:none;cursor:pointer;font-size:1.2rem;line-height:1;padding:0.3rem 0.4rem;flex-shrink:0;">🔐</button>
+          <div onclick="switchTab('settings')" title="Settings" style="display:flex;align-items:center;cursor:pointer;padding:0.3rem 0.5rem;background:var(--bg-secondary);border-radius:4px;color:var(--text-secondary);">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
           </div>
         </div>
       </header>
@@ -118,7 +127,7 @@
           <button class="month-nav-btn" onclick="navigateMonth(-1)">&lt;</button>
           <span id="month-selector-label">July 2026</span>
           <button class="month-nav-btn" onclick="navigateMonth(1)">&gt;</button>
-          <button class="month-nav-btn" id="btn-vault-toggle" onclick="toggleVaultView()" title="Vault" style="margin-left:auto;font-size:1.1rem;">🔐</button>
+          <button class="month-nav-btn" id="btn-diary-mode" onclick="toggleDiaryMode()" title="Diary Mode" style="margin-left:auto;font-size:1rem;">📖</button>
         </div>
         <div class="month-grid" id="month-grid">
           <!-- Months injected via JS -->
@@ -185,7 +194,7 @@
 
         <!-- Summary Cards Grid -->
         <div class="summary-grid" style="margin-bottom: 1.25rem;">
-          <div class="card summary-card" id="card-rent" onclick="toggleReminderFilter('rent')" style="border-left: 4px solid var(--color-success); cursor: pointer;">
+          <div class="card summary-card" id="card-rent" onclick="switchTab('tenants')" style="border-left: 4px solid var(--color-success); cursor: pointer;">
             <div class="summary-card-header">
               <span style="font-weight: 700; font-size: 0.78rem; color: var(--text-primary); text-transform: uppercase; letter-spacing: 0.3px;">Rent To Receive</span>
             </div>
@@ -195,7 +204,7 @@
             <div class="summary-value summary-value-big" id="dash-monthly-rent" style="color: var(--color-success);">Rs. 0.00</div>
             <div class="summary-sub-value-pending" id="dash-rental-balance" style="margin-top: 0.25rem;">Balance to Receive: Rs. 0.00</div>
           </div>
-          <div class="card summary-card success" id="card-interest" onclick="toggleReminderFilter('interest')" style="border-left: 4px solid var(--color-success); cursor: pointer;">
+          <div class="card summary-card success" id="card-interest" onclick="switchTab('finances')" style="border-left: 4px solid var(--color-success); cursor: pointer;">
             <div class="summary-card-header">
               <span style="font-weight: 700; font-size: 0.78rem; color: var(--text-primary); text-transform: uppercase; letter-spacing: 0.3px;">Interest To Collect</span>
             </div>
@@ -231,7 +240,7 @@
             </div>
             <div id="expense-card-details" style="margin-top: 0.5rem; display: none; flex-direction: column; gap: 0.25rem;"></div>
             <div style="margin-top: 0.4rem; display: flex; gap: 0.3rem;">
-              <button class="btn btn-sm" style="flex: 1; font-size: 0.65rem; padding: 0.2rem 0.4rem; background: var(--color-accent); color: #fff; border: none;" onclick="event.stopPropagation(); switchTab('records'); setTimeout(function(){ selectRecordsTab('construction'); }, 100);">Construction</button>
+              <button class="btn btn-sm" style="flex: 1; font-size: 0.65rem; padding: 0.2rem 0.4rem; background: var(--color-accent); color: #fff; border: none;" onclick="event.stopPropagation(); switchTab('expenses'); setTimeout(function(){ selectRecordsTab('construction'); }, 100);">Construction</button>
             </div>
           </div>
         </div>
@@ -264,83 +273,10 @@
           </div>
 
           <!-- INJECTED RENT DASHBOARD -->
-          <div id="notifications-rent-view" style="display: none;">
-            <button class="btn btn-primary" id="btn-add-rental" style="display: none;">
-              <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-              Add Tenant
-            </button>
-            <div class="list-container" id="rentals-list">
-              <!-- Injected via JS -->
-            </div>
-
-            <!-- Summary Stats Bar -->
-            <div class="stats-summary-bar" style="display: flex; gap: 1rem; margin-top: 1.25rem; flex-wrap: wrap;">
-              <div class="card" style="flex: 1; min-width: 150px; padding: 0.75rem 1rem; display: flex; flex-direction: column; gap: 0.25rem; border-left: 3px solid var(--color-warning);">
-                <span style="font-size: 0.75rem; color: var(--text-secondary); font-weight: 600; text-transform: uppercase;">Active Leases</span>
-                <span id="rentals-active-leases" style="font-size: 1.25rem; font-weight: 800; color: var(--text-primary);">0</span>
-              </div>
-              <div class="card" style="flex: 1; min-width: 150px; padding: 0.75rem 1rem; display: flex; flex-direction: column; gap: 0.25rem; border-left: 3px solid var(--color-purple);">
-                <span style="font-size: 0.75rem; color: var(--text-secondary); font-weight: 600; text-transform: uppercase;">Monthly Rental</span>
-                <span id="rentals-monthly-income" style="font-size: 1.25rem; font-weight: 800; color: var(--color-success);">Rs. 0.00</span>
-              </div>
-            </div>
-          </div>
+          <div id="notifications-rent-view" style="display: none;"></div>
           
           <!-- INJECTED INTEREST DASHBOARD -->
-          <div id="notifications-interest-view" style="display: none;">
-            <button class="btn btn-primary" id="btn-add-loan-lent" style="display: none;">
-              <svg viewBox="0 0 24 24" width="16" height="16"><path d="M7 17L17 7M17 7H7M17 7V17"/></svg>
-              Lend Money
-            </button>
-            <button class="btn btn-primary" id="btn-add-loan-borrowed" style="display: none;">
-              <svg viewBox="0 0 24 24" width="16" height="16"><path d="M17 17L7 7M7 7H17M7 7V17"/></svg>
-              Record Borrowing
-            </button>
-
-            <div id="lent-funds-heading" style="margin-top: 0.25rem; margin-bottom: 0.5rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 0.5rem; display: flex; flex-direction: column; gap: 0.2rem;">
-              <div id="lending-filter-loans" style="display: flex; justify-content: space-between; align-items: center; cursor: pointer; border-radius: 4px; padding: 0.1rem 0;" onclick="setLendingFilter('loans')">
-                <span style="color: var(--color-warning); font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; gap: 0.5rem;">
-                  <span style="font-size: 1.05rem; font-weight: 800;">Lent Loans</span>
-                  <span id="lent-loans-count" style="background: var(--color-warning); color: #000; font-size: 0.7rem; font-weight: 800; padding: 0.1rem 0.5rem; border-radius: 10px;">0</span>
-                </span>
-                <span id="lent-reg-principal" style="color:var(--color-warning);font-size:1.05rem;font-weight:800;">₹ 0</span>
-              </div>
-              <div id="lending-filter-emi" style="display: flex; justify-content: space-between; align-items: center; cursor: pointer; border-radius: 4px; padding: 0.1rem 0;" onclick="setLendingFilter('emi')">
-                <span style="font-size:0.85rem;color:var(--color-purple);font-weight:700;display:flex;align-items:center;gap:0.4rem;">EMI <span id="lent-emi-count" style="background:var(--color-purple);color:#fff;font-size:0.7rem;font-weight:800;padding:0.1rem 0.5rem;border-radius:10px;">0</span></span>
-                <span id="lent-emi-total" style="font-size:1rem;color:var(--color-purple);font-weight:800;">₹ 0</span>
-              </div>
-              <div id="lending-filter-all" style="display: flex; justify-content: space-between; align-items: center; cursor: pointer; border-radius: 4px; padding: 0.1rem 0; border-top:1px solid rgba(255,255,255,0.08); padding-top:0.2rem;" onclick="setLendingFilter('all')">
-                <span style="font-size:0.82rem;font-weight:700;color:var(--color-success);">Total</span>
-                <span id="lent-total-outstanding" style="font-size:1.1rem;font-weight:800;color:var(--color-success);">₹ 0</span>
-              </div>
-            </div>
-            <div class="list-container" id="lent-loans-list" style="margin-bottom: 1.25rem;">
-              <!-- Injected via JS -->
-            </div>
-
-            <div id="borrowed-funds-heading" style="margin-top: 1.5rem; margin-bottom: 0.5rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 0.5rem; display: flex; justify-content: space-between; align-items: center;">
-              <span style="color: var(--color-danger); font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; gap: 0.5rem;">
-                <span id="borrowed-loans-label" style="font-size: 1.05rem; font-weight: 800;">Borrowed Funds</span>
-                <span id="borrowed-loans-count" style="background: var(--color-danger); color: #fff; font-size: 0.7rem; font-weight: 800; padding: 0.1rem 0.5rem; border-radius: 10px;">0</span>
-              </span>
-              <span id="borrowed-loans-principal" style="color: var(--color-danger); font-size: 1.35rem; font-weight: 800;">Rs. 0</span>
-            </div>
-            <div class="list-container" id="borrowed-loans-list">
-              <!-- Injected via JS -->
-            </div>
-
-            <!-- Overall Interest Cards -->
-            <div style="display: flex; gap: 0.75rem; margin-top: 1.25rem; flex-wrap: wrap;">
-              <div class="card" style="flex: 1; min-width: 140px; padding: 0.75rem 1rem; display: flex; flex-direction: column; gap: 0.25rem; border-left: 3px solid var(--color-success);">
-                <span style="font-size: 0.7rem; color: var(--text-primary); font-weight: 600; text-transform: uppercase;">Lent Overall Interest</span>
-                <span id="lending-total-outstanding" style="font-size: 1.15rem; font-weight: 800; color: var(--color-success);">Rs. 0</span>
-              </div>
-              <div class="card" style="flex: 1; min-width: 140px; padding: 0.75rem 1rem; display: flex; flex-direction: column; gap: 0.25rem; border-left: 3px solid var(--color-danger);">
-                <span style="font-size: 0.7rem; color: var(--text-primary); font-weight: 600; text-transform: uppercase;">Borrowed Overall Interest</span>
-                <span id="borrowing-total-outstanding" style="font-size: 1.15rem; font-weight: 800; color: var(--color-danger);">Rs. 0</span>
-              </div>
-            </div>
-          </div>
+          <div id="notifications-interest-view" style="display: none;"></div>
           <!-- INJECTED EXPENSES DASHBOARD -->
           <div id="notifications-expenses-view" style="display: none;">
             <div class="section-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem;">
@@ -493,39 +429,136 @@
         <!-- Moved Reset System to view-settings -->
       </section>
 
-      <!-- VIEW: RECORDS -->
+      <!-- VIEW: TENANTS -->
+      <section id="view-tenants" class="tab-content">
+        <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.5rem;">
+          <button class="btn btn-primary btn-sm" onclick="showAddRental()" style="flex-shrink:0;">+ Add Tenant</button>
+          <div style="font-size:0.78rem;font-weight:600;color:var(--text-muted);text-align:center;flex:1;" id="rentals-active-month-badge"></div>
+        </div>
+        <div id="tenants-normal">
+          <div id="rentals-list"></div>
+          <div class="card" style="margin-bottom: 0;">
+            <div class="summary-grid" style="margin-bottom: 0;">
+              <div class="card summary-card" style="border-left: 4px solid var(--color-success); flex: 1; padding: 0.75rem; text-align: center;">
+                <div style="font-size: 0.65rem; text-transform: uppercase; color: var(--text-secondary); font-weight: 600; letter-spacing: 0.3px;">Active Leases</div>
+                <div id="rentals-active-leases" style="font-size: 1.5rem; font-weight: 800; color: var(--color-success); margin-top: 0.25rem;">0</div>
+              </div>
+              <div class="card summary-card" style="border-left: 4px solid var(--color-accent); flex: 1; padding: 0.75rem; text-align: center;">
+                <div style="font-size: 0.65rem; text-transform: uppercase; color: var(--text-secondary); font-weight: 600; letter-spacing: 0.3px;">Monthly Income</div>
+                <div id="rentals-monthly-income" style="font-size: 1.5rem; font-weight: 800; color: var(--color-accent); margin-top: 0.25rem;">₹0</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div id="tenants-diary-container" style="display:none;">
+          <div id="tenants-diary-content" style="font-family:'Courier New',Courier,monospace;font-size:0.85rem;line-height:1.7;padding:0.5rem 0;white-space:pre-wrap;color:var(--text-primary);"></div>
+        </div>
+      </section>
+
+      <!-- VIEW: FINANCES -->
+      <section id="view-finances" class="tab-content">
+        <div style="display:flex;gap:0.35rem;align-items:center;flex-wrap:wrap;margin-bottom:0.5rem;">
+          <button class="btn btn-sm" onclick="showAddLoanLent()" style="background:var(--color-success);color:#fff;border:none;padding:0.35rem 0.65rem;border-radius:6px;font-size:0.78rem;font-weight:700;cursor:pointer;">+ Lend</button>
+          <button class="btn btn-sm" onclick="showAddLoanBorrowed()" style="background:var(--color-danger);color:#fff;border:none;padding:0.35rem 0.65rem;border-radius:6px;font-size:0.78rem;font-weight:700;cursor:pointer;">+ Borrow</button>
+          <span style="font-size:0.7rem;font-weight:600;color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.3px;margin-left:auto;">Lent Loans</span>
+          <span id="lent-loans-count" style="font-size:0.75rem;color:var(--text-muted);"></span>
+          <span style="display:flex;gap:0.35rem;">
+            <button class="btn btn-sm btn-primary" id="lending-filter-all" onclick="setLendingFilter('all')" style="padding:0.2rem 0.5rem;font-size:0.7rem;">All</button>
+            <button class="btn btn-sm btn-secondary" id="lending-filter-loans" onclick="setLendingFilter('loans')" style="padding:0.2rem 0.5rem;font-size:0.7rem;">Loans</button>
+            <button class="btn btn-sm btn-secondary" id="lending-filter-emi" onclick="setLendingFilter('emi')" style="padding:0.2rem 0.5rem;font-size:0.7rem;">EMI</button>
+          </span>
+        </div>
+        <div id="finances-normal">
+          <div style="font-size:0.68rem;color:var(--text-muted);margin-bottom:0.35rem;display:flex;gap:0.75rem;flex-wrap:wrap;">
+            <span>Non-EMI: <strong id="lent-reg-principal" style="color:var(--text-primary);">₹0</strong></span>
+            <span>EMI (<span id="lent-emi-count">0</span>): <strong id="lent-emi-total" style="color:var(--text-primary);">₹0</strong></span>
+            <span>Total: <strong id="lent-total-outstanding" style="color:var(--color-warning);">₹0</strong></span>
+          </div>
+          <div class="list-container" id="lent-loans-list" style="margin-bottom:1rem;"></div>
+          <div style="font-size:0.7rem;font-weight:600;color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.3px;margin-bottom:0.35rem;">Borrowed <span id="borrowed-loans-count" style="font-size:0.75rem;color:var(--text-muted);"></span></div>
+          <div class="list-container" id="borrowed-loans-list"></div>
+          <div class="card" style="margin-bottom: 0;">
+            <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+              <div class="card summary-card" style="border-left: 4px solid var(--color-warning); flex: 1; min-width: 120px; padding: 0.75rem; text-align: center;">
+                <div style="font-size: 0.65rem; text-transform: uppercase; color: var(--text-secondary); font-weight: 600; letter-spacing: 0.3px;">Lent (Interest)</div>
+                <div id="lending-total-outstanding" style="font-size: 1.2rem; font-weight: 800; color: var(--color-warning); margin-top: 0.25rem;">₹0</div>
+              </div>
+              <div class="card summary-card" style="border-left: 4px solid var(--color-danger); flex: 1; min-width: 120px; padding: 0.75rem; text-align: center;">
+                <div style="font-size: 0.65rem; text-transform: uppercase; color: var(--text-secondary); font-weight: 600; letter-spacing: 0.3px;">Borrowed (Interest)</div>
+                <div id="borrowing-total-outstanding" style="font-size: 1.2rem; font-weight: 800; color: var(--color-danger); margin-top: 0.25rem;">₹0</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div id="finances-diary-container" style="display:none;">
+          <div id="finances-diary-content" style="font-family:'Courier New',Courier,monospace;font-size:0.85rem;line-height:1.7;padding:0.5rem 0;white-space:pre-wrap;color:var(--text-primary);"></div>
+        </div>
+      </section>
+
+      <!-- VIEW: VAULT -->
       <section id="view-records" class="tab-content">
 
-        <!-- Bills / Docs / Policies Summary Cards -->
-        <div class="card summary-card" onclick="selectRecordsTab('bills')" style="border-left: 4px solid var(--color-warning); cursor: pointer; margin-bottom: 0.75rem;">
+        <!-- Vault Section -->
+        <div id="vault-content">
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:0.4rem;padding:0.3rem 0;margin-bottom:0.5rem;border-bottom:1px solid var(--border-color);">
+            <span style="font-size:0.9rem;font-weight:700;color:var(--text-primary);flex-shrink:0;">🔐 VAULT</span>
+            <input type="text" id="vault-search" placeholder="Search..." oninput="renderVault()" style="flex:1;min-width:0;font-size:0.78rem;padding:0.4rem 0.7rem;border:1px solid var(--border-color);border-radius:8px;background:var(--input-bg);color:var(--text-primary);font-family:inherit;">
+            <button class="btn btn-primary btn-sm" onclick="showAddVaultEntry()" style="font-size:0.75rem;padding:0.2rem 0.6rem;flex-shrink:0;">+ Add</button>
+          </div>
+          <div id="vault-list" style="font-size:0.85rem;line-height:1.8;color:var(--text-primary);"></div>
+        </div>
+
+        <!-- Summary Cards linking to Expenses tab -->
+        <div class="card summary-card" onclick="switchTab('expenses');setTimeout(function(){selectRecordsTab('bills')},100)" style="border-left: 4px solid var(--color-warning); cursor: pointer; margin-bottom: 0.75rem;">
           <div class="summary-card-header">
             <span style="font-weight: 700; font-size: 0.78rem; color: var(--text-primary); text-transform: uppercase; letter-spacing: 0.3px;">Rent Agreements</span>
             <div class="summary-card-icon" style="background: rgba(251, 191, 36, 0.1); color: var(--color-warning);">
               <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
             </div>
           </div>
-          <div class="summary-value summary-value-big" id="count-bills" style="color: var(--color-warning);">0</div>
+          <div class="summary-value summary-value-big" id="vault-count-bills" style="color: var(--color-warning);">0</div>
           <div class="summary-sub-value" style="margin-top: 0.25rem; font-size: 0.72rem; font-weight: 500; color: var(--text-secondary);">Agreements</div>
         </div>
-        <div class="card summary-card" onclick="selectRecordsTab('documents')" style="border-left: 4px solid var(--color-success); cursor: pointer; margin-bottom: 0.75rem;">
+        <div class="card summary-card" onclick="switchTab('expenses');setTimeout(function(){selectRecordsTab('documents')},100)" style="border-left: 4px solid var(--color-success); cursor: pointer; margin-bottom: 0.75rem;">
           <div class="summary-card-header">
             <span style="font-weight: 700; font-size: 0.78rem; color: var(--text-primary); text-transform: uppercase; letter-spacing: 0.3px;">Documents</span>
             <div class="summary-card-icon" style="background: rgba(34, 197, 94, 0.1); color: var(--color-success);">
               <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
             </div>
           </div>
-          <div class="summary-value summary-value-big" id="count-documents" style="color: var(--color-success);">0</div>
+          <div class="summary-value summary-value-big" id="vault-count-documents" style="color: var(--color-success);">0</div>
           <div class="summary-sub-value" style="margin-top: 0.25rem; font-size: 0.72rem; font-weight: 500; color: var(--text-secondary);">Documents</div>
         </div>
-        <div class="card summary-card" onclick="selectRecordsTab('policies')" style="border-left: 4px solid var(--color-purple); cursor: pointer; margin-bottom: 1.25rem;">
+        <div class="card summary-card" onclick="switchTab('expenses');setTimeout(function(){selectRecordsTab('policies')},100)" style="border-left: 4px solid var(--color-purple); cursor: pointer; margin-bottom: 1.25rem;">
           <div class="summary-card-header">
             <span style="font-weight: 700; font-size: 0.78rem; color: var(--text-primary); text-transform: uppercase; letter-spacing: 0.3px;">Policies</span>
             <div class="summary-card-icon" style="background: rgba(147, 51, 234, 0.1); color: var(--color-purple);">
               <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
             </div>
           </div>
-          <div class="summary-value summary-value-big" id="count-policies" style="color: var(--color-purple);">0</div>
+          <div class="summary-value summary-value-big" id="vault-count-policies" style="color: var(--color-purple);">0</div>
           <div class="summary-sub-value" style="margin-top: 0.25rem; font-size: 0.72rem; font-weight: 500; color: var(--text-secondary);">Policies</div>
+        </div>
+
+      </section>
+
+      <!-- VIEW: EXPENSES -->
+      <section id="view-expenses" class="tab-content">
+
+        <!-- Today's Expenses Card -->
+        <div class="card summary-card danger" id="card-expenses" style="border-left: 4px solid var(--color-danger); margin-bottom: 1.25rem;">
+          <div class="summary-card-header">
+            <span style="font-weight: 600; font-size: 0.75rem; color: var(--color-danger); text-transform: uppercase; letter-spacing: 0.3px;">Today's Expenses</span>
+          </div>
+          <div class="summary-card-icon summary-card-icon-collection" style="background: rgba(239, 68, 68, 0.1); color: var(--color-danger); cursor: pointer;" onclick="event.stopPropagation(); openExpenseDetails(event)">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+          </div>
+          <div class="summary-value" id="dash-total-expenses" style="color: var(--color-danger);">Rs. 0.00</div>
+          <div class="summary-sub-value" style="font-size: 0.72rem; margin-top: 0.3rem; font-weight: 500; color: var(--text-primary); display: flex; flex-direction: column; gap: 0.1rem;">
+            <span id="dash-weekly-expenses">This Week: Rs. 0.00</span>
+            <span id="dash-monthly-expenses">This Month: Rs. 0.00</span>
+          </div>
+          <div id="expense-card-details" style="margin-top: 0.5rem; display: none; flex-direction: column; gap: 0.25rem;"></div>
         </div>
 
         <!-- Construction Summary Card -->
@@ -606,21 +639,6 @@
         </div>
 
       </section>
-
-      <!-- VIEW: DIARY -->
-      <section id="view-diary" class="tab-content">
-        <div id="diary-content" style="font-family:'Courier New',Courier,monospace;font-size:0.85rem;line-height:1.7;padding:0.5rem 0;white-space:pre-wrap;color:var(--text-primary);"></div>
-        <div id="vault-content" style="display:none;">
-          <div style="display:flex;justify-content:space-between;align-items:center;gap:0.4rem;padding:0.3rem 0;margin-bottom:0.5rem;border-bottom:1px solid var(--border-color);font-family:'Courier New',Courier,monospace;">
-            <span style="font-size:0.9rem;font-weight:700;color:var(--text-primary);flex-shrink:0;">🔐 VAULT</span>
-            <input type="text" id="vault-search" placeholder="Search..." oninput="renderVault()" style="flex:1;min-width:0;font-size:0.85rem;padding:0.3rem 0.5rem;border:1px solid var(--border-color);border-radius:4px;background:var(--input-bg);color:var(--text-primary);font-family:inherit;">
-            <button class="btn btn-primary btn-sm" onclick="showAddVaultEntry()" style="font-size:0.75rem;padding:0.2rem 0.6rem;flex-shrink:0;">+ Add</button>
-          </div>
-          <div id="vault-list" style="font-family:'Courier New',Courier,monospace;font-size:0.85rem;line-height:1.8;color:var(--text-primary);"></div>
-        </div>
-      </section>
-
-      <!-- VIEW: SETTINGS -->
       <section id="view-settings" class="tab-content">
         <div class="card" style="margin-bottom: 1.25rem;">
           <div class="section-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
@@ -771,218 +789,6 @@
           </div>
         </div>
 
-        <div class="card" style="margin-bottom: 1.25rem;">
-          <div class="section-header" style="cursor:pointer;" onclick="var c=document.getElementById('help-content');c.style.display=c.style.display==='none'?'':'none';this.querySelector('.help-chevron').style.transform=c.style.display==='none'?'rotate(0deg)':'rotate(180deg)';">
-            <h2 style="margin-bottom: 0; display: flex; align-items: center; gap: 0.5rem;">
-              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-              <span>How This App Works</span>
-              <span class="help-chevron" style="font-size:0.7rem;transition:transform 0.2s;transform:rotate(180deg);">▼</span>
-            </h2>
-          </div>
-          <div id="help-content" style="font-size:0.82rem;color:#fff;line-height:1.6;padding:0.5rem 0;">
-
-<script>function toggleHelpSec(i,e){var c=document.getElementById(i);if(!c)return;var v=c.style.display;c.style.display=v==='none'?'':'none';var a=e.querySelector('.hch');if(a)a.style.transform=v==='none'?'rotate(90deg)':'rotate(0deg)';}</script>
-
-<div>
-<p style="font-weight:700;color:var(--text-primary);margin:0.75rem 0 0.3rem;cursor:pointer;" onclick="toggleHelpSec('h1',this)"><span class="hch" style="font-size:0.6rem;display:inline-block;transition:transform 0.2s;transform:rotate(90deg);margin-right:0.3rem;">▶</span> 📌 DASHBOARD OVERVIEW</p>
-<div id="h1" style="padding-left:1rem;display:none;">
-<strong>Top Stats Bar:</strong><br>
-➤ <strong>Lent Outstanding</strong> — Total principal across all lending loans<br>
-➤ <strong>Borrowed</strong> — Total principal across all borrowing loans<br>
-➤ <strong>Interest /mo</strong> — Net monthly spread (lending yield − borrowing cost)<br>
-➤ <strong>Interest Rcvd</strong> — Total interest received lifetime<br>
-➤ <strong>Interest Paid</strong> — Total interest paid lifetime<br>
-➤ <strong>Expenses</strong> — Total expenses this month<br><br>
-<strong>Summary Cards (at a glance):</strong><br>
-➤ <strong>Rent</strong> — Shows pending rent amount. Fully collected → "July Rent Received" in green. Partially collected → yellow amount.<br>
-➤ <strong>Interest</strong> — Shows pending interest to collect. Fully collected → "July Interest Collected" in green. Click to expand lending/borrowing detail.<br>
-➤ <strong>Expenses</strong> — Today's + weekly + monthly totals, ongoing construction projects<br>
-➤ <strong>Net</strong> — Total collected vs total monthly income<br><br>
-<strong>Below cards:</strong> Recent activity feed with all transactions sorted by date.
-</div>
-</div>
-
-<div>
-<p style="font-weight:700;color:var(--text-primary);margin:0.75rem 0 0.3rem;cursor:pointer;" onclick="toggleHelpSec('h2',this)"><span class="hch" style="font-size:0.6rem;display:inline-block;transition:transform 0.2s;transform:rotate(90deg);margin-right:0.3rem;">▶</span> 📌 3 CARD TYPES (Lending)</p>
-<div id="h2" style="padding-left:1rem;display:none;">
-Every borrower's loans are grouped into <strong>3 types</strong> of cards:<br><br>
-<strong>1️⃣ Simple Loan</strong> — Interest-only (no EMI). Each non-EMI loan gets its own card.<br>
-&nbsp;&nbsp;→ Shows: Principal, monthly yield, interest received, Bal/Adv<br>
-&nbsp;&nbsp;→ <em>Examples:</em> Rupesh, Inder, Arjun, Sahil<br><br>
-<strong>2️⃣ EMI Only</strong> — Borrower has only EMI loans. Single grouped card.<br>
-&nbsp;&nbsp;→ Shows: Total principal across EMIs, per-EMI sub-lines with progress<br>
-&nbsp;&nbsp;→ <em>Examples:</em> M.K.<br><br>
-<strong>3️⃣ Loan + EMI</strong> — BOTH EMI and non-EMI loans. Single grouped card.<br>
-&nbsp;&nbsp;→ Shows: Combined total, non-EMI sub-lines with interest, EMI sub-lines with progress<br>
-&nbsp;&nbsp;→ <em>Examples:</em> Chirag, Tushar, Sailesh
-</div>
-</div>
-
-<div>
-<p style="font-weight:700;color:var(--text-primary);margin:0.75rem 0 0.3rem;cursor:pointer;" onclick="toggleHelpSec('h3',this)"><span class="hch" style="font-size:0.6rem;display:inline-block;transition:transform 0.2s;transform:rotate(90deg);margin-right:0.3rem;">▶</span> 📌 ADDING A LOAN</p>
-<div id="h3" style="padding-left:1rem;display:none;">
-➤ Go to <strong>Lend Money</strong> → <strong>Add Loan</strong><br>
-➤ Enter: Name, Phone, Principal, Interest Rate (% per month)<br>
-➤ <strong>0% interest</strong> → Every payment goes to principal (reduces loan).<br>
-➤ Check <strong>"Is EMI?"</strong> for fixed monthly payments (set EMI amount + total count).<br>
-➤ <strong>Borrow More (➕ icon):</strong> Add extra principal to an existing loan — recorded as top-up, outstanding increases.<br><br>
-<em>Example 1:</em> Rupesh ₹1,00,000 @ 2%/mo → earn ₹2,000/month interest, principal untouched<br>
-<em>Example 2:</em> Sahil ₹25,000 @ 0% → every payment reduces ₹25,000<br>
-<em>Example 3:</em> Chirag ₹2,62,500 EMI @ 4% → fixed ₹12,500/month
-</div>
-</div>
-
-<div>
-<p style="font-weight:700;color:var(--text-primary);margin:0.75rem 0 0.3rem;cursor:pointer;" onclick="toggleHelpSec('h4',this)"><span class="hch" style="font-size:0.6rem;display:inline-block;transition:transform 0.2s;transform:rotate(90deg);margin-right:0.3rem;">▶</span> 📌 THE SUMMARY LINE (Card Bottom)</p>
-<div id="h4" style="padding-left:1rem;display:none;">
-Every card shows this at the bottom:<br><br>
-<strong>Exp ₹X · Rcvd ₹Y · Bal ₹Z · Last &lt;date&gt;</strong> — when Rcvd ≤ Exp<br>
-<strong>Exp ₹X · Rcvd ₹Y · Adv ₹Z · Last &lt;date&gt;</strong> — when Rcvd > Exp<br><br>
-➤ <strong>Exp</strong> = Monthly expectation (yield for simple loans, EMI for EMI loans)<br>
-➤ <strong>Rcvd</strong> = Total received this month (interest + EMI principal, excludes top-ups)<br>
-➤ <strong>Bal</strong> = Remaining due (Exp − Rcvd)<br>
-➤ <strong>Adv</strong> = Advance overpayment (Rcvd − Exp, shown in purple)<br>
-➤ <strong>Last</strong> = Latest payment date<br><br>
-<em>Example:</em> Exp ₹6,000 · Rcvd ₹10,000 · Adv ₹4,000 · Last Jul 15<br>
-→ ₹6K expected, ₹10K received, ₹4K is advance (prepaid for next month)
-</div>
-</div>
-
-<div>
-<p style="font-weight:700;color:var(--text-primary);margin:0.75rem 0 0.3rem;cursor:pointer;" onclick="toggleHelpSec('h5',this)"><span class="hch" style="font-size:0.6rem;display:inline-block;transition:transform 0.2s;transform:rotate(90deg);margin-right:0.3rem;">▶</span> 📌 RECEIVING PAYMENTS (Quick Collect)</p>
-<div id="h5" style="padding-left:1rem;display:none;">
-➤ Type amount on any card's quick-pay input → press <strong>Recv</strong> (or <strong>Pay</strong> for borrowed)<br>
-➤ <strong>Simple Loan (&gt;0%):</strong> Fills monthly interest first. Excess → <strong>Advance</strong> (prepaid).<br>
-➤ <strong>Simple Loan (0%):</strong> Whole amount → principal (reduces loan).<br>
-➤ <strong>Grouped (Loan + EMI):</strong> Auto-splits in 3 phases:<br>
-&nbsp;&nbsp;Phase 1: Fill EMI installments (split interest+principal if rate&gt;0)<br>
-&nbsp;&nbsp;Phase 2: Fill interest on non-EMI loans (up to yield, skips if already paid)<br>
-&nbsp;&nbsp;Phase 3: Leftover → advance (rate&gt;0) or principal (0%)<br>
-➤ Use <strong>➖</strong> icon to manually record principal repayment anytime.<br><br>
-<em>Example:</em> ₹1,50,000 @ 4%/mo = ₹6,000 interest. Receive ₹10,000:<br>
-&nbsp;&nbsp;✓ ₹6,000 → interest (this month paid ✅)<br>
-&nbsp;&nbsp;✓ ₹4,000 → Advance (shows <strong>Adv ₹4,000</strong>)<br>
-&nbsp;&nbsp;→ Principal stays ₹1,50,000, yield stays ₹6,000/mo
-</div>
-</div>
-
-<div>
-<p style="font-weight:700;color:var(--text-primary);margin:0.75rem 0 0.3rem;cursor:pointer;" onclick="toggleHelpSec('h6',this)"><span class="hch" style="font-size:0.6rem;display:inline-block;transition:transform 0.2s;transform:rotate(90deg);margin-right:0.3rem;">▶</span> 📌 EMI LOANS</p>
-<div id="h6" style="padding-left:1rem;display:none;">
-➤ Fixed monthly payment, auto-splits into interest + principal.<br>
-➤ Tracked with "Paid X/Total" counter.<br>
-➤ Interest part = outstanding × rate, Principal part = EMI amount − interest part.<br>
-➤ <strong>Convert to EMI (📊):</strong> Convert any active loan to EMI. Principal amount now <strong>editable</strong> — can partially convert (part stays as regular loan, part becomes EMI).<br><br>
-<em>Example:</em> ₹2,62,500 at 4%, ₹12,500/mo. Outstanding = ₹2,50,000:<br>
-&nbsp;&nbsp;✓ Interest = ₹2,50,000 × 4% = ₹10,000<br>
-&nbsp;&nbsp;✓ Principal = ₹12,500 − ₹10,000 = ₹2,500
-</div>
-</div>
-
-<div>
-<p style="font-weight:700;color:var(--text-primary);margin:0.75rem 0 0.3rem;cursor:pointer;" onclick="toggleHelpSec('h7',this)"><span class="hch" style="font-size:0.6rem;display:inline-block;transition:transform 0.2s;transform:rotate(90deg);margin-right:0.3rem;">▶</span> 📌 LEDGER (Click Card)</p>
-<div id="h7" style="padding-left:1rem;display:none;">
-➤ Click anywhere on a lending card → opens <strong>Ledger</strong> for that borrower.<br>
-➤ Shows full transaction history: interest, principal, top-up payments.<br>
-➤ Grouped cards show group totals (combined stats for all loans with same name).<br>
-➤ Use the Transaction Report form to record custom payments.
-</div>
-</div>
-
-<div>
-<p style="font-weight:700;color:var(--text-primary);margin:0.75rem 0 0.3rem;cursor:pointer;" onclick="toggleHelpSec('h8',this)"><span class="hch" style="font-size:0.6rem;display:inline-block;transition:transform 0.2s;transform:rotate(90deg);margin-right:0.3rem;">▶</span> 📌 ICONS ON CARDS</p>
-<div id="h8" style="padding-left:1rem;display:none;">
-<strong>📞💬</strong> Call / WhatsApp &nbsp; <strong>➕</strong> Lend More (add to principal) &nbsp; <strong>➖</strong> Record Principal Repayment<br>
-<strong>📊</strong> Convert to EMI (full or partial) &nbsp; <strong>✏️</strong> Edit &nbsp; <strong>🗑️</strong> Delete<br>
-<strong>📋</strong> Click card body → opens Ledger.
-</div>
-</div>
-
-<div>
-<p style="font-weight:700;color:var(--text-primary);margin:0.75rem 0 0.3rem;cursor:pointer;" onclick="toggleHelpSec('h9',this)"><span class="hch" style="font-size:0.6rem;display:inline-block;transition:transform 0.2s;transform:rotate(90deg);margin-right:0.3rem;">▶</span> 📌 FILTERING (Lending)</p>
-<div id="h9" style="padding-left:1rem;display:none;">
-➤ Click <strong>Lent Loans</strong> stat → shows only Simple Loan cards (non-EMI)<br>
-➤ Click <strong>EMI</strong> stat → shows only EMI cards (EMI Only + Loan+EMI)<br>
-➤ Click <strong>Total</strong> (or same filter again) → shows everything
-</div>
-</div>
-
-<div>
-<p style="font-weight:700;color:var(--text-primary);margin:0.75rem 0 0.3rem;cursor:pointer;" onclick="toggleHelpSec('h10',this)"><span class="hch" style="font-size:0.6rem;display:inline-block;transition:transform 0.2s;transform:rotate(90deg);margin-right:0.3rem;">▶</span> 📌 RENT MANAGEMENT</p>
-<div id="h10" style="padding-left:1rem;display:none;">
-➤ <strong>Add Rental:</strong> Records → Rent Agreements → +Add. Enter tenant name, property, monthly rent, security deposit, due day.<br>
-➤ <strong>Mark Rent Paid:</strong> Dashboard → Rent card → click a tenant → check the box or use Quick Collect.<br>
-➤ <strong>Security Adjustment:</strong> Deduct from security deposit when tenant request. Shows "Security Adjusted" badge on the rental card.<br>
-➤ <strong>Quick Mark:</strong> Checkbox on each rental line in detail view marks rent paid instantly.<br>
-➤ <strong>Renewals:</strong> Set renewal date per rental. Shows renewal countdown when ≤ 30 days.<br>
-➤ <strong>Dashboard card:</strong> Shows month's total rent pending. Green = fully collected, Yellow = partial.
-</div>
-</div>
-
-<div>
-<p style="font-weight:700;color:var(--text-primary);margin:0.75rem 0 0.3rem;cursor:pointer;" onclick="toggleHelpSec('h11',this)"><span class="hch" style="font-size:0.6rem;display:inline-block;transition:transform 0.2s;transform:rotate(90deg);margin-right:0.3rem;">▶</span> 📋 RECORDS TAB</p>
-<div id="h11" style="padding-left:1rem;display:none;">
-<strong>Rent Agreements:</strong> Add/edit/view rental contracts. Upload agreement &amp; Aadhaar images.<br>
-<strong>Documents:</strong> Upload files with labels (e.g., property papers, bills).<br>
-<strong>Policies:</strong> Insurance / policy documents with expiry tracking.<br>
-<strong>Construction:</strong> Track project expenses by project name with labor sub-types (Plumber, Carpenter, Tiles, Painter, etc.). Shows ongoing projects on dashboard.<br>
-<strong>Expenses:</strong> Add personal/bill/travel/health expenses with date, note, receipt upload.<br><br>
-<em>Example:</em> ₹22,500 "Raghu Painter" Jun 18 → category:construction, laborType:Painter, project:23/48
-</div>
-</div>
-
-<div>
-<p style="font-weight:700;color:var(--text-primary);margin:0.75rem 0 0.3rem;cursor:pointer;" onclick="toggleHelpSec('h12',this)"><span class="hch" style="font-size:0.6rem;display:inline-block;transition:transform 0.2s;transform:rotate(90deg);margin-right:0.3rem;">▶</span> 📔 DIARY TAB</p>
-<div id="h12" style="padding-left:1rem;display:none;">
-➤ <strong>Monthly Summary:</strong> Opens to current month. Shows all RENT, INTEREST RECEIVED, and INTEREST PAID entries in a simple text diary format.<br>
-➤ <strong>Numbering:</strong> Each entry numbered (1, 2, 3...) like a physical diary.<br>
-➤ <strong>✓ Tick:</strong> Shows after name when fully collected/paid.<br>
-➤ <strong>EMI Progress:</strong> EMI loans show [EMI 3/24] count.<br>
-➤ <strong>Security note:</strong> Rent paid via security shows "(adjusted from security)".<br>
-➤ <strong>Month selector:</strong> Left/right arrows or month grid at top to change months.<br>
-➤ <strong>Month selector ONLY appears in Diary tab</strong> — not on other tabs.<br><br>
-<strong>🔐 Vault (inside Diary):</strong><br>
-➤ Click 🔐 icon in month selector bar → Vault opens.<br>
-➤ Store PAN, Aadhaar, bank accounts, passwords, policy numbers.<br>
-➤ <strong>📋 Copy button</strong> next to each value — one tap copies to clipboard.<br>
-➤ Search bar to filter entries by label or value.<br>
-➤ Categories: ID, Bank, Card, Policy, Other.<br>
-➤ Click 🔐 again to return to diary view.
-</div>
-</div>
-
-<div>
-<p style="font-weight:700;color:var(--text-primary);margin:0.75rem 0 0.3rem;cursor:pointer;" onclick="toggleHelpSec('h13',this)"><span class="hch" style="font-size:0.6rem;display:inline-block;transition:transform 0.2s;transform:rotate(90deg);margin-right:0.3rem;">▶</span> 🔐 APP LOCK (PIN)</p>
-<div id="h13" style="padding-left:1rem;display:none;">
-➤ <strong>Set PIN:</strong> Settings → Security → Set PIN. 4-digit numeric PIN. Hashed (SHA-256), stored locally.<br>
-➤ <strong>Auto-lock:</strong> App locks when you switch apps or screen turns off (visibility change).<br>
-➤ <strong>Numpad:</strong> Clean numeric keypad. Clear and backspace buttons. Wrong PIN shows error.<br>
-➤ <strong>Note:</strong> PIN is local only — no biometric/passkey (WebAuthn unreliable in PWA).
-</div>
-</div>
-
-<div>
-<p style="font-weight:700;color:var(--text-primary);margin:0.75rem 0 0.3rem;cursor:pointer;" onclick="toggleHelpSec('h14',this)"><span class="hch" style="font-size:0.6rem;display:inline-block;transition:transform 0.2s;transform:rotate(90deg);margin-right:0.3rem;">▶</span> 💾 BACKUP &amp; DATA</p>
-<div id="h14" style="padding-left:1rem;display:none;">
-➤ <strong>Export Backup:</strong> Settings → Export Backup. Downloads full data as .json file.<br>
-➤ <strong>Import Backup:</strong> Settings → Import Backup → choose .json file. Restores all data.<br>
-➤ <strong>Reset System:</strong> Settings → Reset System. Clears ALL data (use after exporting).<br>
-➤ <strong>Data is stored in localStorage</strong> only (phone browser). Not synced across devices.<br>
-➤ <strong>Recommendation:</strong> Export backup weekly. Save to Google Drive / laptop / email.
-</div>
-</div>
-
-<div>
-<p style="font-weight:700;color:var(--text-primary);margin:0.75rem 0 0.3rem;cursor:pointer;" onclick="toggleHelpSec('h15',this)"><span class="hch" style="font-size:0.6rem;display:inline-block;transition:transform 0.2s;transform:rotate(90deg);margin-right:0.3rem;">▶</span> 📱 VIEW MODES</p>
-<div id="h15" style="padding-left:1rem;display:none;">
-➤ <strong>Month View</strong> (default) — Shows data for the selected month. Use month selector in Diary tab.<br>
-➤ <strong>Day View</strong> — Tap date to drill down to single day. Shows only that day's transactions.<br>
-➤ <strong>Year View</strong> — Shows full year data. Controlled via year selector.<br>
-➤ Toggle modes via the view selector buttons (desktop sidebar / mobile).
-</div>
-</div>
-
-          </div>
         </div>
       </section>
 
@@ -1087,6 +893,7 @@ Every card shows this at the bottom:<br><br>
             <div class="card" style="flex: 1; padding: 0.75rem; text-align: center;">
               <div style="font-size: 0.65rem; text-transform: uppercase; color: var(--text-secondary);">Principal to Convert</div>
               <input type="number" id="emi-convert-amount" class="form-input" min="1" step="any" style="width: 120px; margin: 0.25rem auto 0; text-align: center; padding: 0.25rem; min-height: auto; font-weight: 700; font-size: 1rem;" oninput="calculateEMIPreview()">
+              <div id="emi-convert-note" style="font-size:0.7rem;color:var(--text-muted);margin-top:0.25rem;text-align:center;display:none;"></div>
             </div>
             <div class="card" style="flex: 1; padding: 0.75rem; text-align: center;">
               <div style="font-size: 0.65rem; text-transform: uppercase; color: var(--text-secondary);">Rate (% / mo)</div>
@@ -1734,33 +1541,6 @@ Every card shows this at the bottom:<br><br>
     </div>
   </div>
 
-  <div class="modal-overlay" id="modal-quick-actions">
-    <div class="modal-container" style="max-width: 400px;">
-      <div class="modal-header">
-        <h3 class="modal-title">Quick Actions</h3>
-        <button class="modal-close" onclick="closeModal('modal-quick-actions')">
-          <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-        </button>
-      </div>
-      <div class="modal-body" style="max-height:80vh;overflow-y:auto;">
-        <div style="display: flex; flex-direction: column; gap: 0.75rem; padding: 0.5rem 0;">
-          <button onclick="closeModal('modal-quick-actions'); document.getElementById('btn-add-loan-lent').click()" style="display: flex; align-items: center; gap: 0.75rem; padding: 1rem 1.25rem; background: linear-gradient(135deg, var(--color-success), #059669); color: #fff; border: none; border-radius: 12px; cursor: pointer; font-size: 1rem; font-weight: 700; text-align: left;">
-            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="18 15 12 9 6 15"/></svg>
-            Lend Money
-          </button>
-          <button onclick="closeModal('modal-quick-actions'); document.getElementById('btn-add-loan-borrowed').click()" style="display: flex; align-items: center; gap: 0.75rem; padding: 1rem 1.25rem; background: linear-gradient(135deg, var(--color-danger), #b91c1c); color: #fff; border: none; border-radius: 12px; cursor: pointer; font-size: 1rem; font-weight: 700; text-align: left;">
-            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
-            Borrow Money
-          </button>
-          <button onclick="closeModal('modal-quick-actions'); document.getElementById('btn-add-rental').click()" style="display: flex; align-items: center; gap: 0.75rem; padding: 1rem 1.25rem; background: linear-gradient(135deg, var(--color-accent), #0284c7); color: #fff; border: none; border-radius: 12px; cursor: pointer; font-size: 1rem; font-weight: 700; text-align: left;">
-            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-            Add Tenant
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
-
   <!-- MODAL: ADD PRINCIPAL (Borrow More / Lend More) -->
   <div class="modal-overlay" id="modal-add-principal">
     <div class="modal-container" style="max-width: 460px;">
@@ -1813,7 +1593,7 @@ Every card shows this at the bottom:<br><br>
   </div>
 
   <!-- JavaScript Modules -->
-  <script src="app.js?v=14"></script>
+  <script src="app.js?v=35"></script>
 <script>
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('/sw.js');
